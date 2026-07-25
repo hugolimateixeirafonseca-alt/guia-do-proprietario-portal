@@ -1,0 +1,8634 @@
+{
+  "fonte": "INE",
+  "fonte_url": "https://www.ine.pt/ine/json_indicador/pindicaMeta.jsp?varcd=0012234&lang=PT",
+  "periodo_referencia": "1T2026",
+  "extraido_em": "2026-07-24",
+  "notas": "Mediana das vendas dos últimos 12 meses, atualizada no 1T2026. Fonte: INE.",
+  "indicador": "0012234",
+  "dados": [
+    {
+      "slug": "abrantes",
+      "nome": "Abrantes",
+      "codigo_ine": "1401",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 975,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2829,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 815
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 867
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 908
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 975
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "agueda",
+      "nome": "Águeda",
+      "codigo_ine": "0101",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 1366,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3619,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1109
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1190
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1250
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1366
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "aguiar-da-beira",
+      "nome": "Aguiar da Beira",
+      "codigo_ine": "0901",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 474,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.058,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 446
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 410
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 410
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 474
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alandroal",
+      "nome": "Alandroal",
+      "codigo_ine": "0701",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 771,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0798,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 731
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 712
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 717
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 771
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "albergaria-a-velha",
+      "nome": "Albergaria-a-Velha",
+      "codigo_ine": "0102",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 1357,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1365,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1250
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1250
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1322
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1357
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "albufeira",
+      "nome": "Albufeira",
+      "codigo_ine": "0801",
+      "nuts3": "Algarve",
+      "valor_atual": 3354,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1033,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 3136
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3194
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3285
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3354
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alcacer-do-sal",
+      "nome": "Alcácer do Sal",
+      "codigo_ine": "1501",
+      "nuts3": "Alentejo Litoral",
+      "valor_atual": 1932,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2113,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1598
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1822
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1796
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1932
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alcanena",
+      "nome": "Alcanena",
+      "codigo_ine": "1402",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 779,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0127,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 831
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 844
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 820
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 779
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alcobaca",
+      "nome": "Alcobaça",
+      "codigo_ine": "1001",
+      "nuts3": "Oeste",
+      "valor_atual": 1808,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2661,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1507
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1638
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1750
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1808
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alcochete",
+      "nome": "Alcochete",
+      "codigo_ine": "1502",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 2883,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3051,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2309
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2628
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2765
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2883
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alcoutim",
+      "nome": "Alcoutim",
+      "codigo_ine": "0802",
+      "nuts3": "Algarve",
+      "valor_atual": 917,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.065,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 920
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 981
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 951
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 917
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alenquer",
+      "nome": "Alenquer",
+      "codigo_ine": "1101",
+      "nuts3": "Oeste",
+      "valor_atual": 1928,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2234,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1628
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1707
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1798
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1928
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alfandega-da-fe",
+      "nome": "Alfândega da Fé",
+      "codigo_ine": "0401",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 419,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.027,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 408
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 382
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 418
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 419
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alijo",
+      "nome": "Alijó",
+      "codigo_ine": "1701",
+      "nuts3": "Douro",
+      "valor_atual": 472,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0129,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 458
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 446
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 492
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 472
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "aljezur",
+      "nome": "Aljezur",
+      "codigo_ine": "0803",
+      "nuts3": "Algarve",
+      "valor_atual": 3240,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0395,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 3158
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3240
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3288
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3240
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "aljustrel",
+      "nome": "Aljustrel",
+      "codigo_ine": "0201",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 890,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3424,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 694
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 731
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 833
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 890
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "almada",
+      "nome": "Almada",
+      "codigo_ine": "1503",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 3267,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1915,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2867
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3012
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3160
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3267
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "almeida",
+      "nome": "Almeida",
+      "codigo_ine": "0902",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 342,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0209,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 296
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 275
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 321
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 342
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "almeirim",
+      "nome": "Almeirim",
+      "codigo_ine": "1403",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1522,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2579,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1247
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1336
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1463
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1522
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "almodovar",
+      "nome": "Almodôvar",
+      "codigo_ine": "0202",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 979,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2814,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 785
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 862
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 950
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 979
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alpiarca",
+      "nome": "Alpiarça",
+      "codigo_ine": "1404",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1291,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2534,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1088
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1158
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1250
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1291
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alter-do-chao",
+      "nome": "Alter do Chão",
+      "codigo_ine": "1201",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 461,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.011,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 481
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 487
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 432
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 461
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alvaiazere",
+      "nome": "Alvaiázere",
+      "codigo_ine": "1002",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 651,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0796,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 612
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 600
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 644
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 651
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "alvito",
+      "nome": "Alvito",
+      "codigo_ine": "0203",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 970,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2696,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 980
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 763
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 920
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 970
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "amadora",
+      "nome": "Amadora",
+      "codigo_ine": "1115",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 3143,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2239,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2690
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2797
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2986
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3143
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "amarante",
+      "nome": "Amarante",
+      "codigo_ine": "1301",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 1192,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2378,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1052
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1111
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1176
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1192
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "amares",
+      "nome": "Amares",
+      "codigo_ine": "0301",
+      "nuts3": "Cávado",
+      "valor_atual": 1566,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3834,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1159
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1291
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1392
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1566
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "anadia",
+      "nome": "Anadia",
+      "codigo_ine": "0103",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 941,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1911,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 858
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 841
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 856
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 941
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "angra-do-heroismo",
+      "nome": "Angra do Heroísmo",
+      "codigo_ine": "4301",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1316,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1424,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1097
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1145
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1251
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1316
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ansiao",
+      "nome": "Ansião",
+      "codigo_ine": "1003",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 727,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.226,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 634
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 625
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 701
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 727
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "arcos-de-valdevez",
+      "nome": "Arcos de Valdevez",
+      "codigo_ine": "1601",
+      "nuts3": "Alto Minho",
+      "valor_atual": 914,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0479,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 966
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 913
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 943
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 914
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "arganil",
+      "nome": "Arganil",
+      "codigo_ine": "0601",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 685,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1831,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 643
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 685
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 680
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 685
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "armamar",
+      "nome": "Armamar",
+      "codigo_ine": "1801",
+      "nuts3": "Douro",
+      "valor_atual": 403,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.7832,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 375
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 438
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 471
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 403
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "arouca",
+      "nome": "Arouca",
+      "codigo_ine": "0104",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 1012,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0408,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1070
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1031
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1057
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1012
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "arraiolos",
+      "nome": "Arraiolos",
+      "codigo_ine": "0702",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 1286,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.5877,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 894
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1049
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1195
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1286
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "arronches",
+      "nome": "Arronches",
+      "codigo_ine": "1202",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 842,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2256,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 687
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 714
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 726
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 842
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "arruda-dos-vinhos",
+      "nome": "Arruda dos Vinhos",
+      "codigo_ine": "1102",
+      "nuts3": "Oeste",
+      "valor_atual": 2161,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2209,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1770
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1831
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2070
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2161
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "aveiro",
+      "nome": "Aveiro",
+      "codigo_ine": "0105",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 2329,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0482,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2238
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2365
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2343
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2329
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "avis",
+      "nome": "Avis",
+      "codigo_ine": "1203",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 767,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.348,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 597
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 679
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 755
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 767
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "azambuja",
+      "nome": "Azambuja",
+      "codigo_ine": "1103",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1902,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4344,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1441
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1482
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1650
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1902
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "baiao",
+      "nome": "Baião",
+      "codigo_ine": "1302",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 841,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3947,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 709
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 750
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 778
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 841
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "barcelos",
+      "nome": "Barcelos",
+      "codigo_ine": "0302",
+      "nuts3": "Cávado",
+      "valor_atual": 1678,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1994,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1416
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1450
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1571
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1678
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "barrancos",
+      "nome": "Barrancos",
+      "codigo_ine": "0204",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 914,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2748,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 781
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 832
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 878
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 914
+        }
+      ],
+      "fallback_nuts3": true
+    },
+    {
+      "slug": "barreiro",
+      "nome": "Barreiro",
+      "codigo_ine": "1504",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 2705,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3279,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2139
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2297
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2508
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2705
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "batalha",
+      "nome": "Batalha",
+      "codigo_ine": "1004",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 1387,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2135,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1158
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1237
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1366
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1387
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "beja",
+      "nome": "Beja",
+      "codigo_ine": "0205",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 1252,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2583,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1057
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1128
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1195
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1252
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "belmonte",
+      "nome": "Belmonte",
+      "codigo_ine": "0501",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 500,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.2636,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 679
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 610
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 619
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 500
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "benavente",
+      "nome": "Benavente",
+      "codigo_ine": "1405",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 2063,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2902,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1684
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1777
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1941
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2063
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "bombarral",
+      "nome": "Bombarral",
+      "codigo_ine": "1005",
+      "nuts3": "Oeste",
+      "valor_atual": 1582,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1204,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1480
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1506
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1548
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1582
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "borba",
+      "nome": "Borba",
+      "codigo_ine": "0703",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 924,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3937,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 649
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 670
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 818
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 924
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "boticas",
+      "nome": "Boticas",
+      "codigo_ine": "1702",
+      "nuts3": "Alto Tâmega e Barroso",
+      "valor_atual": 532,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0634,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 714
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 666
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 631
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 532
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "braga",
+      "nome": "Braga",
+      "codigo_ine": "0303",
+      "nuts3": "Cávado",
+      "valor_atual": 2100,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2209,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1808
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1900
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1996
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2100
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "braganca",
+      "nome": "Bragança",
+      "codigo_ine": "0402",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 1157,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1734,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1022
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1094
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1134
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1157
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "cabeceiras-de-basto",
+      "nome": "Cabeceiras de Basto",
+      "codigo_ine": "0304",
+      "nuts3": "Ave",
+      "valor_atual": 893,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1907,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 905
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 908
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 880
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 893
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "cadaval",
+      "nome": "Cadaval",
+      "codigo_ine": "1104",
+      "nuts3": "Oeste",
+      "valor_atual": 1432,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2324,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1289
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1311
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1398
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1432
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "caldas-da-rainha",
+      "nome": "Caldas da Rainha",
+      "codigo_ine": "1006",
+      "nuts3": "Oeste",
+      "valor_atual": 2092,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2198,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1777
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1857
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1962
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2092
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "calheta-acores",
+      "nome": "Calheta",
+      "codigo_ine": "4501",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 697,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0043,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 669
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 755
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 680
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 697
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "calheta-madeira",
+      "nome": "Calheta",
+      "codigo_ine": "3101",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 1722,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2187,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1544
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1535
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1637
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1722
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "camara-de-lobos",
+      "nome": "Câmara de Lobos",
+      "codigo_ine": "3102",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 2500,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0097,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2647
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2625
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2484
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2500
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "caminha",
+      "nome": "Caminha",
+      "codigo_ine": "1602",
+      "nuts3": "Alto Minho",
+      "valor_atual": 1646,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1266,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1490
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1544
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1606
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1646
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "campo-maior",
+      "nome": "Campo Maior",
+      "codigo_ine": "1204",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 697,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1426,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 650
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 670
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 691
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 697
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "cantanhede",
+      "nome": "Cantanhede",
+      "codigo_ine": "0602",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 1100,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0557,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1100
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1114
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1108
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1100
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "carrazeda-de-ansiaes",
+      "nome": "Carrazeda de Ansiães",
+      "codigo_ine": "0403",
+      "nuts3": "Douro",
+      "valor_atual": 352,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.4368,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 587
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 395
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 308
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 352
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "carregal-do-sal",
+      "nome": "Carregal do Sal",
+      "codigo_ine": "1802",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 697,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2207,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 604
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 651
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 674
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 697
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "cartaxo",
+      "nome": "Cartaxo",
+      "codigo_ine": "1406",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1553,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.274,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1330
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1399
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1486
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1553
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "cascais",
+      "nome": "Cascais",
+      "codigo_ine": "1105",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 4687,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1186,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 4267
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 4431
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 4550
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 4687
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "castanheira-de-pera",
+      "nome": "Castanheira de Pêra",
+      "codigo_ine": "1007",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 609,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2531,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 527
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 497
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 659
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 609
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "castelo-branco",
+      "nome": "Castelo Branco",
+      "codigo_ine": "0502",
+      "nuts3": "Beira Baixa",
+      "valor_atual": 1026,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2889,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 833
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 880
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 966
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1026
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "castelo-de-paiva",
+      "nome": "Castelo de Paiva",
+      "codigo_ine": "0106",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 952,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0355,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1076
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1000
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 962
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 952
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "castelo-de-vide",
+      "nome": "Castelo de Vide",
+      "codigo_ine": "1205",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 705,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0368,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 760
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 771
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 705
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 705
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "castro-daire",
+      "nome": "Castro Daire",
+      "codigo_ine": "1803",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 652,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2256,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 553
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 637
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 669
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 652
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "castro-marim",
+      "nome": "Castro Marim",
+      "codigo_ine": "0804",
+      "nuts3": "Algarve",
+      "valor_atual": 2542,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2019,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2176
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2231
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2406
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2542
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "castro-verde",
+      "nome": "Castro Verde",
+      "codigo_ine": "0206",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 1095,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3257,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 854
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1015
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 810
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1095
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "celorico-da-beira",
+      "nome": "Celorico da Beira",
+      "codigo_ine": "0903",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 497,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3542,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 386
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 367
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 494
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 497
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "celorico-de-basto",
+      "nome": "Celorico de Basto",
+      "codigo_ine": "0305",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 886,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.212,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 728
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 713
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 813
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 886
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "chamusca",
+      "nome": "Chamusca",
+      "codigo_ine": "1407",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 909,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.259,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 859
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 861
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 833
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 909
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "chaves",
+      "nome": "Chaves",
+      "codigo_ine": "1703",
+      "nuts3": "Alto Tâmega e Barroso",
+      "valor_atual": 1184,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1677,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1045
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1111
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1151
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1184
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "cinfaes",
+      "nome": "Cinfães",
+      "codigo_ine": "1804",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 509,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3573,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 386
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 460
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 500
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 509
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "coimbra",
+      "nome": "Coimbra",
+      "codigo_ine": "0603",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 2210,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.219,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1895
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2011
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2095
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2210
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "condeixa-a-nova",
+      "nome": "Condeixa-a-Nova",
+      "codigo_ine": "0604",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 1622,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1553,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1420
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1470
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1524
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1622
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "constancia",
+      "nome": "Constância",
+      "codigo_ine": "1408",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 1032,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1661,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 976
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 862
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 851
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1032
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "coruche",
+      "nome": "Coruche",
+      "codigo_ine": "1409",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1383,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2471,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1181
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1239
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1326
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1383
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "corvo",
+      "nome": "Corvo",
+      "codigo_ine": "4901",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1494,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2206,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1274
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1327
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1426
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1494
+        }
+      ],
+      "fallback_nuts3": true
+    },
+    {
+      "slug": "covilha",
+      "nome": "Covilhã",
+      "codigo_ine": "0503",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 1116,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1797,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1023
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1040
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1114
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1116
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "crato",
+      "nome": "Crato",
+      "codigo_ine": "1206",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 508,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4767,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 411
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 453
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 504
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 508
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "cuba",
+      "nome": "Cuba",
+      "codigo_ine": "0207",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 692,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0762,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 640
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 627
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 657
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 692
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "elvas",
+      "nome": "Elvas",
+      "codigo_ine": "1207",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 938,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1153,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 905
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 925
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 923
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 938
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "entroncamento",
+      "nome": "Entroncamento",
+      "codigo_ine": "1410",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 1646,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2879,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1356
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1450
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1536
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1646
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "espinho",
+      "nome": "Espinho",
+      "codigo_ine": "0107",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 2776,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1285,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2470
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2562
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2703
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2776
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "esposende",
+      "nome": "Esposende",
+      "codigo_ine": "0306",
+      "nuts3": "Cávado",
+      "valor_atual": 2152,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0248,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2138
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2157
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2118
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2152
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "estarreja",
+      "nome": "Estarreja",
+      "codigo_ine": "0108",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 1248,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0871,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1190
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1223
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1296
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1248
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "estremoz",
+      "nome": "Estremoz",
+      "codigo_ine": "0704",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 843,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0753,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 840
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 885
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 846
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 843
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "evora",
+      "nome": "Évora",
+      "codigo_ine": "0705",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 2255,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.185,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1993
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2113
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2140
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2255
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "fafe",
+      "nome": "Fafe",
+      "codigo_ine": "0307",
+      "nuts3": "Ave",
+      "valor_atual": 1303,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1728,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1133
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1181
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1263
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1303
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "faro",
+      "nome": "Faro",
+      "codigo_ine": "0805",
+      "nuts3": "Algarve",
+      "valor_atual": 3125,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2038,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2774
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2885
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2985
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3125
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "felgueiras",
+      "nome": "Felgueiras",
+      "codigo_ine": "1303",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 1201,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2872,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1007
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1060
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1094
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1201
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ferreira-do-alentejo",
+      "nome": "Ferreira do Alentejo",
+      "codigo_ine": "0208",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 841,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4525,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 700
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 776
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 776
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 841
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ferreira-do-zezere",
+      "nome": "Ferreira do Zêzere",
+      "codigo_ine": "1411",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 883,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1037,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 762
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 751
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 803
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 883
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "figueira-da-foz",
+      "nome": "Figueira da Foz",
+      "codigo_ine": "0605",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 1789,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1287,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1627
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1667
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1718
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1789
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "figueira-de-castelo-rodrigo",
+      "nome": "Figueira de Castelo Rodrigo",
+      "codigo_ine": "0904",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 332,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.7474,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 203
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 246
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 263
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 332
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "figueiro-dos-vinhos",
+      "nome": "Figueiró dos Vinhos",
+      "codigo_ine": "1008",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 555,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.1176,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 565
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 576
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 639
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 555
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "fornos-de-algodres",
+      "nome": "Fornos de Algodres",
+      "codigo_ine": "0905",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 502,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.512,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 379
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 432
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 464
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 502
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "freixo-de-espada-a-cinta",
+      "nome": "Freixo de Espada à Cinta",
+      "codigo_ine": "0404",
+      "nuts3": "Douro",
+      "valor_atual": 280,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.3622,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 354
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 255
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 271
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 280
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "fronteira",
+      "nome": "Fronteira",
+      "codigo_ine": "1208",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 596,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0276,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 545
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 621
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 564
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 596
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "funchal",
+      "nome": "Funchal",
+      "codigo_ine": "3103",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 3322,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0716,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 3205
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3269
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3100
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3322
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "fundao",
+      "nome": "Fundão",
+      "codigo_ine": "0504",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 803,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0955,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 719
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 656
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 774
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 803
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "gaviao",
+      "nome": "Gavião",
+      "codigo_ine": "1209",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 529,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.5423,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 411
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 417
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 529
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 529
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "gois",
+      "nome": "Góis",
+      "codigo_ine": "0606",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 756,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.5816,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 470
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 535
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 614
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 756
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "golega",
+      "nome": "Golegã",
+      "codigo_ine": "1412",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1263,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4601,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 886
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1020
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1108
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1263
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "gondomar",
+      "nome": "Gondomar",
+      "codigo_ine": "1304",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 2227,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.223,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1902
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2011
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2138
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2227
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "gouveia",
+      "nome": "Gouveia",
+      "codigo_ine": "0906",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 525,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1564,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 469
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 484
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 500
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 525
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "grandola",
+      "nome": "Grândola",
+      "codigo_ine": "1505",
+      "nuts3": "Alentejo Litoral",
+      "valor_atual": 2533,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.299,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1979
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2147
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2426
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2533
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "guarda",
+      "nome": "Guarda",
+      "codigo_ine": "0907",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 955,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0495,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 954
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 973
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 950
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 955
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "guimaraes",
+      "nome": "Guimarães",
+      "codigo_ine": "0308",
+      "nuts3": "Ave",
+      "valor_atual": 1733,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2256,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1481
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1545
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1607
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1733
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "horta",
+      "nome": "Horta",
+      "codigo_ine": "4701",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1359,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2906,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1102
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1166
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1252
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1359
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "idanha-a-nova",
+      "nome": "Idanha-a-Nova",
+      "codigo_ine": "0505",
+      "nuts3": "Beira Baixa",
+      "valor_atual": 412,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.5373,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 331
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 359
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 412
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 412
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ilhavo",
+      "nome": "Ílhavo",
+      "codigo_ine": "0110",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 2248,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2503,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1927
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2103
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2188
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2248
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lagoa-algarve",
+      "nome": "Lagoa",
+      "codigo_ine": "0806",
+      "nuts3": "Algarve",
+      "valor_atual": 3220,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1529,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2946
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3002
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3107
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3220
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lagoa-acores",
+      "nome": "Lagoa",
+      "codigo_ine": "4201",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1761,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0999,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1651
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1748
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1696
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1761
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lagos",
+      "nome": "Lagos",
+      "codigo_ine": "0807",
+      "nuts3": "Algarve",
+      "valor_atual": 3855,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0762,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 3638
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3690
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3801
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3855
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lajes-das-flores",
+      "nome": "Lajes das Flores",
+      "codigo_ine": "4801",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1494,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2206,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1274
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1327
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1426
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1494
+        }
+      ],
+      "fallback_nuts3": true
+    },
+    {
+      "slug": "lajes-do-pico",
+      "nome": "Lajes do Pico",
+      "codigo_ine": "4601",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1138,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1414,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 987
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 970
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1079
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1138
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lamego",
+      "nome": "Lamego",
+      "codigo_ine": "1805",
+      "nuts3": "Douro",
+      "valor_atual": 973,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2539,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 783
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 876
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 914
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 973
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "leiria",
+      "nome": "Leiria",
+      "codigo_ine": "1009",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 1922,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2432,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1640
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1707
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1814
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1922
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lisboa",
+      "nome": "Lisboa",
+      "codigo_ine": "1106",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 5082,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1519,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 4525
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 4691
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 4875
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 5082
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "loule",
+      "nome": "Loulé",
+      "codigo_ine": "0808",
+      "nuts3": "Algarve",
+      "valor_atual": 4091,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2029,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 3639
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3919
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3993
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 4091
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "loures",
+      "nome": "Loures",
+      "codigo_ine": "1107",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 3191,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1788,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2808
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2918
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3057
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3191
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lourinha",
+      "nome": "Lourinhã",
+      "codigo_ine": "1108",
+      "nuts3": "Oeste",
+      "valor_atual": 2030,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1998,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1727
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1857
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1979
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2030
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lousa",
+      "nome": "Lousã",
+      "codigo_ine": "0607",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 1411,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3249,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1173
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1215
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1333
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1411
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "lousada",
+      "nome": "Lousada",
+      "codigo_ine": "1305",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 1348,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1794,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1188
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1264
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1294
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1348
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "macao",
+      "nome": "Mação",
+      "codigo_ine": "1413",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 372,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3727,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 308
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 353
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 348
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 372
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "macedo-de-cavaleiros",
+      "nome": "Macedo de Cavaleiros",
+      "codigo_ine": "0405",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 799,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1681,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 694
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 754
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 797
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 799
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "machico",
+      "nome": "Machico",
+      "codigo_ine": "3104",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 2027,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0363,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2021
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2165
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1904
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2027
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "madalena",
+      "nome": "Madalena",
+      "codigo_ine": "4602",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1118,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0881,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 914
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1000
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1025
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1118
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mafra",
+      "nome": "Mafra",
+      "codigo_ine": "1109",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 2942,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1801,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2616
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2720
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2860
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2942
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "maia",
+      "nome": "Maia",
+      "codigo_ine": "1306",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 2462,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1586,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2196
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2271
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2370
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2462
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mangualde",
+      "nome": "Mangualde",
+      "codigo_ine": "1806",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 806,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3638,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 627
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 666
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 694
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 806
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "manteigas",
+      "nome": "Manteigas",
+      "codigo_ine": "0908",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 424,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1553,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 324
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 416
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 397
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 424
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "marco-de-canaveses",
+      "nome": "Marco de Canaveses",
+      "codigo_ine": "1307",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 1366,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3418,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1160
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1210
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1271
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1366
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "marinha-grande",
+      "nome": "Marinha Grande",
+      "codigo_ine": "1010",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 1462,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1715,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1304
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1366
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1435
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1462
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "marvao",
+      "nome": "Marvão",
+      "codigo_ine": "1210",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 654,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2111,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 522
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 636
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 639
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 654
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "matosinhos",
+      "nome": "Matosinhos",
+      "codigo_ine": "1308",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 3058,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1483,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2770
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2870
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3004
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3058
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mealhada",
+      "nome": "Mealhada",
+      "codigo_ine": "0111",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 1132,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1586,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1006
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1035
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1133
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1132
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "meda",
+      "nome": "Mêda",
+      "codigo_ine": "0909",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 411,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1138,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 351
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 392
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 411
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 411
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "melgaco",
+      "nome": "Melgaço",
+      "codigo_ine": "1603",
+      "nuts3": "Alto Minho",
+      "valor_atual": 734,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.5453,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 475
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 530
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 710
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 734
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mertola",
+      "nome": "Mértola",
+      "codigo_ine": "0209",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 723,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3824,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 619
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 697
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 704
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 723
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mesao-frio",
+      "nome": "Mesão Frio",
+      "codigo_ine": "1704",
+      "nuts3": "Douro",
+      "valor_atual": 657,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.6384,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 342
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 392
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 536
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 657
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mira",
+      "nome": "Mira",
+      "codigo_ine": "0608",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 1515,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0565,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1479
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1477
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1472
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1515
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "miranda-do-corvo",
+      "nome": "Miranda do Corvo",
+      "codigo_ine": "0609",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 903,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1562,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 865
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 905
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 887
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 903
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "miranda-do-douro",
+      "nome": "Miranda do Douro",
+      "codigo_ine": "0406",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 477,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0021,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 512
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 512
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 547
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 477
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mirandela",
+      "nome": "Mirandela",
+      "codigo_ine": "0407",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 1042,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2032,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 950
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 999
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 973
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1042
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mogadouro",
+      "nome": "Mogadouro",
+      "codigo_ine": "0408",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 356,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0895,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 415
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 382
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 342
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 356
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "moimenta-da-beira",
+      "nome": "Moimenta da Beira",
+      "codigo_ine": "1807",
+      "nuts3": "Douro",
+      "valor_atual": 571,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1773,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 515
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 583
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 588
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 571
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "moita",
+      "nome": "Moita",
+      "codigo_ine": "1506",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 2371,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3049,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1923
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2026
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2226
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2371
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "moncao",
+      "nome": "Monção",
+      "codigo_ine": "1604",
+      "nuts3": "Alto Minho",
+      "valor_atual": 1197,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0378,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1224
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1138
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1200
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1197
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "monchique",
+      "nome": "Monchique",
+      "codigo_ine": "0809",
+      "nuts3": "Algarve",
+      "valor_atual": 1637,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2789,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1248
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1471
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1636
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1637
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mondim-de-basto",
+      "nome": "Mondim de Basto",
+      "codigo_ine": "1705",
+      "nuts3": "Ave",
+      "valor_atual": 980,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3225,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 835
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 744
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 852
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 980
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "monforte",
+      "nome": "Monforte",
+      "codigo_ine": "1211",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 544,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2308,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 442
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 445
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 499
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 544
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "montalegre",
+      "nome": "Montalegre",
+      "codigo_ine": "1706",
+      "nuts3": "Alto Tâmega e Barroso",
+      "valor_atual": 800,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.6427,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 524
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 558
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 607
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 800
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "montemor-o-novo",
+      "nome": "Montemor-o-Novo",
+      "codigo_ine": "0706",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 1436,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1809,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1334
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1314
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1429
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1436
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "montemor-o-velho",
+      "nome": "Montemor-o-Velho",
+      "codigo_ine": "0610",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 1142,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1087,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1059
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1104
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1109
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1142
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "montijo",
+      "nome": "Montijo",
+      "codigo_ine": "1507",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 2608,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2354,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2250
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2346
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2472
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2608
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mora",
+      "nome": "Mora",
+      "codigo_ine": "0707",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 1041,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0935,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 952
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 952
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 994
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1041
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mortagua",
+      "nome": "Mortágua",
+      "codigo_ine": "1808",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 738,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0933,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 754
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 691
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 736
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 738
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "moura",
+      "nome": "Moura",
+      "codigo_ine": "0210",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 792,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4043,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 588
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 630
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 686
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 792
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "mourao",
+      "nome": "Mourão",
+      "codigo_ine": "0708",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 755,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0713,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 713
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 714
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 585
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 755
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "murca",
+      "nome": "Murça",
+      "codigo_ine": "1707",
+      "nuts3": "Douro",
+      "valor_atual": 529,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.5423,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 357
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 429
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 585
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 529
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "murtosa",
+      "nome": "Murtosa",
+      "codigo_ine": "0112",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 1406,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2301,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1169
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1204
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1355
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1406
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "nazare",
+      "nome": "Nazaré",
+      "codigo_ine": "1011",
+      "nuts3": "Oeste",
+      "valor_atual": 2424,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0528,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2538
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2333
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2332
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2424
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "nelas",
+      "nome": "Nelas",
+      "codigo_ine": "1809",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 787,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0885,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 745
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 791
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 807
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 787
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "nisa",
+      "nome": "Nisa",
+      "codigo_ine": "1212",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 500,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1933,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 434
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 461
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 500
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 500
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "nordeste",
+      "nome": "Nordeste",
+      "codigo_ine": "4202",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1164,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4568,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 953
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 977
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1098
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1164
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "obidos",
+      "nome": "Óbidos",
+      "codigo_ine": "1012",
+      "nuts3": "Oeste",
+      "valor_atual": 2242,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1033,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2007
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2073
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2160
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2242
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "odemira",
+      "nome": "Odemira",
+      "codigo_ine": "0211",
+      "nuts3": "Alentejo Litoral",
+      "valor_atual": 1799,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2297,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1573
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1654
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1708
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1799
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "odivelas",
+      "nome": "Odivelas",
+      "codigo_ine": "1116",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 3462,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2038,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2980
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3113
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3282
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3462
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "oeiras",
+      "nome": "Oeiras",
+      "codigo_ine": "1110",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 4297,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1795,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 3802
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3996
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 4187
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 4297
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "oleiros",
+      "nome": "Oleiros",
+      "codigo_ine": "0506",
+      "nuts3": "Beira Baixa",
+      "valor_atual": 556,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2991,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 500
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 490
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 487
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 556
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "olhao",
+      "nome": "Olhão",
+      "codigo_ine": "0810",
+      "nuts3": "Algarve",
+      "valor_atual": 2725,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.172,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2432
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2511
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2614
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2725
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "oliveira-de-azemeis",
+      "nome": "Oliveira de Azeméis",
+      "codigo_ine": "0113",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 1412,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2079,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1211
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1265
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1333
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1412
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "oliveira-de-frades",
+      "nome": "Oliveira de Frades",
+      "codigo_ine": "1810",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 968,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1415,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 850
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 865
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 975
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 968
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "oliveira-do-bairro",
+      "nome": "Oliveira do Bairro",
+      "codigo_ine": "0114",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 1358,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1317,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1242
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1292
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1337
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1358
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "oliveira-do-hospital",
+      "nome": "Oliveira do Hospital",
+      "codigo_ine": "0611",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 746,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0597,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 708
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 754
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 729
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 746
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ourem",
+      "nome": "Ourém",
+      "codigo_ine": "1421",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 1348,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2344,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1143
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1190
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1283
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1348
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ourique",
+      "nome": "Ourique",
+      "codigo_ine": "0212",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 846,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1865,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 786
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 859
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 911
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 846
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ovar",
+      "nome": "Ovar",
+      "codigo_ine": "0115",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 1836,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1754,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1615
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1678
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1713
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1836
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "pacos-de-ferreira",
+      "nome": "Paços de Ferreira",
+      "codigo_ine": "1309",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 1472,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.172,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1327
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1436
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1461
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1472
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "palmela",
+      "nome": "Palmela",
+      "codigo_ine": "1508",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 2375,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1917,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2074
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2172
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2263
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2375
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "pampilhosa-da-serra",
+      "nome": "Pampilhosa da Serra",
+      "codigo_ine": "0612",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 465,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.8526,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 303
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 312
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 324
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 465
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "paredes",
+      "nome": "Paredes",
+      "codigo_ine": "1310",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 1643,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2197,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1380
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1501
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1568
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1643
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "paredes-de-coura",
+      "nome": "Paredes de Coura",
+      "codigo_ine": "1605",
+      "nuts3": "Alto Minho",
+      "valor_atual": 777,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0091,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 752
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 777
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 842
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 777
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "pedrogao-grande",
+      "nome": "Pedrógão Grande",
+      "codigo_ine": "1013",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 576,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.1028,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 607
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 630
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 616
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 576
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "penacova",
+      "nome": "Penacova",
+      "codigo_ine": "0613",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 595,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0663,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 594
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 580
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 594
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 595
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "penafiel",
+      "nome": "Penafiel",
+      "codigo_ine": "1311",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 1455,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2853,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1192
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1304
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1422
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1455
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "penalva-do-castelo",
+      "nome": "Penalva do Castelo",
+      "codigo_ine": "1811",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 429,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0779,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 429
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 358
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 400
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 429
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "penamacor",
+      "nome": "Penamacor",
+      "codigo_ine": "0507",
+      "nuts3": "Beira Baixa",
+      "valor_atual": 395,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2191,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 411
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 396
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 408
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 395
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "penedono",
+      "nome": "Penedono",
+      "codigo_ine": "1812",
+      "nuts3": "Douro",
+      "valor_atual": 441,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": null,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": null
+        },
+        {
+          "periodo": "3T2025",
+          "valor": null
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 318
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 441
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "penela",
+      "nome": "Penela",
+      "codigo_ine": "0614",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 744,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.1014,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 828
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 811
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 759
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 744
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "peniche",
+      "nome": "Peniche",
+      "codigo_ine": "1014",
+      "nuts3": "Oeste",
+      "valor_atual": 2219,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2099,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1919
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1998
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2082
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2219
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "peso-da-regua",
+      "nome": "Peso da Régua",
+      "codigo_ine": "1708",
+      "nuts3": "Douro",
+      "valor_atual": 1119,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4147,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 917
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1004
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1080
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1119
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "pinhel",
+      "nome": "Pinhel",
+      "codigo_ine": "0910",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 429,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1319,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 374
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 411
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 476
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 429
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "pombal",
+      "nome": "Pombal",
+      "codigo_ine": "1015",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 1230,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1593,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1082
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1119
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1136
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1230
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ponta-delgada",
+      "nome": "Ponta Delgada",
+      "codigo_ine": "4203",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 2017,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1546,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1817
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1884
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1912
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2017
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ponta-do-sol",
+      "nome": "Ponta do Sol",
+      "codigo_ine": "3105",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 1718,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0429,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1839
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1845
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1797
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1718
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ponte-da-barca",
+      "nome": "Ponte da Barca",
+      "codigo_ine": "1606",
+      "nuts3": "Alto Minho",
+      "valor_atual": 1239,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2643,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1019
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1123
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1173
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1239
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ponte-de-lima",
+      "nome": "Ponte de Lima",
+      "codigo_ine": "1607",
+      "nuts3": "Alto Minho",
+      "valor_atual": 1450,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0615,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1370
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1300
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1282
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1450
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ponte-de-sor",
+      "nome": "Ponte de Sor",
+      "codigo_ine": "1213",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 960,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1837,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 782
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 896
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 902
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 960
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "portalegre",
+      "nome": "Portalegre",
+      "codigo_ine": "1214",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 1088,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1969,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 955
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1000
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1037
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1088
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "portel",
+      "nome": "Portel",
+      "codigo_ine": "0709",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 815,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.5703,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 625
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 709
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 785
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 815
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "portimao",
+      "nome": "Portimão",
+      "codigo_ine": "0811",
+      "nuts3": "Algarve",
+      "valor_atual": 3125,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1873,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2718
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2795
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2953
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3125
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "porto",
+      "nome": "Porto",
+      "codigo_ine": "1312",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 3510,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1673,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 3060
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3186
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3347
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3510
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "porto-de-mos",
+      "nome": "Porto de Mós",
+      "codigo_ine": "1016",
+      "nuts3": "Região de Leiria",
+      "valor_atual": 1233,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.367,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1000
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1102
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1156
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1233
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "porto-moniz",
+      "nome": "Porto Moniz",
+      "codigo_ine": "3106",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 1490,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.496,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1095
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1242
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1412
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1490
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "porto-santo",
+      "nome": "Porto Santo",
+      "codigo_ine": "3201",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 2484,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2432,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2249
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2392
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2409
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2484
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "povoa-de-lanhoso",
+      "nome": "Póvoa de Lanhoso",
+      "codigo_ine": "0309",
+      "nuts3": "Ave",
+      "valor_atual": 1339,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2273,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1206
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1287
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1308
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1339
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "povoa-de-varzim",
+      "nome": "Póvoa de Varzim",
+      "codigo_ine": "1313",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 2345,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1725,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2083
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2169
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2271
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2345
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "povoacao",
+      "nome": "Povoação",
+      "codigo_ine": "4204",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1426,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2167,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1155
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1186
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1277
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1426
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "proenca-a-nova",
+      "nome": "Proença-a-Nova",
+      "codigo_ine": "0508",
+      "nuts3": "Beira Baixa",
+      "valor_atual": 584,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.0152,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 522
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 573
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 569
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 584
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "redondo",
+      "nome": "Redondo",
+      "codigo_ine": "0710",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 920,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1486,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 875
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 790
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 899
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 920
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "reguengos-de-monsaraz",
+      "nome": "Reguengos de Monsaraz",
+      "codigo_ine": "0711",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 1100,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2209,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 964
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1012
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1094
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1100
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "resende",
+      "nome": "Resende",
+      "codigo_ine": "1813",
+      "nuts3": "Tâmega e Sousa",
+      "valor_atual": 637,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1156,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 654
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 646
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 647
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 637
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ribeira-brava",
+      "nome": "Ribeira Brava",
+      "codigo_ine": "3107",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 1508,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.008,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1586
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1596
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1589
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1508
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ribeira-de-pena",
+      "nome": "Ribeira de Pena",
+      "codigo_ine": "1709",
+      "nuts3": "Alto Tâmega e Barroso",
+      "valor_atual": 357,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.5475,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 710
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 663
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 385
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 357
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "ribeira-grande",
+      "nome": "Ribeira Grande",
+      "codigo_ine": "4205",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1565,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.6319,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 926
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 966
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1425
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1565
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "rio-maior",
+      "nome": "Rio Maior",
+      "codigo_ine": "1414",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1278,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1503,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1212
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1232
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1233
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1278
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sabrosa",
+      "nome": "Sabrosa",
+      "codigo_ine": "1710",
+      "nuts3": "Douro",
+      "valor_atual": 757,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.312,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 654
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 822
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 825
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 757
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sabugal",
+      "nome": "Sabugal",
+      "codigo_ine": "0911",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 427,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2861,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 376
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 418
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 402
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 427
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "salvaterra-de-magos",
+      "nome": "Salvaterra de Magos",
+      "codigo_ine": "1415",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1787,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2026,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1531
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1658
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1712
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1787
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santa-comba-dao",
+      "nome": "Santa Comba Dão",
+      "codigo_ine": "1814",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 767,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0052,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 773
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 715
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 720
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 767
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santa-cruz",
+      "nome": "Santa Cruz",
+      "codigo_ine": "3108",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 2617,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1266,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2395
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2444
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2500
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2617
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santa-cruz-da-graciosa",
+      "nome": "Santa Cruz da Graciosa",
+      "codigo_ine": "4401",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 560,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.447,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 396
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 496
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 428
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 560
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santa-cruz-das-flores",
+      "nome": "Santa Cruz das Flores",
+      "codigo_ine": "4802",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1494,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2206,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1274
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1327
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1426
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1494
+        }
+      ],
+      "fallback_nuts3": true
+    },
+    {
+      "slug": "santa-maria-da-feira",
+      "nome": "Santa Maria da Feira",
+      "codigo_ine": "0109",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 1700,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2117,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1486
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1558
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1636
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1700
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santa-marta-de-penaguiao",
+      "nome": "Santa Marta de Penaguião",
+      "codigo_ine": "1711",
+      "nuts3": "Douro",
+      "valor_atual": 500,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1547,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 458
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 496
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 544
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 500
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santana",
+      "nome": "Santana",
+      "codigo_ine": "3109",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 1605,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4847,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1101
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1188
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1333
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1605
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santarem",
+      "nome": "Santarém",
+      "codigo_ine": "1416",
+      "nuts3": "Lezíria do Tejo",
+      "valor_atual": 1495,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2214,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1278
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1354
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1391
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1495
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santiago-do-cacem",
+      "nome": "Santiago do Cacém",
+      "codigo_ine": "1509",
+      "nuts3": "Alentejo Litoral",
+      "valor_atual": 2019,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1355,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1785
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1847
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1935
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2019
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "santo-tirso",
+      "nome": "Santo Tirso",
+      "codigo_ine": "1314",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 1700,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3168,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1346
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1483
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1651
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1700
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sao-bras-de-alportel",
+      "nome": "São Brás de Alportel",
+      "codigo_ine": "0812",
+      "nuts3": "Algarve",
+      "valor_atual": 2381,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2179,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1949
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2099
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2301
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2381
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sao-joao-da-madeira",
+      "nome": "São João da Madeira",
+      "codigo_ine": "0116",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 1836,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3114,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1450
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1500
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1678
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1836
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sao-joao-da-pesqueira",
+      "nome": "São João da Pesqueira",
+      "codigo_ine": "1815",
+      "nuts3": "Douro",
+      "valor_atual": 446,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0695,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 418
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 420
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 491
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 446
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sao-pedro-do-sul",
+      "nome": "São Pedro do Sul",
+      "codigo_ine": "1816",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 970,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.278,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 769
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 845
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 909
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 970
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sao-roque-do-pico",
+      "nome": "São Roque do Pico",
+      "codigo_ine": "4603",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1390,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": null,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1257
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1380
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1568
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1390
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sao-vicente",
+      "nome": "São Vicente",
+      "codigo_ine": "3110",
+      "nuts3": "Região Autónoma da Madeira",
+      "valor_atual": 1331,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.286,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1035
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1087
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1289
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1331
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sardoal",
+      "nome": "Sardoal",
+      "codigo_ine": "1417",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 675,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.214,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 612
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 706
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 634
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 675
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "satao",
+      "nome": "Sátão",
+      "codigo_ine": "1817",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 715,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1189,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 705
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 701
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 703
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 715
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "seia",
+      "nome": "Seia",
+      "codigo_ine": "0912",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 708,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3694,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 563
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 625
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 699
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 708
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "seixal",
+      "nome": "Seixal",
+      "codigo_ine": "1510",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 2800,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2428,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2382
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2497
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2654
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2800
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sernancelhe",
+      "nome": "Sernancelhe",
+      "codigo_ine": "1818",
+      "nuts3": "Douro",
+      "valor_atual": 297,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0421,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 264
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 260
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 245
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 297
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "serpa",
+      "nome": "Serpa",
+      "codigo_ine": "0213",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 662,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.035,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 688
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 679
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 691
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 662
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "serta",
+      "nome": "Sertã",
+      "codigo_ine": "0509",
+      "nuts3": "Beira Baixa",
+      "valor_atual": 915,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0714,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 848
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 881
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 852
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 915
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sesimbra",
+      "nome": "Sesimbra",
+      "codigo_ine": "1511",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 2909,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2421,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2425
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2573
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2765
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2909
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "setubal",
+      "nome": "Setúbal",
+      "codigo_ine": "1512",
+      "nuts3": "Península de Setúbal",
+      "valor_atual": 2638,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2592,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2178
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2320
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2468
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2638
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sever-do-vouga",
+      "nome": "Sever do Vouga",
+      "codigo_ine": "0117",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 786,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0622,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 765
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 811
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 769
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 786
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "silves",
+      "nome": "Silves",
+      "codigo_ine": "0813",
+      "nuts3": "Algarve",
+      "valor_atual": 2815,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.131,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2584
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2667
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2746
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2815
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sines",
+      "nome": "Sines",
+      "codigo_ine": "1513",
+      "nuts3": "Alentejo Litoral",
+      "valor_atual": 2473,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1872,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2176
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2257
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2340
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2473
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sintra",
+      "nome": "Sintra",
+      "codigo_ine": "1111",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 2908,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.266,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2418
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2555
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2733
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2908
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sobral-de-monte-agraco",
+      "nome": "Sobral de Monte Agraço",
+      "codigo_ine": "1112",
+      "nuts3": "Oeste",
+      "valor_atual": 1865,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1456,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1773
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1838
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1860
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1865
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "soure",
+      "nome": "Soure",
+      "codigo_ine": "0615",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 884,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1914,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 789
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 800
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 852
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 884
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "sousel",
+      "nome": "Sousel",
+      "codigo_ine": "1215",
+      "nuts3": "Alto Alentejo",
+      "valor_atual": 668,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1617,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 585
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 615
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 695
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 668
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "tabua",
+      "nome": "Tábua",
+      "codigo_ine": "0616",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 768,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.148,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 705
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 776
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 751
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 768
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "tabuaco",
+      "nome": "Tabuaço",
+      "codigo_ine": "1819",
+      "nuts3": "Douro",
+      "valor_atual": 582,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.6772,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 359
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 544
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 589
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 582
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "tarouca",
+      "nome": "Tarouca",
+      "codigo_ine": "1820",
+      "nuts3": "Douro",
+      "valor_atual": 750,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0373,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 752
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 726
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 707
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 750
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "tavira",
+      "nome": "Tavira",
+      "codigo_ine": "0814",
+      "nuts3": "Algarve",
+      "valor_atual": 3152,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0899,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2936
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3014
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3103
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3152
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "terras-de-bouro",
+      "nome": "Terras de Bouro",
+      "codigo_ine": "0310",
+      "nuts3": "Cávado",
+      "valor_atual": 1071,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2396,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 915
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 864
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1042
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1071
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "tomar",
+      "nome": "Tomar",
+      "codigo_ine": "1418",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 1285,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3261,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1047
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1170
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1217
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1285
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "tondela",
+      "nome": "Tondela",
+      "codigo_ine": "1821",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 810,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.231,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 739
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 750
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 771
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 810
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "torre-de-moncorvo",
+      "nome": "Torre de Moncorvo",
+      "codigo_ine": "0409",
+      "nuts3": "Douro",
+      "valor_atual": 448,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4884,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 347
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 300
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 338
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 448
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "torres-novas",
+      "nome": "Torres Novas",
+      "codigo_ine": "1419",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 1199,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3075,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 954
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1025
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1058
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1199
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "torres-vedras",
+      "nome": "Torres Vedras",
+      "codigo_ine": "1113",
+      "nuts3": "Oeste",
+      "valor_atual": 2292,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2525,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1875
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1993
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2150
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2292
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "trancoso",
+      "nome": "Trancoso",
+      "codigo_ine": "0913",
+      "nuts3": "Beiras e Serra da Estrela",
+      "valor_atual": 492,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.131,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 408
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 388
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 469
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 492
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "trofa",
+      "nome": "Trofa",
+      "codigo_ine": "1318",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 1847,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1809,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1647
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1753
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1792
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1847
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vagos",
+      "nome": "Vagos",
+      "codigo_ine": "0118",
+      "nuts3": "Região de Aveiro",
+      "valor_atual": 1715,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1195,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1556
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1656
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1684
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1715
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vale-de-cambra",
+      "nome": "Vale de Cambra",
+      "codigo_ine": "0119",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 1318,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1874,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1182
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1184
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1250
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1318
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "valenca",
+      "nome": "Valença",
+      "codigo_ine": "1608",
+      "nuts3": "Alto Minho",
+      "valor_atual": 1181,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2879,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 940
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 970
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1012
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1181
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "valongo",
+      "nome": "Valongo",
+      "codigo_ine": "1315",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 2204,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2224,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1886
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1959
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2079
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2204
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "valpacos",
+      "nome": "Valpaços",
+      "codigo_ine": "1712",
+      "nuts3": "Alto Tâmega e Barroso",
+      "valor_atual": 684,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1104,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 621
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 673
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 650
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 684
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "velas",
+      "nome": "Velas",
+      "codigo_ine": "4502",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1103,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3321,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 917
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 949
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 895
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1103
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vendas-novas",
+      "nome": "Vendas Novas",
+      "codigo_ine": "0712",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 1646,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2339,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1380
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1499
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1533
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1646
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "viana-do-alentejo",
+      "nome": "Viana do Alentejo",
+      "codigo_ine": "0713",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 1058,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4278,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 843
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 907
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 903
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1058
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "viana-do-castelo",
+      "nome": "Viana do Castelo",
+      "codigo_ine": "1609",
+      "nuts3": "Alto Minho",
+      "valor_atual": 1857,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1414,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1683
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1698
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1810
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1857
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vidigueira",
+      "nome": "Vidigueira",
+      "codigo_ine": "0214",
+      "nuts3": "Baixo Alentejo",
+      "valor_atual": 763,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3674,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 611
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 622
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 700
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 763
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vieira-do-minho",
+      "nome": "Vieira do Minho",
+      "codigo_ine": "0311",
+      "nuts3": "Ave",
+      "valor_atual": 1144,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.6204,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 893
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1064
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1070
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1144
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-da-praia-da-vitoria",
+      "nome": "Vila da Praia da Vitória",
+      "codigo_ine": "4302",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1349,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2099,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1242
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1242
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1332
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1349
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-de-rei",
+      "nome": "Vila de Rei",
+      "codigo_ine": "0510",
+      "nuts3": "Beira Baixa",
+      "valor_atual": 864,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 1.1022,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 411
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 554
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 609
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 864
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-do-bispo",
+      "nome": "Vila do Bispo",
+      "codigo_ine": "0815",
+      "nuts3": "Algarve",
+      "valor_atual": 3236,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0726,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 3006
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 3040
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 3189
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3236
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-do-conde",
+      "nome": "Vila do Conde",
+      "codigo_ine": "1316",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 2262,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1453,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2008
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2104
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2163
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2262
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-do-porto",
+      "nome": "Vila do Porto",
+      "codigo_ine": "4101",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1409,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1559,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1266
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1115
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1383
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1409
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-flor",
+      "nome": "Vila Flor",
+      "codigo_ine": "0410",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 487,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1043,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 471
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 474
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 476
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 487
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-franca-de-xira",
+      "nome": "Vila Franca de Xira",
+      "codigo_ine": "1114",
+      "nuts3": "Grande Lisboa",
+      "valor_atual": 2822,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2862,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2308
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2412
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2605
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2822
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-franca-do-campo",
+      "nome": "Vila Franca do Campo",
+      "codigo_ine": "4206",
+      "nuts3": "Região Autónoma dos Açores",
+      "valor_atual": 1585,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4396,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1357
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1410
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1500
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1585
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-nova-da-barquinha",
+      "nome": "Vila Nova da Barquinha",
+      "codigo_ine": "1420",
+      "nuts3": "Médio Tejo",
+      "valor_atual": 1415,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2567,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1175
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1285
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1312
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1415
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-nova-de-cerveira",
+      "nome": "Vila Nova de Cerveira",
+      "codigo_ine": "1610",
+      "nuts3": "Alto Minho",
+      "valor_atual": 1097,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1695,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1002
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1022
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1037
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1097
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-nova-de-famalicao",
+      "nome": "Vila Nova de Famalicão",
+      "codigo_ine": "0312",
+      "nuts3": "Ave",
+      "valor_atual": 1795,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.212,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1600
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1680
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1747
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1795
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-nova-de-foz-coa",
+      "nome": "Vila Nova de Foz Côa",
+      "codigo_ine": "0914",
+      "nuts3": "Douro",
+      "valor_atual": 423,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0144,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 387
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 402
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 467
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 423
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-nova-de-gaia",
+      "nome": "Vila Nova de Gaia",
+      "codigo_ine": "1317",
+      "nuts3": "Área Metropolitana do Porto",
+      "valor_atual": 2583,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1854,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2280
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2341
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2474
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 2583
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-nova-de-paiva",
+      "nome": "Vila Nova de Paiva",
+      "codigo_ine": "1822",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 340,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": -0.3511,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 489
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 398
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 374
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 340
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-nova-de-poiares",
+      "nome": "Vila Nova de Poiares",
+      "codigo_ine": "0617",
+      "nuts3": "Região de Coimbra",
+      "valor_atual": 1031,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3747,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 750
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 867
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 945
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1031
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-pouca-de-aguiar",
+      "nome": "Vila Pouca de Aguiar",
+      "codigo_ine": "1713",
+      "nuts3": "Alto Tâmega e Barroso",
+      "valor_atual": 800,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1283,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 795
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 791
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 736
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 800
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-real",
+      "nome": "Vila Real",
+      "codigo_ine": "1714",
+      "nuts3": "Douro",
+      "valor_atual": 1591,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.2145,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1310
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1333
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1519
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1591
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-real-de-santo-antonio",
+      "nome": "Vila Real de Santo António",
+      "codigo_ine": "0816",
+      "nuts3": "Algarve",
+      "valor_atual": 3001,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1424,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 2705
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 2788
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 2914
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 3001
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-velha-de-rodao",
+      "nome": "Vila Velha de Ródão",
+      "codigo_ine": "0511",
+      "nuts3": "Beira Baixa",
+      "valor_atual": 395,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1618,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 346
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 388
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 446
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 395
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-verde",
+      "nome": "Vila Verde",
+      "codigo_ine": "0313",
+      "nuts3": "Cávado",
+      "valor_atual": 1506,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.1962,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1332
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1381
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1456
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1506
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vila-vicosa",
+      "nome": "Vila Viçosa",
+      "codigo_ine": "0714",
+      "nuts3": "Alentejo Central",
+      "valor_atual": 838,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.3012,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 736
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 812
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 825
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 838
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vimioso",
+      "nome": "Vimioso",
+      "codigo_ine": "0411",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 464,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.7444,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 299
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 367
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 430
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 464
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vinhais",
+      "nome": "Vinhais",
+      "codigo_ine": "0412",
+      "nuts3": "Terras de Trás-os-Montes",
+      "valor_atual": 352,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.0898,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 313
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 313
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 323
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 352
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "viseu",
+      "nome": "Viseu",
+      "codigo_ine": "1823",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 1595,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.178,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1426
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1459
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1553
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1595
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vizela",
+      "nome": "Vizela",
+      "codigo_ine": "0314",
+      "nuts3": "Ave",
+      "valor_atual": 1540,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.4259,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 1172
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 1307
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 1423
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 1540
+        }
+      ],
+      "fallback_nuts3": false
+    },
+    {
+      "slug": "vouzela",
+      "nome": "Vouzela",
+      "codigo_ine": "1824",
+      "nuts3": "Viseu Dão Lafões",
+      "valor_atual": 625,
+      "periodo_atual": "1T2026",
+      "variacao_homologa": 0.195,
+      "serie": [
+        {
+          "periodo": "2T2025",
+          "valor": 516
+        },
+        {
+          "periodo": "3T2025",
+          "valor": 587
+        },
+        {
+          "periodo": "4T2025",
+          "valor": 680
+        },
+        {
+          "periodo": "1T2026",
+          "valor": 625
+        }
+      ],
+      "fallback_nuts3": false
+    }
+  ]
+}

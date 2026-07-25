@@ -1,0 +1,36 @@
+---
+interface Props {
+  valores: number[];
+  periodos: string[];
+  concelho: string;
+  fallback?: boolean;
+}
+
+const { valores, periodos, concelho, fallback = false } = Astro.props;
+const largura = 620;
+const altura = 260;
+const margem = { topo: 28, direita: 24, fundo: 48, esquerda: 72 };
+const maximo = Math.max(...valores);
+const minimo = Math.min(...valores);
+const intervalo = Math.max(maximo - minimo, maximo * 0.08);
+const base = Math.max(0, minimo - intervalo * 0.4);
+const x = (indice: number) => margem.esquerda + indice * ((largura - margem.esquerda - margem.direita) / (valores.length - 1));
+const y = (valor: number) => margem.topo + (maximo + intervalo * 0.2 - valor) * ((altura - margem.topo - margem.fundo) / (maximo + intervalo * 0.2 - base));
+const pontos = valores.map((valor, indice) => `${x(indice)},${y(valor)}`).join(" ");
+---
+<figure class="data-visual">
+  <figcaption>Evolução da mediana móvel {fallback ? "na NUTS III de referência" : `em ${concelho}`}</figcaption>
+  <svg viewBox={`0 0 ${largura} ${altura}`} role="img" aria-labelledby="trend-title trend-desc">
+    <title id="trend-title">Evolução dos preços das casas em {concelho}</title>
+    <desc id="trend-desc">Gráfico das últimas quatro leituras da mediana dos 12 meses anteriores, de {valores[0].toLocaleString("pt-PT")} a {valores[valores.length - 1].toLocaleString("pt-PT")} euros por metro quadrado.</desc>
+    <line x1={margem.esquerda} y1={altura - margem.fundo} x2={largura - margem.direita} y2={altura - margem.fundo} class="chart-axis" />
+    <polyline points={pontos} class="chart-line" />
+    {valores.map((valor, indice) => (
+      <g>
+        <circle cx={x(indice)} cy={y(valor)} r="7" class="chart-dot" />
+        <text x={x(indice)} y={y(valor) - 15} text-anchor="middle" class="chart-value">{valor.toLocaleString("pt-PT")} €</text>
+        <text x={x(indice)} y={altura - 19} text-anchor="middle" class="chart-label">{periodos[indice]}</text>
+      </g>
+    ))}
+  </svg>
+</figure>

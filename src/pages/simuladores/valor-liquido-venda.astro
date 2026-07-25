@@ -1,0 +1,10 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import NetSaleCalculator from "../../components/NetSaleCalculator.astro";
+---
+<BaseLayout titulo="Simulador do valor líquido da venda" descricao="Estime quanto poderá receber depois de vender e descontar os principais custos.">
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Simuladores", url: "/simuladores/" }, { nome: "Valor líquido da venda" }]} /><p class="eyebrow">Simulador aberto</p><h1>Quanto poderá receber depois de vender?</h1><p>Estime o valor do imóvel e desconte comissão, crédito e outros custos indicativos.</p></div></section>
+  <NetSaleCalculator />
+  <div class="container demo-note">Os valores por metro quadrado são de demonstração. A ferramenta não pede nem guarda contactos.</div>
+</BaseLayout>

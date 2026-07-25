@@ -1,0 +1,17 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import glossario from "../dados/glossario.json";
+import { pilares } from "../config";
+
+const termos = [...glossario.termos].sort((a, b) => a.termo.localeCompare(b.termo, "pt"));
+---
+<BaseLayout titulo="Glossário do proprietário" descricao="Definições simples dos termos usados para explicar impostos, venda, arrendamento, condomínio, casa e obras.">
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Glossário" }]} /><p class="eyebrow">Sem palavras difíceis</p><h1>Glossário do proprietário.</h1><p>Definições curtas para perceber os termos técnicos sem sair do assunto que está a ler.</p></div></section>
+  <section class="section"><div class="container glossary-list">
+    {termos.map((item) => {
+      const pilar = pilares.find((entrada) => entrada.slug === item.pilar);
+      return <article id={item.slug}><p class="eyebrow">{pilar?.nome}</p><h2>{item.termo}</h2><p>{item.definicao}</p><a href={`/${item.pilar}/`}>Ver guias de {pilar?.nome.toLowerCase()}</a></article>;
+    })}
+  </div></section>
+</BaseLayout>

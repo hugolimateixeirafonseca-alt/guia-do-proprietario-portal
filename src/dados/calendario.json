@@ -1,0 +1,132 @@
+{
+  "nota": "Valores e datas a confirmar com as fontes oficiais antes de publicar.",
+  "itens": [
+    {
+      "mes": 1,
+      "dia_limite": 15,
+      "nome": "Assembleia de condóminos",
+      "quem": "Condóminos e administradores",
+      "descricao": "A assembleia ordinária para aprovar contas e orçamento realiza-se na primeira quinzena de janeiro.",
+      "fonte_nome": "Código Civil, artigo 1431.º",
+      "fonte_url": "https://diariodarepublica.pt/dr/legislacao-consolidada/decreto-lei/1966-34509075",
+      "recorrente": true
+    },
+    {
+      "mes": 2,
+      "dia_limite": null,
+      "nome": "Organizar documentos do IRS",
+      "quem": "Proprietários e senhorios",
+      "descricao": "Sem prazos gerais. Aproveite o mês para organizar os documentos do IRS.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 3,
+      "dia_limite": null,
+      "nome": "Confirmar rendas e faturas",
+      "quem": "Proprietários e senhorios",
+      "descricao": "Confirme as rendas e as faturas que vai considerar no IRS.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 4,
+      "dia_limite": 1,
+      "nome": "Arranque da entrega do IRS",
+      "quem": "Todos os proprietários",
+      "descricao": "A entrega da declaração de IRS decorre de 1 de abril a 30 de junho. Senhorios declaram as rendas no anexo F.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 5,
+      "dia_limite": 31,
+      "nome": "IMI, pagamento único ou primeira prestação",
+      "quem": "Proprietários a 31 de dezembro do ano anterior",
+      "descricao": "Até 100 euros paga-se de uma vez em maio. Acima disso, maio é a primeira prestação.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 6,
+      "dia_limite": 30,
+      "nome": "Fim do prazo do IRS",
+      "quem": "Todos os proprietários",
+      "descricao": "Termina o prazo geral para entregar a declaração anual de IRS.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 7,
+      "dia_limite": null,
+      "nome": "Sem prazo geral",
+      "quem": "Proprietários",
+      "descricao": "Não há um prazo fiscal geral para proprietários assinalado neste mês.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 8,
+      "dia_limite": 31,
+      "nome": "IMI, segunda prestação",
+      "quem": "Quem tem IMI acima de 500 euros, pago em três prestações",
+      "descricao": "A segunda prestação do IMI deve ser paga até ao final de agosto.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 9,
+      "dia_limite": 30,
+      "nome": "AIMI",
+      "quem": "Proprietários com soma de valores patrimoniais acima do limiar legal",
+      "descricao": "O adicional ao IMI paga-se em setembro.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 10,
+      "dia_limite": null,
+      "nome": "Sem prazo geral",
+      "quem": "Proprietários",
+      "descricao": "Não há um prazo fiscal geral para proprietários assinalado neste mês.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 11,
+      "dia_limite": 30,
+      "nome": "IMI, última prestação",
+      "quem": "Quem paga em duas ou três prestações",
+      "descricao": "A última prestação do IMI deve ser paga até ao final de novembro.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    },
+    {
+      "mes": 12,
+      "dia_limite": null,
+      "nome": "Rever taxas municipais",
+      "quem": "Proprietários",
+      "descricao": "Reveja as taxas municipais do ano seguinte quando forem publicadas.",
+      "fonte_nome": "Portal das Finanças",
+      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "recorrente": true
+    }
+  ],
+  "mensal": {
+    "nome": "Recibos de renda eletrónicos",
+    "quem": "Senhorios",
+    "descricao": "Emitir o recibo de cada renda no Portal das Finanças até ao fim do mês seguinte ao recebimento.",
+    "fonte_nome": "Portal das Finanças",
+    "fonte_url": "https://www.portaldasfinancas.gov.pt/"
+  }
+}

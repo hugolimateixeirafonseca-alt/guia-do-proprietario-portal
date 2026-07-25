@@ -1,0 +1,22 @@
+---
+import glossario from "../dados/glossario.json";
+
+interface Props {
+  sigla: string;
+  nome: string;
+  slug?: string;
+}
+
+const { sigla, nome, slug } = Astro.props;
+const normalizar = (valor: string) => valor.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const entrada = glossario.termos.find((item) =>
+  item.slug === slug ||
+  normalizar(item.termo) === normalizar(sigla) ||
+  normalizar(item.termo) === normalizar(nome)
+);
+const destino = entrada ? `/glossario/#${entrada.slug}` : "/glossario/";
+---
+<details class="termo">
+  <summary>{sigla}</summary>
+  <span><strong>{nome}</strong>: <slot /> <a href={destino}>Ver no glossário</a></span>
+</details>

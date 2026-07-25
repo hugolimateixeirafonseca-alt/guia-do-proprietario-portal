@@ -1,0 +1,8 @@
+[
+  { "titulo": "Simular o IMI", "url": "/simuladores/imi/", "descricao": "Calcule uma estimativa anual." },
+  { "titulo": "Quanto pode receber depois de vender", "url": "/simuladores/valor-liquido-venda/", "descricao": "Desconte os principais custos da venda." },
+  { "titulo": "Vender casa", "url": "/vender/", "descricao": "Guias para preparar a venda." },
+  { "titulo": "Impostos", "url": "/impostos/", "descricao": "IMI, mais-valias e outros temas fiscais." },
+  { "titulo": "Arrendamento", "url": "/arrendar/", "descricao": "Informação prática para senhorios." },
+  { "titulo": "Condomínio", "url": "/condominio/", "descricao": "Quotas, reuniões e obras." }
+]

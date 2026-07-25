@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title">
+  <title id="title">Calendário e moeda</title>
+  <rect width="320" height="220" rx="24" fill="#f5f2e9"/>
+  <g fill="none" stroke="#256b5c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="42" y="52" width="168" height="136" rx="10"/>
+    <path d="M42 91h168M82 35v34M169 35v34"/>
+    <path d="M75 120h20M118 120h20M161 120h20M75 151h20M118 151h20"/>
+    <circle cx="235" cy="153" r="48" fill="#f5f2e9"/>
+    <path d="M250 128c-25-12-42 1-42 24s18 36 42 23M207 147h36M207 161h31"/>
+  </g>
+  <circle cx="188" cy="151" r="5" fill="#e2c58f"/>
+</svg>

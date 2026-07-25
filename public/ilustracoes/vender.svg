@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title">
+  <title id="title">Casa com placa de venda</title>
+  <rect width="320" height="220" rx="24" fill="#f5f2e9"/>
+  <g fill="none" stroke="#256b5c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M50 116 142 43l92 73v70H50z"/>
+    <path d="M112 186v-54h60v54M198 82V52h25v50"/>
+    <path d="M224 117h52v69h-52M237 139h26"/>
+  </g>
+  <circle cx="263" cy="171" r="5" fill="#e2c58f"/>
+</svg>

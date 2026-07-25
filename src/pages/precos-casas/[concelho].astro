@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import PriceTrend from "../../components/PriceTrend.astro";
+import MapaPortugal from "../../components/MapaPortugal.astro";
+import { formatarData } from "../../config";
+import concelhosData from "../../dados/concelhos.json";
+import precosData from "../../dados/precos-concelhos.json";
+
+type Concelho = (typeof concelhosData.dados)[number];
+type DadosPrecos = (typeof precosData.dados)[number];
+
+export function getStaticPaths() {
+  return concelhosData.dados.map((concelho) => ({
+    params: { concelho: concelho.slug },
+    props: { concelho, dados: precosData.dados.find((item) => item.slug === concelho.slug)! }
+  }));
+}
+const { concelho, dados } = Astro.props as { concelho: Concelho; dados: DadosPrecos };
+const valores = dados.serie.map((item) => item.valor);
+const periodos = dados.serie.map((item) => item.periodo);
+const serieCompleta = valores.every((valor): valor is number => valor !== null);
+const valoresGrafico = serieCompleta ? valores as number[] : [];
+const notaValor = dados.fallback_nuts3
+  ? `O INE não publicou um valor municipal para ${concelho.nome}. Mostramos a mediana da sub-região ${dados.nuts3}, identificada como fallback NUTS III.`
+  : `Mediana publicada para o município de ${concelho.nome}.`;
+const dataExtracao = formatarData(new Date(`${precosData.extraido_em}T00:00:00`));
+const variacaoPercentagem = dados.variacao_homologa === null ? null : dados.variacao_homologa * 100;
+---
+<BaseLayout titulo={`Preços das casas em ${concelho.nome}`} descricao={`Mediana de preços de habitação em ${concelho.nome}, evolução recente e nota metodológica.`}>
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Preços das casas" }, { nome: concelho.nome }]} /><p class="eyebrow">Dados por concelho</p><h1>Preços das casas em {concelho.nome}</h1><p>Mediana das vendas dos últimos 12 meses, atualizada no {dados.periodo_atual}. Fonte: INE.</p></div></section>
+  <article class="article-layout article-body">
+    <aside class="data-source"><strong>Fonte: <a href={precosData.fonte_url}>{precosData.fonte}</a></strong><span>Período de referência: {precosData.periodo_referencia}</span><span>Dados extraídos a {dataExtracao}</span></aside>
+    {dados.valor_atual === null && <div class="no-data"><strong>O INE não publicou um valor para {concelho.nome} nem para a respetiva NUTS III.</strong><p>Não mostramos um zero nem estimamos um preço.</p></div>}
+    {dados.valor_atual !== null && <div class="programmatic-grid"><div class="data-card"><span>Últimos 12 meses, atualização {dados.periodo_atual}</span><strong>{dados.valor_atual.toLocaleString("pt-PT")} €/m²</strong></div><div class="data-card"><span>Nível geográfico</span><strong style="font-size:18px">{dados.fallback_nuts3 ? "NUTS III" : "Município"}</strong></div><div class="data-card"><span>Variação homóloga</span><strong>{variacaoPercentagem === null ? "Sem dados" : `${variacaoPercentagem.toLocaleString("pt-PT", { maximumFractionDigits: 1 })}%`}</strong></div></div>}
+    <p>{notaValor}</p>
+    <h2>Últimas quatro atualizações</h2>
+    <div class:list={["data-identity", !serieCompleta && "map-only"]}>{serieCompleta && <PriceTrend valores={valoresGrafico} periodos={periodos} concelho={concelho.nome} fallback={dados.fallback_nuts3} />}<MapaPortugal distrito={concelho.distrito} /></div>
+    <div class="table-wrap"><table><thead><tr><th>Atualização</th><th>Mediana dos últimos 12 meses</th></tr></thead><tbody>{dados.serie.map((item) => <tr><td>{item.periodo}</td><td>{item.valor === null ? "Sem dados" : `${item.valor.toLocaleString("pt-PT")} €/m²`}</td></tr>)}</tbody></table></div>
+    <h2>Como ler este valor</h2><p>A mediana resume transações observadas numa geografia. Não representa uma avaliação de um imóvel concreto e não considera estado, piso, exposição, vista ou outras características.</p>
+    <p>Este número não corresponde apenas às vendas realizadas em {dados.periodo_atual}. Corresponde às vendas dos 12 meses anteriores e é atualizado trimestralmente.</p>
+    <section class="sources"><h2>Fonte e metodologia</h2><p>{precosData.notas}</p><p><a href={precosData.fonte_url}>Consultar a metainformação do indicador {precosData.indicador} no INE</a>.</p></section>
+  </article>
+</BaseLayout>

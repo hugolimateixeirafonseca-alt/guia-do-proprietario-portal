@@ -1,0 +1,38 @@
+---
+interface Props {
+  distrito: string;
+}
+
+const { distrito } = Astro.props;
+const posicoes: Record<string, { x: number; y: number }> = {
+  "Viana do Castelo": { x: 78, y: 42 },
+  "Braga": { x: 92, y: 60 },
+  "Porto": { x: 82, y: 82 },
+  "Vila Real": { x: 116, y: 76 },
+  "Bragança": { x: 145, y: 68 },
+  "Aveiro": { x: 78, y: 112 },
+  "Viseu": { x: 111, y: 108 },
+  "Guarda": { x: 139, y: 119 },
+  "Coimbra": { x: 91, y: 139 },
+  "Castelo Branco": { x: 128, y: 151 },
+  "Leiria": { x: 76, y: 165 },
+  "Santarém": { x: 94, y: 187 },
+  "Lisboa": { x: 68, y: 209 },
+  "Portalegre": { x: 127, y: 194 },
+  "Évora": { x: 111, y: 224 },
+  "Setúbal": { x: 82, y: 234 },
+  "Beja": { x: 102, y: 260 },
+  "Faro": { x: 92, y: 294 }
+};
+const regiaoAutonoma = distrito.includes("Região Autónoma");
+const ponto = posicoes[distrito] || posicoes.Lisboa;
+---
+<figure class="mini-map">
+  <svg viewBox="0 0 210 330" role="img" aria-labelledby="map-title map-desc">
+    <title id="map-title">Localização de {distrito}</title>
+    <desc id="map-desc">Mapa simplificado de Portugal com {distrito} em destaque.</desc>
+    <path class="map-shape" d="M67 18 116 25 153 55 158 93 147 126 151 158 139 188 137 220 121 252 111 292 83 312 57 292 52 258 57 226 45 194 57 161 52 126 61 91 56 57Z" />
+    {regiaoAutonoma ? <g><circle class="map-district" cx="22" cy={distrito.includes("Açores") ? "92" : "260"} r="12" /><circle class="map-pin" cx="22" cy={distrito.includes("Açores") ? "92" : "260"} r="5" /></g> : <g><circle class="map-district" cx={ponto.x} cy={ponto.y} r="12" /><circle class="map-pin" cx={ponto.x} cy={ponto.y} r="5" /></g>}
+  </svg>
+  <figcaption>{regiaoAutonoma ? distrito : `Distrito de ${distrito}`}</figcaption>
+</figure>

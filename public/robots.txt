@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://guiadoproprietario.pt/sitemap-index.xml

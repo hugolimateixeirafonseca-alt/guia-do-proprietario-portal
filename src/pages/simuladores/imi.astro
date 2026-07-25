@@ -1,0 +1,10 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ImiCalculator from "../../components/ImiCalculator.astro";
+---
+<BaseLayout titulo="Simulador de IMI" descricao="Escolha o concelho e estime quanto paga de IMI e em quantas prestações.">
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Simuladores", url: "/simuladores/" }, { nome: "IMI" }]} /><p class="eyebrow">Simulador aberto</p><h1>Quanto vai pagar de IMI?</h1><p>Escolha o concelho e indique o valor patrimonial da casa. Dizemos quanto paga de IMI este ano e em quantas prestações.</p></div></section>
+  <ImiCalculator />
+  <div class="container demo-note">Este simulador não recolhe dados. A estimativa não substitui a liquidação da Autoridade Tributária.</div>
+</BaseLayout>

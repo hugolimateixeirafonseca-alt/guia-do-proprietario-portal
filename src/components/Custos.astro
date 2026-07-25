@@ -1,0 +1,28 @@
+---
+interface ItemCusto {
+  item: string;
+  intervalo: string;
+  nota: string;
+}
+
+interface Props {
+  titulo: string;
+  itens: ItemCusto[];
+}
+
+const { titulo, itens } = Astro.props;
+---
+<section class="costs" aria-labelledby="custos-titulo">
+  <h2 id="custos-titulo">{titulo}</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Trabalho</th><th>Intervalo de preço</th><th>O que faz variar</th></tr>
+      </thead>
+      <tbody>
+        {itens.map((item) => <tr><td>{item.item}</td><td><strong>{item.intervalo}</strong></td><td>{item.nota}</td></tr>)}
+      </tbody>
+    </table>
+  </div>
+  <p class="costs-note">Intervalos indicativos recolhidos junto de profissionais e de orçamentos publicados. Peça sempre pelo menos três orçamentos.</p>
+</section>

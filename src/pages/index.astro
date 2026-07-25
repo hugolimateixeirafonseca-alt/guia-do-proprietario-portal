@@ -1,0 +1,123 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import Newsletter from "../components/Newsletter.astro";
+import ProximosPrazos from "../components/ProximosPrazos.astro";
+import { formatarData } from "../config";
+
+const artigos = (await getCollection("artigos", ({ data }) => !data.rascunho))
+  .filter((artigo) => artigo.data.destaque && artigo.data.nivel === "essencial")
+  .sort((a, b) => b.data.revisto.valueOf() - a.data.revisto.valueOf());
+const notas = (await getCollection("notas")).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+const notaRecente = notas[0];
+const situacoes = [
+  { titulo: "Vou vender a casa.", url: "/vender/", imagem: "situacao-vender", alt: "Casa portuguesa com placa de venda" },
+  { titulo: "Quanto vou pagar de IMI?", url: "/simuladores/imi/", imagem: "situacao-imi", alt: "Casa portuguesa com calendário e moeda de euro" },
+  { titulo: "Sou senhorio.", url: "/arrendar/", imagem: "situacao-senhorio", alt: "Entrada de casa com chave e contrato de arrendamento" },
+  // TODO: ligar a conteúdo próprio de heranças quando existir.
+  { titulo: "Herdei uma casa.", url: "/vender/", imagem: "situacao-heranca", alt: "Casa portuguesa envolvida por um laço de herança" },
+  { titulo: "Vivo em condomínio.", url: "/condominio/", imagem: "situacao-condominio", alt: "Prédio de condomínio português com varandas" },
+  { titulo: "Quanto vale a minha casa?", url: "/simuladores/valor-liquido-venda/", imagem: "situacao-valor", alt: "Casa portuguesa com etiqueta de valor" }
+];
+const perguntasRapidas = [
+  { pergunta: "Quanto custa pintar a casa?", url: "/casa/quanto-custa-pintar-casa/" },
+  { pergunta: "Quem paga uma infiltração?", url: "/casa/quem-paga-infiltracao/" },
+  { pergunta: "Quando se paga o IMI?", url: "/impostos/imi-explicado-simples/" },
+  { pergunta: "O que fazer com uma casa herdada?", url: "/vender/o-que-fazer-casa-herdada/" },
+  { pergunta: "Como baixar a conta da luz?", url: "/casa/como-baixar-conta-luz/" }
+];
+---
+<BaseLayout>
+  <section class="hero">
+    <div class="container hero-visual">
+      <picture class="hero-picture">
+        <source srcset="/imagens/hero-home.avif" type="image/avif" />
+        <img src="/imagens/hero-home.webp" width="1600" height="900" fetchpriority="high" alt="Rua de bairro portuguesa com casas de azulejo, varandas e telhados vermelhos" />
+      </picture>
+      <div class="hero-content">
+        <p class="eyebrow">Guia do Proprietário</p>
+        <h1>A sua casa, <em>sem complicações.</em></h1>
+        <p class="hero-copy">Prazos, impostos, arrendamento e venda explicados em português de todos os dias. Com fontes oficiais e ferramentas gratuitas.</p>
+        <div class="hero-actions">
+          <a class="button" href="/calendario/">Ver os prazos deste mês</a>
+          <a class="button secondary" href="#simuladores">Usar os simuladores</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section current-month">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Agora</p><h2>Este mês</h2></div>
+      <div class="current-grid">
+        <ProximosPrazos dataBuild={new Date()} />
+        <article class="latest-note">
+          <p class="eyebrow">Última novidade</p>
+          <time datetime={notaRecente.data.data.toISOString()}>{formatarData(notaRecente.data.data)}</time>
+          <h3><a href={`/novidades/${notaRecente.id}/`}>{notaRecente.data.titulo}</a></h3>
+          <p>{notaRecente.data.resumo}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section soft">
+    <div class="container">
+      <div class="section-heading"><h2>A sua situação</h2><p>Comece pelo que precisa de resolver.</p></div>
+      <div class="situation-grid">
+        {situacoes.map((situacao) => (
+          <a class="situation-card" href={situacao.url}>
+            <picture>
+              <source srcset={`/imagens/${situacao.imagem}.avif`} type="image/avif" />
+              <img src={`/imagens/${situacao.imagem}.webp`} alt={situacao.alt} width="640" height="360" loading="lazy" />
+            </picture>
+            <h3>{situacao.titulo}</h3>
+            <span>Ver o próximo passo</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Comece por aqui</p><h2>Guias essenciais</h2></div>
+      <div class="article-grid">{artigos.map((artigo) => <ArticleCard artigo={artigo} />)}</div>
+    </div>
+  </section>
+
+  <section class="section quick-links-section">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Respostas diretas</p><h2>Perguntas rápidas</h2></div>
+      <ul class="quick-links">{perguntasRapidas.map((item) => <li><a href={item.url}>{item.pergunta}<span aria-hidden="true">›</span></a></li>)}</ul>
+    </div>
+  </section>
+
+  <section class="section soft">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Atualidade</p><h2>Novidades</h2></div>
+      <div class="notes-grid">
+        {notas.slice(0, 3).map((nota) => (
+          <article>
+            <time datetime={nota.data.data.toISOString()}>{formatarData(nota.data.data)}</time>
+            <h3><a href={`/novidades/${nota.id}/`}>{nota.data.titulo}</a></h3>
+            <p>{nota.data.resumo}</p>
+          </article>
+        ))}
+      </div>
+      <p class="section-link"><a href="/novidades/">Todas as novidades</a></p>
+    </div>
+  </section>
+
+  <section class="section" id="simuladores">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Ferramentas abertas</p><h2>Faça uma primeira simulação sem deixar contactos.</h2></div>
+      <div class="tools-grid">
+        <a class="tool-card" href="/simuladores/imi/"><h3>Simulador de IMI</h3><p>Estime o imposto anual a partir do valor patrimonial e da taxa municipal.</p></a>
+        <a class="tool-card" href="/simuladores/valor-liquido-venda/"><h3>Valor líquido da venda</h3><p>Veja quanto pode sobrar depois dos principais custos.</p></a>
+      </div>
+    </div>
+  </section>
+  <Newsletter />
+</BaseLayout>

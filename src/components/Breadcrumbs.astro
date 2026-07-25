@@ -1,0 +1,19 @@
+---
+interface Item { nome: string; url?: string; }
+interface Props { itens: Item[]; }
+const { itens } = Astro.props;
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: itens.map((item, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: item.nome,
+    ...(item.url ? { item: new URL(item.url, "https://guiadoproprietario.pt").toString() } : {})
+  }))
+};
+---
+<nav class="breadcrumbs" aria-label="Percurso">
+  {itens.map((item, index) => <><span>{index ? "/" : ""}</span>{item.url ? <a href={item.url}>{item.nome}</a> : <span>{item.nome}</span>}</>)}
+</nav>
+<script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />

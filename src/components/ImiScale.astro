@@ -1,0 +1,18 @@
+---
+interface Props {
+  taxa: number;
+  concelho: string;
+  minimo?: number;
+  maximo?: number;
+}
+
+const { taxa, concelho, minimo = 0.3, maximo = 0.45 } = Astro.props;
+const posicao = Math.max(0, Math.min(100, ((taxa - minimo) / (maximo - minimo)) * 100));
+---
+<figure class="data-visual imi-scale">
+  <figcaption>Posição da taxa de {concelho} nos limites legais</figcaption>
+  <div class="scale-track" role="img" aria-label={`A taxa de IMI de ${concelho}, ${taxa.toLocaleString("pt-PT")} por cento, está entre o mínimo de ${minimo.toLocaleString("pt-PT")} e o máximo de ${maximo.toLocaleString("pt-PT")} por cento.`}>
+    <span class="scale-marker" style={`left:${posicao}%`}><strong>{taxa.toLocaleString("pt-PT")} %</strong></span>
+  </div>
+  <div class="scale-labels"><span>{minimo.toLocaleString("pt-PT")} % mínimo</span><span>{maximo.toLocaleString("pt-PT")} % máximo</span></div>
+</figure>

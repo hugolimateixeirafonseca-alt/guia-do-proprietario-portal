@@ -1,0 +1,67 @@
+---
+import "../styles/global.css";
+import { site, pilares } from "../config";
+
+interface Props {
+  titulo?: string;
+  descricao?: string;
+  canonical?: string;
+  tipo?: "website" | "article";
+  imagemOg?: string;
+}
+
+const {
+  titulo = site.nome,
+  descricao = site.descricao,
+  canonical = new URL(Astro.url.pathname, site.dominio).toString(),
+  tipo = "website",
+  imagemOg
+} = Astro.props;
+const tituloCompleto = titulo === site.nome ? titulo : `${titulo} | ${site.nome}`;
+const utilitaria = ["/", "/sobre/", "/metodologia/", "/privacidade/", "/termos/", "/ligacoes/", "/glossario/", "/404/"].includes(Astro.url.pathname);
+const ogPath = utilitaria ? "/og-1200x630.png" : `/og${Astro.url.pathname === "/" ? "/index/" : Astro.url.pathname}index.png`;
+const imagemOgFinal = imagemOg || new URL(ogPath, site.dominio).toString();
+const organization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: site.nome,
+  url: site.dominio
+};
+---
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={descricao} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content={tipo} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imagemOgFinal} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>{tituloCompleto}</title>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(organization)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
+    <header class="site-header">
+      <a class="brand" href="/"><span class="brand-mark">GP</span><span>Guia do Proprietário</span></a>
+      <nav aria-label="Navegação principal">
+        {pilares.map((pilar) => <a href={`/${pilar.slug}/`}>{pilar.nome}</a>)}
+        <a href="/calendario/">Calendário</a>
+        <a href="/novidades/">Novidades</a>
+        <a href="/simuladores/">Simuladores</a>
+      </nav>
+      <a class="header-cta" href="/ligacoes/">Explorar</a>
+    </header>
+    <main id="conteudo"><slot /></main>
+    <footer class="site-footer">
+      <div><a class="brand footer-brand" href="/"><span class="brand-mark">GP</span><span>Guia do Proprietário</span></a><p>Informação prática para proprietários em Portugal.</p></div>
+      <nav aria-label="Informação"><a href="/sobre/">Sobre</a><a href="/metodologia/">Metodologia</a><a href="/glossario/">Glossário</a><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><a href="/rss.xml">RSS</a></nav>
+      <small>© {new Date().getFullYear()} Guia do Proprietário. Conteúdo informativo, sujeito a revisão.</small>
+    </footer>
+  </body>
+</html>

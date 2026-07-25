@@ -1,0 +1,41 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import calendario from "../dados/calendario.json";
+
+const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+---
+<BaseLayout titulo="Calendário do proprietário" descricao="Prazos de IMI, IRS, AIMI, condomínio e rendas organizados por mês para proprietários em Portugal.">
+  <section class="page-hero">
+    <div class="container">
+      <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Calendário" }]} />
+      <p class="eyebrow">Prazos do ano</p>
+      <h1>Calendário do proprietário</h1>
+      <p>Veja os principais prazos do ano num só lugar e confirme sempre as datas aplicáveis ao seu caso nas fontes oficiais.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container calendar-layout">
+      <div class="demo-note">{calendario.nota}</div>
+      <article class="monthly-band">
+        <span>Todos os meses</span>
+        <div>
+          <h2>{calendario.mensal.nome}</h2>
+          <p><strong>{calendario.mensal.quem}.</strong> {calendario.mensal.descricao}</p>
+          <a href={calendario.mensal.fonte_url} rel="noreferrer">Fonte: {calendario.mensal.fonte_nome}</a>
+        </div>
+      </article>
+      <div class="calendar-grid">
+        {calendario.itens.map((item) => (
+          <article class="month-card">
+            <header><span>{String(item.mes).padStart(2, "0")}</span><h2>{meses[item.mes - 1]}</h2></header>
+            <p class="month-date">{item.dia_limite ? `Até ${item.dia_limite} de ${meses[item.mes - 1].toLowerCase()}` : "Sem prazo geral"}</p>
+            <h3>{item.nome}</h3>
+            <p><strong>{item.quem}.</strong> {item.descricao}</p>
+            <a href={item.fonte_url} rel="noreferrer">Fonte: {item.fonte_nome}</a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,8 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+---
+<BaseLayout titulo="Como produzimos os conteúdos" descricao="Fontes, verificação, revisão, atualização e correções no Guia do Proprietário.">
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Metodologia" }]} /><p class="eyebrow">Metodologia editorial</p><h1>Como produzimos os conteúdos.</h1><p>Cada página deve mostrar quem a preparou, quando foi revista e que fontes sustentam as afirmações.</p></div></section>
+  <article class="article-layout article-body"><h2>Fontes primeiro</h2><p>Privilegiamos legislação, entidades públicas, documentação técnica e fontes diretamente responsáveis pelos dados.</p><h2>Apoio de inteligência artificial</h2><p>A inteligência artificial pode apoiar pesquisa, estrutura e redação. Nenhum conteúdo é publicado sem aprovação humana.</p><h2>Atualizações e correções</h2><p>Os conteúdos sensíveis mostram uma data de revisão. Correções materiais devem ser feitas com rapidez e registadas no processo editorial.</p></article>
+</BaseLayout>

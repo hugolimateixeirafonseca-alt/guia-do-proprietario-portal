@@ -1,0 +1,8 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+---
+<BaseLayout titulo="Sobre" descricao="Conheça o objetivo e a responsabilidade editorial do Guia do Proprietário.">
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Sobre" }]} /><p class="eyebrow">Sobre o projeto</p><h1>Informação prática para quem tem um imóvel.</h1><p>O Guia do Proprietário organiza temas complexos e mostra fontes, datas e limites de cada explicação.</p></div></section>
+  <article class="article-layout article-body"><h2>Quem está por trás</h2><p>O fundador do Guia do Proprietário assume a edição e curadoria do projeto. A identificação completa será publicada antes do lançamento.</p><h2>O que não afirmamos</h2><p>O projeto não se apresenta como sociedade de advogados, gabinete de contabilidade, avaliador ou mediador imobiliário. Conteúdos especializados exigem fontes e revisão adequada.</p></article>
+</BaseLayout>

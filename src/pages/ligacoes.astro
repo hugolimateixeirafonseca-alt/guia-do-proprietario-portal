@@ -1,0 +1,5 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import links from "../dados/ligacoes.json";
+---
+<BaseLayout titulo="Ligações úteis" descricao="Aceda aos principais guias e simuladores do Guia do Proprietário."><section class="page-hero"><div class="container"><p class="eyebrow">Guia do Proprietário</p><h1>Comece pelo que precisa.</h1><p>Guias e ferramentas para proprietários em Portugal.</p></div></section><div class="link-list">{links.map((link) => <a href={link.url}><strong>{link.titulo}</strong><span>{link.descricao}</span></a>)}</div></BaseLayout>

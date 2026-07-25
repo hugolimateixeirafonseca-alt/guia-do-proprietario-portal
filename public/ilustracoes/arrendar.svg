@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title">
+  <title id="title">Chave e contrato</title>
+  <rect width="320" height="220" rx="24" fill="#f5f2e9"/>
+  <g fill="none" stroke="#256b5c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M62 41h140l40 40v105H62zM202 41v41h40"/>
+    <path d="M93 112h75M93 140h58"/>
+    <circle cx="221" cy="153" r="29" fill="#f5f2e9"/>
+    <path d="m200 174-51 28-14-14 16-16 10 4 8-12 10 3 19-14"/>
+  </g>
+  <circle cx="223" cy="153" r="7" fill="#e2c58f"/>
+</svg>

@@ -1,0 +1,8 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+---
+<BaseLayout titulo="Simuladores" descricao="Ferramentas abertas para fazer primeiras estimativas sobre o seu imóvel.">
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Simuladores" }]} /><p class="eyebrow">Ferramentas abertas</p><h1>Simuladores para proprietários.</h1><p>Faça uma primeira estimativa sem criar conta e sem deixar contactos.</p></div></section>
+  <section class="section"><div class="container tools-grid"><a class="tool-card" href="/simuladores/imi/"><h3>IMI anual</h3><p>Escolha o concelho e veja quanto paga e em quantas prestações.</p></a><a class="tool-card" href="/simuladores/valor-liquido-venda/"><h3>Valor líquido da venda</h3><p>Desconte comissão, crédito e outros custos indicativos.</p></a></div></section>
+</BaseLayout>

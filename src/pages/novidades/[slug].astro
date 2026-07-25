@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import { formatarData } from "../../config";
+
+export async function getStaticPaths() {
+  const notas = await getCollection("notas");
+  return notas.map((nota) => ({ params: { slug: nota.id }, props: { nota } }));
+}
+
+const { nota } = Astro.props;
+const { Content } = await render(nota);
+---
+<BaseLayout titulo={nota.data.titulo} descricao={`Nota de atualidade publicada a ${formatarData(nota.data.data)}.`}>
+  <article class="article-layout note-page">
+    <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Novidades", url: "/novidades/" }, { nome: nota.data.titulo }]} />
+    <header class="article-header">
+      <p class="eyebrow">Novidade</p>
+      <h1>{nota.data.titulo}</h1>
+      <p class="article-meta">Publicado a {formatarData(nota.data.data)}</p>
+    </header>
+    <div class="article-body"><Content /></div>
+    <section class="sources">
+      <h2>Fonte</h2>
+      <p><a href={nota.data.fonte_url} rel="noreferrer">{nota.data.fonte_nome}</a></p>
+    </section>
+  </article>
+</BaseLayout>

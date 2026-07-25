@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title">
+  <title id="title">Prédio de condomínio</title>
+  <rect width="320" height="220" rx="24" fill="#f5f2e9"/>
+  <g fill="none" stroke="#256b5c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M70 190V39h180v151M45 190h230"/>
+    <path d="M101 70h28v25h-28zM156 70h28v25h-28zM211 70h15v25h-15z"/>
+    <path d="M101 116h28v25h-28zM156 116h28v25h-28zM211 116h15v25h-15z"/>
+    <path d="M144 190v-31h35v31"/>
+  </g>
+  <path d="M49 190h227" stroke="#e2c58f" stroke-width="12" stroke-linecap="round"/>
+</svg>

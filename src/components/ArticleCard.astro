@@ -1,0 +1,18 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { formatarData, pilares } from "../config";
+interface Props { artigo: CollectionEntry<"artigos">; }
+const { artigo } = Astro.props;
+const pilar = pilares.find((item) => item.slug === artigo.data.pilar);
+const imagemWebp = artigo.data.imagem_capa === "auto" ? pilar?.imagemWebp : artigo.data.imagem_capa;
+const imagemAvif = artigo.data.imagem_capa === "auto" ? pilar?.imagemAvif : artigo.data.imagem_capa.replace(/\.(webp|png|jpe?g)$/i, ".avif");
+---
+<article class="article-card">
+  <a href={`/${artigo.data.pilar}/${artigo.id}/`}>
+    {imagemWebp && <picture><source srcset={imagemAvif} type="image/avif" /><img src={imagemWebp} alt="" width="1200" height="675" loading="lazy" /></picture>}
+    <span class="card-pillar">{pilar?.nome}{artigo.data.nivel === "detalhado" && " · Versão completa"}</span>
+    <h3>{artigo.data.titulo}</h3>
+    <p>{artigo.data.descricao}</p>
+    <small>Atualizado a {formatarData(artigo.data.revisto)}</small>
+  </a>
+</article>

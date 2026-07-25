@@ -1,0 +1,2473 @@
+{
+  "fonte": "INE",
+  "fonte_url": "https://www.ine.pt/ine/json_indicador/pindicaMeta.jsp?varcd=0012234&lang=PT",
+  "periodo_referencia": "NUTS 2024",
+  "extraido_em": "2026-07-24",
+  "notas": "Lista mestra dos 308 municípios usada para juntar as fontes da AT e do INE.",
+  "dados": [
+    {
+      "slug": "abrantes",
+      "nome": "Abrantes",
+      "distrito": "Santarém",
+      "codigo_ine": "1401",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "agueda",
+      "nome": "Águeda",
+      "distrito": "Aveiro",
+      "codigo_ine": "0101",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "aguiar-da-beira",
+      "nome": "Aguiar da Beira",
+      "distrito": "Guarda",
+      "codigo_ine": "0901",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "alandroal",
+      "nome": "Alandroal",
+      "distrito": "Évora",
+      "codigo_ine": "0701",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "albergaria-a-velha",
+      "nome": "Albergaria-a-Velha",
+      "distrito": "Aveiro",
+      "codigo_ine": "0102",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "albufeira",
+      "nome": "Albufeira",
+      "distrito": "Faro",
+      "codigo_ine": "0801",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "alcacer-do-sal",
+      "nome": "Alcácer do Sal",
+      "distrito": "Setúbal",
+      "codigo_ine": "1501",
+      "nuts3": "Alentejo Litoral",
+      "nuts3_codigo": "1C1"
+    },
+    {
+      "slug": "alcanena",
+      "nome": "Alcanena",
+      "distrito": "Santarém",
+      "codigo_ine": "1402",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "alcobaca",
+      "nome": "Alcobaça",
+      "distrito": "Leiria",
+      "codigo_ine": "1001",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "alcochete",
+      "nome": "Alcochete",
+      "distrito": "Setúbal",
+      "codigo_ine": "1502",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "alcoutim",
+      "nome": "Alcoutim",
+      "distrito": "Faro",
+      "codigo_ine": "0802",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "alenquer",
+      "nome": "Alenquer",
+      "distrito": "Lisboa",
+      "codigo_ine": "1101",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "alfandega-da-fe",
+      "nome": "Alfândega da Fé",
+      "distrito": "Bragança",
+      "codigo_ine": "0401",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "alijo",
+      "nome": "Alijó",
+      "distrito": "Vila Real",
+      "codigo_ine": "1701",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "aljezur",
+      "nome": "Aljezur",
+      "distrito": "Faro",
+      "codigo_ine": "0803",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "aljustrel",
+      "nome": "Aljustrel",
+      "distrito": "Beja",
+      "codigo_ine": "0201",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "almada",
+      "nome": "Almada",
+      "distrito": "Setúbal",
+      "codigo_ine": "1503",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "almeida",
+      "nome": "Almeida",
+      "distrito": "Guarda",
+      "codigo_ine": "0902",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "almeirim",
+      "nome": "Almeirim",
+      "distrito": "Santarém",
+      "codigo_ine": "1403",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "almodovar",
+      "nome": "Almodôvar",
+      "distrito": "Beja",
+      "codigo_ine": "0202",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "alpiarca",
+      "nome": "Alpiarça",
+      "distrito": "Santarém",
+      "codigo_ine": "1404",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "alter-do-chao",
+      "nome": "Alter do Chão",
+      "distrito": "Portalegre",
+      "codigo_ine": "1201",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "alvaiazere",
+      "nome": "Alvaiázere",
+      "distrito": "Leiria",
+      "codigo_ine": "1002",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "alvito",
+      "nome": "Alvito",
+      "distrito": "Beja",
+      "codigo_ine": "0203",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "amadora",
+      "nome": "Amadora",
+      "distrito": "Lisboa",
+      "codigo_ine": "1115",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "amarante",
+      "nome": "Amarante",
+      "distrito": "Porto",
+      "codigo_ine": "1301",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "amares",
+      "nome": "Amares",
+      "distrito": "Braga",
+      "codigo_ine": "0301",
+      "nuts3": "Cávado",
+      "nuts3_codigo": "112"
+    },
+    {
+      "slug": "anadia",
+      "nome": "Anadia",
+      "distrito": "Aveiro",
+      "codigo_ine": "0103",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "angra-do-heroismo",
+      "nome": "Angra do Heroísmo",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4301",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "ansiao",
+      "nome": "Ansião",
+      "distrito": "Leiria",
+      "codigo_ine": "1003",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "arcos-de-valdevez",
+      "nome": "Arcos de Valdevez",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1601",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "arganil",
+      "nome": "Arganil",
+      "distrito": "Coimbra",
+      "codigo_ine": "0601",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "armamar",
+      "nome": "Armamar",
+      "distrito": "Viseu",
+      "codigo_ine": "1801",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "arouca",
+      "nome": "Arouca",
+      "distrito": "Aveiro",
+      "codigo_ine": "0104",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "arraiolos",
+      "nome": "Arraiolos",
+      "distrito": "Évora",
+      "codigo_ine": "0702",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "arronches",
+      "nome": "Arronches",
+      "distrito": "Portalegre",
+      "codigo_ine": "1202",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "arruda-dos-vinhos",
+      "nome": "Arruda dos Vinhos",
+      "distrito": "Lisboa",
+      "codigo_ine": "1102",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "aveiro",
+      "nome": "Aveiro",
+      "distrito": "Aveiro",
+      "codigo_ine": "0105",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "avis",
+      "nome": "Avis",
+      "distrito": "Portalegre",
+      "codigo_ine": "1203",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "azambuja",
+      "nome": "Azambuja",
+      "distrito": "Lisboa",
+      "codigo_ine": "1103",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "baiao",
+      "nome": "Baião",
+      "distrito": "Porto",
+      "codigo_ine": "1302",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "barcelos",
+      "nome": "Barcelos",
+      "distrito": "Braga",
+      "codigo_ine": "0302",
+      "nuts3": "Cávado",
+      "nuts3_codigo": "112"
+    },
+    {
+      "slug": "barrancos",
+      "nome": "Barrancos",
+      "distrito": "Beja",
+      "codigo_ine": "0204",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "barreiro",
+      "nome": "Barreiro",
+      "distrito": "Setúbal",
+      "codigo_ine": "1504",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "batalha",
+      "nome": "Batalha",
+      "distrito": "Leiria",
+      "codigo_ine": "1004",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "beja",
+      "nome": "Beja",
+      "distrito": "Beja",
+      "codigo_ine": "0205",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "belmonte",
+      "nome": "Belmonte",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0501",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "benavente",
+      "nome": "Benavente",
+      "distrito": "Santarém",
+      "codigo_ine": "1405",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "bombarral",
+      "nome": "Bombarral",
+      "distrito": "Leiria",
+      "codigo_ine": "1005",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "borba",
+      "nome": "Borba",
+      "distrito": "Évora",
+      "codigo_ine": "0703",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "boticas",
+      "nome": "Boticas",
+      "distrito": "Vila Real",
+      "codigo_ine": "1702",
+      "nuts3": "Alto Tâmega e Barroso",
+      "nuts3_codigo": "11B"
+    },
+    {
+      "slug": "braga",
+      "nome": "Braga",
+      "distrito": "Braga",
+      "codigo_ine": "0303",
+      "nuts3": "Cávado",
+      "nuts3_codigo": "112"
+    },
+    {
+      "slug": "braganca",
+      "nome": "Bragança",
+      "distrito": "Bragança",
+      "codigo_ine": "0402",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "cabeceiras-de-basto",
+      "nome": "Cabeceiras de Basto",
+      "distrito": "Braga",
+      "codigo_ine": "0304",
+      "nuts3": "Ave",
+      "nuts3_codigo": "119"
+    },
+    {
+      "slug": "cadaval",
+      "nome": "Cadaval",
+      "distrito": "Lisboa",
+      "codigo_ine": "1104",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "caldas-da-rainha",
+      "nome": "Caldas da Rainha",
+      "distrito": "Leiria",
+      "codigo_ine": "1006",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "calheta-acores",
+      "nome": "Calheta",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4501",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "calheta-madeira",
+      "nome": "Calheta",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3101",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "camara-de-lobos",
+      "nome": "Câmara de Lobos",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3102",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "caminha",
+      "nome": "Caminha",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1602",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "campo-maior",
+      "nome": "Campo Maior",
+      "distrito": "Portalegre",
+      "codigo_ine": "1204",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "cantanhede",
+      "nome": "Cantanhede",
+      "distrito": "Coimbra",
+      "codigo_ine": "0602",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "carrazeda-de-ansiaes",
+      "nome": "Carrazeda de Ansiães",
+      "distrito": "Bragança",
+      "codigo_ine": "0403",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "carregal-do-sal",
+      "nome": "Carregal do Sal",
+      "distrito": "Viseu",
+      "codigo_ine": "1802",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "cartaxo",
+      "nome": "Cartaxo",
+      "distrito": "Santarém",
+      "codigo_ine": "1406",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "cascais",
+      "nome": "Cascais",
+      "distrito": "Lisboa",
+      "codigo_ine": "1105",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "castanheira-de-pera",
+      "nome": "Castanheira de Pêra",
+      "distrito": "Leiria",
+      "codigo_ine": "1007",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "castelo-branco",
+      "nome": "Castelo Branco",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0502",
+      "nuts3": "Beira Baixa",
+      "nuts3_codigo": "195"
+    },
+    {
+      "slug": "castelo-de-paiva",
+      "nome": "Castelo de Paiva",
+      "distrito": "Aveiro",
+      "codigo_ine": "0106",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "castelo-de-vide",
+      "nome": "Castelo de Vide",
+      "distrito": "Portalegre",
+      "codigo_ine": "1205",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "castro-daire",
+      "nome": "Castro Daire",
+      "distrito": "Viseu",
+      "codigo_ine": "1803",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "castro-marim",
+      "nome": "Castro Marim",
+      "distrito": "Faro",
+      "codigo_ine": "0804",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "castro-verde",
+      "nome": "Castro Verde",
+      "distrito": "Beja",
+      "codigo_ine": "0206",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "celorico-da-beira",
+      "nome": "Celorico da Beira",
+      "distrito": "Guarda",
+      "codigo_ine": "0903",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "celorico-de-basto",
+      "nome": "Celorico de Basto",
+      "distrito": "Braga",
+      "codigo_ine": "0305",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "chamusca",
+      "nome": "Chamusca",
+      "distrito": "Santarém",
+      "codigo_ine": "1407",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "chaves",
+      "nome": "Chaves",
+      "distrito": "Vila Real",
+      "codigo_ine": "1703",
+      "nuts3": "Alto Tâmega e Barroso",
+      "nuts3_codigo": "11B"
+    },
+    {
+      "slug": "cinfaes",
+      "nome": "Cinfães",
+      "distrito": "Viseu",
+      "codigo_ine": "1804",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "coimbra",
+      "nome": "Coimbra",
+      "distrito": "Coimbra",
+      "codigo_ine": "0603",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "condeixa-a-nova",
+      "nome": "Condeixa-a-Nova",
+      "distrito": "Coimbra",
+      "codigo_ine": "0604",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "constancia",
+      "nome": "Constância",
+      "distrito": "Santarém",
+      "codigo_ine": "1408",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "coruche",
+      "nome": "Coruche",
+      "distrito": "Santarém",
+      "codigo_ine": "1409",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "corvo",
+      "nome": "Corvo",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4901",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "covilha",
+      "nome": "Covilhã",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0503",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "crato",
+      "nome": "Crato",
+      "distrito": "Portalegre",
+      "codigo_ine": "1206",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "cuba",
+      "nome": "Cuba",
+      "distrito": "Beja",
+      "codigo_ine": "0207",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "elvas",
+      "nome": "Elvas",
+      "distrito": "Portalegre",
+      "codigo_ine": "1207",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "entroncamento",
+      "nome": "Entroncamento",
+      "distrito": "Santarém",
+      "codigo_ine": "1410",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "espinho",
+      "nome": "Espinho",
+      "distrito": "Aveiro",
+      "codigo_ine": "0107",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "esposende",
+      "nome": "Esposende",
+      "distrito": "Braga",
+      "codigo_ine": "0306",
+      "nuts3": "Cávado",
+      "nuts3_codigo": "112"
+    },
+    {
+      "slug": "estarreja",
+      "nome": "Estarreja",
+      "distrito": "Aveiro",
+      "codigo_ine": "0108",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "estremoz",
+      "nome": "Estremoz",
+      "distrito": "Évora",
+      "codigo_ine": "0704",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "evora",
+      "nome": "Évora",
+      "distrito": "Évora",
+      "codigo_ine": "0705",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "fafe",
+      "nome": "Fafe",
+      "distrito": "Braga",
+      "codigo_ine": "0307",
+      "nuts3": "Ave",
+      "nuts3_codigo": "119"
+    },
+    {
+      "slug": "faro",
+      "nome": "Faro",
+      "distrito": "Faro",
+      "codigo_ine": "0805",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "felgueiras",
+      "nome": "Felgueiras",
+      "distrito": "Porto",
+      "codigo_ine": "1303",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "ferreira-do-alentejo",
+      "nome": "Ferreira do Alentejo",
+      "distrito": "Beja",
+      "codigo_ine": "0208",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "ferreira-do-zezere",
+      "nome": "Ferreira do Zêzere",
+      "distrito": "Santarém",
+      "codigo_ine": "1411",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "figueira-da-foz",
+      "nome": "Figueira da Foz",
+      "distrito": "Coimbra",
+      "codigo_ine": "0605",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "figueira-de-castelo-rodrigo",
+      "nome": "Figueira de Castelo Rodrigo",
+      "distrito": "Guarda",
+      "codigo_ine": "0904",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "figueiro-dos-vinhos",
+      "nome": "Figueiró dos Vinhos",
+      "distrito": "Leiria",
+      "codigo_ine": "1008",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "fornos-de-algodres",
+      "nome": "Fornos de Algodres",
+      "distrito": "Guarda",
+      "codigo_ine": "0905",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "freixo-de-espada-a-cinta",
+      "nome": "Freixo de Espada à Cinta",
+      "distrito": "Bragança",
+      "codigo_ine": "0404",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "fronteira",
+      "nome": "Fronteira",
+      "distrito": "Portalegre",
+      "codigo_ine": "1208",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "funchal",
+      "nome": "Funchal",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3103",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "fundao",
+      "nome": "Fundão",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0504",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "gaviao",
+      "nome": "Gavião",
+      "distrito": "Portalegre",
+      "codigo_ine": "1209",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "gois",
+      "nome": "Góis",
+      "distrito": "Coimbra",
+      "codigo_ine": "0606",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "golega",
+      "nome": "Golegã",
+      "distrito": "Santarém",
+      "codigo_ine": "1412",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "gondomar",
+      "nome": "Gondomar",
+      "distrito": "Porto",
+      "codigo_ine": "1304",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "gouveia",
+      "nome": "Gouveia",
+      "distrito": "Guarda",
+      "codigo_ine": "0906",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "grandola",
+      "nome": "Grândola",
+      "distrito": "Setúbal",
+      "codigo_ine": "1505",
+      "nuts3": "Alentejo Litoral",
+      "nuts3_codigo": "1C1"
+    },
+    {
+      "slug": "guarda",
+      "nome": "Guarda",
+      "distrito": "Guarda",
+      "codigo_ine": "0907",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "guimaraes",
+      "nome": "Guimarães",
+      "distrito": "Braga",
+      "codigo_ine": "0308",
+      "nuts3": "Ave",
+      "nuts3_codigo": "119"
+    },
+    {
+      "slug": "horta",
+      "nome": "Horta",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4701",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "idanha-a-nova",
+      "nome": "Idanha-a-Nova",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0505",
+      "nuts3": "Beira Baixa",
+      "nuts3_codigo": "195"
+    },
+    {
+      "slug": "ilhavo",
+      "nome": "Ílhavo",
+      "distrito": "Aveiro",
+      "codigo_ine": "0110",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "lagoa-algarve",
+      "nome": "Lagoa",
+      "distrito": "Faro",
+      "codigo_ine": "0806",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "lagoa-acores",
+      "nome": "Lagoa",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4201",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "lagos",
+      "nome": "Lagos",
+      "distrito": "Faro",
+      "codigo_ine": "0807",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "lajes-das-flores",
+      "nome": "Lajes das Flores",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4801",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "lajes-do-pico",
+      "nome": "Lajes do Pico",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4601",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "lamego",
+      "nome": "Lamego",
+      "distrito": "Viseu",
+      "codigo_ine": "1805",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "leiria",
+      "nome": "Leiria",
+      "distrito": "Leiria",
+      "codigo_ine": "1009",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "lisboa",
+      "nome": "Lisboa",
+      "distrito": "Lisboa",
+      "codigo_ine": "1106",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "loule",
+      "nome": "Loulé",
+      "distrito": "Faro",
+      "codigo_ine": "0808",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "loures",
+      "nome": "Loures",
+      "distrito": "Lisboa",
+      "codigo_ine": "1107",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "lourinha",
+      "nome": "Lourinhã",
+      "distrito": "Lisboa",
+      "codigo_ine": "1108",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "lousa",
+      "nome": "Lousã",
+      "distrito": "Coimbra",
+      "codigo_ine": "0607",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "lousada",
+      "nome": "Lousada",
+      "distrito": "Porto",
+      "codigo_ine": "1305",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "macao",
+      "nome": "Mação",
+      "distrito": "Santarém",
+      "codigo_ine": "1413",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "macedo-de-cavaleiros",
+      "nome": "Macedo de Cavaleiros",
+      "distrito": "Bragança",
+      "codigo_ine": "0405",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "machico",
+      "nome": "Machico",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3104",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "madalena",
+      "nome": "Madalena",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4602",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "mafra",
+      "nome": "Mafra",
+      "distrito": "Lisboa",
+      "codigo_ine": "1109",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "maia",
+      "nome": "Maia",
+      "distrito": "Porto",
+      "codigo_ine": "1306",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "mangualde",
+      "nome": "Mangualde",
+      "distrito": "Viseu",
+      "codigo_ine": "1806",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "manteigas",
+      "nome": "Manteigas",
+      "distrito": "Guarda",
+      "codigo_ine": "0908",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "marco-de-canaveses",
+      "nome": "Marco de Canaveses",
+      "distrito": "Porto",
+      "codigo_ine": "1307",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "marinha-grande",
+      "nome": "Marinha Grande",
+      "distrito": "Leiria",
+      "codigo_ine": "1010",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "marvao",
+      "nome": "Marvão",
+      "distrito": "Portalegre",
+      "codigo_ine": "1210",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "matosinhos",
+      "nome": "Matosinhos",
+      "distrito": "Porto",
+      "codigo_ine": "1308",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "mealhada",
+      "nome": "Mealhada",
+      "distrito": "Aveiro",
+      "codigo_ine": "0111",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "meda",
+      "nome": "Mêda",
+      "distrito": "Guarda",
+      "codigo_ine": "0909",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "melgaco",
+      "nome": "Melgaço",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1603",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "mertola",
+      "nome": "Mértola",
+      "distrito": "Beja",
+      "codigo_ine": "0209",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "mesao-frio",
+      "nome": "Mesão Frio",
+      "distrito": "Vila Real",
+      "codigo_ine": "1704",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "mira",
+      "nome": "Mira",
+      "distrito": "Coimbra",
+      "codigo_ine": "0608",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "miranda-do-corvo",
+      "nome": "Miranda do Corvo",
+      "distrito": "Coimbra",
+      "codigo_ine": "0609",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "miranda-do-douro",
+      "nome": "Miranda do Douro",
+      "distrito": "Bragança",
+      "codigo_ine": "0406",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "mirandela",
+      "nome": "Mirandela",
+      "distrito": "Bragança",
+      "codigo_ine": "0407",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "mogadouro",
+      "nome": "Mogadouro",
+      "distrito": "Bragança",
+      "codigo_ine": "0408",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "moimenta-da-beira",
+      "nome": "Moimenta da Beira",
+      "distrito": "Viseu",
+      "codigo_ine": "1807",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "moita",
+      "nome": "Moita",
+      "distrito": "Setúbal",
+      "codigo_ine": "1506",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "moncao",
+      "nome": "Monção",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1604",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "monchique",
+      "nome": "Monchique",
+      "distrito": "Faro",
+      "codigo_ine": "0809",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "mondim-de-basto",
+      "nome": "Mondim de Basto",
+      "distrito": "Vila Real",
+      "codigo_ine": "1705",
+      "nuts3": "Ave",
+      "nuts3_codigo": "119"
+    },
+    {
+      "slug": "monforte",
+      "nome": "Monforte",
+      "distrito": "Portalegre",
+      "codigo_ine": "1211",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "montalegre",
+      "nome": "Montalegre",
+      "distrito": "Vila Real",
+      "codigo_ine": "1706",
+      "nuts3": "Alto Tâmega e Barroso",
+      "nuts3_codigo": "11B"
+    },
+    {
+      "slug": "montemor-o-novo",
+      "nome": "Montemor-o-Novo",
+      "distrito": "Évora",
+      "codigo_ine": "0706",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "montemor-o-velho",
+      "nome": "Montemor-o-Velho",
+      "distrito": "Coimbra",
+      "codigo_ine": "0610",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "montijo",
+      "nome": "Montijo",
+      "distrito": "Setúbal",
+      "codigo_ine": "1507",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "mora",
+      "nome": "Mora",
+      "distrito": "Évora",
+      "codigo_ine": "0707",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "mortagua",
+      "nome": "Mortágua",
+      "distrito": "Viseu",
+      "codigo_ine": "1808",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "moura",
+      "nome": "Moura",
+      "distrito": "Beja",
+      "codigo_ine": "0210",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "mourao",
+      "nome": "Mourão",
+      "distrito": "Évora",
+      "codigo_ine": "0708",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "murca",
+      "nome": "Murça",
+      "distrito": "Vila Real",
+      "codigo_ine": "1707",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "murtosa",
+      "nome": "Murtosa",
+      "distrito": "Aveiro",
+      "codigo_ine": "0112",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "nazare",
+      "nome": "Nazaré",
+      "distrito": "Leiria",
+      "codigo_ine": "1011",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "nelas",
+      "nome": "Nelas",
+      "distrito": "Viseu",
+      "codigo_ine": "1809",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "nisa",
+      "nome": "Nisa",
+      "distrito": "Portalegre",
+      "codigo_ine": "1212",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "nordeste",
+      "nome": "Nordeste",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4202",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "obidos",
+      "nome": "Óbidos",
+      "distrito": "Leiria",
+      "codigo_ine": "1012",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "odemira",
+      "nome": "Odemira",
+      "distrito": "Beja",
+      "codigo_ine": "0211",
+      "nuts3": "Alentejo Litoral",
+      "nuts3_codigo": "1C1"
+    },
+    {
+      "slug": "odivelas",
+      "nome": "Odivelas",
+      "distrito": "Lisboa",
+      "codigo_ine": "1116",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "oeiras",
+      "nome": "Oeiras",
+      "distrito": "Lisboa",
+      "codigo_ine": "1110",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "oleiros",
+      "nome": "Oleiros",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0506",
+      "nuts3": "Beira Baixa",
+      "nuts3_codigo": "195"
+    },
+    {
+      "slug": "olhao",
+      "nome": "Olhão",
+      "distrito": "Faro",
+      "codigo_ine": "0810",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "oliveira-de-azemeis",
+      "nome": "Oliveira de Azeméis",
+      "distrito": "Aveiro",
+      "codigo_ine": "0113",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "oliveira-de-frades",
+      "nome": "Oliveira de Frades",
+      "distrito": "Viseu",
+      "codigo_ine": "1810",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "oliveira-do-bairro",
+      "nome": "Oliveira do Bairro",
+      "distrito": "Aveiro",
+      "codigo_ine": "0114",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "oliveira-do-hospital",
+      "nome": "Oliveira do Hospital",
+      "distrito": "Coimbra",
+      "codigo_ine": "0611",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "ourem",
+      "nome": "Ourém",
+      "distrito": "Santarém",
+      "codigo_ine": "1421",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "ourique",
+      "nome": "Ourique",
+      "distrito": "Beja",
+      "codigo_ine": "0212",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "ovar",
+      "nome": "Ovar",
+      "distrito": "Aveiro",
+      "codigo_ine": "0115",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "pacos-de-ferreira",
+      "nome": "Paços de Ferreira",
+      "distrito": "Porto",
+      "codigo_ine": "1309",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "palmela",
+      "nome": "Palmela",
+      "distrito": "Setúbal",
+      "codigo_ine": "1508",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "pampilhosa-da-serra",
+      "nome": "Pampilhosa da Serra",
+      "distrito": "Coimbra",
+      "codigo_ine": "0612",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "paredes",
+      "nome": "Paredes",
+      "distrito": "Porto",
+      "codigo_ine": "1310",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "paredes-de-coura",
+      "nome": "Paredes de Coura",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1605",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "pedrogao-grande",
+      "nome": "Pedrógão Grande",
+      "distrito": "Leiria",
+      "codigo_ine": "1013",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "penacova",
+      "nome": "Penacova",
+      "distrito": "Coimbra",
+      "codigo_ine": "0613",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "penafiel",
+      "nome": "Penafiel",
+      "distrito": "Porto",
+      "codigo_ine": "1311",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "penalva-do-castelo",
+      "nome": "Penalva do Castelo",
+      "distrito": "Viseu",
+      "codigo_ine": "1811",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "penamacor",
+      "nome": "Penamacor",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0507",
+      "nuts3": "Beira Baixa",
+      "nuts3_codigo": "195"
+    },
+    {
+      "slug": "penedono",
+      "nome": "Penedono",
+      "distrito": "Viseu",
+      "codigo_ine": "1812",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "penela",
+      "nome": "Penela",
+      "distrito": "Coimbra",
+      "codigo_ine": "0614",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "peniche",
+      "nome": "Peniche",
+      "distrito": "Leiria",
+      "codigo_ine": "1014",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "peso-da-regua",
+      "nome": "Peso da Régua",
+      "distrito": "Vila Real",
+      "codigo_ine": "1708",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "pinhel",
+      "nome": "Pinhel",
+      "distrito": "Guarda",
+      "codigo_ine": "0910",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "pombal",
+      "nome": "Pombal",
+      "distrito": "Leiria",
+      "codigo_ine": "1015",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "ponta-delgada",
+      "nome": "Ponta Delgada",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4203",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "ponta-do-sol",
+      "nome": "Ponta do Sol",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3105",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "ponte-da-barca",
+      "nome": "Ponte da Barca",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1606",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "ponte-de-lima",
+      "nome": "Ponte de Lima",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1607",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "ponte-de-sor",
+      "nome": "Ponte de Sor",
+      "distrito": "Portalegre",
+      "codigo_ine": "1213",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "portalegre",
+      "nome": "Portalegre",
+      "distrito": "Portalegre",
+      "codigo_ine": "1214",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "portel",
+      "nome": "Portel",
+      "distrito": "Évora",
+      "codigo_ine": "0709",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "portimao",
+      "nome": "Portimão",
+      "distrito": "Faro",
+      "codigo_ine": "0811",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "porto",
+      "nome": "Porto",
+      "distrito": "Porto",
+      "codigo_ine": "1312",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "porto-de-mos",
+      "nome": "Porto de Mós",
+      "distrito": "Leiria",
+      "codigo_ine": "1016",
+      "nuts3": "Região de Leiria",
+      "nuts3_codigo": "193"
+    },
+    {
+      "slug": "porto-moniz",
+      "nome": "Porto Moniz",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3106",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "porto-santo",
+      "nome": "Porto Santo",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3201",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "povoa-de-lanhoso",
+      "nome": "Póvoa de Lanhoso",
+      "distrito": "Braga",
+      "codigo_ine": "0309",
+      "nuts3": "Ave",
+      "nuts3_codigo": "119"
+    },
+    {
+      "slug": "povoa-de-varzim",
+      "nome": "Póvoa de Varzim",
+      "distrito": "Porto",
+      "codigo_ine": "1313",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "povoacao",
+      "nome": "Povoação",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4204",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "proenca-a-nova",
+      "nome": "Proença-a-Nova",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0508",
+      "nuts3": "Beira Baixa",
+      "nuts3_codigo": "195"
+    },
+    {
+      "slug": "redondo",
+      "nome": "Redondo",
+      "distrito": "Évora",
+      "codigo_ine": "0710",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "reguengos-de-monsaraz",
+      "nome": "Reguengos de Monsaraz",
+      "distrito": "Évora",
+      "codigo_ine": "0711",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "resende",
+      "nome": "Resende",
+      "distrito": "Viseu",
+      "codigo_ine": "1813",
+      "nuts3": "Tâmega e Sousa",
+      "nuts3_codigo": "11C"
+    },
+    {
+      "slug": "ribeira-brava",
+      "nome": "Ribeira Brava",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3107",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "ribeira-de-pena",
+      "nome": "Ribeira de Pena",
+      "distrito": "Vila Real",
+      "codigo_ine": "1709",
+      "nuts3": "Alto Tâmega e Barroso",
+      "nuts3_codigo": "11B"
+    },
+    {
+      "slug": "ribeira-grande",
+      "nome": "Ribeira Grande",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4205",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "rio-maior",
+      "nome": "Rio Maior",
+      "distrito": "Santarém",
+      "codigo_ine": "1414",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "sabrosa",
+      "nome": "Sabrosa",
+      "distrito": "Vila Real",
+      "codigo_ine": "1710",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "sabugal",
+      "nome": "Sabugal",
+      "distrito": "Guarda",
+      "codigo_ine": "0911",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "salvaterra-de-magos",
+      "nome": "Salvaterra de Magos",
+      "distrito": "Santarém",
+      "codigo_ine": "1415",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "santa-comba-dao",
+      "nome": "Santa Comba Dão",
+      "distrito": "Viseu",
+      "codigo_ine": "1814",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "santa-cruz",
+      "nome": "Santa Cruz",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3108",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "santa-cruz-da-graciosa",
+      "nome": "Santa Cruz da Graciosa",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4401",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "santa-cruz-das-flores",
+      "nome": "Santa Cruz das Flores",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4802",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "santa-maria-da-feira",
+      "nome": "Santa Maria da Feira",
+      "distrito": "Aveiro",
+      "codigo_ine": "0109",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "santa-marta-de-penaguiao",
+      "nome": "Santa Marta de Penaguião",
+      "distrito": "Vila Real",
+      "codigo_ine": "1711",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "santana",
+      "nome": "Santana",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3109",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "santarem",
+      "nome": "Santarém",
+      "distrito": "Santarém",
+      "codigo_ine": "1416",
+      "nuts3": "Lezíria do Tejo",
+      "nuts3_codigo": "1D3"
+    },
+    {
+      "slug": "santiago-do-cacem",
+      "nome": "Santiago do Cacém",
+      "distrito": "Setúbal",
+      "codigo_ine": "1509",
+      "nuts3": "Alentejo Litoral",
+      "nuts3_codigo": "1C1"
+    },
+    {
+      "slug": "santo-tirso",
+      "nome": "Santo Tirso",
+      "distrito": "Porto",
+      "codigo_ine": "1314",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "sao-bras-de-alportel",
+      "nome": "São Brás de Alportel",
+      "distrito": "Faro",
+      "codigo_ine": "0812",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "sao-joao-da-madeira",
+      "nome": "São João da Madeira",
+      "distrito": "Aveiro",
+      "codigo_ine": "0116",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "sao-joao-da-pesqueira",
+      "nome": "São João da Pesqueira",
+      "distrito": "Viseu",
+      "codigo_ine": "1815",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "sao-pedro-do-sul",
+      "nome": "São Pedro do Sul",
+      "distrito": "Viseu",
+      "codigo_ine": "1816",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "sao-roque-do-pico",
+      "nome": "São Roque do Pico",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4603",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "sao-vicente",
+      "nome": "São Vicente",
+      "distrito": "Região Autónoma da Madeira",
+      "codigo_ine": "3110",
+      "nuts3": "Região Autónoma da Madeira",
+      "nuts3_codigo": "300"
+    },
+    {
+      "slug": "sardoal",
+      "nome": "Sardoal",
+      "distrito": "Santarém",
+      "codigo_ine": "1417",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "satao",
+      "nome": "Sátão",
+      "distrito": "Viseu",
+      "codigo_ine": "1817",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "seia",
+      "nome": "Seia",
+      "distrito": "Guarda",
+      "codigo_ine": "0912",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "seixal",
+      "nome": "Seixal",
+      "distrito": "Setúbal",
+      "codigo_ine": "1510",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "sernancelhe",
+      "nome": "Sernancelhe",
+      "distrito": "Viseu",
+      "codigo_ine": "1818",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "serpa",
+      "nome": "Serpa",
+      "distrito": "Beja",
+      "codigo_ine": "0213",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "serta",
+      "nome": "Sertã",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0509",
+      "nuts3": "Beira Baixa",
+      "nuts3_codigo": "195"
+    },
+    {
+      "slug": "sesimbra",
+      "nome": "Sesimbra",
+      "distrito": "Setúbal",
+      "codigo_ine": "1511",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "setubal",
+      "nome": "Setúbal",
+      "distrito": "Setúbal",
+      "codigo_ine": "1512",
+      "nuts3": "Península de Setúbal",
+      "nuts3_codigo": "1B0"
+    },
+    {
+      "slug": "sever-do-vouga",
+      "nome": "Sever do Vouga",
+      "distrito": "Aveiro",
+      "codigo_ine": "0117",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "silves",
+      "nome": "Silves",
+      "distrito": "Faro",
+      "codigo_ine": "0813",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "sines",
+      "nome": "Sines",
+      "distrito": "Setúbal",
+      "codigo_ine": "1513",
+      "nuts3": "Alentejo Litoral",
+      "nuts3_codigo": "1C1"
+    },
+    {
+      "slug": "sintra",
+      "nome": "Sintra",
+      "distrito": "Lisboa",
+      "codigo_ine": "1111",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "sobral-de-monte-agraco",
+      "nome": "Sobral de Monte Agraço",
+      "distrito": "Lisboa",
+      "codigo_ine": "1112",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "soure",
+      "nome": "Soure",
+      "distrito": "Coimbra",
+      "codigo_ine": "0615",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "sousel",
+      "nome": "Sousel",
+      "distrito": "Portalegre",
+      "codigo_ine": "1215",
+      "nuts3": "Alto Alentejo",
+      "nuts3_codigo": "1C3"
+    },
+    {
+      "slug": "tabua",
+      "nome": "Tábua",
+      "distrito": "Coimbra",
+      "codigo_ine": "0616",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "tabuaco",
+      "nome": "Tabuaço",
+      "distrito": "Viseu",
+      "codigo_ine": "1819",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "tarouca",
+      "nome": "Tarouca",
+      "distrito": "Viseu",
+      "codigo_ine": "1820",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "tavira",
+      "nome": "Tavira",
+      "distrito": "Faro",
+      "codigo_ine": "0814",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "terras-de-bouro",
+      "nome": "Terras de Bouro",
+      "distrito": "Braga",
+      "codigo_ine": "0310",
+      "nuts3": "Cávado",
+      "nuts3_codigo": "112"
+    },
+    {
+      "slug": "tomar",
+      "nome": "Tomar",
+      "distrito": "Santarém",
+      "codigo_ine": "1418",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "tondela",
+      "nome": "Tondela",
+      "distrito": "Viseu",
+      "codigo_ine": "1821",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "torre-de-moncorvo",
+      "nome": "Torre de Moncorvo",
+      "distrito": "Bragança",
+      "codigo_ine": "0409",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "torres-novas",
+      "nome": "Torres Novas",
+      "distrito": "Santarém",
+      "codigo_ine": "1419",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "torres-vedras",
+      "nome": "Torres Vedras",
+      "distrito": "Lisboa",
+      "codigo_ine": "1113",
+      "nuts3": "Oeste",
+      "nuts3_codigo": "1D1"
+    },
+    {
+      "slug": "trancoso",
+      "nome": "Trancoso",
+      "distrito": "Guarda",
+      "codigo_ine": "0913",
+      "nuts3": "Beiras e Serra da Estrela",
+      "nuts3_codigo": "196"
+    },
+    {
+      "slug": "trofa",
+      "nome": "Trofa",
+      "distrito": "Porto",
+      "codigo_ine": "1318",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "vagos",
+      "nome": "Vagos",
+      "distrito": "Aveiro",
+      "codigo_ine": "0118",
+      "nuts3": "Região de Aveiro",
+      "nuts3_codigo": "191"
+    },
+    {
+      "slug": "vale-de-cambra",
+      "nome": "Vale de Cambra",
+      "distrito": "Aveiro",
+      "codigo_ine": "0119",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "valenca",
+      "nome": "Valença",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1608",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "valongo",
+      "nome": "Valongo",
+      "distrito": "Porto",
+      "codigo_ine": "1315",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "valpacos",
+      "nome": "Valpaços",
+      "distrito": "Vila Real",
+      "codigo_ine": "1712",
+      "nuts3": "Alto Tâmega e Barroso",
+      "nuts3_codigo": "11B"
+    },
+    {
+      "slug": "velas",
+      "nome": "Velas",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4502",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "vendas-novas",
+      "nome": "Vendas Novas",
+      "distrito": "Évora",
+      "codigo_ine": "0712",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "viana-do-alentejo",
+      "nome": "Viana do Alentejo",
+      "distrito": "Évora",
+      "codigo_ine": "0713",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "viana-do-castelo",
+      "nome": "Viana do Castelo",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1609",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "vidigueira",
+      "nome": "Vidigueira",
+      "distrito": "Beja",
+      "codigo_ine": "0214",
+      "nuts3": "Baixo Alentejo",
+      "nuts3_codigo": "1C2"
+    },
+    {
+      "slug": "vieira-do-minho",
+      "nome": "Vieira do Minho",
+      "distrito": "Braga",
+      "codigo_ine": "0311",
+      "nuts3": "Ave",
+      "nuts3_codigo": "119"
+    },
+    {
+      "slug": "vila-da-praia-da-vitoria",
+      "nome": "Vila da Praia da Vitória",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4302",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "vila-de-rei",
+      "nome": "Vila de Rei",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0510",
+      "nuts3": "Beira Baixa",
+      "nuts3_codigo": "195"
+    },
+    {
+      "slug": "vila-do-bispo",
+      "nome": "Vila do Bispo",
+      "distrito": "Faro",
+      "codigo_ine": "0815",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "vila-do-conde",
+      "nome": "Vila do Conde",
+      "distrito": "Porto",
+      "codigo_ine": "1316",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "vila-do-porto",
+      "nome": "Vila do Porto",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4101",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "vila-flor",
+      "nome": "Vila Flor",
+      "distrito": "Bragança",
+      "codigo_ine": "0410",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "vila-franca-de-xira",
+      "nome": "Vila Franca de Xira",
+      "distrito": "Lisboa",
+      "codigo_ine": "1114",
+      "nuts3": "Grande Lisboa",
+      "nuts3_codigo": "1A0"
+    },
+    {
+      "slug": "vila-franca-do-campo",
+      "nome": "Vila Franca do Campo",
+      "distrito": "Região Autónoma dos Açores",
+      "codigo_ine": "4206",
+      "nuts3": "Região Autónoma dos Açores",
+      "nuts3_codigo": "200"
+    },
+    {
+      "slug": "vila-nova-da-barquinha",
+      "nome": "Vila Nova da Barquinha",
+      "distrito": "Santarém",
+      "codigo_ine": "1420",
+      "nuts3": "Médio Tejo",
+      "nuts3_codigo": "1D2"
+    },
+    {
+      "slug": "vila-nova-de-cerveira",
+      "nome": "Vila Nova de Cerveira",
+      "distrito": "Viana do Castelo",
+      "codigo_ine": "1610",
+      "nuts3": "Alto Minho",
+      "nuts3_codigo": "111"
+    },
+    {
+      "slug": "vila-nova-de-famalicao",
+      "nome": "Vila Nova de Famalicão",
+      "distrito": "Braga",
+      "codigo_ine": "0312",
+      "nuts3": "Ave",
+      "nuts3_codigo": "119"
+    },
+    {
+      "slug": "vila-nova-de-foz-coa",
+      "nome": "Vila Nova de Foz Côa",
+      "distrito": "Guarda",
+      "codigo_ine": "0914",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "vila-nova-de-gaia",
+      "nome": "Vila Nova de Gaia",
+      "distrito": "Porto",
+      "codigo_ine": "1317",
+      "nuts3": "Área Metropolitana do Porto",
+      "nuts3_codigo": "11A"
+    },
+    {
+      "slug": "vila-nova-de-paiva",
+      "nome": "Vila Nova de Paiva",
+      "distrito": "Viseu",
+      "codigo_ine": "1822",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "vila-nova-de-poiares",
+      "nome": "Vila Nova de Poiares",
+      "distrito": "Coimbra",
+      "codigo_ine": "0617",
+      "nuts3": "Região de Coimbra",
+      "nuts3_codigo": "192"
+    },
+    {
+      "slug": "vila-pouca-de-aguiar",
+      "nome": "Vila Pouca de Aguiar",
+      "distrito": "Vila Real",
+      "codigo_ine": "1713",
+      "nuts3": "Alto Tâmega e Barroso",
+      "nuts3_codigo": "11B"
+    },
+    {
+      "slug": "vila-real",
+      "nome": "Vila Real",
+      "distrito": "Vila Real",
+      "codigo_ine": "1714",
+      "nuts3": "Douro",
+      "nuts3_codigo": "11D"
+    },
+    {
+      "slug": "vila-real-de-santo-antonio",
+      "nome": "Vila Real de Santo António",
+      "distrito": "Faro",
+      "codigo_ine": "0816",
+      "nuts3": "Algarve",
+      "nuts3_codigo": "150"
+    },
+    {
+      "slug": "vila-velha-de-rodao",
+      "nome": "Vila Velha de Ródão",
+      "distrito": "Castelo Branco",
+      "codigo_ine": "0511",
+      "nuts3": "Beira Baixa",
+      "nuts3_codigo": "195"
+    },
+    {
+      "slug": "vila-verde",
+      "nome": "Vila Verde",
+      "distrito": "Braga",
+      "codigo_ine": "0313",
+      "nuts3": "Cávado",
+      "nuts3_codigo": "112"
+    },
+    {
+      "slug": "vila-vicosa",
+      "nome": "Vila Viçosa",
+      "distrito": "Évora",
+      "codigo_ine": "0714",
+      "nuts3": "Alentejo Central",
+      "nuts3_codigo": "1C4"
+    },
+    {
+      "slug": "vimioso",
+      "nome": "Vimioso",
+      "distrito": "Bragança",
+      "codigo_ine": "0411",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "vinhais",
+      "nome": "Vinhais",
+      "distrito": "Bragança",
+      "codigo_ine": "0412",
+      "nuts3": "Terras de Trás-os-Montes",
+      "nuts3_codigo": "11E"
+    },
+    {
+      "slug": "viseu",
+      "nome": "Viseu",
+      "distrito": "Viseu",
+      "codigo_ine": "1823",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    },
+    {
+      "slug": "vizela",
+      "nome": "Vizela",
+      "distrito": "Braga",
+      "codigo_ine": "0314",
+      "nuts3": "Ave",
+      "nuts3_codigo": "119"
+    },
+    {
+      "slug": "vouzela",
+      "nome": "Vouzela",
+      "distrito": "Viseu",
+      "codigo_ine": "1824",
+      "nuts3": "Viseu Dão Lafões",
+      "nuts3_codigo": "194"
+    }
+  ]
+}

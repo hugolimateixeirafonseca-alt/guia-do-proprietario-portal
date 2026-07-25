@@ -1,0 +1,20 @@
+{
+  "termos": [
+    { "slug": "imi", "termo": "IMI", "definicao": "Imposto municipal sobre imóveis, calculado anualmente a partir do VPT e da taxa definida pelo município.", "pilar": "impostos" },
+    { "slug": "vpt", "termo": "VPT", "definicao": "Valor fiscal atribuído ao imóvel pela Autoridade Tributária e usado no cálculo de impostos como o IMI.", "pilar": "impostos" },
+    { "slug": "caderneta-predial", "termo": "Caderneta predial", "definicao": "Documento fiscal que identifica o imóvel, os titulares, as áreas e o respetivo VPT.", "pilar": "impostos" },
+    { "slug": "cpcv", "termo": "CPCV", "definicao": "Contrato-promessa de compra e venda que regista as condições acordadas antes da escritura.", "pilar": "vender" },
+    { "slug": "distrate", "termo": "Distrate", "definicao": "Documento emitido pelo banco que permite cancelar a hipoteca depois de liquidado o crédito.", "pilar": "vender" },
+    { "slug": "mais-valia", "termo": "Mais-valia", "definicao": "Ganho apurado entre o valor de aquisição e o valor de venda, depois dos ajustamentos e despesas aceites.", "pilar": "impostos" },
+    { "slug": "fracao-autonoma", "termo": "Fração autónoma", "definicao": "Parte independente de um prédio em propriedade horizontal, como um apartamento, loja ou garagem.", "pilar": "condominio" },
+    { "slug": "quota", "termo": "Quota", "definicao": "Valor pago pelos condóminos para suportar despesas comuns e fundos aprovados.", "pilar": "condominio" },
+    { "slug": "licenca-utilizacao", "termo": "Licença de utilização", "definicao": "Documento municipal que confirma o uso autorizado para o imóvel, quando é aplicável.", "pilar": "vender" },
+    { "slug": "certificado-energetico", "termo": "Certificado energético", "definicao": "Documento que classifica o desempenho energético do imóvel e identifica possíveis melhorias.", "pilar": "casa" },
+    { "slug": "coeficiente-atualizacao", "termo": "Coeficiente de atualização", "definicao": "Fator publicado anualmente que pode ser usado para atualizar rendas nos termos legais.", "pilar": "arrendar" },
+    { "slug": "permilagem", "termo": "Permilagem", "definicao": "Proporção de cada fração no valor total do prédio, expressa em mil partes.", "pilar": "condominio" },
+    { "slug": "caucao", "termo": "Caução", "definicao": "Valor entregue como garantia do cumprimento de obrigações previstas no contrato.", "pilar": "arrendar" },
+    { "slug": "parte-comum", "termo": "Parte comum", "definicao": "Zona ou elemento do prédio que pertence ao conjunto dos condóminos, como o telhado ou as fachadas.", "pilar": "condominio" },
+    { "slug": "potencia-contratada", "termo": "Potência contratada", "definicao": "Limite de potência elétrica disponível em simultâneo e refletido na parte fixa da fatura.", "pilar": "casa" },
+    { "slug": "erse", "termo": "ERSE", "definicao": "Entidade Reguladora dos Serviços Energéticos, responsável pela regulação dos setores da eletricidade e do gás.", "pilar": "casa" }
+  ]
+}

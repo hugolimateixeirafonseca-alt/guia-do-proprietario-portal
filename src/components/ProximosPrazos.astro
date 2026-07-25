@@ -1,0 +1,44 @@
+---
+import calendario from "../dados/calendario.json";
+
+interface Props {
+  dataBuild?: Date;
+  quantidade?: number;
+  compacto?: boolean;
+}
+
+const { dataBuild = new Date(), quantidade = 3, compacto = false } = Astro.props;
+const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+const ano = dataBuild.getUTCFullYear();
+const inicioHoje = Date.UTC(ano, dataBuild.getUTCMonth(), dataBuild.getUTCDate());
+const prazos = calendario.itens
+  .filter((item) => item.dia_limite !== null)
+  .map((item) => {
+    let data = Date.UTC(ano, item.mes - 1, item.dia_limite!);
+    if (data < inicioHoje) data = Date.UTC(ano + 1, item.mes - 1, item.dia_limite!);
+    return { ...item, data };
+  })
+  .sort((a, b) => a.data - b.data)
+  .slice(0, quantidade);
+---
+<section class:list={["deadlines", { compact: compacto }]} aria-labelledby={compacto ? "proximos-prazos-artigo" : "proximos-prazos"}>
+  <div class="deadline-heading">
+    <h2 id={compacto ? "proximos-prazos-artigo" : "proximos-prazos"}>Próximos prazos</h2>
+    <a href="/calendario/">Ver calendário completo</a>
+  </div>
+  <div class="deadline-list">
+    {prazos.map((prazo) => (
+      <article class="deadline-card">
+        <time datetime={new Date(prazo.data).toISOString().slice(0, 10)}>
+          <strong>{prazo.dia_limite}</strong>
+          <span>{meses[prazo.mes - 1]}</span>
+        </time>
+        <div>
+          <h3>{prazo.nome}</h3>
+          <p>{prazo.descricao}</p>
+          <small>{prazo.quem}</small>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>

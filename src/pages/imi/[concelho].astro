@@ -1,0 +1,51 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ImiCalculator from "../../components/ImiCalculator.astro";
+import ImiScale from "../../components/ImiScale.astro";
+import MapaPortugal from "../../components/MapaPortugal.astro";
+import { formatarData } from "../../config";
+import concelhosData from "../../dados/concelhos.json";
+import imiData from "../../dados/imi-concelhos.json";
+
+type Concelho = (typeof concelhosData.dados)[number];
+type DadosImi = (typeof imiData.dados)[number];
+
+export function getStaticPaths() {
+  return concelhosData.dados.map((concelho) => ({
+    params: { concelho: concelho.slug },
+    props: { concelho, dados: imiData.dados.find((item) => item.slug === concelho.slug)! }
+  }));
+}
+const { concelho, dados } = Astro.props as { concelho: Concelho; dados: DadosImi };
+const vizinhos = concelhosData.dados
+  .filter((item) => item.distrito === concelho.distrito && item.slug !== concelho.slug)
+  .sort((a, b) => a.nome.localeCompare(b.nome, "pt"))
+  .slice(0, 6);
+const taxaPercentagem = dados.taxa_urbana === null ? null : dados.taxa_urbana * 100;
+const taxaAnteriorPercentagem = dados.taxa_urbana_ano_anterior === null ? null : dados.taxa_urbana_ano_anterior * 100;
+const mudou = taxaPercentagem === null || taxaAnteriorPercentagem === null
+  ? "Comparação indisponível"
+  : taxaPercentagem === taxaAnteriorPercentagem
+    ? "Sem alteração"
+    : `${taxaPercentagem > taxaAnteriorPercentagem ? "Subiu" : "Desceu"} face a ${Number(imiData.periodo_referencia) - 1}`;
+const deducoes = Object.entries(dados.deducao_agregado) as [string, number][];
+const semPublicacao = dados.estado === "nao_publicada";
+const dataExtracao = formatarData(new Date(`${imiData.extraido_em}T00:00:00`));
+const formatarTaxa = (taxa: number) => `${taxa.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}%`;
+const formatarPontos = (valor: number) => `${valor.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} p.p.`;
+---
+<BaseLayout titulo={`IMI em ${concelho.nome}`} descricao={`Taxa de IMI em ${concelho.nome}, comparação anual e simulador para estimar o imposto.`}>
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "IMI", url: "/impostos/" }, { nome: concelho.nome }]} /><p class="eyebrow">IMI por concelho</p><h1>IMI em {concelho.nome}</h1><p>Taxa municipal, comparação anual e simulador para fazer uma primeira estimativa.</p></div></section>
+  <article class="article-layout article-body">
+    <aside class="data-source"><strong>Fonte: <a href={imiData.fonte_url}>{imiData.fonte}</a></strong><span>Ano de referência: {imiData.periodo_referencia}</span><span>Dados extraídos a {dataExtracao}</span></aside>
+    {semPublicacao && <div class="no-data"><strong>A taxa de {imiData.periodo_referencia} ainda não está publicada para {concelho.nome}.</strong><p>A Autoridade Tributária não apresenta uma taxa urbana para este município. Não mostramos um valor estimado nem usamos a taxa de outro concelho.</p></div>}
+    {!semPublicacao && <div class="programmatic-grid"><div class="data-card"><span>Taxa urbana em {imiData.periodo_referencia}</span><strong>{taxaPercentagem === null ? "Varia por freguesia" : formatarTaxa(taxaPercentagem)}</strong></div><div class="data-card"><span>Ano anterior</span><strong>{taxaAnteriorPercentagem === null ? "Sem valor" : formatarTaxa(taxaAnteriorPercentagem)}</strong></div><div class="data-card"><span>Comparação</span><strong style="font-size:18px">{mudou}</strong></div></div>}
+    <div class:list={["data-identity", taxaPercentagem === null && "map-only"]}>{taxaPercentagem !== null && <ImiScale taxa={taxaPercentagem} concelho={concelho.nome} />}<MapaPortugal distrito={concelho.distrito} /></div>
+    {dados.ajustes_freguesia.length > 0 && <><h2>Taxas por freguesia</h2><p>Este município publicou taxas específicas ou ajustamentos por freguesia. Confirme a freguesia do imóvel antes de calcular.</p><div class="table-wrap"><table><thead><tr><th>Freguesia</th><th>Regra</th><th>Valor</th></tr></thead><tbody>{dados.ajustes_freguesia.map((item) => <tr><td>{item.freguesia}</td><td>{item.tipo === "taxa_especifica" ? "Taxa específica" : item.tipo === "majoracao" ? "Majoração" : "Minoração"}</td><td>{item.tipo === "taxa_especifica" ? formatarTaxa(item.valor * 100) : formatarPontos(item.valor * 100)}</td></tr>)}</tbody></table></div></>}
+    {deducoes.length > 0 && <><h2>Dedução por agregado familiar</h2><div class="table-wrap"><table><thead><tr><th>Dependentes</th><th>Dedução fixa</th></tr></thead><tbody>{deducoes.map(([dependentes, valor]) => <tr><td>{dependentes === "3" ? "3 ou mais" : dependentes}</td><td>{valor.toLocaleString("pt-PT")} €</td></tr>)}</tbody></table></div></>}
+    <h2>Calcular o IMI em {concelho.nome}</h2><p>O concelho já está selecionado. Indique apenas o valor patrimonial da casa ou quanto pagou de IMI no ano anterior.</p><ImiCalculator concelhoInicial={concelho.slug} />
+    <h2>Concelhos próximos</h2><div class="neighbours">{vizinhos.map((vizinho: any) => <a href={`/imi/${vizinho.slug}/`}>IMI em {vizinho.nome}</a>)}</div>
+    <section class="sources"><h2>Fonte e metodologia</h2><p>{imiData.notas}</p><p><a href={imiData.fonte_url}>Consultar taxas de IMI na Autoridade Tributária</a>.</p></section>
+  </article>
+</BaseLayout>

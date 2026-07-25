@@ -1,0 +1,272 @@
+---
+import imiData from "../dados/imi-concelhos.json";
+
+interface Props {
+  concelhoInicial?: string;
+}
+
+const { concelhoInicial = "" } = Astro.props;
+const municipios = [...imiData.dados].sort((a, b) => a.nome.localeCompare(b.nome, "pt"));
+const anoAnterior = Number(imiData.periodo_referencia) - 1;
+const nomeOpcao = (municipio: (typeof municipios)[number]) => {
+  if (municipio.slug.endsWith("-acores")) return `${municipio.nome}, Açores`;
+  if (municipio.slug.endsWith("-madeira")) return `${municipio.nome}, Madeira`;
+  if (municipio.slug.endsWith("-algarve")) return `${municipio.nome}, Algarve`;
+  return municipio.nome;
+};
+---
+<div class="simulator-shell imi-simulator" id="imi-simulator" data-concelho-inicial={concelhoInicial}>
+  <form id="imi-form">
+    <fieldset class="path-picker">
+      <legend>Que informação tem consigo?</legend>
+      <div class="path-options">
+        <button type="button" class="path-choice active" data-imi-path="vpt" aria-pressed="true"><strong>Sei o valor patrimonial</strong><span>Use o valor fiscal indicado nas Finanças.</span></button>
+        <button type="button" class="path-choice" data-imi-path="pago" aria-pressed="false"><strong>Só sei quanto paguei de IMI no ano passado</strong><span>Calculamos o valor patrimonial a partir desse pagamento.</span></button>
+      </div>
+    </fieldset>
+
+    <div class="form-grid">
+      <div class="field full">
+        <label for="imi-concelho">Concelho do imóvel</label>
+        <select id="imi-concelho" required>
+          <option value="">Escolha o concelho</option>
+          {municipios.map((municipio) => <option value={municipio.slug} selected={municipio.slug === concelhoInicial}>{nomeOpcao(municipio)}</option>)}
+        </select>
+        <small>A taxa municipal é preenchida automaticamente.</small>
+      </div>
+
+      <div class="field full municipality-status" id="imi-municipality-status" role="status" hidden></div>
+
+      <section class="field full path-fields" id="imi-path-vpt">
+        <label for="imi-vpt">Valor patrimonial da casa (VPT) <a href="/glossario/#vpt">O que significa?</a></label>
+        <p class="field-explanation">É o valor que as Finanças atribuem à casa para efeitos de imposto. Não é o preço de compra nem o valor de mercado.</p>
+        <input id="imi-vpt" type="text" inputmode="decimal" value="180 000" autocomplete="off" aria-describedby="imi-vpt-help" />
+        <details class="field-help" id="imi-vpt-help">
+          <summary>Onde encontro este valor?</summary>
+          <ol>
+            <li>Entre no Portal das Finanças.</li>
+            <li>Procure Património e escolha Prédios.</li>
+            <li>Abra a caderneta predial e procure “Valor patrimonial atual”. O valor vem também na nota de cobrança do IMI que recebe todos os anos.</li>
+          </ol>
+        </details>
+      </section>
+
+      <section class="field full path-fields" id="imi-path-pago" hidden>
+        <label for="imi-pago-anterior">Quanto pagou de IMI em {anoAnterior}?</label>
+        <p class="field-explanation">Use o total anual indicado na nota de cobrança, antes de dividir pelas prestações.</p>
+        <input id="imi-pago-anterior" type="text" inputmode="decimal" value="540,00" autocomplete="off" />
+      </section>
+
+      <details class="field full manual-rate" id="imi-manual-rate" hidden>
+        <summary>Usar outra taxa</summary>
+        <p id="imi-manual-help">Pode usar uma taxa diferente em casos de majoração, minoração ou prédio rústico.</p>
+        <div class="form-grid compact">
+          <div class="field">
+            <label for="imi-taxa-manual">Taxa de {imiData.periodo_referencia}, em percentagem</label>
+            <input id="imi-taxa-manual" type="text" inputmode="decimal" autocomplete="off" aria-describedby="imi-manual-help" />
+          </div>
+          <div class="field" id="imi-taxa-anterior-wrap">
+            <label for="imi-taxa-anterior-manual">Taxa de {anoAnterior}, em percentagem</label>
+            <input id="imi-taxa-anterior-manual" type="text" inputmode="decimal" autocomplete="off" aria-describedby="imi-manual-help" />
+          </div>
+        </div>
+      </details>
+
+      <div class="field full" id="imi-dependentes-wrap" hidden>
+        <label for="imi-dependentes">Quantos filhos dependentes tem?</label>
+        <select id="imi-dependentes">
+          <option value="0">Nenhum</option>
+          <option value="1">1 filho</option>
+          <option value="2">2 filhos</option>
+          <option value="3">3 ou mais filhos</option>
+        </select>
+        <small>Aplicamos a dedução fixa de IMI familiar publicada pelo município.</small>
+      </div>
+
+      <div class="field full"><button class="button" type="submit">Calcular o IMI e as prestações</button></div>
+    </div>
+  </form>
+
+  <div class="result-box imi-result" id="imi-result" aria-live="polite" hidden>
+    <span>Estimativa anual de IMI</span>
+    <strong id="imi-total"></strong>
+    <p id="imi-deduction-result" hidden></p>
+    <div class="installment-result">
+      <h3 id="imi-installment-heading"></h3>
+      <ul id="imi-installments"></ul>
+    </div>
+    <p id="imi-path-note" hidden>Estimativa a partir do que pagou. Se entretanto houve reavaliação do imóvel ou alteração de isenções, o valor muda.</p>
+    <small>O valor não considera isenções nem situações específicas. A nota de cobrança oficial está no Portal das Finanças.</small>
+    <nav class="result-links" aria-label="Informação relacionada">
+      <a id="imi-municipality-link" href="/impostos/">Ver a página do concelho</a>
+      <a href="/impostos/quanto-vou-pagar-de-imi/">Ler o guia essencial do IMI</a>
+    </nav>
+  </div>
+</div>
+
+<script>
+  import dadosImi from "../dados/imi-concelhos.json";
+  import { calcularImi, calcularPrestacoesImi, lerNumeroPt } from "../lib/estimador";
+
+  const shell = document.querySelector<HTMLElement>("#imi-simulator")!;
+  const form = shell.querySelector<HTMLFormElement>("#imi-form")!;
+  const concelhoSelect = shell.querySelector<HTMLSelectElement>("#imi-concelho")!;
+  const status = shell.querySelector<HTMLElement>("#imi-municipality-status")!;
+  const manual = shell.querySelector<HTMLDetailsElement>("#imi-manual-rate")!;
+  const manualHelp = shell.querySelector<HTMLElement>("#imi-manual-help")!;
+  const taxaManual = shell.querySelector<HTMLInputElement>("#imi-taxa-manual")!;
+  const taxaAnteriorManual = shell.querySelector<HTMLInputElement>("#imi-taxa-anterior-manual")!;
+  const taxaAnteriorWrap = shell.querySelector<HTMLElement>("#imi-taxa-anterior-wrap")!;
+  const dependentesWrap = shell.querySelector<HTMLElement>("#imi-dependentes-wrap")!;
+  const dependentes = shell.querySelector<HTMLSelectElement>("#imi-dependentes")!;
+  const pathVpt = shell.querySelector<HTMLElement>("#imi-path-vpt")!;
+  const pathPago = shell.querySelector<HTMLElement>("#imi-path-pago")!;
+  const vptInput = shell.querySelector<HTMLInputElement>("#imi-vpt")!;
+  const pagoInput = shell.querySelector<HTMLInputElement>("#imi-pago-anterior")!;
+  const resultBox = shell.querySelector<HTMLElement>("#imi-result")!;
+  const totalElement = shell.querySelector<HTMLElement>("#imi-total")!;
+  const deductionElement = shell.querySelector<HTMLElement>("#imi-deduction-result")!;
+  const installmentHeading = shell.querySelector<HTMLElement>("#imi-installment-heading")!;
+  const installments = shell.querySelector<HTMLUListElement>("#imi-installments")!;
+  const pathNote = shell.querySelector<HTMLElement>("#imi-path-note")!;
+  const municipalityLink = shell.querySelector<HTMLAnchorElement>("#imi-municipality-link")!;
+  let caminho: "vpt" | "pago" = "vpt";
+
+  const moeda = (valor: number) => new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor);
+  const percentagem = (taxa: number) => (taxa * 100).toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  const municipioAtual = () => dadosImi.dados.find((item) => item.slug === concelhoSelect.value);
+
+  function definirErro(input: HTMLInputElement, mensagem = "") {
+    input.setCustomValidity(mensagem);
+  }
+
+  function numeroPositivo(input: HTMLInputElement, mensagem: string) {
+    const valor = lerNumeroPt(input.value);
+    definirErro(input, Number.isFinite(valor) && valor > 0 ? "" : mensagem);
+    return valor;
+  }
+
+  function atualizarCaminho(novo: "vpt" | "pago") {
+    caminho = novo;
+    pathVpt.hidden = caminho !== "vpt";
+    pathPago.hidden = caminho !== "pago";
+    taxaAnteriorWrap.hidden = caminho !== "pago";
+    shell.querySelectorAll<HTMLButtonElement>("[data-imi-path]").forEach((botao) => {
+      const ativo = botao.dataset.imiPath === caminho;
+      botao.classList.toggle("active", ativo);
+      botao.setAttribute("aria-pressed", String(ativo));
+    });
+    const municipio = municipioAtual();
+    if (caminho === "pago" && municipio?.taxa_urbana_ano_anterior === null) {
+      manual.open = true;
+      manualHelp.textContent = "Indique também a taxa do ano anterior para podermos calcular o valor patrimonial da casa.";
+    }
+    resultBox.hidden = true;
+  }
+
+  function atualizarMunicipio() {
+    const municipio = municipioAtual();
+    resultBox.hidden = true;
+    if (!municipio) {
+      status.hidden = true;
+      manual.hidden = true;
+      dependentesWrap.hidden = true;
+      return;
+    }
+
+    const semTaxa = municipio.taxa_urbana === null;
+    const naoPublicada = municipio.estado === "nao_publicada";
+    status.hidden = false;
+    manual.hidden = false;
+    taxaManual.value = municipio.taxa_urbana === null ? "" : percentagem(municipio.taxa_urbana);
+    taxaAnteriorManual.value = municipio.taxa_urbana_ano_anterior === null ? "" : percentagem(municipio.taxa_urbana_ano_anterior);
+
+    if (naoPublicada) {
+      status.innerHTML = `<strong>${municipio.nome} ainda não tem uma taxa publicada para ${dadosImi.periodo_referencia}.</strong><span>Introduza a taxa manualmente e confirme-a junto da câmara municipal.</span>`;
+      manual.open = true;
+      manual.querySelector("summary")!.textContent = "Introduzir a taxa manualmente";
+      manualHelp.textContent = "Confirme a taxa atual e, se usar o segundo caminho, a taxa do ano anterior junto da câmara municipal.";
+    } else if (semTaxa) {
+      status.innerHTML = `<strong>${municipio.nome} publica taxas diferentes por freguesia em ${dadosImi.periodo_referencia}.</strong><span>Introduza a taxa aplicável à freguesia do imóvel.</span>`;
+      manual.open = true;
+      manual.querySelector("summary")!.textContent = "Introduzir a taxa da freguesia";
+      manualHelp.textContent = "Confirme a taxa aplicável à freguesia do imóvel na página oficial do município.";
+    } else {
+      status.innerHTML = `<strong>${municipio.nome} aplica ${percentagem(municipio.taxa_urbana)}% em ${dadosImi.periodo_referencia}.</strong><span>A taxa foi preenchida a partir dos dados oficiais da Autoridade Tributária.</span>`;
+      manual.open = false;
+      manual.querySelector("summary")!.textContent = "Usar outra taxa";
+      manualHelp.textContent = "Pode usar uma taxa diferente em casos de majoração, minoração ou prédio rústico.";
+    }
+
+    const temDeducao = Object.keys(municipio.deducao_agregado).length > 0;
+    dependentesWrap.hidden = !temDeducao;
+    if (!temDeducao) dependentes.value = "0";
+    municipalityLink.href = `/imi/${municipio.slug}/`;
+  }
+
+  shell.querySelectorAll<HTMLButtonElement>("[data-imi-path]").forEach((botao) => {
+    botao.addEventListener("click", () => atualizarCaminho(botao.dataset.imiPath as "vpt" | "pago"));
+  });
+  concelhoSelect.addEventListener("change", atualizarMunicipio);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const municipio = municipioAtual();
+    if (!municipio) {
+      concelhoSelect.setCustomValidity("Escolha o concelho do imóvel.");
+      concelhoSelect.reportValidity();
+      return;
+    }
+    concelhoSelect.setCustomValidity("");
+
+    const usarManual = manual.open || municipio.taxa_urbana === null;
+    const taxaPercentual = usarManual ? numeroPositivo(taxaManual, "Indique uma taxa válida.") : municipio.taxa_urbana * 100;
+    if (!Number.isFinite(taxaPercentual) || taxaPercentual <= 0) {
+      taxaManual.reportValidity();
+      return;
+    }
+    const taxaAtual = taxaPercentual / 100;
+
+    let vpt = 0;
+    if (caminho === "vpt") {
+      vpt = numeroPositivo(vptInput, "Indique um valor patrimonial válido.");
+      if (!Number.isFinite(vpt) || vpt <= 0) {
+        vptInput.reportValidity();
+        return;
+      }
+    } else {
+      const pago = numeroPositivo(pagoInput, "Indique o total de IMI pago no ano anterior.");
+      const taxaAnteriorPercentual = usarManual || municipio.taxa_urbana_ano_anterior === null
+        ? numeroPositivo(taxaAnteriorManual, "Indique uma taxa válida para o ano anterior.")
+        : municipio.taxa_urbana_ano_anterior * 100;
+      if (!Number.isFinite(pago) || pago <= 0) {
+        pagoInput.reportValidity();
+        return;
+      }
+      if (!Number.isFinite(taxaAnteriorPercentual) || taxaAnteriorPercentual <= 0) {
+        taxaAnteriorManual.reportValidity();
+        return;
+      }
+      vpt = pago / (taxaAnteriorPercentual / 100);
+    }
+
+    const chaveDeducao = String(Math.min(3, Number(dependentes.value)));
+    const deducao = Number(dependentes.value) > 0
+      ? municipio.deducao_agregado[chaveDeducao as keyof typeof municipio.deducao_agregado] ?? 0
+      : 0;
+    const calculo = calcularImi({ vpt, taxa: taxaAtual, deducao });
+    const plano = calcularPrestacoesImi(calculo.total);
+
+    totalElement.textContent = moeda(calculo.total);
+    deductionElement.hidden = calculo.deducaoAplicada === 0;
+    deductionElement.textContent = calculo.deducaoAplicada > 0 ? `Inclui ${moeda(calculo.deducaoAplicada)} de desconto por filhos.` : "";
+    installmentHeading.textContent = plano.length === 1 ? "Paga numa prestação" : `Paga em ${plano.length} prestações`;
+    installments.innerHTML = plano.map((prestacao) => `<li><span>${prestacao.mes}</span><strong>${moeda(prestacao.valor)}</strong></li>`).join("");
+    pathNote.hidden = caminho !== "pago";
+    resultBox.hidden = false;
+    resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  atualizarCaminho("vpt");
+  atualizarMunicipio();
+</script>

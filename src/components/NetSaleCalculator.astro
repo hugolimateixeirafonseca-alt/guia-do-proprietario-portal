@@ -1,0 +1,45 @@
+<div class="simulator-shell">
+  <p class="simulator-intro">Em cerca de dois minutos, obtém uma faixa do valor que poderá sobrar depois da comissão, do crédito e dos principais custos indicativos.</p>
+  <form id="sale-form" class="form-grid">
+    <div class="field"><label for="sale-area">Área do imóvel</label><input id="sale-area" type="text" inputmode="decimal" value="120" required aria-describedby="sale-area-help" /><small id="sale-area-help">Use a área privativa indicada nos documentos da casa.</small></div>
+    <div class="field"><label for="sale-type">Tipo</label><select id="sale-type" aria-describedby="sale-type-help"><option value="apartamento">Apartamento</option><option value="moradia">Moradia</option></select><small id="sale-type-help">A estimativa aplica um ajuste simples conforme o tipo de imóvel.</small></div>
+    <div class="field"><label for="sale-rate">Referência local por m²</label><input id="sale-rate" type="text" inputmode="decimal" value="3 000" required aria-describedby="sale-rate-help" /><small id="sale-rate-help">Use uma mediana recente do concelho, não o preço de um anúncio isolado.</small></div>
+    <div class="field"><label for="sale-fee">Comissão, sem IVA</label><input id="sale-fee" type="text" inputmode="decimal" value="5" required aria-describedby="sale-fee-help" /><small id="sale-fee-help">Valor típico praticado, sempre negociável. Se vender sem agência, ponha zero.</small></div>
+    <div class="field full"><label for="sale-debt">Crédito por liquidar</label><input id="sale-debt" type="text" inputmode="decimal" value="75 000" required aria-describedby="sale-debt-help" /><small id="sale-debt-help">Indique o capital que teria de devolver ao banco na data da venda.</small></div>
+    <div class="field full"><button class="button" type="submit">Calcular valor líquido</button></div>
+  </form>
+  <div class="result-box" id="sale-result" aria-live="polite"><span>Estimativa líquida antes do eventual IRS</span><strong>262 000 € a 337 000 €</strong><small>Dados de demonstração. Inclui comissão com IVA e 750 € de outros custos.</small></div>
+</div>
+<script>
+  import { estimarValorLiquido, lerNumeroPt } from "../lib/estimador";
+  const form = document.querySelector<HTMLFormElement>("#sale-form")!;
+  const result = document.querySelector<HTMLElement>("#sale-result strong")!;
+  const moeda = (valor: number) => new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Math.round(valor / 1000) * 1000);
+  const campo = (seletor: string, minimo: number, maximo: number, mensagem: string) => {
+    const input = document.querySelector<HTMLInputElement>(seletor)!;
+    const valor = lerNumeroPt(input.value);
+    input.setCustomValidity(Number.isFinite(valor) && valor >= minimo && valor <= maximo ? "" : mensagem);
+    return { input, valor };
+  };
+  function calcular() {
+    const area = campo("#sale-area", 20, 2000, "Indique uma área entre 20 e 2 000 m².");
+    const valorM2 = campo("#sale-rate", 1, 100000, "Indique uma referência válida por metro quadrado.");
+    const comissao = campo("#sale-fee", 0, 10, "Indique uma comissão entre 0% e 10%.");
+    const credito = campo("#sale-debt", 0, Number.MAX_SAFE_INTEGER, "Indique um crédito igual ou superior a zero.");
+    const invalido = [area, valorM2, comissao, credito].find((item) => !item.input.checkValidity());
+    if (invalido) {
+      invalido.input.reportValidity();
+      return;
+    }
+    const calculo = estimarValorLiquido({
+      area: area.valor,
+      tipo: document.querySelector<HTMLSelectElement>("#sale-type")!.value as "apartamento" | "moradia",
+      valorM2: valorM2.valor,
+      comissao: comissao.valor,
+      credito: credito.valor
+    });
+    result.textContent = `${moeda(calculo.minimo)} a ${moeda(calculo.maximo)}`;
+  }
+  form.addEventListener("submit", (event) => { event.preventDefault(); calcular(); });
+  calcular();
+</script>

@@ -1,0 +1,28 @@
+{
+  "name": "guia-do-proprietario-portal",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run images:convert && npm run validate:data && npm run validate:copy && npm run generate:og && astro check && astro build",
+    "preview": "astro preview",
+    "images:convert": "node scripts/converter-imagens.mjs",
+    "validate:copy": "node scripts/validate-copy.mjs",
+    "validate:data": "node scripts/validar-dados.mjs",
+    "generate:og": "node scripts/generate-og.mjs",
+    "dados:ine": "node scripts/obter-precos-ine.mjs",
+    "dados:imi": "node scripts/obter-taxas-imi.mjs --ano 2025"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "latest",
+    "@astrojs/sitemap": "latest",
+    "astro": "^7.1.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "latest",
+    "lighthouse": "^13.4.1",
+    "sharp": "^0.35.3",
+    "typescript": "latest"
+  }
+}
