@@ -5,6 +5,7 @@ import ArticleCard from "../components/ArticleCard.astro";
 import Newsletter from "../components/Newsletter.astro";
 import ProximosPrazos from "../components/ProximosPrazos.astro";
 import { formatarData, pilares } from "../config";
+import { obterImagensArtigo } from "../lib/imagens-artigos";
 
 const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
 const artigos = todosArtigos
@@ -45,8 +46,8 @@ const perguntasDoDia = [
       </picture>
       <div class="hero-content">
         <p class="eyebrow">GUIA DO PROPRIETÁRIO</p>
-        <h1>A sua casa dá trabalho. Nós tratamos da parte chata.</h1>
-        <p class="hero-copy">Do bolor na parede ao IMI que chega em agosto, dizemos-lhe o que fazer, por onde começar e quanto custa.</p>
+        <h1>Tudo o que precisa de saber sobre a sua casa, num só sítio.</h1>
+        <p class="hero-copy">Impostos, obras, arrendamento, condomínio, venda: ...tudo o que dá trabalho numa casa, explicado.</p>
         <div class="hero-actions">
           <a class="button" href="#perguntas-dia">Começar pelas dúvidas mais comuns</a>
           <a class="button secondary" href="#este-mes">Ver os prazos deste mês</a>
@@ -81,8 +82,8 @@ const perguntasDoDia = [
         {perguntasDoDia.map((item) => (
           <a class="daily-question-card" href={`/casa/${item.artigo.id}/`}>
             <picture>
-              <source srcset={pilarCasa.imagemAvif} type="image/avif" />
-              <img src={pilarCasa.imagemWebp} alt={pilarCasa.alt} width="1200" height="675" loading="lazy" />
+              <source srcset={obterImagensArtigo(item.artigo).avif} type="image/avif" />
+              <img src={obterImagensArtigo(item.artigo).webp} alt={pilarCasa.alt} width="1200" height="675" loading="lazy" />
             </picture>
             <h3>{item.pergunta}</h3>
           </a>
