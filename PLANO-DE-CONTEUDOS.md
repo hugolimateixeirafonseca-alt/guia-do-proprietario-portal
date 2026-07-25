@@ -8,6 +8,7 @@ Notas de disciplina: os números concretos de 2026 indicados neste plano (coefic
 
 - Funil: redes sociais e Google trazem a visita; o artigo responde e empurra para um simulador, para o calendário ou para a newsletter; a newsletter retém; a monetização (leads, afiliados) entra mais tarde nas páginas de intenção.
 - Dois motores de tráfego com regras diferentes: SEO quer poucos artigos completos e atualizados; redes querem cadência diária e ganchos. Cada artigo é escrito uma vez e desdobrado em 3 a 6 publicações sociais.
+- Rumo definido a 2026-07-25: o eixo do portal é o dia a dia da casa, não a fiscalidade. O pilar Casa e obras e os temas de senso comum têm prioridade de escrita e de destaque; o fiscal e o jurídico ficam ao mínimo e como camada de fundo. Os artigos fiscais já escritos publicam-se, mas a fila nova é dominada por Casa e obras. A proporção 60/40 essencial/detalhado mantém-se, com o essencial a puxar para o quotidiano.
 - Prioridades de lançamento: P1 escreve-se primeiro (8 artigos, são os briefs iniciais), P2 no primeiro trimestre, P3 depois. Dentro de cada pilar, a ordem aproveita a sazonalidade fiscal.
 - Equilíbrio obrigatório entre dois níveis, decidido a 2026-07-24 depois de o portal ficar demasiado técnico. Cada artigo tem um `nivel` no frontmatter:
   - `essencial`: escrito para quem nunca tratou do assunto. Frases curtas, zero jargão sem tradução imediata, números concretos, custos reais, imagem. Máximo 800 palavras. É a porta de entrada e a maioria do que se publica.

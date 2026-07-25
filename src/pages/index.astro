@@ -4,13 +4,15 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import Newsletter from "../components/Newsletter.astro";
 import ProximosPrazos from "../components/ProximosPrazos.astro";
-import { formatarData } from "../config";
+import { formatarData, pilares } from "../config";
 
-const artigos = (await getCollection("artigos", ({ data }) => !data.rascunho))
+const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
+const artigos = todosArtigos
   .filter((artigo) => artigo.data.destaque && artigo.data.nivel === "essencial")
   .sort((a, b) => b.data.revisto.valueOf() - a.data.revisto.valueOf());
 const notas = (await getCollection("notas")).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
 const notaRecente = notas[0];
+const pilarCasa = pilares.find((pilar) => pilar.slug === "casa")!;
 const situacoes = [
   { titulo: "Vou vender a casa.", url: "/vender/", imagem: "situacao-vender", alt: "Casa portuguesa com placa de venda" },
   { titulo: "Quanto vou pagar de IMI?", url: "/simuladores/imi/", imagem: "situacao-imi", alt: "Casa portuguesa com calendário e moeda de euro" },
@@ -20,13 +22,17 @@ const situacoes = [
   { titulo: "Vivo em condomínio.", url: "/condominio/", imagem: "situacao-condominio", alt: "Prédio de condomínio português com varandas" },
   { titulo: "Quanto vale a minha casa?", url: "/simuladores/valor-liquido-venda/", imagem: "situacao-valor", alt: "Casa portuguesa com etiqueta de valor" }
 ];
-const perguntasRapidas = [
-  { pergunta: "Quanto custa pintar a casa?", url: "/casa/quanto-custa-pintar-casa/" },
-  { pergunta: "Quem paga uma infiltração?", url: "/casa/quem-paga-infiltracao/" },
-  { pergunta: "Quando se paga o IMI?", url: "/impostos/imi-explicado-simples/" },
-  { pergunta: "O que fazer com uma casa herdada?", url: "/vender/o-que-fazer-casa-herdada/" },
-  { pergunta: "Como baixar a conta da luz?", url: "/casa/como-baixar-conta-luz/" }
-];
+const perguntasDoDia = [
+  { pergunta: "Quanto custa pintar a casa?", artigo: "quanto-custa-pintar-casa" },
+  { pergunta: "De quem é a culpa de uma infiltração?", artigo: "quem-paga-infiltracao" },
+  { pergunta: "Como baixar a conta da luz?", artigo: "como-baixar-conta-luz" },
+  { pergunta: "O que fazer com o bolor?", artigo: "o-que-fazer-com-bolor" },
+  { pergunta: "O que fazer com um vizinho barulhento?", artigo: "vizinho-barulhento" },
+  { pergunta: "Quanto custa uma remodelação?", artigo: "quanto-custa-remodelacao" }
+].flatMap((item) => {
+  const artigo = todosArtigos.find((entrada) => entrada.id === item.artigo && entrada.data.pilar === "casa");
+  return artigo ? [{ ...item, artigo }] : [];
+});
 ---
 <BaseLayout>
   <section class="hero">
@@ -36,18 +42,18 @@ const perguntasRapidas = [
         <img src="/imagens/hero-home.webp" width="1600" height="900" fetchpriority="high" alt="Rua de bairro portuguesa com casas de azulejo, varandas e telhados vermelhos" />
       </picture>
       <div class="hero-content">
-        <p class="eyebrow">Guia do Proprietário</p>
-        <h1>A sua casa, <em>sem complicações.</em></h1>
-        <p class="hero-copy">Prazos, impostos, arrendamento e venda explicados em português de todos os dias. Com fontes oficiais e ferramentas gratuitas.</p>
+        <p class="eyebrow">GUIA DO PROPRIETÁRIO</p>
+        <h1>A sua casa dá trabalho. Nós tratamos da parte chata.</h1>
+        <p class="hero-copy">Do bolor na parede ao IMI que chega em agosto, dizemos-lhe o que fazer, por onde começar e quanto custa.</p>
         <div class="hero-actions">
-          <a class="button" href="/calendario/">Ver os prazos deste mês</a>
-          <a class="button secondary" href="#simuladores">Usar os simuladores</a>
+          <a class="button" href="#perguntas-dia">Começar pelas dúvidas mais comuns</a>
+          <a class="button secondary" href="#este-mes">Ver os prazos deste mês</a>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section current-month">
+  <section class="section current-month" id="este-mes">
     <div class="container">
       <div class="section-heading"><p class="eyebrow">Agora</p><h2>Este mês</h2></div>
       <div class="current-grid">
@@ -62,9 +68,30 @@ const perguntasRapidas = [
     </div>
   </section>
 
+  <section class="section daily-questions-section" id="perguntas-dia">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">O DIA A DIA DA CASA</p>
+        <h2>Comece pela dúvida que o trouxe aqui.</h2>
+        <p>As perguntas que todos os proprietários fazem mais cedo ou mais tarde.</p>
+      </div>
+      <div class="daily-questions-grid">
+        {perguntasDoDia.map((item) => (
+          <a class="daily-question-card" href={`/casa/${item.artigo.id}/`}>
+            <picture>
+              <source srcset={pilarCasa.imagemAvif} type="image/avif" />
+              <img src={pilarCasa.imagemWebp} alt={pilarCasa.alt} width="1200" height="675" loading="lazy" />
+            </picture>
+            <h3>{item.pergunta}</h3>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
   <section class="section soft">
     <div class="container">
-      <div class="section-heading"><h2>A sua situação</h2><p>Comece pelo que precisa de resolver.</p></div>
+      <div class="section-heading"><h2>A sua situação</h2><p>Está a tratar de algo maior? Escolha o ponto de partida.</p></div>
       <div class="situation-grid">
         {situacoes.map((situacao) => (
           <a class="situation-card" href={situacao.url}>
@@ -82,15 +109,18 @@ const perguntasRapidas = [
 
   <section class="section">
     <div class="container">
-      <div class="section-heading"><p class="eyebrow">Comece por aqui</p><h2>Guias essenciais</h2></div>
+      <div class="section-heading"><p class="eyebrow">PARA LER COM CALMA</p><h2>Guias que explicam tudo, passo a passo.</h2></div>
       <div class="article-grid">{artigos.map((artigo) => <ArticleCard artigo={artigo} />)}</div>
     </div>
   </section>
 
-  <section class="section quick-links-section">
+  <section class="section" id="simuladores">
     <div class="container">
-      <div class="section-heading"><p class="eyebrow">Respostas diretas</p><h2>Perguntas rápidas</h2></div>
-      <ul class="quick-links">{perguntasRapidas.map((item) => <li><a href={item.url}>{item.pergunta}<span aria-hidden="true">›</span></a></li>)}</ul>
+      <div class="section-heading"><p class="eyebrow">Ferramentas abertas</p><h2>Faça uma primeira simulação sem deixar contactos.</h2></div>
+      <div class="tools-grid">
+        <a class="tool-card" href="/simuladores/imi/"><h3>Simulador de IMI</h3><p>Estime o imposto anual a partir do valor patrimonial e da taxa municipal.</p></a>
+        <a class="tool-card" href="/simuladores/valor-liquido-venda/"><h3>Valor líquido da venda</h3><p>Veja quanto pode sobrar depois dos principais custos.</p></a>
+      </div>
     </div>
   </section>
 
@@ -107,16 +137,6 @@ const perguntasRapidas = [
         ))}
       </div>
       <p class="section-link"><a href="/novidades/">Todas as novidades</a></p>
-    </div>
-  </section>
-
-  <section class="section" id="simuladores">
-    <div class="container">
-      <div class="section-heading"><p class="eyebrow">Ferramentas abertas</p><h2>Faça uma primeira simulação sem deixar contactos.</h2></div>
-      <div class="tools-grid">
-        <a class="tool-card" href="/simuladores/imi/"><h3>Simulador de IMI</h3><p>Estime o imposto anual a partir do valor patrimonial e da taxa municipal.</p></a>
-        <a class="tool-card" href="/simuladores/valor-liquido-venda/"><h3>Valor líquido da venda</h3><p>Veja quanto pode sobrar depois dos principais custos.</p></a>
-      </div>
     </div>
   </section>
   <Newsletter />

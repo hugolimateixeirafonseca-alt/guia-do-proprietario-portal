@@ -15,8 +15,9 @@ const entrada = glossario.termos.find((item) =>
   normalizar(item.termo) === normalizar(nome)
 );
 const destino = entrada ? `/glossario/#${entrada.slug}` : "/glossario/";
+const identificador = `termo-${entrada?.slug ?? normalizar(sigla).replace(/\s+/g, "-")}`;
 ---
-<details class="termo">
-  <summary>{sigla}</summary>
-  <span><strong>{nome}</strong>: <slot /> <a href={destino}>Ver no glossário</a></span>
-</details>
+<span class="termo">
+  <button type="button" class="termo-gatilho" aria-describedby={identificador}>{sigla}</button>
+  <span class="termo-definicao" id={identificador} role="tooltip"><strong>{nome}</strong>: <slot /> <a href={destino}>Ver no glossário</a></span>
+</span>

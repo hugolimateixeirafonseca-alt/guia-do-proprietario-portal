@@ -83,3 +83,15 @@ Este ficheiro regista decisões que afetam várias áreas do projeto. Uma altera
 
 - Decisão: analítica com Cloudflare Web Analytics, sem cookies, ativada no painel do Cloudflare Pages no momento do primeiro deploy. Sem Google Analytics, sem tag managers e sem pixels de redes sociais no portal editorial.
 - Decisão: a newsletter fica sem fornecedor e desativada por agora. Não se recolhem emails em nenhum sistema provisório, incluindo folhas de cálculo, por não garantirem duplo consentimento, prova de subscrição nem mecanismo de cancelamento.
+
+### D016. Rumo editorial e postura sobre dados (25 jul 2026)
+
+- Decisão: priorizar artigos correntes e de senso comum, com o pilar Casa e obras à cabeça (custos, manutenção, humidade, energia, vizinhança). O conteúdo fiscal e jurídico fica ao mínimo indispensável e como camada de fundo; os artigos fiscais já escritos mantêm-se publicados, mas não se abrem novos nessa linha sem razão forte.
+- Decisão: não há verificação manual dos dados de IMI e preços concelho a concelho antes de publicar. A exposição é controlada pela própria página, que mostra sempre a fonte, a data e o enquadramento de estimativa, com remissão para o Portal das Finanças e o INE. Erros pontuais corrigem-se no ficheiro de dados.
+- Impacto: a homepage e a navegação passam a dar destaque ao dia a dia (ver ALTERACOES-PORTAL-V5.md); o plano de conteúdos reordena-se em torno de Casa e obras.
+
+### D017. Publicação e independência operacional (25 jul 2026)
+
+- Decisão: o portal vive em repositório GitHub com deploy automático no Cloudflare Pages a cada commit. Publicar um artigo é adicionar um ficheiro .mdx em src/content/artigos/ pelo browser; o site reconstrói sozinho. O Codex deixa de ser necessário para publicar conteúdo.
+- Analítica: Cloudflare Web Analytics ativa. Conversão automática de PNG/JPG para AVIF e WebP no build. Campo rascunho: true mantém um artigo fora do site e dos feeds.
+- Domínio: guiadoproprietario.pt fica por ligar. Só se aponta ao Cloudflare quando o site estiver pronto para ser promovido, para o endereço definitivo ser o que o Google indexa. Até lá usa-se o endereço .pages.dev.
