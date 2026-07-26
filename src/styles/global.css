@@ -309,7 +309,8 @@ th { font-size: 11px; text-transform: uppercase; }
   .newsletter form > div { display: grid; }
   .site-footer { grid-template-columns: 1fr; }
   .site-footer small { grid-column: auto; }
-  .pillar-hero img { width: 210px; }
+  .pillar-hero picture { width: 100%; overflow: hidden; border-radius: 14px; }
+  .pillar-hero img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 0; }
   .article-illustration { width: 100%; max-height: 310px; }
   .deadline-heading { display: block; margin-bottom: 18px; }
   .deadline-heading h2 { margin-bottom: 5px; }
