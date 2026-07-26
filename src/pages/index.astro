@@ -56,21 +56,6 @@ const perguntasDoDia = [
     </div>
   </section>
 
-  <section class="section current-month" id="este-mes">
-    <div class="container">
-      <div class="section-heading"><p class="eyebrow">Agora</p><h2>Este mês</h2></div>
-      <div class="current-grid">
-        <ProximosPrazos dataBuild={new Date()} />
-        <article class="latest-note">
-          <p class="eyebrow">Última novidade</p>
-          <time datetime={notaRecente.data.data.toISOString()}>{formatarData(notaRecente.data.data)}</time>
-          <h3><a href={`/novidades/${notaRecente.id}/`}>{notaRecente.data.titulo}</a></h3>
-          <p>{notaRecente.data.resumo}</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
   <section class="section daily-questions-section" id="perguntas-dia">
     <div class="container">
       <div class="section-heading">
@@ -117,9 +102,24 @@ const perguntasDoDia = [
     </div>
   </section>
 
+  <section class="section current-month" id="este-mes">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Calendário</p><h2>Este mês</h2></div>
+      <div class="current-grid">
+        <ProximosPrazos dataBuild={new Date()} />
+        <article class="latest-note">
+          <p class="eyebrow">Última novidade</p>
+          <time datetime={notaRecente.data.data.toISOString()}>{formatarData(notaRecente.data.data)}</time>
+          <h3><a href={`/novidades/${notaRecente.id}/`}>{notaRecente.data.titulo}</a></h3>
+          <p>{notaRecente.data.resumo}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="simuladores">
     <div class="container">
-      <div class="section-heading"><p class="eyebrow">Ferramentas abertas</p><h2>Faça uma primeira simulação sem deixar contactos.</h2></div>
+      <div class="section-heading"><p class="eyebrow">Ferramentas abertas</p><h2>Faça uma simulação sem custos!</h2></div>
       <div class="tools-grid">
         <a class="tool-card" href="/simuladores/imi/"><h3>Simulador de IMI</h3><p>Estime o imposto anual a partir do valor patrimonial e da taxa municipal.</p></a>
         <a class="tool-card" href="/simuladores/valor-liquido-venda/"><h3>Valor líquido da venda</h3><p>Veja quanto pode sobrar depois dos principais custos.</p></a>

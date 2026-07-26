@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { site, pilares } from "../config";
+import Marca from "../components/Marca.astro";
 
 interface Props {
   titulo?: string;
@@ -48,7 +49,7 @@ const organization = {
   <body>
     <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
     <header class="site-header">
-      <a class="brand" href="/"><span class="brand-mark">GP</span><span>Guia do Proprietário</span></a>
+      <a class="brand" href="/"><Marca /><span>Guia do Proprietário</span></a>
       <nav aria-label="Navegação principal">
         {pilares.map((pilar) => <a href={`/${pilar.slug}/`}>{pilar.nome}</a>)}
         <a href="/calendario/">Calendário</a>
@@ -59,7 +60,7 @@ const organization = {
     </header>
     <main id="conteudo"><slot /></main>
     <footer class="site-footer">
-      <div><a class="brand footer-brand" href="/"><span class="brand-mark">GP</span><span>Guia do Proprietário</span></a><p>Informação prática para proprietários em Portugal.</p></div>
+      <div><a class="brand footer-brand" href="/"><Marca /><span>Guia do Proprietário</span></a><p>Informação prática para proprietários em Portugal.</p></div>
       <nav aria-label="Informação"><a href="/sobre/">Sobre</a><a href="/metodologia/">Metodologia</a><a href="/glossario/">Glossário</a><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><a href="/rss.xml">RSS</a></nav>
       <small>© {new Date().getFullYear()} Guia do Proprietário. Conteúdo informativo, sujeito a revisão.</small>
     </footer>
