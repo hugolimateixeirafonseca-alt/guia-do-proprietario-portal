@@ -28,6 +28,13 @@ const organization = {
   name: site.nome,
   url: site.dominio
 };
+
+const linksNavegacao = [
+  ...pilares.map((pilar) => ({ nome: pilar.nome, url: `/${pilar.slug}/` })),
+  { nome: "Calendário", url: "/calendario/" },
+  { nome: "Novidades", url: "/novidades/" },
+  { nome: "Simuladores", url: "/simuladores/" }
+];
 ---
 <!doctype html>
 <html lang="pt-PT">
@@ -50,13 +57,15 @@ const organization = {
     <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
     <header class="site-header">
       <a class="brand" href="/"><Marca /><span>Guia do Proprietário</span></a>
-      <nav aria-label="Navegação principal">
-        {pilares.map((pilar) => <a href={`/${pilar.slug}/`}>{pilar.nome}</a>)}
-        <a href="/calendario/">Calendário</a>
-        <a href="/novidades/">Novidades</a>
-        <a href="/simuladores/">Simuladores</a>
+      <nav class="desktop-nav" aria-label="Navegação principal">
+        {linksNavegacao.map((link) => <a href={link.url}>{link.nome}</a>)}
       </nav>
-      <a class="header-cta" href="/ligacoes/">Explorar</a>
+      <details class="mobile-menu">
+        <summary>Explorar</summary>
+        <nav aria-label="Navegação móvel">
+          {linksNavegacao.map((link) => <a href={link.url}>{link.nome}</a>)}
+        </nav>
+      </details>
     </header>
     <main id="conteudo"><slot /></main>
     <footer class="site-footer">
