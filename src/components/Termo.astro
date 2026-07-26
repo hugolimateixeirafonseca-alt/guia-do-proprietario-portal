@@ -2,22 +2,23 @@
 import glossario from "../dados/glossario.json";
 
 interface Props {
-  sigla: string;
+  sigla?: string;
   nome: string;
   slug?: string;
 }
 
 const { sigla, nome, slug } = Astro.props;
 const normalizar = (valor: string) => valor.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+const rotulo = sigla?.trim() || nome;
 const entrada = glossario.termos.find((item) =>
   item.slug === slug ||
-  normalizar(item.termo) === normalizar(sigla) ||
+  normalizar(item.termo) === normalizar(rotulo) ||
   normalizar(item.termo) === normalizar(nome)
 );
 const destino = entrada ? `/glossario/#${entrada.slug}` : "/glossario/";
-const identificador = `termo-${entrada?.slug ?? normalizar(sigla).replace(/\s+/g, "-")}`;
+const identificador = `termo-${entrada?.slug ?? normalizar(rotulo).replace(/\s+/g, "-")}`;
 ---
 <span class="termo">
-  <button type="button" class="termo-gatilho" aria-describedby={identificador}>{sigla}</button>
+  <button type="button" class="termo-gatilho" aria-describedby={identificador}>{rotulo}</button>
   <span class="termo-definicao" id={identificador} role="tooltip"><strong>{nome}</strong>: <slot /> <a href={destino}>Ver no glossário</a></span>
 </span>

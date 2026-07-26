@@ -5,6 +5,7 @@ import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import Newsletter from "../../components/Newsletter.astro";
 import ProximosPrazos from "../../components/ProximosPrazos.astro";
 import Custos from "../../components/Custos.astro";
+import Termo from "../../components/Termo.astro";
 import { avisos, formatarData, pilares, site } from "../../config";
 import { obterImagensArtigo } from "../../lib/imagens-artigos";
 
@@ -48,7 +49,7 @@ const artigoPar = artigo.data.par
     {artigo.data.exemplo && <aside class="number-example"><h2>{artigo.data.exemplo.titulo}</h2><p>{artigo.data.exemplo.texto}</p></aside>}
     {artigo.data.aviso !== "nenhum" && <aside class="notice">{avisos[artigo.data.aviso]}</aside>}
     {artigo.data.custos && <Custos titulo={artigo.data.custos.titulo} itens={artigo.data.custos.itens} />}
-    <div class="article-body"><Content /></div>
+    <div class="article-body"><Content components={{ Termo }} /></div>
     {artigo.data.perguntas_rapidas && <section class="quick-questions"><h2>Perguntas rápidas</h2>{artigo.data.perguntas_rapidas.map((item) => <details><summary>{item.pergunta}</summary><p>{item.resposta}</p></details>)}</section>}
     {artigoPar && <aside class="paired-article"><p>{artigo.data.nivel === "essencial" ? "Prefere a versão completa?" : "Prefere a versão simples?"}</p><a href={`/${artigoPar.data.pilar}/${artigoPar.id}/`}>{artigoPar.data.titulo}</a></aside>}
     {artigo.data.pilar === "impostos" && <ProximosPrazos dataBuild={new Date()} quantidade={3} compacto />}
