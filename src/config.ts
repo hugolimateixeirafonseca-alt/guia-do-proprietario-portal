@@ -5,6 +5,8 @@ export const site = {
   email: "ola@guiadoproprietario.pt"
 };
 
+export const NEWSLETTER_ATIVA = false;
+
 export const pilares = [
   { slug: "casa", nome: "Casa e obras", descricao: "Custos reais, manutenção, energia e vizinhança. A casa vivida, não a casa administrativa.", imagemAvif: "/imagens/pilar-casa.avif", imagemWebp: "/imagens/pilar-casa.webp", alt: "Casa portuguesa em manutenção com escadote e lata de tinta" },
   { slug: "vender", nome: "Vender casa", descricao: "Prepare documentos, custos e decisões antes de colocar o imóvel no mercado.", imagemAvif: "/imagens/pilar-vender.avif", imagemWebp: "/imagens/pilar-vender.webp", alt: "Casa portuguesa preparada para venda, com placa, chaves e documentos" },

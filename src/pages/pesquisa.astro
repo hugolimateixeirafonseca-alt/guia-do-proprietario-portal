@@ -1,0 +1,123 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout titulo="Pesquisar" descricao="Pesquise artigos, temas, ferramentas e páginas do Guia do Proprietário.">
+  <section class="page-hero search-hero">
+    <div class="container narrow">
+      <p class="eyebrow">Pesquisa</p>
+      <h1>O que precisa de encontrar?</h1>
+      <p>Pesquise por um problema, imposto, prazo, concelho ou tarefa da casa.</p>
+      <form class="search-form" id="search-form" role="search">
+        <label for="search-input">Pesquisar no Guia do Proprietário</label>
+        <div>
+          <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Por exemplo: infiltração, IMI ou vender casa" />
+          <button class="button" type="submit">Pesquisar</button>
+        </div>
+      </form>
+      <p class="search-status" id="search-status" aria-live="polite">Escreva pelo menos duas letras.</p>
+    </div>
+  </section>
+  <section class="section search-results-section">
+    <div class="container narrow">
+      <ol class="search-results" id="search-results"></ol>
+      <noscript><p>Esta pesquisa funciona no seu dispositivo e precisa de JavaScript. Pode continuar a navegar pelos temas no cabeçalho.</p></noscript>
+    </div>
+  </section>
+  <script is:inline>
+    const form = document.querySelector("#search-form");
+    const input = document.querySelector("#search-input");
+    const status = document.querySelector("#search-status");
+    const lista = document.querySelector("#search-results");
+    let indicePromise;
+    let temporizador;
+
+    const normalizar = (valor) => valor
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLocaleLowerCase("pt-PT")
+      .trim();
+
+    const carregarIndice = () => {
+      indicePromise ??= fetch("/indice-pesquisa.json").then((resposta) => {
+        if (!resposta.ok) throw new Error("Não foi possível carregar a pesquisa.");
+        return resposta.json();
+      });
+      return indicePromise;
+    };
+
+    const pontuar = (entrada, termos) => {
+      const titulo = normalizar(entrada.titulo);
+      const descricao = normalizar(entrada.descricao);
+      const pilar = normalizar(entrada.pilar);
+      const completo = `${titulo} ${descricao} ${pilar}`;
+      if (!termos.every((termo) => completo.includes(termo))) return 0;
+      return termos.reduce((total, termo) => total
+        + (titulo.startsWith(termo) ? 8 : 0)
+        + (titulo.includes(termo) ? 5 : 0)
+        + (pilar.includes(termo) ? 3 : 0)
+        + (descricao.includes(termo) ? 1 : 0), 0);
+    };
+
+    const mostrarResultados = (resultados, pesquisa) => {
+      lista.replaceChildren();
+      if (!resultados.length) {
+        status.textContent = `Não encontrámos resultados para “${pesquisa}”. Tente palavras mais simples.`;
+        return;
+      }
+      status.textContent = `${resultados.length} resultado${resultados.length === 1 ? "" : "s"} para “${pesquisa}”.`;
+      for (const entrada of resultados) {
+        const item = document.createElement("li");
+        const link = document.createElement("a");
+        const contexto = document.createElement("span");
+        const titulo = document.createElement("strong");
+        const trecho = document.createElement("p");
+        link.href = entrada.url;
+        contexto.className = "search-result-context";
+        contexto.textContent = entrada.pilar;
+        titulo.textContent = entrada.titulo;
+        trecho.textContent = entrada.descricao;
+        link.append(contexto, titulo, trecho);
+        item.append(link);
+        lista.append(item);
+      }
+    };
+
+    const pesquisar = async () => {
+      const pesquisa = input.value.trim();
+      const normalizada = normalizar(pesquisa);
+      const url = new URL(window.location.href);
+      if (pesquisa) url.searchParams.set("q", pesquisa); else url.searchParams.delete("q");
+      history.replaceState(null, "", url);
+      if (normalizada.length < 2) {
+        lista.replaceChildren();
+        status.textContent = "Escreva pelo menos duas letras.";
+        return;
+      }
+      status.textContent = "A pesquisar…";
+      try {
+        const indice = await carregarIndice();
+        const termos = normalizada.split(/\s+/).filter(Boolean);
+        const resultados = indice
+          .map((entrada) => ({ ...entrada, pontuacao: pontuar(entrada, termos) }))
+          .filter((entrada) => entrada.pontuacao > 0)
+          .sort((a, b) => b.pontuacao - a.pontuacao || a.titulo.localeCompare(b.titulo, "pt-PT"))
+          .slice(0, 30);
+        mostrarResultados(resultados, pesquisa);
+      } catch {
+        status.textContent = "A pesquisa não ficou disponível. Tente novamente dentro de momentos.";
+      }
+    };
+
+    form.addEventListener("submit", (evento) => { evento.preventDefault(); pesquisar(); });
+    input.addEventListener("input", () => {
+      clearTimeout(temporizador);
+      temporizador = setTimeout(pesquisar, 180);
+    });
+
+    const pesquisaInicial = new URLSearchParams(window.location.search).get("q");
+    if (pesquisaInicial) {
+      input.value = pesquisaInicial;
+      pesquisar();
+    }
+  </script>
+</BaseLayout>

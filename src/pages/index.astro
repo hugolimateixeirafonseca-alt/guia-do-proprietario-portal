@@ -4,7 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import Newsletter from "../components/Newsletter.astro";
 import ProximosPrazos from "../components/ProximosPrazos.astro";
-import { formatarData, pilares } from "../config";
+import { formatarData, NEWSLETTER_ATIVA, pilares } from "../config";
 import { obterImagensArtigo } from "../lib/imagens-artigos";
 
 const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
@@ -142,5 +142,5 @@ const perguntasDoDia = [
       <p class="section-link"><a href="/novidades/">Todas as novidades</a></p>
     </div>
   </section>
-  <Newsletter />
+  {NEWSLETTER_ATIVA && <Newsletter />}
 </BaseLayout>

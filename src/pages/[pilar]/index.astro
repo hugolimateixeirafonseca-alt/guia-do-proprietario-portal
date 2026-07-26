@@ -4,7 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ArticleCard from "../../components/ArticleCard.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import Newsletter from "../../components/Newsletter.astro";
-import { pilares } from "../../config";
+import { NEWSLETTER_ATIVA, pilares } from "../../config";
 
 export function getStaticPaths() {
   return pilares.map((pilar) => ({ params: { pilar: pilar.slug }, props: { pilar } }));
@@ -18,5 +18,5 @@ const artigos = (await getCollection("artigos", ({ data }) => data.pilar === pil
 <BaseLayout titulo={pilar.nome} descricao={pilar.descricao}>
   <section class="page-hero"><div class="container pillar-hero"><div><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: pilar.nome }]} /><p class="eyebrow">Guia por tema</p><h1>{pilar.nome}</h1><p>{pilar.descricao}</p></div><picture><source srcset={pilar.imagemAvif} type="image/avif" /><img src={pilar.imagemWebp} alt={pilar.alt} width="1200" height="675" loading="lazy" /></picture></div></section>
   <section class="section"><div class="container"><div class="article-grid">{artigos.map((artigo) => <ArticleCard artigo={artigo} />)}</div></div></section>
-  <Newsletter />
+  {NEWSLETTER_ATIVA && <Newsletter />}
 </BaseLayout>

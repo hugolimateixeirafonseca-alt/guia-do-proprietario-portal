@@ -9,7 +9,7 @@ const imagem = obterImagensArtigo(artigo);
 ---
 <article class="article-card">
   <a href={`/${artigo.data.pilar}/${artigo.id}/`}>
-    <picture><source srcset={imagem.avif} type="image/avif" /><img src={imagem.webp} alt="" width="1200" height="675" loading="lazy" /></picture>
+    <picture><source srcset={imagem.avif} type="image/avif" /><img src={imagem.webp} alt={artigo.data.imagem_alt || pilar?.alt || ""} width="1200" height="675" loading="lazy" /></picture>
     <span class="card-pillar">{pilar?.nome}{artigo.data.nivel === "detalhado" && " · Versão completa"}</span>
     <h3>{artigo.data.titulo}</h3>
     <p>{artigo.data.descricao}</p>

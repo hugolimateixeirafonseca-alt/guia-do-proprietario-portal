@@ -40,8 +40,12 @@ const artigos = defineCollection({
     rascunho: z.boolean().default(false),
     destaque: z.boolean().default(false),
     imagem_og: z.string().default("auto"),
-    imagem_capa: z.string().min(1).optional()
+    imagem_capa: z.string().min(1).optional(),
+    imagem_alt: z.string().min(1).optional()
   }).superRefine((artigo, ctx) => {
+    if (artigo.imagem_capa && artigo.imagem_capa !== "auto" && !artigo.imagem_alt) {
+      ctx.addIssue({ code: "custom", path: ["imagem_alt"], message: "Uma imagem própria precisa de texto alternativo descritivo." });
+    }
     if (artigo.nivel === "essencial" && !artigo.exemplo) {
       ctx.addIssue({ code: "custom", path: ["exemplo"], message: "Um artigo essencial precisa de um exemplo com números." });
     }
