@@ -1,0 +1,109 @@
+---
+# O título apresentado no cartão, no cabeçalho e nos motores de pesquisa. OBRIGATÓRIO.
+titulo: "Título claro do artigo"
+
+# Resumo usado nos cartões e na descrição da página. OBRIGATÓRIO. Entre 80 e 180 caracteres.
+descricao: "Explique em 80 a 180 caracteres o que o leitor vai aprender, qual o problema resolvido e o resultado prático que pode esperar."
+
+# Resposta direta apresentada no início do artigo. OBRIGATÓRIO.
+resposta_rapida: "Responda à pergunta principal em duas ou três frases claras, antes de desenvolver o tema."
+
+# Profundidade do artigo. OBRIGATÓRIO. Valores possíveis: essencial ou detalhado.
+# Em Casa e obras, use sempre essencial.
+nivel: essencial
+
+# Exemplo concreto com números ou uma situação prática. OBRIGATÓRIO em artigos essenciais. OPCIONAL em detalhados.
+exemplo:
+  titulo: "Exemplo com números"
+  texto: "Descreva uma situação concreta que ajude o leitor a aplicar a informação."
+
+# Slug do artigo que apresenta a outra versão do mesmo tema. OPCIONAL.
+# Exemplo: se este for essencial, pode apontar para a versão detalhada.
+# Remova o campo inteiro quando não existir artigo par.
+par: "slug-da-outra-versao"
+
+# Bloco de perguntas apresentado no fim do artigo. OBRIGATÓRIO em artigos essenciais. OPCIONAL em detalhados.
+# Quando usado, tem de conter entre 3 e 5 pares com este formato exato.
+perguntas_rapidas:
+  - pergunta: "Qual é a primeira dúvida mais comum?"
+    resposta: "Resposta curta, direta e suficiente para esclarecer a dúvida."
+  - pergunta: "Qual é a segunda dúvida mais comum?"
+    resposta: "Segunda resposta curta e direta."
+  - pergunta: "Qual é a terceira dúvida mais comum?"
+    resposta: "Terceira resposta curta e direta."
+
+# Quadro de custos apresentado antes do corpo do artigo. OPCIONAL.
+# Se usar este bloco, inclua pelo menos um item.
+# O intervalo tem obrigatoriamente a palavra «a», por exemplo «4 € a 16 € por m²».
+custos:
+  titulo: "Intervalos para preparar o orçamento"
+  itens:
+    - item: "Nome do trabalho ou despesa"
+      intervalo: "100 € a 300 €"
+      nota: "Explique o que pode fazer o valor variar."
+
+# Tema editorial do artigo. OBRIGATÓRIO.
+# Valores possíveis: casa, vender, impostos, arrendar ou condominio.
+pilar: casa
+
+# Data da primeira publicação, em AAAA-MM-DD. OBRIGATÓRIO.
+publicado: 2026-07-26
+
+# Data da última revisão, em AAAA-MM-DD. OBRIGATÓRIO.
+revisto: 2026-07-26
+
+# Autor editorial. OBRIGATÓRIO. O valor atual tem de ser sempre redacao.
+autor: redacao
+
+# Nome ou indicação da revisão profissional. OBRIGATÓRIO, mas pode ficar vazio.
+revisao_profissional: ""
+
+# Fontes utilizadas. OBRIGATÓRIO. Inclua pelo menos uma fonte com nome e URL válidos.
+fontes:
+  - nome: "Nome da entidade ou publicação"
+    url: "https://www.exemplo.pt/"
+
+# Tipo de aviso apresentado ao leitor. OBRIGATÓRIO.
+# Valores possíveis: fiscal, juridico, financeiro ou nenhum.
+aviso: nenhum
+
+# Impede a publicação no site, RSS e feed JSON. OPCIONAL. Por omissão é false.
+rascunho: true
+
+# Permite destacar o artigo na homepage quando também é essencial. OPCIONAL. Por omissão é false.
+destaque: false
+
+# Imagem usada na partilha social. OPCIONAL. Use auto para gerar o cartão automaticamente.
+imagem_og: auto
+
+# Imagem própria para o cartão e cabeçalho do artigo. OPCIONAL.
+# Se remover este campo ou usar auto, o site escolhe uma imagem do pilar a partir do slug.
+imagem_capa: auto
+---
+
+<!--
+DIFERENÇAS ENTRE NÍVEIS
+
+Artigo essencial:
+- nivel: essencial
+- exemplo é obrigatório
+- perguntas_rapidas é obrigatório e precisa de 3 a 5 pares
+- todos os artigos do pilar casa têm de ser essenciais
+
+Artigo detalhado:
+- nivel: detalhado
+- exemplo é opcional e pode ser removido
+- perguntas_rapidas é opcional e pode ser removido
+- os restantes campos obrigatórios mantêm-se
+
+Para publicar:
+1. Copie este ficheiro para src/content/artigos/.
+2. Dê ao ficheiro o slug pretendido, por exemplo como-escolher-seguro-casa.mdx.
+3. Substitua os valores de exemplo.
+4. Defina rascunho: false ou remova o campo rascunho.
+5. Escreva o artigo abaixo deste comentário.
+-->
+
+## Comece pela resposta prática
+
+Desenvolva aqui o conteúdo do artigo com subtítulos claros, exemplos e próximos passos.
