@@ -2,7 +2,46 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 ---
-<BaseLayout titulo="Como produzimos os conteúdos" descricao="Fontes, verificação, revisão, atualização e correções no Guia do Proprietário.">
-  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Metodologia" }]} /><p class="eyebrow">Metodologia editorial</p><h1>Como produzimos os conteúdos.</h1><p>Cada página deve mostrar quem a preparou, quando foi revista e que fontes sustentam as afirmações.</p></div></section>
-  <article class="article-layout article-body"><h2>Fontes primeiro</h2><p>Privilegiamos legislação, entidades públicas, documentação técnica e fontes diretamente responsáveis pelos dados.</p><h2>Apoio de inteligência artificial</h2><p>A inteligência artificial pode apoiar pesquisa, estrutura e redação. Nenhum conteúdo é publicado sem aprovação humana.</p><h2>Atualizações e correções</h2><p>Os conteúdos sensíveis mostram uma data de revisão. Correções materiais devem ser feitas com rapidez e registadas no processo editorial.</p></article>
+<BaseLayout
+  titulo="Metodologia"
+  descricao="Como produzimos e verificamos a informação do Guia do Proprietário: fontes oficiais, dados atualizados e o que esperar das nossas ferramentas."
+>
+  <section class="page-hero">
+    <div class="container">
+      <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Metodologia" }]} />
+      <p class="eyebrow">Metodologia editorial</p>
+      <h1>Como produzimos os conteúdos</h1>
+      <p>Fontes oficiais, dados atualizados e regras claras para os nossos guias e ferramentas.</p>
+    </div>
+  </section>
+  <article class="article-layout article-body">
+    <p class="article-meta">Atualizado a 26 de julho de 2026</p>
+
+    <h2>As fontes</h2>
+    <p>Baseamos os guias em legislação portuguesa e em fontes oficiais. As principais são:</p>
+    <ul>
+      <li>o <strong>Portal das Finanças</strong> e a <strong>Autoridade Tributária</strong>, para impostos como o IMI, o IMT e as mais-valias;</li>
+      <li>o <strong>INE</strong>, Instituto Nacional de Estatística, para os preços da habitação;</li>
+      <li>o <strong>Diário da República</strong>, para a legislação e as suas alterações;</li>
+      <li>outras entidades públicas conforme o tema, como a ERSE para a energia, a ADENE para o certificado energético ou o IMPIC para a mediação imobiliária.</li>
+    </ul>
+    <p>Cada guia indica as fontes em que se apoia. Quando um valor vem de uma fonte oficial, dizemo-lo; quando é uma estimativa ou um intervalo de mercado, também.</p>
+
+    <h2>Verificação e atualização</h2>
+    <p>Confirmamos os valores e as regras nas fontes oficiais antes de publicar, com atenção especial aos temas fiscais e legais. Cada página mostra a data da última revisão, e os guias são atualizados quando a lei ou as fontes mudam.</p>
+
+    <h2>Os dados de IMI e de preços por concelho</h2>
+    <p>As páginas por concelho usam dados oficiais:</p>
+    <ul>
+      <li>as <strong>taxas de IMI</strong> vêm da consulta pública da Autoridade Tributária, por município e por ano, com o ano de referência sempre indicado;</li>
+      <li>os <strong>preços por metro quadrado</strong> vêm do INE e correspondem à mediana das vendas dos últimos 12 meses, atualizada a cada trimestre, com o período à vista.</li>
+    </ul>
+    <p>Municípios sem valor publicado são identificados como tal, e nunca preenchidos com estimativas nossas nem com valores de outro concelho.</p>
+
+    <h2>As ferramentas e simuladores</h2>
+    <p>Os simuladores dão uma estimativa para uma primeira ideia, com base nas regras e nas taxas oficiais disponíveis. Não conhecem todas as isenções e situações específicas do seu caso, por isso o resultado é uma aproximação para se orientar, não o valor final, que só a Autoridade Tributária determina.</p>
+
+    <h2>Privacidade</h2>
+    <p>O site usa uma analítica que não recolhe dados pessoais nem usa cookies de rastreio.</p>
+  </article>
 </BaseLayout>

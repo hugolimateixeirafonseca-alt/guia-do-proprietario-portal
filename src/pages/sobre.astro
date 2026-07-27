@@ -2,7 +2,34 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 ---
-<BaseLayout titulo="Sobre" descricao="Conheça o objetivo e a responsabilidade editorial do Guia do Proprietário.">
-  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Sobre" }]} /><p class="eyebrow">Sobre o projeto</p><h1>Informação prática para quem tem um imóvel.</h1><p>O Guia do Proprietário organiza temas complexos e mostra fontes, datas e limites de cada explicação.</p></div></section>
-  <article class="article-layout article-body"><h2>Quem está por trás</h2><p>O fundador do Guia do Proprietário assume a edição e curadoria do projeto. A identificação completa será publicada antes do lançamento.</p><h2>O que não afirmamos</h2><p>O projeto não se apresenta como sociedade de advogados, gabinete de contabilidade, avaliador ou mediador imobiliário. Conteúdos especializados exigem fontes e revisão adequada.</p></article>
+<BaseLayout
+  titulo="Sobre o Guia do Proprietário"
+  descricao="Informação prática e clara para quem tem casa em Portugal. Impostos, obras, arrendamento, condomínio e venda, explicados em português simples."
+>
+  <section class="page-hero">
+    <div class="container">
+      <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Sobre" }]} />
+      <p class="eyebrow">Sobre o projeto</p>
+      <h1>Sobre o Guia do Proprietário</h1>
+      <p>Informação prática e clara para quem tem casa em Portugal.</p>
+    </div>
+  </section>
+  <article class="article-layout article-body">
+    <p class="article-meta">Atualizado a 26 de julho de 2026</p>
+
+    <h2>Porque existe este site</h2>
+    <p>Ter casa em Portugal dá trabalho, e a maior parte desse trabalho é papelada, prazos e dúvidas. Quando chega a nota do IMI, quando aparece uma infiltração, quando é preciso atualizar uma renda ou vender uma casa herdada, a informação existe, mas está espalhada, escrita em linguagem difícil, e nem sempre é fácil perceber por onde começar.</p>
+    <p>O Guia do Proprietário reúne num só sítio as respostas às dúvidas do dia a dia de quem tem casa, explicadas em português simples, com as contas feitas e as fontes à vista.</p>
+
+    <h2>O que fazemos</h2>
+    <p>Escrevemos guias práticos sobre impostos, obras, arrendamento, condomínio e venda de casa. Apoiamo-nos em legislação portuguesa e em fontes oficiais, como o Portal das Finanças, o INE e o Diário da República, e indicamos em cada guia aquilo em que nos baseamos.</p>
+    <p>Os nossos guias são um ponto de partida informado para perceber cada assunto. Não são aconselhamento individual: quando o seu caso exige um advogado, um solicitador ou um contabilista, dizemo-lo, para que chegue a esse profissional já preparado.</p>
+
+    <h2>Quem escreve</h2>
+    <p>Os guias são escritos e revistos pela Redação do Guia do Proprietário, com o cuidado de confirmar os números e as regras nas fontes oficiais antes de publicar.</p>
+
+    <h2>Fale connosco</h2>
+    <p>Encontrou um erro, tem uma sugestão ou um tema que gostava de ver explicado? Escreva-nos. São as dúvidas reais dos proprietários que definem o que escrevemos a seguir.</p>
+    <p><a href="mailto:geral@guiadoproprietario.pt">geral@guiadoproprietario.pt</a></p>
+  </article>
 </BaseLayout>
