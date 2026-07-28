@@ -1,5 +1,5 @@
 {
-  "nota": "Valores e datas a confirmar com as fontes oficiais antes de publicar.",
+  "nota": "Datas gerais para proprietários em Portugal. Confirme no Portal das Finanças os prazos e valores aplicáveis ao seu caso.",
   "itens": [
     {
       "mes": 1,
@@ -64,11 +64,11 @@
     {
       "mes": 7,
       "dia_limite": null,
-      "nome": "Sem prazo geral",
-      "quem": "Proprietários",
-      "descricao": "Não há um prazo fiscal geral para proprietários assinalado neste mês.",
-      "fonte_nome": "Portal das Finanças",
-      "fonte_url": "https://www.portaldasfinancas.gov.pt/",
+      "nome": "Verificar se compensa pedir a reavaliação do VPT",
+      "quem": "Proprietários cujo VPT possa estar desatualizado",
+      "descricao": "Pode pedir uma nova avaliação quando tiverem decorrido três anos desde o pedido anterior, a inscrição ou a atualização do prédio na matriz. Antes de avançar, simule o efeito no IMI.",
+      "fonte_nome": "Portal das Finanças, reclamação de avaliação",
+      "fonte_url": "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/questoes_frequentes/Pages/faqs-00468.aspx",
       "recorrente": true
     },
     {

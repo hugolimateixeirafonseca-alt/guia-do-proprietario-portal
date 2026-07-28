@@ -252,10 +252,17 @@ th { font-size: 11px; text-transform: uppercase; }
 .installment-result li strong { margin: 0; font-size: 16px; }
 .result-links { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px 18px; }
 .result-links a { color: white; font-size: 12px; font-weight: 800; }
-.link-list { max-width: 680px; margin: 45px auto; display: grid; gap: 12px; }
+.links-page { padding-top: 42px; }
+.links-page .container { max-width: 720px; }
+.link-group + .link-group { margin-top: 38px; }
+.link-group h2 { margin: 0 0 14px; font-size: clamp(22px, 4vw, 30px); }
+.link-list { display: grid; gap: 12px; }
 .link-list a { padding: 18px; display: block; color: inherit; background: white; border: 1px solid var(--line); text-decoration: none; }
-.link-list strong { display: block; }
-.link-list span { color: var(--muted); font-size: 12px; }
+.link-list a:hover, .link-list a:focus-visible { border-color: var(--green); transform: translateY(-1px); }
+.link-list strong { display: block; font-size: 17px; }
+.link-list span { display: block; margin-top: 5px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.featured-links a { color: white; background: var(--green); border-color: var(--green); }
+.featured-links span { color: rgba(255,255,255,.82); }
 .calendar-layout { max-width: 1040px; }
 .monthly-band { margin: 25px 0 30px; padding: 24px; display: grid; grid-template-columns: 150px 1fr; gap: 25px; color: white; background: var(--green); }
 .monthly-band > span { font-size: 13px; font-weight: 800; text-transform: uppercase; }

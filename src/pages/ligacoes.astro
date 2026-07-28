@@ -1,5 +1,46 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
 import links from "../dados/ligacoes.json";
+
+const simuladores = links.slice(0, 2);
+const destinos = links.slice(2);
 ---
-<BaseLayout titulo="Ligações úteis" descricao="Aceda aos principais guias e simuladores do Guia do Proprietário."><section class="page-hero"><div class="container"><p class="eyebrow">Guia do Proprietário</p><h1>Comece pelo que precisa.</h1><p>Guias e ferramentas para proprietários em Portugal.</p></div></section><div class="link-list">{links.map((link) => <a href={link.url}><strong>{link.titulo}</strong><span>{link.descricao}</span></a>)}</div></BaseLayout>
+<BaseLayout titulo="Ligações úteis" descricao="Aceda aos principais guias e simuladores do Guia do Proprietário.">
+  <section class="page-hero compact-hero">
+    <div class="container">
+      <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Ligações" }]} />
+      <p class="eyebrow">Guia do Proprietário</p>
+      <h1>Comece pelo que precisa.</h1>
+      <p>Simuladores e guias práticos para proprietários em Portugal.</p>
+    </div>
+  </section>
+
+  <section class="section links-page" aria-labelledby="links-simuladores">
+    <div class="container">
+      <div class="link-group">
+        <h2 id="links-simuladores">Simuladores</h2>
+        <div class="link-list featured-links">
+          {simuladores.map((link) => (
+            <a href={link.url}>
+              <strong>{link.titulo}</strong>
+              <span>{link.descricao}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="link-group">
+        <h2>Guias e páginas úteis</h2>
+        <div class="link-list">
+          {destinos.map((link) => (
+            <a href={link.url}>
+              <strong>{link.titulo}</strong>
+              <span>{link.descricao}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
