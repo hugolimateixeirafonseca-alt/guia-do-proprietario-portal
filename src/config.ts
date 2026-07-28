@@ -5,6 +5,11 @@ export const site = {
   email: "ola@guiadoproprietario.pt"
 };
 
+export const redesSociais = [
+  { nome: "Facebook", url: "https://www.facebook.com/guiadoproprietario/" },
+  { nome: "Instagram", url: "https://www.instagram.com/guiadoproprietario.pt/" }
+] as const;
+
 export const NEWSLETTER_ATIVA = false;
 
 export const pilares = [

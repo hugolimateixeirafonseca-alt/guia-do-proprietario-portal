@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { site, pilares } from "../config";
+import { site, pilares, redesSociais } from "../config";
 import Marca from "../components/Marca.astro";
 
 interface Props {
@@ -26,7 +26,8 @@ const organization = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: site.nome,
-  url: site.dominio
+  url: site.dominio,
+  sameAs: redesSociais.map((rede) => rede.url)
 };
 
 const linksNavegacao = [
@@ -73,7 +74,22 @@ const linksNavegacao = [
     </header>
     <main id="conteudo"><slot /></main>
     <footer class="site-footer">
-      <div><a class="brand footer-brand" href="/"><Marca /><span>Guia do Proprietário</span></a><p>Informação prática para proprietários em Portugal.</p></div>
+      <div>
+        <a class="brand footer-brand" href="/"><Marca /><span>Guia do Proprietário</span></a>
+        <p>Informação prática para proprietários em Portugal.</p>
+        <nav class="footer-social" aria-label="Redes sociais">
+          {redesSociais.map((rede) => (
+            <a href={rede.url} target="_blank" rel="me noopener noreferrer" aria-label={`${site.nome} no ${rede.nome}`}>
+              {rede.nome === "Facebook" ? (
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 8.5V7.2c0-.6.4-.7.8-.7H17V3.1c-.9-.1-1.9-.2-2.8-.2-2.8 0-4.7 1.7-4.7 4.8v.8H6.4V12h3.1v9h4.5v-9h3l.5-3.5H14Z"></path></svg>
+              ) : (
+                <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.4" cy="6.7" r="1"></circle></svg>
+              )}
+              <span>{rede.nome}</span>
+            </a>
+          ))}
+        </nav>
+      </div>
       <nav aria-label="Informação"><a href="/sobre/">Sobre</a><a href="/metodologia/">Metodologia</a><a href="/glossario/">Glossário</a><a href="/calendario/">Calendário</a><a href="/ligacoes/">Ligações</a><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><a href="/rss.xml">RSS</a></nav>
       <small>© {new Date().getFullYear()} Guia do Proprietário. Conteúdo informativo, sujeito a revisão.</small>
     </footer>

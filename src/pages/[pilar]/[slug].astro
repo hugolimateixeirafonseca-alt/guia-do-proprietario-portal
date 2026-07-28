@@ -6,7 +6,7 @@ import Newsletter from "../../components/Newsletter.astro";
 import ProximosPrazos from "../../components/ProximosPrazos.astro";
 import Custos from "../../components/Custos.astro";
 import Termo from "../../components/Termo.astro";
-import { avisos, formatarData, NEWSLETTER_ATIVA, pilares, site } from "../../config";
+import { avisos, formatarData, NEWSLETTER_ATIVA, pilares, redesSociais, site } from "../../config";
 import { obterImagensArtigo } from "../../lib/imagens-artigos";
 
 export async function getStaticPaths() {
@@ -25,7 +25,7 @@ const articleSchema = {
   datePublished: artigo.data.publicado.toISOString(),
   dateModified: artigo.data.revisto.toISOString(),
   author: { "@type": "Organization", name: "Redação Guia do Proprietário" },
-  publisher: { "@type": "Organization", name: site.nome, url: site.dominio },
+  publisher: { "@type": "Organization", name: site.nome, url: site.dominio, sameAs: redesSociais.map((rede) => rede.url) },
   mainEntityOfPage: new URL(Astro.url.pathname, site.dominio).toString()
 };
 const faqSchema = artigo.data.perguntas_rapidas ? {

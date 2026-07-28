@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import EmailProtegido from "../components/EmailProtegido.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { redesSociais } from "../config";
 ---
 <BaseLayout
   titulo="Sobre o Guia do Proprietário"
@@ -32,5 +33,13 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
     <h2 id="contacto">Fale connosco</h2>
     <p>Encontrou um erro, tem uma sugestão ou um tema que gostava de ver explicado? Escreva-nos. São as dúvidas reais dos proprietários que definem o que escrevemos a seguir.</p>
     <p><EmailProtegido /></p>
+
+    <h2>Siga o Guia do Proprietário</h2>
+    <p>Acompanhe os novos guias, prazos e explicações práticas nas nossas redes sociais.</p>
+    <p class="social-links">
+      {redesSociais.map((rede) => (
+        <a href={rede.url} target="_blank" rel="me noopener noreferrer">{rede.nome}</a>
+      ))}
+    </p>
   </article>
 </BaseLayout>
