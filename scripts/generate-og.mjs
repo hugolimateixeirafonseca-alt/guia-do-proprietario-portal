@@ -76,21 +76,21 @@ const pages = [
 await fs.rm(outputDir, { recursive: true, force: true });
 async function renderCard(page, target) {
   const lines = wrapTitle(page.title, page.image ? 22 : 29);
-  const text = lines.map((line, index) => `<text x="88" y="${250 + index * 78}" font-size="64" font-weight="750" fill="#102a31">${escapeXml(line)}</text>`).join("");
+  const text = lines.map((line, index) => `<text x="88" y="${250 + index * 78}" font-size="64" font-weight="750" fill="#10282e">${escapeXml(line)}</text>`).join("");
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
     <defs>
       <pattern id="azulejo" width="64" height="64" patternUnits="userSpaceOnUse">
-        <path d="M0 32 32 0l32 32-32 32Z" fill="none" stroke="#256b5c" stroke-width="1" opacity=".12"/>
-        <circle cx="32" cy="32" r="14" fill="none" stroke="#256b5c" stroke-width="1" opacity=".12"/>
-        <path d="M16 16 48 48M48 16 16 48" fill="none" stroke="#256b5c" stroke-width="1" opacity=".12"/>
+        <path d="M0 32 32 0l32 32-32 32Z" fill="none" stroke="#315f78" stroke-width="1" opacity=".10"/>
+        <circle cx="32" cy="32" r="14" fill="none" stroke="#d6a955" stroke-width="1" opacity=".14"/>
+        <path d="M16 16 48 48M48 16 16 48" fill="none" stroke="#d8814b" stroke-width="1" opacity=".08"/>
       </pattern>
     </defs>
-    <rect width="1200" height="630" fill="#f5f2e9"/>
+    <rect width="1200" height="630" fill="#f6efe0"/>
     <rect width="1200" height="630" fill="url(#azulejo)"/>
-    <rect x="0" y="0" width="26" height="630" fill="#256b5c"/>
-    <text x="88" y="110" font-size="25" font-weight="700" letter-spacing="4" fill="#256b5c">GUIA DO PROPRIETÁRIO</text>
+    <rect x="0" y="0" width="26" height="630" fill="#315f78"/>
+    <text x="88" y="110" font-size="25" font-weight="700" letter-spacing="4" fill="#315f78">GUIA DO PROPRIETÁRIO</text>
     ${text}
-    <text x="88" y="570" font-size="24" fill="#5f7075">guiadoproprietario.pt</text>
+    <text x="88" y="570" font-size="24" font-weight="650" fill="#24594f">guiadoproprietario.pt</text>
   </svg>`;
   let card = sharp(Buffer.from(svg));
   if (page.image) {
@@ -98,10 +98,16 @@ async function renderCard(page, target) {
     const illustration = await sharp(imagePath).resize(390, 630, { fit: "cover" }).png().toBuffer();
     card = card.composite([
       { input: illustration, left: 810, top: 0 },
-      { input: Buffer.from(`<svg width="390" height="630"><rect width="390" height="630" fill="none" stroke="#256b5c" stroke-width="14"/></svg>`), left: 810, top: 0 }
+      { input: Buffer.from(`<svg width="390" height="630"><rect width="390" height="630" fill="none" stroke="#315f78" stroke-width="14"/></svg>`), left: 810, top: 0 }
     ]);
   } else {
-    const motif = Buffer.from(`<svg width="250" height="250"><circle cx="125" cy="125" r="92" fill="#e2c58f"/><path d="M80 141 125 102l45 39v55H80z" fill="none" stroke="#256b5c" stroke-width="12" stroke-linejoin="round"/></svg>`);
+    const motif = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250" viewBox="0 0 250 250">
+      <rect x="34" y="34" width="182" height="182" rx="32" fill="#315f78"/>
+      <path d="M58 127 125 69l67 58v69H58Z" fill="#f6efe0"/>
+      <path d="M94 196v-56h62v56" fill="#24594f"/>
+      <circle cx="176" cy="84" r="15" fill="#d8814b"/>
+      <path d="M34 125h24M192 125h24M125 34v35M125 196v20" fill="none" stroke="#d6a955" stroke-width="9"/>
+    </svg>`);
     card = card.composite([{ input: motif, left: 920, top: 35 }]);
   }
   await fs.mkdir(path.dirname(target), { recursive: true });
@@ -114,7 +120,7 @@ for (const page of pages) {
 }
 
 await renderCard(
-  { title: "A sua casa, sem complicações.", image: "hero-home" },
+  { title: "Tudo o que precisa de saber sobre a sua casa, num só sítio.", image: "hero-home" },
   path.join(root, "public", "og-1200x630.png")
 );
 await fs.copyFile(path.join(root, "public", "og-1200x630.png"), path.join(root, "public", "og.png"));
