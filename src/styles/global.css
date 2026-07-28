@@ -69,6 +69,16 @@ h3 { font-size: 21px; }
 .section-heading { max-width: 760px; margin-bottom: 36px; }
 .section-heading h2 { margin: 0 0 12px; }
 .section-heading p { margin: 0; color: var(--muted); }
+.recent-articles-section { padding-top: 68px; background: var(--paper); }
+.recent-articles-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.recent-article-card { min-width: 0; overflow: hidden; background: white; border: 1px solid var(--line); }
+.recent-article-card:hover { border-color: #6f9c8c; transform: translateY(-2px); }
+.recent-article-card a { height: 100%; display: flex; flex-direction: column; color: inherit; text-decoration: none; }
+.recent-article-card picture, .recent-article-card img { display: block; }
+.recent-article-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.recent-article-card a > div { padding: 17px 18px 20px; }
+.recent-article-card p { margin: 0 0 7px; color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.recent-article-card h3 { margin: 0; font-size: 18px; line-height: 1.25; }
 .pillar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .pillar-card { padding: 23px; display: grid; align-content: space-between; gap: 22px; color: inherit; background: var(--paper); border: 1px solid var(--line); text-decoration: none; }
 .pillar-card span { color: var(--green); font-size: 10px; font-weight: 800; }
@@ -307,6 +317,7 @@ th { font-size: 11px; text-transform: uppercase; }
   .desktop-nav { display: none; }
   .mobile-menu { display: block; }
   .hero-grid, .newsletter, .current-grid { grid-template-columns: 1fr; }
+  .recent-articles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pillar-grid { grid-template-columns: 1fr 1fr; }
   .situation-grid, .calendar-grid { grid-template-columns: 1fr 1fr; }
 }
@@ -323,7 +334,8 @@ th { font-size: 11px; text-transform: uppercase; }
 }
 @media (max-width: 600px) {
   .hero-grid { gap: 42px; }
-  .pillar-grid, .article-grid, .tools-grid, .programmatic-grid, .form-grid, .situation-grid, .notes-grid, .calendar-grid, .pillar-hero, .daily-questions-grid, .glossary-list { grid-template-columns: 1fr; }
+  .pillar-grid, .article-grid, .recent-articles-grid, .tools-grid, .programmatic-grid, .form-grid, .situation-grid, .notes-grid, .calendar-grid, .pillar-hero, .daily-questions-grid, .glossary-list { grid-template-columns: 1fr; }
+  .recent-articles-section { padding-top: 54px; }
   .field.full { grid-column: auto; }
   .newsletter { padding: 28px 22px; }
   .newsletter form > div { display: grid; }

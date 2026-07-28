@@ -11,6 +11,15 @@ const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho
 const artigos = todosArtigos
   .filter((artigo) => artigo.data.destaque && artigo.data.nivel === "essencial")
   .sort((a, b) => b.data.revisto.valueOf() - a.data.revisto.valueOf());
+const artigosRecentes = [...todosArtigos]
+  .sort((a, b) => {
+    const diferencaPublicacao = b.data.publicado.valueOf() - a.data.publicado.valueOf();
+    if (diferencaPublicacao !== 0) return diferencaPublicacao;
+
+    return a.data.titulo.localeCompare(b.data.titulo, "pt");
+  })
+  .slice(0, 8);
+const nomesPilares = new Map(pilares.map((pilar) => [pilar.slug, pilar.nome]));
 const notas = (await getCollection("notas")).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
 const notaRecente = notas[0];
 const pilarCasa = pilares.find((pilar) => pilar.slug === "casa")!;
@@ -52,6 +61,39 @@ const perguntasDoDia = [
           <a class="button" href="#perguntas-dia">Começar pelas dúvidas mais comuns</a>
           <a class="button secondary" href="#este-mes">Ver os prazos deste mês</a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section recent-articles-section" aria-labelledby="mais-recentes-titulo">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">ACABADO DE PUBLICAR</p>
+        <h2 id="mais-recentes-titulo">Mais recentes</h2>
+        <p>Os últimos artigos do Guia do Proprietário, de todos os temas.</p>
+      </div>
+      <div class="recent-articles-grid">
+        {artigosRecentes.map((artigo) => (
+          <article class="recent-article-card">
+            <a href={`/${artigo.data.pilar}/${artigo.id}/`}>
+              <picture>
+                <source srcset={obterImagensArtigo(artigo).avif} type="image/avif" />
+                <img
+                  src={obterImagensArtigo(artigo).webp}
+                  alt=""
+                  width="1200"
+                  height="675"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <div>
+                <p>{nomesPilares.get(artigo.data.pilar) ?? artigo.data.pilar}</p>
+                <h3>{artigo.data.titulo}</h3>
+              </div>
+            </a>
+          </article>
+        ))}
       </div>
     </div>
   </section>
