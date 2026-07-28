@@ -1,0 +1,20 @@
+<a
+  href="/sobre/#contacto"
+  data-contact-email
+  data-local="geral"
+  data-domain="guiadoproprietario"
+  data-tld="pt"
+>Ver endereço de email</a>
+<noscript>geral [arroba] guiadoproprietario [ponto] pt</noscript>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>("[data-contact-email]").forEach((ligacao) => {
+    const local = ligacao.dataset.local || "";
+    const dominio = ligacao.dataset.domain || "";
+    const tld = ligacao.dataset.tld || "";
+    const endereco = [local, dominio].join("@").concat(".", tld);
+    ligacao.textContent = endereco;
+    ligacao.href = `mailto:${endereco}`;
+    ligacao.setAttribute("aria-label", `Enviar email para ${endereco}`);
+  });
+</script>

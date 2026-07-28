@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import EmailProtegido from "../components/EmailProtegido.astro";
 ---
 <BaseLayout
   titulo="Termos de Utilização"
@@ -33,6 +34,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <p>Estas condições podem ser atualizadas. A data da última revisão está no topo da página. A utilização continuada do site após alterações significa a aceitação das novas condições.</p>
 
     <h2>Contacto</h2>
-    <p><a href="mailto:geral@guiadoproprietario.pt">geral@guiadoproprietario.pt</a></p>
+    <p><EmailProtegido /></p>
   </article>
 </BaseLayout>

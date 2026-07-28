@@ -45,7 +45,7 @@ const artigoPar = artigo.data.par
   <article class="article-layout">
     <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: pilar.nome, url: `/${pilar.slug}/` }, { nome: artigo.data.titulo }]} />
     <header class="article-header"><picture><source srcset={imagemCapa.avif} type="image/avif" /><img class="article-illustration" src={imagemCapa.webp} alt={artigo.data.imagem_alt || pilar.alt} width="1200" height="675" loading="lazy" /></picture><p class="eyebrow">{pilar.nome}{artigo.data.nivel === "detalhado" && <span class="level-label">Versão completa</span>}</p><h1>{artigo.data.titulo}</h1><p class="article-description">{artigo.data.descricao}</p><p class="article-meta">Atualizado a {formatarData(artigo.data.revisto)} · Redação Guia do Proprietário</p></header>
-    <aside class="quick-answer"><h2>{artigo.data.nivel === "essencial" ? "Em duas linhas" : "Resposta rápida"}</h2><p>{artigo.data.resposta_rapida}</p></aside>
+    <aside class="quick-answer"><h2>{artigo.data.nivel === "essencial" ? "O essencial" : "Resposta rápida"}</h2><p>{artigo.data.resposta_rapida}</p></aside>
     {artigo.data.exemplo && <aside class="number-example"><h2>{artigo.data.exemplo.titulo}</h2><p>{artigo.data.exemplo.texto}</p></aside>}
     {artigo.data.aviso !== "nenhum" && <aside class="notice">{avisos[artigo.data.aviso]}</aside>}
     {artigo.data.custos && <Custos titulo={artigo.data.custos.titulo} itens={artigo.data.custos.itens} />}

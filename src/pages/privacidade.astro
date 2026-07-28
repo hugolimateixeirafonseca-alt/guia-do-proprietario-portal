@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import EmailProtegido from "../components/EmailProtegido.astro";
 ---
 <BaseLayout
   titulo="Política de Privacidade"
@@ -34,6 +35,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <p>Esta política pode ser atualizada, por exemplo se o site passar a oferecer novas funcionalidades. A data da última revisão está no topo. Recomendamos que a consulte de vez em quando.</p>
 
     <h2>Contacto</h2>
-    <p><a href="mailto:geral@guiadoproprietario.pt">geral@guiadoproprietario.pt</a></p>
+    <p><EmailProtegido /></p>
   </article>
 </BaseLayout>

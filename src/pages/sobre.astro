@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import EmailProtegido from "../components/EmailProtegido.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
 ---
 <BaseLayout
@@ -28,8 +29,8 @@ import Breadcrumbs from "../components/Breadcrumbs.astro";
     <h2>Quem escreve</h2>
     <p>Os guias são escritos e revistos pela Redação do Guia do Proprietário, com o cuidado de confirmar os números e as regras nas fontes oficiais antes de publicar.</p>
 
-    <h2>Fale connosco</h2>
+    <h2 id="contacto">Fale connosco</h2>
     <p>Encontrou um erro, tem uma sugestão ou um tema que gostava de ver explicado? Escreva-nos. São as dúvidas reais dos proprietários que definem o que escrevemos a seguir.</p>
-    <p><a href="mailto:geral@guiadoproprietario.pt">geral@guiadoproprietario.pt</a></p>
+    <p><EmailProtegido /></p>
   </article>
 </BaseLayout>
