@@ -6,14 +6,19 @@
     <div class="field"><label for="sale-rate">Valor de referência por m² (€)</label><input id="sale-rate" type="text" inputmode="decimal" value="3 000" required aria-describedby="sale-rate-help" /><small id="sale-rate-help">Exemplo: escreva 3 000 para 3 000 € por m².</small></div>
     <div class="field"><label for="sale-fee">Comissão da agência (% sem IVA)</label><input id="sale-fee" type="text" inputmode="decimal" value="5" required aria-describedby="sale-fee-help" /><small id="sale-fee-help">É uma percentagem. Escreva 5 para 5%. Se vender sem agência, escreva 0. O simulador acrescenta o IVA.</small></div>
     <div class="field full"><label for="sale-debt">Capital em dívida ao banco (€)</label><input id="sale-debt" type="text" inputmode="decimal" value="75 000" required aria-describedby="sale-debt-help" /><small id="sale-debt-help">É o valor que falta pagar ao banco. Se não tiver crédito, escreva 0.</small></div>
-    <div class="field full"><button class="button" type="submit">Calcular valor líquido</button></div>
+    <div class="field full simulator-actions">
+      <button class="button" type="submit">Calcular valor líquido</button>
+      <button class="button secondary" type="button" id="sale-clear">Limpar simulação</button>
+    </div>
   </form>
-  <div class="result-box" id="sale-result" aria-live="polite"><span>Estimativa líquida antes do eventual IRS</span><strong>262 000 € a 337 000 €</strong><small>Dados de demonstração. Inclui comissão com IVA e 750 € de outros custos.</small></div>
+  <div class="result-box" id="sale-result" aria-live="polite" hidden><span>Estimativa líquida antes do eventual IRS</span><strong></strong><small>Dados de demonstração. Inclui comissão com IVA e 750 € de outros custos.</small></div>
 </div>
 <script>
   import { estimarValorLiquido, lerNumeroPt } from "../lib/estimador";
   const form = document.querySelector<HTMLFormElement>("#sale-form")!;
+  const resultBox = document.querySelector<HTMLElement>("#sale-result")!;
   const result = document.querySelector<HTMLElement>("#sale-result strong")!;
+  const clearButton = document.querySelector<HTMLButtonElement>("#sale-clear")!;
   const moeda = (valor: number) => new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(Math.round(valor / 1000) * 1000);
   const campo = (seletor: string, minimo: number, maximo: number, mensagem: string) => {
     const input = document.querySelector<HTMLInputElement>(seletor)!;
@@ -39,7 +44,25 @@
       credito: credito.valor
     });
     result.textContent = `${moeda(calculo.minimo)} a ${moeda(calculo.maximo)}`;
+    resultBox.hidden = false;
+    resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
   form.addEventListener("submit", (event) => { event.preventDefault(); calcular(); });
-  calcular();
+  clearButton.addEventListener("click", () => {
+    form.reset();
+    form.querySelectorAll<HTMLInputElement>("input").forEach((input) => {
+      input.value = "";
+      input.setCustomValidity("");
+    });
+    result.textContent = "";
+    resultBox.hidden = true;
+    form.querySelector<HTMLInputElement>("#sale-area")?.focus();
+  });
 </script>
+<style>
+  .simulator-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>

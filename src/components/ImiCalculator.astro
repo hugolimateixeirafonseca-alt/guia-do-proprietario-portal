@@ -7,7 +7,10 @@ interface Props {
 
 const { concelhoInicial = "" } = Astro.props;
 const municipios = [...imiData.dados].sort((a, b) => a.nome.localeCompare(b.nome, "pt"));
-const anoAnterior = Number(imiData.periodo_referencia) - 1;
+const anoTaxaAtual = Number(imiData.periodo_referencia);
+const anoTaxaAnterior = anoTaxaAtual - 1;
+const anoPagamento = anoTaxaAtual;
+const anoImiAPagar = anoTaxaAtual + 1;
 const nomeOpcao = (municipio: (typeof municipios)[number]) => {
   if (municipio.slug.endsWith("-acores")) return `${municipio.nome}, Açores`;
   if (municipio.slug.endsWith("-madeira")) return `${municipio.nome}, Madeira`;
@@ -21,7 +24,7 @@ const nomeOpcao = (municipio: (typeof municipios)[number]) => {
       <legend>Que informação tem consigo?</legend>
       <div class="path-options">
         <button type="button" class="path-choice active" data-imi-path="vpt" aria-pressed="true"><strong>Sei o valor patrimonial</strong><span>Use o valor fiscal indicado nas Finanças.</span></button>
-        <button type="button" class="path-choice" data-imi-path="pago" aria-pressed="false"><strong>Só sei quanto paguei de IMI no ano passado</strong><span>Calculamos o valor patrimonial a partir desse pagamento.</span></button>
+        <button type="button" class="path-choice" data-imi-path="pago" aria-pressed="false"><strong>Só sei quanto paguei de IMI em {anoPagamento}</strong><span>Calculamos o valor patrimonial a partir desse pagamento.</span></button>
       </div>
     </fieldset>
 
@@ -52,8 +55,8 @@ const nomeOpcao = (municipio: (typeof municipios)[number]) => {
       </section>
 
       <section class="field full path-fields" id="imi-path-pago" hidden>
-        <label for="imi-pago-anterior">Quanto pagou de IMI em {anoAnterior}?</label>
-        <p class="field-explanation">Use o total anual indicado na nota de cobrança, antes de dividir pelas prestações.</p>
+        <label for="imi-pago-anterior">Quanto pagou de IMI em {anoPagamento}?</label>
+        <p class="field-explanation">Indique o total pago em 2025, relativo ao IMI de 2024. Usamos a taxa municipal de 2024 para estimar o seu VPT e a taxa de 2025 para calcular o IMI a pagar em 2026.</p>
         <input id="imi-pago-anterior" type="text" inputmode="decimal" value="540,00" autocomplete="off" />
       </section>
 
@@ -66,7 +69,7 @@ const nomeOpcao = (municipio: (typeof municipios)[number]) => {
             <input id="imi-taxa-manual" type="text" inputmode="decimal" autocomplete="off" aria-describedby="imi-manual-help" />
           </div>
           <div class="field" id="imi-taxa-anterior-wrap">
-            <label for="imi-taxa-anterior-manual">Taxa de {anoAnterior}, em percentagem</label>
+            <label for="imi-taxa-anterior-manual">Taxa de {anoTaxaAnterior}, em percentagem</label>
             <input id="imi-taxa-anterior-manual" type="text" inputmode="decimal" autocomplete="off" aria-describedby="imi-manual-help" />
           </div>
         </div>
@@ -88,14 +91,14 @@ const nomeOpcao = (municipio: (typeof municipios)[number]) => {
   </form>
 
   <div class="result-box imi-result" id="imi-result" aria-live="polite" hidden>
-    <span>Estimativa anual de IMI</span>
+    <span>Estimativa de IMI a pagar em {anoImiAPagar}</span>
     <strong id="imi-total"></strong>
     <p id="imi-deduction-result" hidden></p>
     <div class="installment-result">
       <h3 id="imi-installment-heading"></h3>
       <ul id="imi-installments"></ul>
     </div>
-    <p id="imi-path-note" hidden>Estimativa a partir do que pagou. Se entretanto houve reavaliação do imóvel ou alteração de isenções, o valor muda.</p>
+    <p id="imi-path-note" hidden>Estimativa a partir do IMI pago em 2025. Usamos a taxa de 2024 para recuperar o VPT e a taxa de 2025 para calcular o IMI a pagar em 2026. Se entretanto houve reavaliação do imóvel ou alteração de isenções, o valor muda.</p>
     <small>O valor não considera isenções nem situações específicas. A nota de cobrança oficial está no Portal das Finanças.</small>
     <nav class="result-links" aria-label="Informação relacionada">
       <a id="imi-municipality-link" href="/impostos/">Ver a página do concelho</a>
@@ -235,7 +238,7 @@ const nomeOpcao = (municipio: (typeof municipios)[number]) => {
         return;
       }
     } else {
-      const pago = numeroPositivo(pagoInput, "Indique o total de IMI pago no ano anterior.");
+      const pago = numeroPositivo(pagoInput, "Indique o total de IMI pago em 2025.");
       const taxaAnteriorPercentual = usarManual || municipio.taxa_urbana_ano_anterior === null
         ? numeroPositivo(taxaAnteriorManual, "Indique uma taxa válida para o ano anterior.")
         : municipio.taxa_urbana_ano_anterior * 100;
