@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TÍTULO DO EMAIL</title>
+    <style>
+      body { margin: 0; padding: 0; background-color: #f4efe6; }
+      table { border-collapse: collapse; }
+      img { border: 0; display: block; }
+      a { color: #1f3a5f; }
+      @media only screen and (max-width: 620px) {
+        .email-shell { width: 100% !important; }
+        .email-padding { padding-left: 22px !important; padding-right: 22px !important; }
+        .email-title { font-size: 30px !important; line-height: 36px !important; }
+        .email-button { display: block !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+      TEXTO CURTO QUE APARECE NA PRÉ-VISUALIZAÇÃO DO EMAIL
+    </div>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" style="background-color:#f4efe6;">
+      <tr>
+        <td align="center" valign="top" style="padding:24px 12px;">
+          <table role="presentation" class="email-shell" border="0" cellpadding="0" cellspacing="0" width="600" style="width:600px; max-width:600px; background-color:#ffffff;">
+            <tr>
+              <td class="email-padding" style="padding:28px 42px; background-color:#152d4c; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">
+                <p style="margin:0; font-size:20px; line-height:26px; font-weight:bold;">Guia do Proprietário</p>
+              </td>
+            </tr>
+            <tr>
+              <td class="email-padding" style="padding:44px 42px 22px; color:#152238; font-family:Arial, Helvetica, sans-serif; font-size:17px; line-height:27px;">
+                <p style="margin:0 0 22px;">Olá,</p>
+                <h1 class="email-title" style="margin:0 0 20px; color:#152238; font-family:Arial, Helvetica, sans-serif; font-size:36px; line-height:42px; letter-spacing:-1px;">TÍTULO PRINCIPAL</h1>
+
+                <!-- INÍCIO DO CORPO EDITÁVEL -->
+                <p style="margin:0 0 18px;">Escreva aqui o primeiro parágrafo.</p>
+                <p style="margin:0 0 26px;">Escreva aqui o restante texto do email.</p>
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                  <tr>
+                    <td align="center" style="padding:0 0 28px;">
+                      <a class="email-button" href="URL_DO_BOTÃO" style="display:inline-block; padding:17px 28px; border-radius:7px; color:#102238; background-color:#b9f227; font-family:Arial, Helvetica, sans-serif; font-size:17px; line-height:22px; font-weight:bold; text-decoration:none;">TEXTO DO BOTÃO</a>
+                    </td>
+                  </tr>
+                </table>
+                <!-- FIM DO CORPO EDITÁVEL -->
+
+                <p style="margin:0;">Até breve,<br /><strong>Equipa do Guia do Proprietário</strong></p>
+              </td>
+            </tr>
+            <tr>
+              <td class="email-padding" style="padding:22px 42px 34px; color:#617084; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:19px;">
+                <p style="margin:0 0 12px;">Recebeu este email porque subscreveu os conteúdos do Guia do Proprietário.</p>
+                <p style="margin:0;">
+                  <a href="{$unsubscribe_link}" style="color:#617084; font-family:Arial, Helvetica, sans-serif; font-size:12px; text-decoration:underline;">Cancelar subscrição</a>
+                  &nbsp;·&nbsp;
+                  <a href="https://guiadoproprietario.pt/politica-de-privacidade/" style="color:#617084; font-family:Arial, Helvetica, sans-serif; font-size:12px; text-decoration:underline;">Política de Privacidade</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
