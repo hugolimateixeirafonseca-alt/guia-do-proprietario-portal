@@ -2,9 +2,11 @@
 
 ## Estado
 
-A landing, a validação do formulário e o email de entrega estão preparados. O PDF final está publicado e foi confirmado online em 4 de agosto de 2026. O fornecedor escolhido é o Sender e será usado com single opt-in. A recolha real permanece inativa até o Sender e a integração segura estarem configurados e testados.
+A landing, a validação do formulário e a integração com o Sender estão publicadas. O PDF final está publicado e foi confirmado online em 4 de agosto de 2026. O formulário usa single opt-in e a recolha de subscrições está ativa. A partilha com empresas parceiras permanece inativa enquanto a lista pública de parceiros estiver vazia.
 
 Rota da landing: `/guias/vender-casa/`
+
+Endereço público confirmado: `https://guiadoproprietario.pt/guias/vender-casa/`
 
 PDF entregue por email: `/ebooks/vender-a-casa-em-portugal-3f9a2c.pdf`
 
@@ -14,16 +16,16 @@ Email de entrega: `emails/sender/email-0-guia-vender-casa.html`
 
 Modelo reutilizável: `emails/sender/template-base.html`
 
-## Configuração necessária
+## Configuração confirmada
 
-Configuração necessária no Sender:
+Configuração confirmada pelo responsável no Sender e na Cloudflare:
 
-- grupos criados e identificadores registados no portal;
-- guardar a versão e a data de cada consentimento;
-- criar a automação de entrega e colar o HTML de `emails/sender/email-0-guia-vender-casa.html`;
-- validar o remetente `geral@guiadoproprietario.pt`;
-- integração de `functions/api/subscribe.ts` com a API do Sender preparada;
-- documentar o Sender na Política de Privacidade.
+- grupos e campos personalizados criados;
+- automação de entrega ativa para o grupo `Guia - Vender Casa`;
+- remetente `geral@guiadoproprietario.pt` validado;
+- token da API guardado como segredo na Cloudflare;
+- integração de `functions/api/subscribe.ts` publicada;
+- Sender identificado na Política de Privacidade.
 
 ## Grupos configurados
 
@@ -49,6 +51,16 @@ A integração foi testada localmente para confirmar:
 - apresentação de erro quando o Sender falha.
 
 Os seis testes passaram. Não foram enviados contactos para o Sender durante estes testes.
+
+## Validação em produção
+
+Em 4 de agosto de 2026:
+
+- a publicação da Cloudflare terminou com sucesso;
+- a landing, a Política de Privacidade, a lista de parceiros e o PDF responderam com estado 200;
+- um pedido controlado com `geral@guiadoproprietario.pt` e sem autorização de parceiros foi aceite pela API com estado 200;
+- a resposta do portal confirmou a criação ou atualização do contacto no Sender;
+- a receção do email e o funcionamento do cancelamento ainda devem ser confirmados na caixa de correio.
 
 O Pixel da Meta só deve ser configurado quando estiver aprovado e pronto para utilização.
 
