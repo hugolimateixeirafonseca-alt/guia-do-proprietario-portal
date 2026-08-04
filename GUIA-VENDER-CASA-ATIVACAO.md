@@ -50,7 +50,7 @@ A integração foi testada localmente para confirmar:
 - acionamento da automação ao entrar em `Guia - Vender Casa`;
 - apresentação de erro quando o Sender falha.
 
-Os seis testes passaram. Não foram enviados contactos para o Sender durante estes testes.
+Os sete testes passaram. Não foram enviados contactos para o Sender durante estes testes.
 
 ## Validação em produção
 
@@ -61,6 +61,17 @@ Em 4 de agosto de 2026:
 - um pedido controlado com `geral@guiadoproprietario.pt` e sem autorização de parceiros foi aceite pela API com estado 200;
 - a resposta do portal confirmou a criação ou atualização do contacto no Sender;
 - a receção do email e o funcionamento do cancelamento ainda devem ser confirmados na caixa de correio.
+
+## Correção de 5 de agosto de 2026
+
+O primeiro teste em produção usou um contacto que já existia no Sender e validou apenas a atualização. Quando foram usados endereços novos, a criação falhou e os dois formulários apresentaram erro.
+
+A criação foi corrigida para adicionar o novo subscritor e os respetivos grupos numa única operação. Depois da nova publicação:
+
+- um endereço novo para o pedido do guia foi aceite com estado 200;
+- um endereço novo para a newsletter foi aceite com estado 200;
+- nenhum dos dois testes autorizou a partilha com empresas parceiras;
+- a confirmação da entrega do email do guia continua a depender da verificação da caixa de correio.
 
 O Pixel da Meta só deve ser configurado quando estiver aprovado e pronto para utilização.
 
