@@ -1,8 +1,88 @@
-<section class="newsletter" aria-labelledby="newsletter-title">
-  <div><p class="eyebrow">Newsletter</p><h2 id="newsletter-title">Uma casa tem sempre um prazo a chegar.</h2><p>Receba, de vez em quando, os prazos que se aproximam e os guias novos. Sem spam, cancela quando quiser.</p></div>
-  <form aria-describedby="newsletter-note">
-    <label for="newsletter-email">Email</label>
-    <div><input id="newsletter-email" type="email" placeholder="nome@email.pt" disabled /><button type="button" disabled>Subscrever</button></div>
-    <small id="newsletter-note">A subscrição ainda não está ativa. Não recolhemos o seu email.</small>
+---
+import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
+---
+
+<section class="newsletter" id="newsletter-form" aria-labelledby="newsletter-title">
+  <div>
+    <p class="eyebrow">Newsletter</p>
+    <h2 id="newsletter-title">Receba o essencial para proprietários, sem ruído</h2>
+    <p>Novos guias, prazos importantes e conselhos práticos. Receba apenas o que é útil para cuidar, arrendar ou vender a sua casa.</p>
+  </div>
+  <form class="newsletter-form" novalidate>
+    <label class="newsletter-email-label" for="newsletter-email">Email</label>
+    <div class="newsletter-email-row">
+      <input id="newsletter-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="nome@email.pt" required />
+      <button type="submit">Subscrever</button>
+    </div>
+    <label class="newsletter-consent">
+      <input type="checkbox" name="consent" />
+      <span>Aceito receber a newsletter do Guia do Proprietário por email e li a <a href="/privacidade/">Política de Privacidade</a>. Posso cancelar quando quiser.</span>
+    </label>
+    <p class="newsletter-error" hidden>É preciso aceitar para subscrever.</p>
+    <small>Pode cancelar a subscrição num clique.</small>
+    <p class="newsletter-status" role="status" aria-live="polite"></p>
   </form>
 </section>
+
+<script is:inline define:vars={{ NEWSLETTER_CONSENT_VERSION }}>
+  document.querySelectorAll(".newsletter-form").forEach((form) => {
+    const email = form.querySelector('input[type="email"]');
+    const consent = form.querySelector('input[name="consent"]');
+    const consentLabel = form.querySelector(".newsletter-consent");
+    const error = form.querySelector(".newsletter-error");
+    const status = form.querySelector(".newsletter-status");
+    const button = form.querySelector('button[type="submit"]');
+
+    consent.addEventListener("change", () => {
+      if (consent.checked) {
+        consentLabel.classList.remove("erro");
+        error.hidden = true;
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.textContent = "";
+
+      if (!consent.checked) {
+        consentLabel.classList.add("erro");
+        error.hidden = false;
+        consent.focus();
+        return;
+      }
+      if (!email.checkValidity()) {
+        email.reportValidity();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "A enviar...";
+      const eventId = globalThis.crypto?.randomUUID?.() || `newsletter-${Date.now()}`;
+
+      try {
+        const response = await fetch("/api/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email.value.trim(),
+            consent1: true,
+            consent2: false,
+            consentVersion: NEWSLETTER_CONSENT_VERSION,
+            source: "newsletter",
+            pageUrl: location.href,
+            eventId
+          })
+        });
+        if (!response.ok) throw new Error("subscribe_failed");
+        if (window.fbq) window.fbq("track", "Lead", { content_name: "newsletter" }, { eventID: eventId });
+        form.reset();
+        status.textContent = "Subscrição concluída. Já faz parte da Newsletter do Guia do Proprietário.";
+      } catch {
+        status.textContent = "A subscrição ainda não está disponível. Tente novamente mais tarde.";
+      } finally {
+        button.disabled = false;
+        button.textContent = "Subscrever";
+      }
+    });
+  });
+</script>

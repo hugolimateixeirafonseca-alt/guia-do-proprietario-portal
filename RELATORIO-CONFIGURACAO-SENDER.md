@@ -79,18 +79,19 @@ A propagação pode demorar alguns minutos ou, em casos menos frequentes, até 4
 
 Em `Subscribers → Groups`, criar:
 
-| Grupo | Função |
-|---|---|
-| Newsletter - Ativa | Recebe imediatamente todos os subscritores da newsletter |
-| Guia - Vender Casa | Identifica quem pediu o e-book |
-| Parceiros | Contém apenas quem autorizou expressamente a partilha |
+| Grupo | ID | Função |
+|---|---|---|
+| Test group (geral@guiadoproprietario.pt) | `dPlrkn` | Testes manuais. Nunca recebe subscrições reais automaticamente |
+| Newsletter - Ativa | `eEvG4m` | Recebe imediatamente todos os subscritores da newsletter |
+| Guia - Vender Casa | `dJAl59` | Identifica quem pediu o e-book e aciona a entrega automática |
+| Guia - Vender Casa - Parceiros | `aKBm4l` | Contém apenas quem autorizou expressamente a partilha |
 
 ### Regras de utilização
 
 - uma nova subscrição entra diretamente em `Newsletter - Ativa`;
 - não é enviado qualquer email de confirmação da subscrição;
 - o pedido do e-book entra em `Guia - Vender Casa`;
-- o grupo `Parceiros` só recebe quem marcou a autorização opcional;
+- o grupo `Guia - Vender Casa - Parceiros` só recebe quem marcou a autorização opcional;
 - a lista geral nunca é partilhada com empresas parceiras;
 - um contacto pode pertencer a vários grupos.
 
@@ -190,9 +191,10 @@ A integração utilizará:
 
 Depois da configuração do Sender, recolher:
 
-- identificador de `Newsletter - Ativa`;
-- identificador de `Guia - Vender Casa`;
-- identificador de `Parceiros`;
+- identificador de `Newsletter - Ativa`: `eEvG4m`;
+- identificador de `Guia - Vender Casa`: `dJAl59`;
+- identificador de `Guia - Vender Casa - Parceiros`: `aKBm4l`;
+- identificador do grupo de teste: `dPlrkn`;
 - confirmação de que a automação de entrega do guia está ativa;
 - confirmação de que o domínio está autenticado;
 - confirmação de que `geral@guiadoproprietario.pt` envia e recebe corretamente.
@@ -209,8 +211,8 @@ Antes de abrir os formulários ao público:
 - [ ] O contacto fica ativo sem receber um pedido de confirmação.
 - [ ] O pedido do e-book entra em `Guia - Vender Casa`.
 - [ ] O email do guia chega e o botão abre o PDF.
-- [ ] Sem autorização de parceiros, o contacto não entra em `Parceiros`.
-- [ ] Com autorização, entra em `Parceiros`.
+- [ ] Sem autorização de parceiros, o contacto não entra em `Guia - Vender Casa - Parceiros`.
+- [ ] Com autorização, entra em `Guia - Vender Casa - Parceiros`.
 - [ ] Os campos de prova do consentimento ficam preenchidos.
 - [ ] A ligação de cancelamento funciona.
 - [ ] Uma segunda subscrição do mesmo email não cria duplicados.

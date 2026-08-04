@@ -1,0 +1,83 @@
+---
+const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || "";
+---
+
+<aside class="cookie-banner" id="cookie-banner" aria-labelledby="cookie-title" role="dialog" aria-modal="false" hidden>
+  <div>
+    <strong id="cookie-title">Cookies de medição</strong>
+    <p>Usamos cookies de medição para perceber os resultados das nossas campanhas. Pode aceitar ou recusar. Os cookies técnicos, necessários ao site, estão sempre ativos.</p>
+    <a href="/privacidade/">Saber mais</a>
+  </div>
+  <div class="cookie-actions">
+    <button type="button" data-cookie-choice="accepted">Aceitar</button>
+    <button type="button" data-cookie-choice="rejected">Recusar</button>
+  </div>
+</aside>
+
+<script is:inline define:vars={{ metaPixelId }}>
+  (() => {
+    const COOKIE_NAME = "gp_consent";
+    const banner = document.getElementById("cookie-banner");
+    const readConsent = () => document.cookie
+      .split(";")
+      .map((item) => item.trim())
+      .find((item) => item.startsWith(`${COOKIE_NAME}=`))
+      ?.split("=")[1] || "";
+
+    const loadPixel = () => {
+      if (!metaPixelId || window._pixelOn) return;
+      window._pixelOn = true;
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+      (window,document,"script","https://connect.facebook.net/en_US/fbevents.js");
+      window.fbq("init", metaPixelId);
+      window.fbq("track", "PageView");
+    };
+
+    const saveConsent = (choice) => {
+      const pixelWasOn = Boolean(window._pixelOn);
+      const secure = location.protocol === "https:" ? "; Secure" : "";
+      document.cookie = `${COOKIE_NAME}=${choice}; Path=/; Max-Age=15552000; SameSite=Lax${secure}`;
+      banner.hidden = true;
+      if (choice === "accepted") loadPixel();
+      if (choice === "rejected") {
+        document.cookie = "_fbp=; Path=/; Max-Age=0; SameSite=Lax";
+        document.cookie = "_fbc=; Path=/; Max-Age=0; SameSite=Lax";
+        if (pixelWasOn) location.reload();
+      }
+    };
+
+    banner.querySelectorAll("[data-cookie-choice]").forEach((button) => {
+      button.addEventListener("click", () => saveConsent(button.dataset.cookieChoice));
+    });
+
+    document.querySelectorAll("[data-cookie-settings]").forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        banner.hidden = false;
+        banner.querySelector("button")?.focus();
+      });
+    });
+
+    const consent = readConsent();
+    if (consent === "accepted") loadPixel();
+    if (consent !== "accepted" && consent !== "rejected") banner.hidden = false;
+  })();
+</script>
+
+<style>
+  .cookie-banner { position: fixed; z-index: 1000; right: 20px; bottom: 20px; left: 20px; width: min(760px, calc(100% - 40px)); margin-inline: auto; padding: 20px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; color: #102a31; background: #fffefa; border: 1px solid #b9c9c3; box-shadow: 0 18px 55px rgba(9, 34, 41, .24); }
+  .cookie-banner strong { display: block; margin-bottom: 5px; font-size: 17px; }
+  .cookie-banner p { margin: 0; font-size: 13px; line-height: 1.5; }
+  .cookie-banner a { display: inline-block; margin-top: 6px; color: #256b5c; font-size: 12px; font-weight: 750; }
+  .cookie-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .cookie-actions button { min-width: 105px; min-height: 44px; padding: 0 15px; color: white; background: #256b5c; border: 2px solid #256b5c; border-radius: 4px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+  .cookie-actions button:last-child { color: #256b5c; background: transparent; }
+  .cookie-actions button:hover, .cookie-actions button:focus-visible { outline: 3px solid rgba(37, 107, 92, .2); outline-offset: 2px; }
+  @media (max-width: 650px) {
+    .cookie-banner { right: 12px; bottom: 12px; left: 12px; width: calc(100% - 24px); grid-template-columns: 1fr; gap: 14px; padding: 17px; }
+    .cookie-actions button { width: 100%; }
+  }
+</style>

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 export const PROJECT_ROOT = path.resolve(import.meta.dirname, "..", "..");
-export const USER_AGENT = "GuiaDoProprietario-Dados/1.0 (contacto: ola@guiadoproprietario.pt)";
+export const USER_AGENT = "GuiaDoProprietario-Dados/1.0 (contacto: geral@guiadoproprietario.pt)";
 
 export function argumentos(argv = process.argv.slice(2)) {
   const resultado = {};
@@ -126,4 +126,3 @@ export function periodoCurto(designacao) {
   if (!resultado) throw new Error(`Período trimestral desconhecido: ${designacao}`);
   return `${resultado[1]}T${resultado[2]}`;
 }
-

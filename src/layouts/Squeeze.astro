@@ -1,0 +1,37 @@
+---
+import { site } from "../config";
+import CookieConsent from "../components/CookieConsent.astro";
+
+interface Props {
+  titulo: string;
+  descricao: string;
+  imagemOg: string;
+}
+
+const { titulo, descricao, imagemOg } = Astro.props;
+const canonical = new URL(Astro.url.pathname, site.dominio).toString();
+const imagemOgAbsoluta = new URL(imagemOg, site.dominio).toString();
+const cookieBannerEnabled = import.meta.env.PUBLIC_COOKIE_BANNER_ENABLED === "true";
+---
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={descricao} />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imagemOgAbsoluta} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>{titulo}</title>
+  </head>
+  <body>
+    <main><slot /></main>
+    {cookieBannerEnabled && <CookieConsent />}
+  </body>
+</html>

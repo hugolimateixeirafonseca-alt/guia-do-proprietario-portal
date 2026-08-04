@@ -2,7 +2,7 @@ export const site = {
   nome: "Guia do Proprietário",
   dominio: "https://guiadoproprietario.pt",
   descricao: "Informação prática para cuidar, arrendar e vender imóveis em Portugal.",
-  email: "ola@guiadoproprietario.pt"
+  email: "geral@guiadoproprietario.pt"
 };
 
 export const redesSociais = [

@@ -1,0 +1,235 @@
+---
+import Squeeze from "../../layouts/Squeeze.astro";
+import { CONSENT_VERSION } from "../../data/consent";
+
+const titulo = "Vender a sua casa em Portugal, sem surpresas";
+const descricao = "Receba gratuitamente o guia completo para vender casa em Portugal, calcular custos e reunir os documentos necessários.";
+const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
+---
+<Squeeze titulo={titulo} descricao={descricao} imagemOg={imagemEbook}>
+  <section class="hero" aria-labelledby="titulo-guia">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <a class="brand" href="/" aria-label="Guia do Proprietário, página inicial">
+          <img src="/imagens/marca/logotipo-horizontal-claro.svg" alt="Guia do Proprietário" width="218" height="42" />
+        </a>
+        <p class="kicker">GUIA GRATUITO PARA PROPRIETÁRIOS</p>
+        <h1 id="titulo-guia">Vender a sua casa em Portugal, sem surpresas</h1>
+        <p class="subtitle">O guia completo, passo a passo: quanto vale a sua casa, quanto lhe fica no bolso e todos os documentos e prazos até às chaves entregues.</p>
+
+        <figure class="hero-visual-mobile">
+          <img src={imagemEbook} alt="Ebook Vender a Casa em Portugal apresentado como livro" width="1200" height="800" fetchpriority="high" />
+        </figure>
+
+        <form id="lead" novalidate>
+          <label class="email-label" for="email">O seu email</label>
+          <input id="email" type="email" name="email" required autocomplete="email" inputmode="email" placeholder="o.seu.email@exemplo.pt" />
+
+          <label class="chk" id="chk1-label">
+            <input type="checkbox" id="consent1" />
+            <span>Quero receber o guia e aceito receber conselhos e novidades do Guia do Proprietário por email. Posso cancelar a qualquer momento. <a href="/politica-de-privacidade/">Li a Política de Privacidade</a>.</span>
+          </label>
+
+          <label class="chk">
+            <input type="checkbox" id="consent2" />
+            <span>Autorizo a partilha do meu contacto com empresas parceiras do Guia do Proprietário, para me contactarem sobre produtos e serviços. Consulte quem são na <a href="/parceiros/">lista de parceiros</a>. <em>(Opcional)</em></span>
+          </label>
+
+          <button id="submit-button" type="submit">Quero o guia gratuito</button>
+          <p id="chk1-erro" class="field-error" hidden>É preciso aceitar para receber o guia.</p>
+          <p class="microcopy">Enviamos para o seu email · Tudo num só guia · 24 páginas</p>
+          <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div id="sucesso" class="success" hidden tabindex="-1">
+          <span aria-hidden="true">✓</span>
+          <h2>O guia vai a caminho.</h2>
+          <p>Enviámos o link para o seu email. Verifique a caixa de entrada e, se não chegar em poucos minutos, veja o spam ou promoções. Se não aparecer, confirme se escreveu o email corretamente e tente de novo.</p>
+        </div>
+      </div>
+
+      <figure class="hero-visual">
+        <img src={imagemEbook} alt="Ebook Vender a Casa em Portugal apresentado como livro" width="1200" height="800" fetchpriority="high" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="inside" aria-labelledby="dentro-titulo">
+    <div class="content">
+      <p class="section-kicker">24 páginas para preparar a venda</p>
+      <h2 id="dentro-titulo">O que vai encontrar lá dentro</h2>
+      <ul>
+        <li>Os três valores da sua casa, e qual conta mesmo para o preço</li>
+        <li>A conta que ninguém mostra: quanto lhe sobra depois de comissões, impostos e distrate</li>
+        <li>Mais-valias sem letra miúda, com as isenções que pode aproveitar</li>
+        <li>A checklist de documentos que evita atrasos na escritura</li>
+        <li>A cláusula do contrato-promessa que, se faltar, lhe pode custar caro</li>
+        <li>Os erros mais caros de quem vende, resumidos</li>
+      </ul>
+    </div>
+  </section>
+
+  <aside class="audience">
+    <div class="content"><strong>Para quem é:</strong> proprietários que querem vender por conta própria, ou apenas perceber todo o processo antes de falar com um consultor.</div>
+  </aside>
+
+  <section class="bottom-cta" aria-labelledby="cta-titulo">
+    <div class="content">
+      <p class="section-kicker">Comece com informação clara</p>
+      <h2 id="cta-titulo">Receba o guia agora</h2>
+      <a class="cta-button" href="#lead">Descarregar o guia gratuito</a>
+      <p>O link chega diretamente ao seu email.</p>
+    </div>
+  </section>
+
+  <footer>© 2026 Guia do Proprietário · <a href="/politica-de-privacidade/">Política de Privacidade</a> · <a href="#cookie-settings" data-cookie-settings>Definições de cookies</a></footer>
+
+  <script is:inline define:vars={{ CONSENT_VERSION }}>
+    const form = document.getElementById("lead");
+    const emailInput = document.getElementById("email");
+    const consent1Input = document.getElementById("consent1");
+    const consent2Input = document.getElementById("consent2");
+    const consent1Label = document.getElementById("chk1-label");
+    const consent1Error = document.getElementById("chk1-erro");
+    const status = document.getElementById("form-status");
+    const submitButton = document.getElementById("submit-button");
+    const success = document.getElementById("sucesso");
+
+    consent1Input.addEventListener("change", () => {
+      if (consent1Input.checked) {
+        consent1Label.classList.remove("erro");
+        consent1Error.hidden = true;
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.textContent = "";
+
+      if (!consent1Input.checked) {
+        consent1Error.hidden = false;
+        consent1Label.classList.add("erro");
+        consent1Input.focus();
+        return;
+      }
+
+      if (!emailInput.checkValidity()) {
+        emailInput.reportValidity();
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "A enviar...";
+      const eventId = globalThis.crypto?.randomUUID?.() || `lead-${Date.now()}`;
+
+      try {
+        const response = await fetch("/api/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: emailInput.value.trim(),
+            consent1: true,
+            consent2: consent2Input.checked,
+            source: "ebook-vender-casa",
+            consentVersion: CONSENT_VERSION,
+            pageUrl: location.href,
+            eventId
+          })
+        });
+
+        if (!response.ok) throw new Error("subscribe_failed");
+        if (window.fbq) window.fbq("track", "Lead", { content_name: "ebook-vender-casa" }, { eventID: eventId });
+        form.hidden = true;
+        success.hidden = false;
+        success.focus();
+      } catch {
+        status.textContent = "Não foi possível enviar agora. Tente novamente dentro de instantes.";
+        submitButton.disabled = false;
+        submitButton.textContent = "Quero o guia gratuito";
+      }
+    });
+  </script>
+</Squeeze>
+
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(html) { scroll-behavior: smooth; }
+  :global(body) { margin: 0; color: #152238; background: #fffdf8; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  :global(button), :global(input) { font: inherit; }
+  :global(a:focus-visible), :global(button:focus-visible), :global(input:focus-visible) { outline: 3px solid #f1b25f; outline-offset: 3px; }
+  .content { width: min(700px, calc(100% - 40px)); margin-inline: auto; }
+  .hero { color: white; background: #1f3a5f; }
+  .hero-inner { position: relative; width: min(1120px, calc(100% - 40px)); min-height: 720px; margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(360px, .98fr); align-items: center; gap: 54px; padding: 42px 0 58px; }
+  .brand { display: inline-flex; margin-bottom: 56px; }
+  .brand img { width: 218px; height: auto; display: block; }
+  .kicker, .section-kicker { margin: 0 0 13px; color: #e0a24f; font-size: 12px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+  h1 { max-width: 690px; margin: 0; font-size: clamp(40px, 5vw, 68px); line-height: .98; letter-spacing: -.045em; }
+  .subtitle { max-width: 660px; margin: 22px 0 30px; color: #e8eef6; font-size: clamp(17px, 2vw, 21px); line-height: 1.48; }
+  form { max-width: 620px; display: grid; gap: 12px; }
+  .email-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  input[type="email"] { width: 100%; min-height: 58px; padding: 0 18px; color: #172238; background: #fff; border: 2px solid transparent; border-radius: 8px; font-size: 17px; box-shadow: 0 7px 22px rgba(4, 18, 37, .18); }
+  input[type="email"]:focus { border-color: #e0a24f; outline: 0; }
+  .chk { display: grid; grid-template-columns: 19px 1fr; gap: 10px; padding: 9px 10px; color: #e8eef6; border: 1px solid transparent; border-radius: 7px; font-size: 12px; line-height: 1.42; cursor: pointer; }
+  .chk input { width: 17px; height: 17px; margin: 1px 0 0; accent-color: #e0a24f; }
+  .chk a { color: white; text-underline-offset: 2px; }
+  .chk em { font-style: normal; font-weight: 800; }
+  .chk.erro { color: #ffb4ad; }
+  .field-error, .form-status { color: #ffb4ad; font-size: 12px; font-weight: 750; }
+  .field-error { margin: -4px 0 0; text-align: center; }
+  .form-status { min-height: 18px; margin: -5px 0 0; }
+  button, .cta-button { min-height: 56px; border: 0; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: #102238; background: #b9f227; font-weight: 850; text-align: center; text-decoration: none; cursor: pointer; transition: transform .18s ease, background .18s ease; }
+  button:hover, .cta-button:hover { background: #ccff42; transform: translateY(-1px); }
+  button:disabled { cursor: wait; opacity: .72; transform: none; }
+  .microcopy { margin: -3px 0 0; color: #b9c8da; font-size: 11px; text-align: center; }
+  .hero-visual { margin: 0; overflow: hidden; }
+  .hero-visual img { width: 100%; height: auto; display: block; border-radius: 12px; box-shadow: 0 30px 70px rgba(4, 15, 31, .42); }
+  .hero-visual-mobile { display: none; }
+  .success { max-width: 620px; padding: 26px; color: #19334f; background: #f4efe6; border-left: 5px solid #d59a4d; border-radius: 8px; }
+  .success > span { width: 42px; height: 42px; display: grid; place-items: center; color: white; background: #2b6b5b; border-radius: 50%; font-size: 23px; font-weight: 900; }
+  .success h2 { margin: 16px 0 8px; font-size: 28px; }
+  .success p { margin: 0; line-height: 1.55; }
+  .inside { padding: 74px 0 66px; background: #fff; }
+  .inside h2, .bottom-cta h2 { margin: 0 0 26px; font-size: clamp(30px, 5vw, 46px); letter-spacing: -.035em; }
+  .inside ul { margin: 0; padding: 0; display: grid; gap: 0; list-style: none; }
+  .inside li { position: relative; padding: 17px 0 17px 40px; border-bottom: 1px solid #e1e5e7; font-size: 17px; line-height: 1.42; }
+  .inside li::before { content: "✓"; position: absolute; left: 4px; top: 16px; color: #c48233; font-size: 19px; font-weight: 900; }
+  .audience { padding: 27px 0; color: #27384e; background: #f4efe6; border-block: 1px solid #ded4c3; font-size: 16px; line-height: 1.55; }
+  .bottom-cta { padding: 62px 0; text-align: center; }
+  .bottom-cta .content { max-width: 620px; }
+  .bottom-cta .cta-button { width: 100%; color: #102238; background: #b9f227; }
+  .bottom-cta .cta-button:hover { background: #ccff42; }
+  .bottom-cta p:last-child { margin: 12px 0 0; color: #617084; font-size: 12px; }
+  footer { padding: 24px 20px; color: #cfdae8; background: #152d4c; font-size: 11px; text-align: center; }
+  footer a { color: white; }
+  @media (max-width: 760px) {
+    .hero-inner { min-height: auto; display: block; padding: 20px 0 34px; }
+    .brand { margin-bottom: 25px; }
+    .brand img { width: 182px; }
+    .kicker { margin-top: 7px; }
+    h1 { max-width: none; font-size: clamp(34px, 10.5vw, 46px); line-height: 1.02; }
+    .subtitle { max-width: none; margin: 15px 0 18px; font-size: 15px; line-height: 1.45; }
+    .hero-visual { display: none; }
+    .hero-visual-mobile { width: min(82%, 310px); display: block; margin: 4px auto 20px; overflow: hidden; }
+    .hero-visual-mobile img { width: 100%; height: auto; display: block; border-radius: 8px; box-shadow: 0 18px 38px rgba(4, 15, 31, .4); }
+    form { gap: 8px; }
+    input[type="email"] { min-height: 52px; font-size: 16px; }
+    .chk { padding: 7px 4px; font-size: 10.5px; line-height: 1.35; }
+    button { min-height: 52px; }
+    .microcopy { font-size: 10px; }
+    .inside { padding: 52px 0 46px; }
+    .inside li { padding: 14px 0 14px 34px; font-size: 15px; }
+    .inside li::before { top: 13px; }
+    .audience { font-size: 14px; }
+    .bottom-cta { padding: 50px 0; }
+  }
+  @media (max-width: 410px) {
+    .hero-inner, .content { width: min(100% - 28px, 700px); }
+    .brand { margin-bottom: 19px; }
+    .brand img { width: 165px; }
+    .kicker { font-size: 9px; }
+    h1 { font-size: 29px; }
+    .subtitle { font-size: 13px; }
+    .hero-visual-mobile { width: min(88%, 290px); }
+  }
+  @media (prefers-reduced-motion: reduce) { :global(html) { scroll-behavior: auto; } button, .cta-button { transition: none; } }
+</style>

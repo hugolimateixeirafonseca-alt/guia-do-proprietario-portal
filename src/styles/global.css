@@ -131,11 +131,19 @@ h3 { font-size: 21px; }
 .newsletter h2 { margin: 0 0 8px; font-size: 31px; }
 .newsletter p { margin: 0; color: rgba(255,255,255,.7); }
 .newsletter form { align-self: center; }
-.newsletter label { display: block; margin-bottom: 7px; font-size: 11px; font-weight: 700; }
-.newsletter form > div { display: flex; }
-.newsletter input { flex: 1; min-width: 0; height: 47px; padding: 0 13px; border: 0; }
-.newsletter button { padding: 0 15px; color: #64716f; background: #d8ddda; border: 0; }
+.newsletter-email-label { display: block; margin-bottom: 7px; font-size: 11px; font-weight: 700; }
+.newsletter-email-row { display: flex; }
+.newsletter-email-row input { flex: 1; min-width: 0; height: 47px; padding: 0 13px; border: 0; }
+.newsletter-email-row button { min-height: 47px; padding: 0 17px; color: white; background: var(--green); border: 0; font-weight: 800; cursor: pointer; }
+.newsletter-email-row button:hover { background: #318270; }
+.newsletter-email-row button:disabled { cursor: wait; opacity: .7; }
+.newsletter-consent { margin-top: 12px; display: grid; grid-template-columns: 18px 1fr; gap: 9px; align-items: start; color: rgba(255,255,255,.82); font-size: 11px; line-height: 1.45; cursor: pointer; }
+.newsletter-consent input { width: 17px; height: 17px; margin: 1px 0 0; accent-color: var(--green); }
+.newsletter-consent a { color: white; }
+.newsletter-consent.erro { color: #ffb4ad; }
+.newsletter-error { margin-top: 7px !important; color: #ffb4ad !important; font-size: 11px; font-weight: 800; }
 .newsletter small { display: block; margin-top: 8px; color: rgba(255,255,255,.55); }
+.newsletter-status { min-height: 20px; margin-top: 7px !important; color: white !important; font-size: 12px; font-weight: 750; }
 .page-hero { padding: 65px 0 45px; background: var(--cream); }
 .page-hero h1 { margin: 0 0 12px; font-size: clamp(40px, 5vw, 64px); }
 .page-hero p { max-width: 720px; margin: 0; color: var(--muted); font-size: 17px; }
@@ -343,7 +351,7 @@ th { font-size: 11px; text-transform: uppercase; }
   .recent-articles-section { padding-top: 54px; }
   .field.full { grid-column: auto; }
   .newsletter { padding: 28px 22px; }
-  .newsletter form > div { display: grid; }
+  .newsletter-email-row { display: grid; }
   .site-footer { grid-template-columns: 1fr; }
   .site-footer small { grid-column: auto; }
   .pillar-hero picture { width: 100%; overflow: hidden; border-radius: 14px; }

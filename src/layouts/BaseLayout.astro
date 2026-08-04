@@ -2,6 +2,8 @@
 import "../styles/global.css";
 import { site, pilares, redesSociais } from "../config";
 import Marca from "../components/Marca.astro";
+import Newsletter from "../components/Newsletter.astro";
+import CookieConsent from "../components/CookieConsent.astro";
 
 interface Props {
   titulo?: string;
@@ -19,7 +21,9 @@ const {
   imagemOg
 } = Astro.props;
 const tituloCompleto = titulo === site.nome ? titulo : `${titulo} | ${site.nome}`;
-const utilitaria = ["/", "/sobre/", "/metodologia/", "/privacidade/", "/termos/", "/ligacoes/", "/glossario/", "/pesquisa/", "/404/"].includes(Astro.url.pathname);
+const leadFormsEnabled = import.meta.env.PUBLIC_LEAD_FORMS_ENABLED !== "false";
+const cookieBannerEnabled = import.meta.env.PUBLIC_COOKIE_BANNER_ENABLED === "true";
+const utilitaria = ["/", "/sobre/", "/metodologia/", "/privacidade/", "/politica-de-privacidade/", "/parceiros/", "/newsletter/", "/termos/", "/ligacoes/", "/glossario/", "/pesquisa/", "/404/"].includes(Astro.url.pathname);
 const ogPath = utilitaria ? "/og-1200x630.png" : `/og${Astro.url.pathname === "/" ? "/index/" : Astro.url.pathname}index.png`;
 const imagemOgFinal = imagemOg || new URL(ogPath, site.dominio).toString();
 const organization = {
@@ -73,6 +77,7 @@ const linksNavegacao = [
       </details>
     </header>
     <main id="conteudo"><slot /></main>
+    {leadFormsEnabled && <Newsletter />}
     <footer class="site-footer">
       <div>
         <a class="brand footer-brand" href="/"><Marca /><span>Guia do Proprietário</span></a>
@@ -90,8 +95,9 @@ const linksNavegacao = [
           ))}
         </nav>
       </div>
-      <nav aria-label="Informação"><a href="/sobre/">Sobre</a><a href="/metodologia/">Metodologia</a><a href="/glossario/">Glossário</a><a href="/calendario/">Calendário</a><a href="/ligacoes/">Ligações</a><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><a href="/rss.xml">RSS</a></nav>
+      <nav aria-label="Informação"><a href="/sobre/">Sobre</a><a href="/metodologia/">Metodologia</a><a href="/glossario/">Glossário</a><a href="/calendario/">Calendário</a><a href="/ligacoes/">Ligações</a><a href="/newsletter/">Newsletter</a><a href="/parceiros/">Parceiros</a><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a>{cookieBannerEnabled && <a href="#cookie-settings" data-cookie-settings>Definições de cookies</a>}<a href="/rss.xml">RSS</a></nav>
       <small>© {new Date().getFullYear()} Guia do Proprietário. Conteúdo informativo, sujeito a revisão.</small>
     </footer>
+    {cookieBannerEnabled && <CookieConsent />}
   </body>
 </html>

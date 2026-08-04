@@ -9,10 +9,10 @@ import EmailProtegido from "../components/EmailProtegido.astro";
   <article class="article-layout article-body">
     <p class="eyebrow">Privacidade</p>
     <h1>Política de Privacidade</h1>
-    <p class="article-meta">Atualizado a 28 de julho de 2026</p>
+    <p class="article-meta">Atualizado a 4 de agosto de 2026</p>
 
     <h2>Em resumo</h2>
-    <p>O Guia do Proprietário é um site informativo. Não lhe pedimos que crie conta, não recolhemos dados pessoais para publicidade, e a nossa analítica não usa cookies de rastreio nem o identifica. Esta página explica em detalhe que dados são tratados, com que fundamento e durante quanto tempo, como exige o Regulamento Geral sobre a Proteção de Dados (RGPD).</p>
+    <p>O Guia do Proprietário é um site informativo. Não lhe pedimos que crie conta. Quando solicita um guia por email, tratamos o endereço e os consentimentos que escolher apenas para as finalidades indicadas no formulário. Esta página explica que dados são tratados, com que fundamento e durante quanto tempo, como exige o Regulamento Geral sobre a Proteção de Dados (RGPD).</p>
 
     <h2>Quem é responsável pelos dados</h2>
     <p>O responsável pelo tratamento dos dados deste site é o titular do projeto Guia do Proprietário, contactável através do email <EmailProtegido />. Para qualquer questão sobre privacidade ou para exercer os seus direitos, use este endereço.</p>
@@ -26,26 +26,36 @@ import EmailProtegido from "../components/EmailProtegido.astro";
         <tbody>
           <tr><td>Analítica do site</td><td>Páginas vistas, tipo de dispositivo, origem aproximada da visita, de forma agregada e sem o identificar</td><td>Interesse legítimo em perceber que conteúdos são úteis</td><td>Dados agregados, sem identificação individual</td></tr>
           <tr><td>Contacto por email</td><td>O seu email e o conteúdo da mensagem que nos enviar</td><td>Responder ao seu pedido</td><td>Enquanto necessário para responder, e apagado depois de resolvido</td></tr>
+          <tr><td>Subscrição da newsletter e envio de guias</td><td>O seu email, data e versão do consentimento, página de origem, endereço IP e identificador técnico do pedido</td><td>Consentimento e necessidade de demonstrar que o pedido foi feito</td><td>Até cancelar a subscrição. A prova é conservada enquanto durar a subscrição e por um período razoável após o cancelamento</td></tr>
+          <tr><td>Partilha com empresas parceiras, opcional</td><td>O seu email, apenas quando o autoriza expressamente</td><td>Consentimento</td><td>Até retirar o consentimento. A partilha cessa a partir desse momento</td></tr>
+          <tr><td>Medição de campanhas com o Meta Pixel</td><td>Interações no site, incluindo páginas vistas e subscrição, e identificadores associados, recolhidos por cookies após o seu consentimento</td><td>Consentimento para cookies</td><td>Segundo as definições e políticas do Meta</td></tr>
           <tr><td>Registos técnicos do servidor</td><td>Dados técnicos de acesso que a infraestrutura regista para funcionar e para segurança</td><td>Segurança e funcionamento do site</td><td>Período curto, definido pela infraestrutura</td></tr>
         </tbody>
       </table>
     </div>
-    <p>Não construímos perfis, não cruzamos os seus dados entre serviços, e não tomamos decisões automatizadas sobre si.</p>
+    <p>Não tomamos decisões automatizadas sobre si.</p>
 
     <h2>Analítica</h2>
     <p>Usamos uma ferramenta de analítica focada na privacidade, o Cloudflare Web Analytics, que mede o tráfego do site de forma agregada e anónima, sem cookies de rastreio e sem identificar visitantes individualmente. Serve apenas para percebermos que páginas são úteis e melhorar o site.</p>
 
-    <h2>Cookies</h2>
-    <p>O site não usa cookies de rastreio nem de publicidade. Podem existir cookies estritamente técnicos, necessários ao funcionamento básico das páginas, que não o identificam nem seguem a sua atividade noutros sites.</p>
+    <h2>Cookies e tecnologias de medição</h2>
+    <p>O site utiliza dois tipos de cookies:</p>
+    <p><strong>Cookies técnicos</strong>, estritamente necessários ao funcionamento das páginas e à memorização das suas preferências de privacidade. São sempre ativos e não o identificam para publicidade.</p>
+    <p><strong>Cookies de medição de campanhas, Meta Pixel</strong>, que só são ativados se os aceitar no aviso de cookies. Servem para medir os resultados das nossas campanhas nas redes do Meta. Se os recusar, não são instalados e a navegação mantém-se igual. Pode mudar a sua escolha a qualquer momento na ligação "Definições de cookies" no rodapé.</p>
+    <p>A nossa analítica de tráfego continua a ser o Cloudflare Web Analytics, que é agregada, anónima e não usa cookies de rastreio.</p>
 
     <h2>Com quem partilhamos dados</h2>
-    <p>Não vendemos nem alugamos dados pessoais. O site assenta em fornecedores de infraestrutura tecnológica, incluindo alojamento, rede e analítica, que processam os pedidos ao servidor para o site funcionar, atuando como subcontratantes e no respeito pela legislação aplicável. Alguns destes fornecedores podem operar servidores fora do Espaço Económico Europeu. Nesses casos, o tratamento fica sujeito às garantias exigidas pelo RGPD. Fora isto, não partilhamos dados com terceiros.</p>
+    <p>Não vendemos nem alugamos listas de subscritores. Para gerir os subscritores e enviar a newsletter e os guias, usamos o Sender, serviço prestado pela UAB Sender.lt, que atua como subcontratante e trata os dados segundo as nossas instruções. Pode consultar a <a href="https://www.sender.net/privacy-policy/" rel="noopener noreferrer">Política de Privacidade do Sender</a>.</p>
+    <p>Se, e apenas se, nos autorizar expressamente, o seu email pode ser transmitido às empresas identificadas na nossa <a href="/parceiros/">lista de parceiros</a>, para o contactarem sobre produtos e serviços. A partir dessa transmissão, cada parceiro passa a ser responsável independente pelo tratamento e fica obrigado a cumprir a lei. Pode retirar esta autorização a qualquer momento. A partilha cessa, mas isso não afeta transmissões já ocorridas. A lista geral de subscritores nunca é partilhada.</p>
+    <p>Para medir a eficácia das nossas campanhas, e apenas se aceitar os cookies de medição, utilizamos o Meta Pixel, do Meta Platforms. Esta tecnologia permite-nos saber que ações resultaram das campanhas no Facebook e Instagram. O Meta pode tratar estes dados fora do Espaço Económico Europeu, ao abrigo das garantias legais aplicáveis.</p>
 
     <h2>Recolha de dados voluntária</h2>
-    <p>Neste momento, o site não tem formulários de subscrição, de comentários nem de recolha de contactos. Se, no futuro, passarmos a oferecer uma newsletter ou outra funcionalidade que implique recolher dados, esta política será atualizada antes de qualquer recolha começar, e ser-lhe-á pedido o consentimento devido.</p>
+    <p>O site oferece a subscrição da nossa newsletter e o descarregamento de guias gratuitos. Para isso pedimos o seu email e o seu consentimento explícito. A subscrição é voluntária e pode ser cancelada a qualquer momento, através da ligação de cancelamento em cada email ou contactando-nos.</p>
+    <p>No momento da subscrição pode ainda, de forma separada e opcional, autorizar a partilha do seu contacto com empresas parceiras, para que estas o contactem sobre produtos e serviços. Esta autorização é independente da subscrição. Pode subscrever sem a conceder e pode retirá-la a qualquer momento sem afetar a subscrição. As empresas parceiras estão identificadas e são mantidas atualizadas na nossa <a href="/parceiros/">lista de parceiros</a>.</p>
+    <p>Guardamos um registo do consentimento que nos deu, incluindo data, versão do texto aceite, página de origem, endereço IP e identificador técnico do pedido, para podermos demonstrar que a recolha foi feita com o seu acordo e evitar duplicações. Retirar o consentimento não afeta a licitude do tratamento feito antes dessa retirada.</p>
 
     <h2>Os seus direitos</h2>
-    <p>Ao abrigo do RGPD, tem direito a aceder aos seus dados, a corrigi-los, a pedir a sua eliminação, a limitar ou opor-se ao seu tratamento e à portabilidade, quando aplicável. Como não construímos perfis nem guardamos dados pessoais além do estritamente necessário para lhe responder quando nos contacta, na prática há poucos dados seus em nossa posse. Para exercer qualquer direito, contacte-nos por email. Tem também o direito de apresentar reclamação junto da Comissão Nacional de Proteção de Dados (CNPD), a autoridade de controlo em Portugal.</p>
+    <p>Ao abrigo do RGPD, tem direito a aceder aos seus dados, a corrigi-los, a pedir a sua eliminação, a limitar ou opor-se ao seu tratamento e à portabilidade, quando aplicável. Não construímos perfis e limitamos os dados ao que está descrito nesta política. Para exercer qualquer direito, contacte-nos por email. Tem também o direito de apresentar reclamação junto da Comissão Nacional de Proteção de Dados (CNPD), a autoridade de controlo em Portugal.</p>
 
     <h2>Alterações</h2>
     <p>Esta política pode ser atualizada, por exemplo se o site passar a oferecer novas funcionalidades. A data da última revisão está no topo. Recomendamos que a consulte periodicamente.</p>

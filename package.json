@@ -14,7 +14,8 @@
     "generate:og": "node scripts/generate-og.mjs",
     "dados:ine": "node scripts/obter-precos-ine.mjs",
     "dados:imi": "node scripts/obter-taxas-imi.mjs --ano 2025",
-    "validate:images": "node scripts/validar-imagens-artigos.mjs"
+    "validate:images": "node scripts/validar-imagens-artigos.mjs",
+    "test:subscribe": "node --test tests/subscribe.test.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "latest",

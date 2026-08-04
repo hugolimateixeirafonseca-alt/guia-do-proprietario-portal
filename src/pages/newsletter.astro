@@ -1,0 +1,17 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+const leadFormsEnabled = import.meta.env.PUBLIC_LEAD_FORMS_ENABLED !== "false";
+---
+
+<BaseLayout titulo="Newsletter" descricao="Receba guias, prazos importantes e conselhos práticos para proprietários em Portugal.">
+  <section class="page-hero">
+    <div class="container narrow">
+      <p class="eyebrow">Newsletter</p>
+      <h1>Informação útil sobre a sua casa, diretamente no email</h1>
+      <p>Receba novos guias, prazos importantes e conselhos práticos. A subscrição é gratuita e pode cancelar quando quiser.</p>
+      {leadFormsEnabled
+        ? <p><a class="button" href="#newsletter-form">Subscrever a newsletter</a></p>
+        : <p class="notice">A subscrição será disponibilizada depois de concluirmos a configuração do fornecedor de email.</p>}
+    </div>
+  </section>
+</BaseLayout>
