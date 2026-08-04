@@ -142,15 +142,36 @@ test("cria o pedido do guia, respeita parceiros e aciona a automação no fim", 
   });
 
   assert.equal(response.status, 200);
-  assert.equal(calls.length, 5);
+  assert.equal(calls.length, 2);
   const createBody = JSON.parse(calls[1].init.body);
   assert.equal(createBody.email, "pessoa@exemplo.pt");
   assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "true");
   assert.equal(createBody.fields["{$LEAD_SOURCE}"], "ebook-vender-casa");
-  assert.match(calls[2].url, /subscribers\/groups\/eEvG4m$/);
-  assert.match(calls[3].url, /subscribers\/groups\/aKBm4l$/);
-  assert.match(calls[4].url, /subscribers\/groups\/dJAl59$/);
-  assert.equal(JSON.parse(calls[4].init.body).trigger_automation, true);
+  assert.deepEqual(createBody.groups, ["eEvG4m", "aKBm4l", "dJAl59"]);
+  assert.equal(createBody.trigger_automation, true);
+});
+
+test("cria uma subscrição nova da newsletter diretamente no grupo ativo", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      ...ebookBody,
+      source: "newsletter",
+      consentVersion: "newsletter-2026-08-a"
+    }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(calls.length, 2);
+  const createBody = JSON.parse(calls[1].init.body);
+  assert.deepEqual(createBody.groups, ["eEvG4m"]);
+  assert.equal(createBody.trigger_automation, false);
 });
 
 test("não apresenta sucesso quando o Sender falha", async () => {
@@ -161,4 +182,5 @@ test("não apresenta sucesso quando o Sender falha", async () => {
 
   const response = await onRequestPost({ request: requestFor(ebookBody), env });
   assert.equal(response.status, 502);
+  assert.deepEqual(await response.json(), { error: "provider_error", code: "lookup_401" });
 });

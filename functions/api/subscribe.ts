@@ -37,6 +37,12 @@ const json = (body: object, status: number) => new Response(JSON.stringify(body)
 const cleanText = (value: unknown, maxLength: number) =>
   typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 
+class SenderError extends Error {
+  constructor(readonly code: string) {
+    super(code);
+  }
+}
+
 async function senderRequest(env: Env, path: string, init: RequestInit = {}) {
   return fetch(`${SENDER_API}${path}`, {
     ...init,
@@ -49,7 +55,13 @@ async function senderRequest(env: Env, path: string, init: RequestInit = {}) {
   });
 }
 
-async function createOrUpdateSubscriber(env: Env, email: string, fields: Record<string, string>) {
+async function createOrUpdateSubscriber(
+  env: Env,
+  email: string,
+  fields: Record<string, string>,
+  groupIds: string[],
+  triggerAutomation: boolean
+) {
   const identifier = encodeURIComponent(email);
   const existing = await senderRequest(env, `/subscribers/${identifier}`, { method: "GET" });
 
@@ -58,18 +70,23 @@ async function createOrUpdateSubscriber(env: Env, email: string, fields: Record<
       method: "PATCH",
       body: JSON.stringify({ fields, trigger_automation: false })
     });
-    if (!updated.ok) throw new Error(`sender_update_${updated.status}`);
-    return;
+    if (!updated.ok) throw new SenderError(`update_${updated.status}`);
+    return false;
   }
 
-  if (existing.status !== 404) throw new Error(`sender_lookup_${existing.status}`);
+  if (existing.status !== 404) throw new SenderError(`lookup_${existing.status}`);
 
   const created = await senderRequest(env, "/subscribers", {
     method: "POST",
-    body: JSON.stringify({ email, fields, trigger_automation: false })
+    body: JSON.stringify({
+      email,
+      groups: groupIds,
+      fields,
+      trigger_automation: triggerAutomation
+    })
   });
 
-  if (created.ok) return;
+  if (created.ok) return true;
 
   // Protege contra duas submissões simultâneas do mesmo endereço.
   if (created.status === 409) {
@@ -77,10 +94,10 @@ async function createOrUpdateSubscriber(env: Env, email: string, fields: Record<
       method: "PATCH",
       body: JSON.stringify({ fields, trigger_automation: false })
     });
-    if (updated.ok) return;
+    if (updated.ok) return false;
   }
 
-  throw new Error(`sender_create_${created.status}`);
+  throw new SenderError(`create_${created.status}`);
 }
 
 async function addSubscriberToGroup(env: Env, groupId: string, email: string, triggerAutomation: boolean) {
@@ -88,7 +105,7 @@ async function addSubscriberToGroup(env: Env, groupId: string, email: string, tr
     method: "POST",
     body: JSON.stringify({ subscribers: [email], trigger_automation: triggerAutomation })
   });
-  if (!response.ok) throw new Error(`sender_group_${response.status}`);
+  if (!response.ok) throw new SenderError(`group_${response.status}`);
 }
 
 export const onRequestPost = async ({ request, env }: RequestContext) => {
@@ -133,7 +150,23 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   };
 
   try {
-    await createOrUpdateSubscriber(env, email, fields);
+    const subscriberGroups = [
+      groups.newsletter,
+      ...(body.consent2 === true ? [groups.guiaParceiros] : []),
+      ...(source === "ebook-vender-casa" ? [groups.guiaVenderCasa] : [])
+    ];
+    const created = await createOrUpdateSubscriber(
+      env,
+      email,
+      fields,
+      subscriberGroups,
+      source === "ebook-vender-casa"
+    );
+
+    if (created) {
+      return json({ ok: true }, 200);
+    }
+
     await addSubscriberToGroup(env, groups.newsletter, email, false);
 
     if (body.consent2 === true) {
@@ -145,7 +178,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     }
 
     return json({ ok: true }, 200);
-  } catch {
-    return json({ error: "provider_error" }, 502);
+  } catch (error) {
+    const code = error instanceof SenderError ? error.code : "unknown";
+    return json({ error: "provider_error", code }, 502);
   }
 };
