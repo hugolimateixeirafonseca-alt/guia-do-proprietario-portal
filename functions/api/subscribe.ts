@@ -17,6 +17,7 @@ interface SubscribeBody {
   eventId?: unknown;
   phone?: unknown;
   postalCode?: unknown;
+  name?: unknown;
 }
 
 interface RequestContext {
@@ -93,7 +94,8 @@ async function createOrUpdateSubscriber(
   fields: Record<string, string>,
   groupIds: string[],
   triggerAutomation: boolean,
-  phone = ""
+  phone = "",
+  firstname = ""
 ) {
   const hasLocationFields = "{$CODIGO_POSTAL}" in fields || "{$LOCALIDADE}" in fields;
   const fieldsWithoutLocation = { ...fields };
@@ -123,6 +125,7 @@ async function createOrUpdateSubscriber(
     const updated = await writeSubscriber(`/subscribers/${identifier}`, "PATCH", {
       fields,
       ...(phone ? { phone } : {}),
+      ...(firstname ? { firstname } : {}),
       trigger_automation: false
     });
     if (!updated.response.ok) throw new SenderError(`update_${updated.response.status}`);
@@ -136,6 +139,7 @@ async function createOrUpdateSubscriber(
     groups: groupIds,
     fields,
     ...(phone ? { phone } : {}),
+    ...(firstname ? { firstname } : {}),
     trigger_automation: triggerAutomation
   });
 
@@ -146,6 +150,7 @@ async function createOrUpdateSubscriber(
     const updated = await writeSubscriber(`/subscribers/${identifier}`, "PATCH", {
       fields,
       ...(phone ? { phone } : {}),
+      ...(firstname ? { firstname } : {}),
       trigger_automation: false
     });
     if (updated.response.ok) return { created: false, locationStored: updated.locationStored };
@@ -176,13 +181,15 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
   const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" ? body.source : "";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-h";
+  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-i";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");
   const phoneOk = phoneDigits.length >= 9 && phoneDigits.length <= 15;
   const postalCode = normalizePostalCode(body.postalCode);
+  const firstname = cleanText(body.name, 80).replace(/\s+/g, " ");
+  const nameOk = firstname.length >= 2;
 
-  if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion || (isPartnerFollowup && (body.consent2 !== true || !phoneOk || !postalCode))) {
+  if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion || (isPartnerFollowup && (body.consent2 !== true || !nameOk || !phoneOk || !postalCode))) {
     return json({ error: "invalid" }, 400);
   }
 
@@ -229,7 +236,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       fields,
       subscriberGroups,
       source === "ebook-vender-casa",
-      phone
+      phone,
+      firstname
     );
 
     if (subscriberResult.created) {

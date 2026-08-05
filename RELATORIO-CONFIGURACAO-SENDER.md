@@ -114,7 +114,7 @@ Em `Subscribers → Fields` ou `Custom fields`, criar os seguintes campos:
 
 O tipo texto reduz incompatibilidades na API e permite guardar datas completas, valores booleanos e identificadores sem conversões.
 
-O telefone pedido no segundo passo da landing é guardado no campo nativo `phone` do contacto no Sender. Não é necessário criar um campo personalizado para este dado.
+O nome e o telefone pedidos no segundo passo da landing são guardados nos campos nativos `firstname` e `phone` do contacto no Sender. Não é necessário criar campos personalizados para estes dados.
 
 O mesmo passo pede agora o código postal. Crie no Sender dois campos personalizados do tipo texto:
 
