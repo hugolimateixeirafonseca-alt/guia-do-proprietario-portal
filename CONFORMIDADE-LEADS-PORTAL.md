@@ -47,6 +47,7 @@
 ## Validação técnica de 5 de agosto de 2026
 
 - A API valida o formato do código postal, consulta o GEO API PT e guarda `CODIGO_POSTAL` e `LOCALIDADE` no Sender quando os campos personalizados existem.
+- O segundo formulário apresenta mensagens específicas junto ao nome, telefone e código postal, incluindo caracteres não permitidos, quantidade incorreta de algarismos, formato inválido e código postal inexistente.
 - A API aceita a autorização opcional de parceiros e adiciona o contacto ao grupo próprio quando essa opção é assinalada.
 - A compilação completa gerou 683 páginas sem erros, avisos ou falhas de conteúdo.
 - A auditoria das dependências terminou com zero vulnerabilidades conhecidas.

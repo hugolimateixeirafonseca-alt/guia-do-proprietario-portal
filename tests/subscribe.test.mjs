@@ -187,6 +187,10 @@ test("recusa o pedido de parceiros sem nome, telefone, código postal válido ou
     request: requestFor({ ...partnerBody, consent2: true, name: "" }),
     env
   });
+  const invalidNameCharacter = await onRequestPost({
+    request: requestFor({ ...partnerBody, consent2: true, name: "Marta@" }),
+    env
+  });
   const withoutPostalCode = await onRequestPost({
     request: requestFor({ ...partnerBody, consent2: true, postalCode: "1000" }),
     env
@@ -195,7 +199,13 @@ test("recusa o pedido de parceiros sem nome, telefone, código postal válido ou
   assert.equal(withoutConsent.status, 400);
   assert.equal(withoutPhone.status, 400);
   assert.equal(withoutName.status, 400);
+  assert.equal(invalidNameCharacter.status, 400);
   assert.equal(withoutPostalCode.status, 400);
+  assert.deepEqual(await withoutConsent.json(), { error: "invalid_consent" });
+  assert.deepEqual(await withoutPhone.json(), { error: "invalid_phone" });
+  assert.deepEqual(await withoutName.json(), { error: "invalid_name" });
+  assert.deepEqual(await invalidNameCharacter.json(), { error: "invalid_name" });
+  assert.deepEqual(await withoutPostalCode.json(), { error: "invalid_postal_code" });
 });
 
 test("atualiza o contacto, guarda nome, telefone e localização e adiciona apenas o grupo de parceiros", async () => {

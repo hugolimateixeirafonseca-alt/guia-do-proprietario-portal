@@ -184,13 +184,25 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-i";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");
-  const phoneOk = phoneDigits.length >= 9 && phoneDigits.length <= 15;
+  const localPhoneDigits = phoneDigits.startsWith("00351")
+    ? phoneDigits.slice(5)
+    : phoneDigits.startsWith("351")
+      ? phoneDigits.slice(3)
+      : phoneDigits;
+  const phoneOk = /^9\d{8}$/.test(localPhoneDigits) && !/[^\d+\s()-]/.test(phone);
   const postalCode = normalizePostalCode(body.postalCode);
   const firstname = cleanText(body.name, 80).replace(/\s+/g, " ");
-  const nameOk = firstname.length >= 2;
+  const nameOk = firstname.length >= 2 && /^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u.test(firstname);
 
-  if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion || (isPartnerFollowup && (body.consent2 !== true || !nameOk || !phoneOk || !postalCode))) {
+  if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion) {
     return json({ error: "invalid" }, 400);
+  }
+
+  if (isPartnerFollowup) {
+    if (body.consent2 !== true) return json({ error: "invalid_consent" }, 400);
+    if (!nameOk) return json({ error: "invalid_name" }, 400);
+    if (!phoneOk) return json({ error: "invalid_phone" }, 400);
+    if (!postalCode) return json({ error: "invalid_postal_code" }, 400);
   }
 
   if (!env.SENDER_API_TOKEN) {

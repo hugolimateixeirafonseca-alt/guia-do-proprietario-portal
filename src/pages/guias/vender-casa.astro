@@ -46,11 +46,14 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
             <p>Peça uma avaliação gratuita a um profissional da sua zona e saiba o valor real da casa. Ajudamos também a poupar em seguros, crédito e energia da casa, sem compromisso.</p>
             <form id="partner-lead" novalidate>
               <label class="partner-field-label" for="name">Nome</label>
-              <input class="partner-input" id="name" type="text" name="name" required autocomplete="name" minlength="2" maxlength="80" placeholder="O seu nome" />
+              <input class="partner-input" id="name" type="text" name="name" required autocomplete="name" minlength="2" maxlength="80" aria-describedby="name-error" placeholder="O seu nome" />
+              <p id="name-error" class="partner-field-error" hidden></p>
               <label class="partner-field-label" for="phone">Telemóvel</label>
-              <input class="partner-input" id="phone" type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="O seu número de telemóvel" />
+              <input class="partner-input" id="phone" type="tel" name="phone" required autocomplete="tel" inputmode="tel" aria-describedby="phone-error" placeholder="O seu número de telemóvel" />
+              <p id="phone-error" class="partner-field-error" hidden></p>
               <label class="partner-field-label" for="postal-code">Código postal</label>
-              <input class="partner-input" id="postal-code" type="text" name="postal-code" required autocomplete="postal-code" inputmode="numeric" maxlength="8" pattern="[0-9]{4}-[0-9]{3}" placeholder="Ex.: 1000-001" />
+              <input class="partner-input" id="postal-code" type="text" name="postal-code" required autocomplete="postal-code" inputmode="numeric" maxlength="8" pattern="[0-9]{4}-[0-9]{3}" aria-describedby="postal-code-error" placeholder="Ex.: 1000-001" />
+              <p id="postal-code-error" class="partner-field-error" hidden></p>
               <label class="chk partner-consent" id="partner-consent-label">
                 <input type="checkbox" id="partner-consent" />
                 <span>Autorizo a partilha do meu nome, contacto, código postal e localidade com empresas das categorias indicadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem com informações e ofertas relacionadas com a casa.</span>
@@ -114,8 +117,11 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
     const success = document.getElementById("sucesso");
     const partnerForm = document.getElementById("partner-lead");
     const nameInput = document.getElementById("name");
+    const nameError = document.getElementById("name-error");
     const phoneInput = document.getElementById("phone");
+    const phoneError = document.getElementById("phone-error");
     const postalCodeInput = document.getElementById("postal-code");
+    const postalCodeError = document.getElementById("postal-code-error");
     const partnerConsentInput = document.getElementById("partner-consent");
     const partnerConsentLabel = document.getElementById("partner-consent-label");
     const partnerError = document.getElementById("partner-error");
@@ -186,27 +192,77 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
       }
     });
 
+    const setFieldError = (input, errorElement, message = "") => {
+      input.classList.toggle("erro", Boolean(message));
+      input.setAttribute("aria-invalid", message ? "true" : "false");
+      errorElement.textContent = message;
+      errorElement.hidden = !message;
+    };
+
+    const validateName = () => {
+      const value = nameInput.value.trim().replace(/\s+/g, " ");
+      if (value.length < 2) return "Escreva o seu nome.";
+      if (/^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u.test(value)) return "";
+      const invalidCharacter = value.match(/[^\p{L}\p{M} '\u2019-]/u)?.[0];
+      return invalidCharacter
+        ? `O nome contém um carácter não permitido: “${invalidCharacter}”. Use apenas letras, espaços, apóstrofos ou hífen.`
+        : "Use apenas letras, espaços, apóstrofos ou hífen no nome.";
+    };
+
+    const validatePhone = () => {
+      const value = phoneInput.value.trim();
+      if (!value) return "Escreva o seu número de telemóvel.";
+      const invalidCharacter = value.match(/[^\d+\s()-]/)?.[0];
+      if (invalidCharacter) return `O telemóvel contém um carácter não permitido: “${invalidCharacter}”.`;
+      const digits = value.replace(/\D/g, "");
+      const localDigits = digits.startsWith("00351") ? digits.slice(5) : digits.startsWith("351") ? digits.slice(3) : digits;
+      if (localDigits.length < 9) {
+        const missing = 9 - localDigits.length;
+        return `Faltam ${missing} ${missing === 1 ? "algarismo" : "algarismos"} no telemóvel.`;
+      }
+      if (localDigits.length > 9) {
+        const extra = localDigits.length - 9;
+        return `O telemóvel tem ${extra} ${extra === 1 ? "algarismo a mais" : "algarismos a mais"}.`;
+      }
+      if (!localDigits.startsWith("9")) return "O telemóvel deve começar por 9.";
+      return "";
+    };
+
+    const validatePostalCode = () => /^[0-9]{4}-[0-9]{3}$/.test(postalCodeInput.value)
+      ? ""
+      : "Use um código postal no formato 1234-567.";
+
+    nameInput.addEventListener("input", () => setFieldError(nameInput, nameError));
+    phoneInput.addEventListener("input", () => setFieldError(phoneInput, phoneError));
+
     postalCodeInput.addEventListener("input", () => {
       const digits = postalCodeInput.value.replace(/\D/g, "").slice(0, 7);
       postalCodeInput.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
+      setFieldError(postalCodeInput, postalCodeError);
     });
 
     partnerForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       partnerStatus.textContent = "";
 
-      if (!nameInput.checkValidity()) {
-        nameInput.reportValidity();
+      const nameMessage = validateName();
+      setFieldError(nameInput, nameError, nameMessage);
+      if (nameMessage) {
+        nameInput.focus();
         return;
       }
 
-      if (!phoneInput.checkValidity()) {
-        phoneInput.reportValidity();
+      const phoneMessage = validatePhone();
+      setFieldError(phoneInput, phoneError, phoneMessage);
+      if (phoneMessage) {
+        phoneInput.focus();
         return;
       }
 
-      if (!postalCodeInput.checkValidity()) {
-        postalCodeInput.reportValidity();
+      const postalCodeMessage = validatePostalCode();
+      setFieldError(postalCodeInput, postalCodeError, postalCodeMessage);
+      if (postalCodeMessage) {
+        postalCodeInput.focus();
         return;
       }
 
@@ -240,10 +296,16 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
 
         const result = await response.json().catch(() => ({}));
         if (!response.ok) {
-          if (result.error === "postal_not_found") {
-            postalCodeInput.setCustomValidity("Confirme o código postal.");
-            postalCodeInput.reportValidity();
-            postalCodeInput.setCustomValidity("");
+          const fieldErrors = {
+            invalid_name: [nameInput, nameError, "Use apenas letras, espaços, apóstrofos ou hífen no nome."],
+            invalid_phone: [phoneInput, phoneError, "Introduza um telemóvel português válido com 9 algarismos."],
+            invalid_postal_code: [postalCodeInput, postalCodeError, "Use um código postal no formato 1234-567."],
+            postal_not_found: [postalCodeInput, postalCodeError, "Este código postal não foi encontrado. Confirme os números."]
+          };
+          const fieldError = fieldErrors[result.error];
+          if (fieldError) {
+            setFieldError(fieldError[0], fieldError[1], fieldError[2]);
+            fieldError[0].focus();
             partnerSubmit.disabled = false;
             partnerSubmit.textContent = "Quero a minha avaliação gratuita";
             return;
@@ -307,6 +369,8 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
   .partner-field-label { color: #19334f; font-size: 13px; font-weight: 800; }
   .partner-input { width: 100%; min-height: 54px; padding: 0 16px; color: #172238; background: #fff; border: 2px solid #d5d8d6; border-radius: 8px; font-size: 16px; }
   .partner-input:focus { border-color: #2b6b5b; outline: 0; }
+  .partner-input.erro, .partner-input.erro:focus { border-color: #b42318; box-shadow: 0 0 0 3px rgba(180, 35, 24, .12); }
+  .partner-field-error { margin: -5px 0 2px; color: #b42318; font-size: 12px; font-weight: 750; line-height: 1.4; }
   .partner-consent { color: #31495f; padding-inline: 0; }
   .partner-consent a { color: #1f5b4d; }
   .partner-success { padding: 16px; color: #19334f; background: #e2eee8; border-radius: 8px; }
