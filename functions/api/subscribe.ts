@@ -121,7 +121,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const consentVersion = cleanText(body.consentVersion, 64);
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
   const source = body.source === "newsletter" || body.source === "ebook-vender-casa" ? body.source : "";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-a" : "2026-08-b";
+  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-b" : "2026-08-c";
 
   if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion) {
     return json({ error: "invalid" }, 400);

@@ -30,7 +30,7 @@ const ebookBody = {
   email: "Pessoa@Exemplo.pt",
   consent1: true,
   consent2: false,
-  consentVersion: "2026-08-b",
+  consentVersion: "2026-08-c",
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
@@ -95,7 +95,7 @@ test("usa os grupos confirmados mesmo sem variáveis adicionais na Cloudflare", 
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-a"
+      consentVersion: "newsletter-2026-08-b"
     }),
     env: { SENDER_API_TOKEN: "token-de-teste" }
   });
@@ -113,7 +113,7 @@ test("atualiza um subscritor e adiciona uma newsletter single opt-in ao grupo at
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-a"
+      consentVersion: "newsletter-2026-08-b"
     }),
     env
   });
@@ -162,7 +162,7 @@ test("cria uma subscrição nova da newsletter diretamente no grupo ativo", asyn
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-a"
+      consentVersion: "newsletter-2026-08-b"
     }),
     env
   });

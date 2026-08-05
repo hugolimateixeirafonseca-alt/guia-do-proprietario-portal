@@ -137,6 +137,7 @@ h3 { font-size: 21px; }
 .newsletter-email-row button { min-height: 47px; padding: 0 17px; color: white; background: var(--green); border: 0; font-weight: 800; cursor: pointer; }
 .newsletter-email-row button:hover { background: #318270; }
 .newsletter-email-row button:disabled { cursor: wait; opacity: .7; }
+.newsletter-email-row button.is-complete:disabled { cursor: default; opacity: 1; }
 .newsletter-consent { margin-top: 12px; display: grid; grid-template-columns: 18px 1fr; gap: 9px; align-items: start; color: rgba(255,255,255,.82); font-size: 11px; line-height: 1.45; cursor: pointer; }
 .newsletter-consent input { width: 17px; height: 17px; margin: 1px 0 0; accent-color: var(--green); }
 .newsletter-consent a { color: white; }

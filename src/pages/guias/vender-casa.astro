@@ -27,7 +27,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
 
           <label class="chk" id="chk1-label">
             <input type="checkbox" id="consent1" />
-            <span>Quero receber o guia e aceito receber conselhos e novidades do Guia do Proprietário por email. Posso cancelar a qualquer momento. <a href="/politica-de-privacidade/">Li a Política de Privacidade</a>.</span>
+            <span>Aceito receber conselhos, novidades e comunicações sobre produtos e serviços de acordo com a <a href="/politica-de-privacidade/">Política de Privacidade</a>. Posso cancelar a qualquer momento.</span>
           </label>
 
           <label class="chk">
@@ -166,6 +166,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
   h1 { max-width: 690px; margin: 0; font-size: clamp(40px, 5vw, 68px); line-height: .98; letter-spacing: -.045em; }
   .subtitle { max-width: 660px; margin: 22px 0 30px; color: #e8eef6; font-size: clamp(17px, 2vw, 21px); line-height: 1.48; }
   form { max-width: 620px; display: grid; gap: 12px; }
+  form[hidden] { display: none; }
   .email-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   input[type="email"] { width: 100%; min-height: 58px; padding: 0 18px; color: #172238; background: #fff; border: 2px solid transparent; border-radius: 8px; font-size: 17px; box-shadow: 0 7px 22px rgba(4, 18, 37, .18); }
   input[type="email"]:focus { border-color: #e0a24f; outline: 0; }

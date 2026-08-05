@@ -16,7 +16,7 @@ import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
     </div>
     <label class="newsletter-consent">
       <input type="checkbox" name="consent" />
-      <span>Aceito receber a newsletter do Guia do Proprietário por email e li a <a href="/privacidade/">Política de Privacidade</a>. Posso cancelar quando quiser.</span>
+      <span>Aceito receber conselhos, novidades e comunicações sobre produtos e serviços de acordo com a <a href="/privacidade/">Política de Privacidade</a>. Posso cancelar a qualquer momento.</span>
     </label>
     <p class="newsletter-error" hidden>É preciso aceitar para subscrever.</p>
     <small>Pode cancelar a subscrição num clique.</small>
@@ -76,10 +76,11 @@ import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
         if (!response.ok) throw new Error("subscribe_failed");
         if (window.fbq) window.fbq("track", "Lead", { content_name: "newsletter" }, { eventID: eventId });
         form.reset();
+        button.classList.add("is-complete");
+        button.textContent = "Subscrição concluída";
         status.textContent = "Subscrição concluída. Já faz parte da Newsletter do Guia do Proprietário.";
       } catch {
         status.textContent = "A subscrição ainda não está disponível. Tente novamente mais tarde.";
-      } finally {
         button.disabled = false;
         button.textContent = "Subscrever";
       }
