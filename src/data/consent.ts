@@ -1,4 +1,4 @@
-export const CONSENT_VERSION = "2026-08-c";
+export const CONSENT_VERSION = "2026-08-d";
 export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-08-b";
 
 export const CONSENT_TEXT = {
@@ -17,6 +17,10 @@ export const CONSENT_TEXT = {
   "newsletter-2026-08-b": {
     c1: "Aceito receber conselhos, novidades e comunicações sobre produtos e serviços de acordo com a Política de Privacidade. Posso cancelar a qualquer momento.",
     c2: ""
+  },
+  "2026-08-d": {
+    c1: "Aceito receber conselhos, novidades e comunicações sobre produtos e serviços de acordo com a Política de Privacidade. Posso cancelar a qualquer momento.",
+    c2: "Autorizo a partilha do meu contacto com as empresas identificadas na lista de parceiros, para me contactarem sobre os produtos e serviços aí indicados. (Opcional)"
   }
 } as const;
 

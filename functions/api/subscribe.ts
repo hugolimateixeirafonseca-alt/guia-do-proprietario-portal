@@ -5,6 +5,7 @@ interface Env {
   SENDER_GROUP_NEWSLETTER?: string;
   SENDER_GROUP_GUIA_VENDER_CASA?: string;
   SENDER_GROUP_GUIA_PARCEIROS?: string;
+  PARTNER_CONSENT_ENABLED?: string;
 }
 
 interface SubscribeBody {
@@ -121,7 +122,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const consentVersion = cleanText(body.consentVersion, 64);
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
   const source = body.source === "newsletter" || body.source === "ebook-vender-casa" ? body.source : "";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-b" : "2026-08-c";
+  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-b" : "2026-08-d";
 
   if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion) {
     return json({ error: "invalid" }, 400);
@@ -129,6 +130,11 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
   if (!env.SENDER_API_TOKEN) {
     return json({ error: "not_configured" }, 503);
+  }
+
+  const partnerConsentEnabled = env.PARTNER_CONSENT_ENABLED === "true";
+  if (body.consent2 === true && !partnerConsentEnabled) {
+    return json({ error: "partner_consent_unavailable" }, 400);
   }
 
   const groups = {

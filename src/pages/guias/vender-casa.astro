@@ -5,6 +5,7 @@ import { CONSENT_VERSION } from "../../data/consent";
 const titulo = "Vender a sua casa em Portugal, sem surpresas";
 const descricao = "Receba gratuitamente o guia completo para vender casa em Portugal, calcular custos e reunir os documentos necessários.";
 const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
+const partnerConsentEnabled = import.meta.env.PUBLIC_PARTNER_CONSENT_ENABLED === "true";
 ---
 <Squeeze titulo={titulo} descricao={descricao} imagemOg={imagemEbook}>
   <section class="hero" aria-labelledby="titulo-guia">
@@ -30,10 +31,12 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
             <span>Aceito receber conselhos, novidades e comunicações sobre produtos e serviços de acordo com a <a href="/politica-de-privacidade/">Política de Privacidade</a>. Posso cancelar a qualquer momento.</span>
           </label>
 
-          <label class="chk">
-            <input type="checkbox" id="consent2" />
-            <span>Autorizo a partilha do meu contacto com empresas parceiras do Guia do Proprietário, para me contactarem sobre produtos e serviços. Consulte quem são na <a href="/parceiros/">lista de parceiros</a>. <em>(Opcional)</em></span>
-          </label>
+          {partnerConsentEnabled && (
+            <label class="chk">
+              <input type="checkbox" id="consent2" />
+              <span>Autorizo a partilha do meu contacto com as empresas identificadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem sobre os produtos e serviços aí indicados. <em>(Opcional)</em></span>
+            </label>
+          )}
 
           <button id="submit-button" type="submit">Quero o guia gratuito</button>
           <p id="chk1-erro" class="field-error" hidden>É preciso aceitar para receber o guia.</p>
@@ -129,7 +132,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
           body: JSON.stringify({
             email: emailInput.value.trim(),
             consent1: true,
-            consent2: consent2Input.checked,
+            consent2: consent2Input?.checked === true,
             source: "ebook-vender-casa",
             consentVersion: CONSENT_VERSION,
             pageUrl: location.href,

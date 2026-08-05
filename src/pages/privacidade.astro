@@ -4,64 +4,92 @@ import EmailProtegido from "../components/EmailProtegido.astro";
 ---
 <BaseLayout
   titulo="Política de Privacidade"
-  descricao="Como o Guia do Proprietário trata os seus dados: que informação recolhemos, com que fundamento, por quanto tempo, e os seus direitos ao abrigo do RGPD."
+  descricao="Como o Guia do Proprietário recolhe, utiliza, conserva e protege dados pessoais, e como pode exercer os seus direitos."
 >
   <article class="article-layout article-body">
     <p class="eyebrow">Privacidade</p>
     <h1>Política de Privacidade</h1>
-    <p class="article-meta">Atualizado a 4 de agosto de 2026</p>
+    <p class="article-meta">Última atualização: 5 de agosto de 2026</p>
 
     <h2>Em resumo</h2>
-    <p>O Guia do Proprietário é um site informativo. Não lhe pedimos que crie conta. Quando solicita um guia por email, tratamos o endereço e os consentimentos que escolher apenas para as finalidades indicadas no formulário. Esta página explica que dados são tratados, com que fundamento e durante quanto tempo, como exige o Regulamento Geral sobre a Proteção de Dados (RGPD).</p>
+    <p>Recolhemos apenas os dados necessários para entregar o que pediu, enviar comunicações que aceitou e, quando existir uma autorização separada, encaminhar um contacto para parceiros identificados. Não vendemos nem alugamos listas de subscritores.</p>
 
-    <h2>Quem é responsável pelos dados</h2>
-    <p>O responsável pelo tratamento dos dados deste site é o titular do projeto Guia do Proprietário, contactável através do email <EmailProtegido />. Para qualquer questão sobre privacidade ou para exercer os seus direitos, use este endereço.</p>
+    <h2>Responsável pelo tratamento</h2>
+    <p>O responsável pelo tratamento é o titular do projeto Guia do Proprietário. Pode contactá-lo através de <EmailProtegido /> para esclarecer questões sobre privacidade ou exercer os seus direitos.</p>
 
-    <h2>Que dados tratamos, para quê e por quanto tempo</h2>
+    <h2>Dados que podemos recolher</h2>
+    <p>Consoante o formulário utilizado, podemos recolher:</p>
+    <ul>
+      <li>dados de contacto, como nome, email e telefone;</li>
+      <li>dados sobre o imóvel, como localização, tipologia, área, estado, relação com o imóvel e intenção ou prazo de venda;</li>
+      <li>valores aproximados necessários a um simulador, como faixa de crédito por liquidar, valor e ano de aquisição;</li>
+      <li>dados de consentimento, incluindo a opção escolhida, data, versão do texto, página de origem, endereço IP e identificador técnico do pedido;</li>
+      <li>dados técnicos de navegação e segurança tratados pela infraestrutura.</li>
+    </ul>
+    <p>Os formulários indicam quais os campos obrigatórios e opcionais. Não pedimos dados de categorias especiais, documentos de identificação, palavras-passe bancárias ou o valor exato de uma dívida para entregar um conteúdo ou estimativa inicial.</p>
+
+    <h2>Finalidades, fundamento e conservação</h2>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr><th>Tratamento</th><th>Dados</th><th>Fundamento</th><th>Conservação</th></tr>
-        </thead>
+        <thead><tr><th>Finalidade</th><th>Fundamento</th><th>Prazo ou critério</th></tr></thead>
         <tbody>
-          <tr><td>Analítica do site</td><td>Páginas vistas, tipo de dispositivo, origem aproximada da visita, de forma agregada e sem o identificar</td><td>Interesse legítimo em perceber que conteúdos são úteis</td><td>Dados agregados, sem identificação individual</td></tr>
-          <tr><td>Contacto por email</td><td>O seu email e o conteúdo da mensagem que nos enviar</td><td>Responder ao seu pedido</td><td>Enquanto necessário para responder, e apagado depois de resolvido</td></tr>
-          <tr><td>Subscrição da newsletter e envio de guias</td><td>O seu email, data e versão do consentimento, página de origem, endereço IP e identificador técnico do pedido</td><td>Consentimento e necessidade de demonstrar que o pedido foi feito</td><td>Até cancelar a subscrição. A prova é conservada enquanto durar a subscrição e por um período razoável após o cancelamento</td></tr>
-          <tr><td>Partilha com empresas parceiras, opcional</td><td>O seu email, apenas quando o autoriza expressamente</td><td>Consentimento</td><td>Até retirar o consentimento. A partilha cessa a partir desse momento</td></tr>
-          <tr><td>Medição de campanhas com o Meta Pixel</td><td>Interações no site, incluindo páginas vistas e subscrição, e identificadores associados, recolhidos por cookies após o seu consentimento</td><td>Consentimento para cookies</td><td>Segundo as definições e políticas do Meta</td></tr>
-          <tr><td>Registos técnicos do servidor</td><td>Dados técnicos de acesso que a infraestrutura regista para funcionar e para segurança</td><td>Segurança e funcionamento do site</td><td>Período curto, definido pela infraestrutura</td></tr>
+          <tr><td>Entregar um guia ou resultado pedido</td><td>Execução do pedido e, quando inclui comunicações futuras, consentimento</td><td>O registo permanece associado à subscrição até ao cancelamento. Pedidos sem subscrição são eliminados quando deixam de ser necessários</td></tr>
+          <tr><td>Enviar newsletter, conselhos e comunicações do Guia do Proprietário</td><td>Consentimento</td><td>Até cancelar, o endereço ficar persistentemente inválido ou a finalidade terminar</td></tr>
+          <tr><td>Partilhar contacto com parceiros identificados</td><td>Consentimento separado</td><td>Até retirar a autorização ou a finalidade terminar. A retirada impede novas partilhas</td></tr>
+          <tr><td>Enviar ofertas de terceiros sem partilhar o contacto</td><td>Consentimento separado</td><td>Até retirar essa autorização. Esta modalidade não está ativa neste momento</td></tr>
+          <tr><td>Responder a contactos</td><td>Pedido do titular e interesse legítimo em gerir comunicações</td><td>Até 12 meses após o assunto ficar resolvido, salvo obrigação ou litígio</td></tr>
+          <tr><td>Provar consentimentos e respeitar cancelamentos</td><td>Obrigação de demonstrar a licitude e interesse legítimo na defesa de direitos</td><td>Durante a subscrição e até 5 anos após o cancelamento. Pode ser mantido um registo mínimo de supressão para evitar novos envios</td></tr>
+          <tr><td>Segurança e diagnóstico técnico</td><td>Interesse legítimo em proteger o serviço</td><td>Pelo período curto definido pela infraestrutura, salvo incidente que justifique conservação adicional</td></tr>
+          <tr><td>Medição de campanhas com o Meta Pixel</td><td>Consentimento para cookies de medição</td><td>Até retirar a escolha e segundo os prazos indicados na <a href="/cookies/">Política de Cookies</a></td></tr>
         </tbody>
       </table>
     </div>
-    <p>Não tomamos decisões automatizadas sobre si.</p>
 
-    <h2>Analítica</h2>
-    <p>Usamos uma ferramenta de analítica focada na privacidade, o Cloudflare Web Analytics, que mede o tráfego do site de forma agregada e anónima, sem cookies de rastreio e sem identificar visitantes individualmente. Serve apenas para percebermos que páginas são úteis e melhorar o site.</p>
+    <h2>Marketing direto e comunicação a terceiros</h2>
+    <h3>Comunicações do Guia do Proprietário</h3>
+    <p>Ao assinalar a opção correspondente e submeter o formulário, consente em receber por email conselhos, novidades e comunicações sobre produtos e serviços do Guia do Proprietário. Cada email inclui uma forma gratuita e simples de cancelar.</p>
 
-    <h2>Cookies e tecnologias de medição</h2>
-    <p>O site utiliza dois tipos de cookies:</p>
-    <p><strong>Cookies técnicos</strong>, estritamente necessários ao funcionamento das páginas e à memorização das suas preferências de privacidade. São sempre ativos e não o identificam para publicidade.</p>
-    <p><strong>Cookies de medição de campanhas, Meta Pixel</strong>, que só são ativados se os aceitar no aviso de cookies. Servem para medir os resultados das nossas campanhas nas redes do Meta. Se os recusar, não são instalados e a navegação mantém-se igual. Pode mudar a sua escolha a qualquer momento na ligação "Definições de cookies" no rodapé.</p>
-    <p>A nossa analítica de tráfego continua a ser o Cloudflare Web Analytics, que é agregada, anónima e não usa cookies de rastreio.</p>
+    <h3>Partilha do contacto com empresas parceiras</h3>
+    <p>Esta autorização é opcional, independente e apresentada numa opção própria. Só estará disponível quando existirem parceiros identificados na <a href="/parceiros/">lista de parceiros</a>. Se a der, transmitiremos apenas os dados indicados no formulário e necessários à finalidade apresentada.</p>
+    <p>Os parceiros podem abranger mediação e avaliação imobiliária; crédito habitação e seguros do imóvel; obras, remodelação e construção; limpeza, mudanças e manutenção; serviços jurídicos e de solicitadoria relacionados com o imóvel; energia e telecomunicações; mobiliário, decoração e equipamento doméstico.</p>
+    <p>A autorização cobre apenas as empresas identificadas na lista na data em que a concedeu. Uma empresa adicionada mais tarde exige uma nova autorização antes de receber um contacto recolhido anteriormente. Depois da transmissão, cada parceiro é responsável independente pelo tratamento que fizer.</p>
 
-    <h2>Com quem partilhamos dados</h2>
-    <p>Não vendemos nem alugamos listas de subscritores. Para gerir os subscritores e enviar a newsletter e os guias, usamos o Sender, serviço prestado pela UAB Sender.lt, que atua como subcontratante e trata os dados segundo as nossas instruções. Pode consultar a <a href="https://www.sender.net/privacy-policy/" rel="noopener noreferrer">Política de Privacidade do Sender</a>.</p>
-    <p>Se, e apenas se, nos autorizar expressamente, o seu email pode ser transmitido às empresas identificadas na nossa <a href="/parceiros/">lista de parceiros</a>, para o contactarem sobre produtos e serviços. A partir dessa transmissão, cada parceiro passa a ser responsável independente pelo tratamento e fica obrigado a cumprir a lei. Pode retirar esta autorização a qualquer momento. A partilha cessa, mas isso não afeta transmissões já ocorridas. A lista geral de subscritores nunca é partilhada.</p>
-    <p>Para medir a eficácia das nossas campanhas, e apenas se aceitar os cookies de medição, utilizamos o Meta Pixel, do Meta Platforms. Esta tecnologia permite-nos saber que ações resultaram das campanhas no Facebook e Instagram. O Meta pode tratar estes dados fora do Espaço Económico Europeu, ao abrigo das garantias legais aplicáveis.</p>
+    <h3>Ofertas de terceiros enviadas por nós</h3>
+    <p>Esta modalidade não está ativa neste momento. Se vier a ser ativada, terá uma autorização opcional, própria e separada. O Guia poderá então enviar ofertas de empresas terceiras, mas o contacto permanecerá connosco e não será entregue ao anunciante.</p>
+    <p>As categorias possíveis estão descritas na <a href="/parceiros/">página de parceiros e fornecedores</a>.</p>
 
-    <h2>Recolha de dados voluntária</h2>
-    <p>O site oferece a subscrição da nossa newsletter e o descarregamento de guias gratuitos. Para isso pedimos o seu email e o seu consentimento explícito. A subscrição é voluntária e pode ser cancelada a qualquer momento, através da ligação de cancelamento em cada email ou contactando-nos.</p>
-    <p>No momento da subscrição pode ainda, de forma separada e opcional, autorizar a partilha do seu contacto com empresas parceiras, para que estas o contactem sobre produtos e serviços. Esta autorização é independente da subscrição. Pode subscrever sem a conceder e pode retirá-la a qualquer momento sem afetar a subscrição. As empresas parceiras estão identificadas e são mantidas atualizadas na nossa <a href="/parceiros/">lista de parceiros</a>.</p>
-    <p>Guardamos um registo do consentimento que nos deu, incluindo data, versão do texto aceite, página de origem, endereço IP e identificador técnico do pedido, para podermos demonstrar que a recolha foi feita com o seu acordo e evitar duplicações. Retirar o consentimento não afeta a licitude do tratamento feito antes dessa retirada.</p>
+    <h3>Registo e retirada dos consentimentos</h3>
+    <p>Guardamos a data, a versão do texto aceite, a origem e os elementos técnicos necessários para demonstrar cada autorização. Pode retirar qualquer consentimento através da ligação de cancelamento presente nos emails ou contactando-nos. Retirar um consentimento não afeta os restantes nem torna ilícito o tratamento realizado antes do pedido.</p>
+
+    <h2>Destinatários e fornecedores</h2>
+    <p>Usamos a Cloudflare para alojamento, distribuição, segurança e analítica agregada, e o Sender, da UAB Sender.lt, para gerir subscritores, consentimentos e envios. Estes fornecedores tratam dados para prestar os respetivos serviços, ao abrigo dos seus contratos e obrigações de proteção de dados.</p>
+    <p>O Meta Pixel só é carregado se estiver configurado e aceitar os cookies de medição. Consoante a operação, o Meta Platforms Ireland Limited pode atuar como subcontratante, corresponsável ou responsável independente. Consulte a lista e as ligações relevantes na nossa <a href="/parceiros/">página de parceiros e fornecedores</a>.</p>
+
+    <h2>Transferências internacionais</h2>
+    <p>Alguns fornecedores podem tratar dados fora do Espaço Económico Europeu. Quando isso acontece, a transferência deve assentar numa decisão de adequação ou noutra garantia prevista no RGPD, como cláusulas contratuais-tipo. As condições concretas dependem do fornecedor e do serviço ativo.</p>
+
+    <h2>Cookies e analítica</h2>
+    <p>O site usa o Cloudflare Web Analytics para estatísticas agregadas. Segundo a documentação da Cloudflare, este serviço não recolhe nem usa dados pessoais dos visitantes. Os cookies opcionais de medição do Meta só são carregados depois da sua autorização.</p>
+    <p>Pode aceitar, recusar ou personalizar os cookies opcionais e mudar a escolha a qualquer momento em "Definições de cookies" no rodapé. Consulte a <a href="/cookies/">Política de Cookies</a> para ver as categorias e os prazos.</p>
+
+    <h2>Origem dos dados e decisões automatizadas</h2>
+    <p>Recebemos os dados diretamente de si quando preenche um formulário ou nos contacta. Os simuladores podem calcular resultados automáticos com base nos valores introduzidos, mas não tomamos decisões com efeitos jurídicos ou equivalentes sobre si. Uma classificação interna de lead pode servir para organizar contactos, sem decidir direitos, preços de imóveis, crédito ou acesso a serviços.</p>
+
+    <h2>Segurança</h2>
+    <p>Limitamos acessos, usamos ligações cifradas e recorremos a fornecedores com controlos técnicos e organizativos. Nenhum sistema elimina totalmente o risco. Em caso de violação de dados, aplicaremos as obrigações de avaliação, registo e notificação previstas na lei.</p>
 
     <h2>Os seus direitos</h2>
-    <p>Ao abrigo do RGPD, tem direito a aceder aos seus dados, a corrigi-los, a pedir a sua eliminação, a limitar ou opor-se ao seu tratamento e à portabilidade, quando aplicável. Não construímos perfis e limitamos os dados ao que está descrito nesta política. Para exercer qualquer direito, contacte-nos por email. Tem também o direito de apresentar reclamação junto da Comissão Nacional de Proteção de Dados (CNPD), a autoridade de controlo em Portugal.</p>
+    <p>Pode pedir acesso, correção, eliminação, limitação, portabilidade ou oposição, quando aplicável. Pode retirar consentimentos a qualquer momento. Responderemos sem demora indevida e, em regra, no prazo de um mês. Podemos pedir informação razoável para confirmar a sua identidade.</p>
+    <p>Também pode apresentar reclamação à <a href="https://www.cnpd.pt/" rel="noopener noreferrer">Comissão Nacional de Proteção de Dados</a>.</p>
+
+    <h2>Menores</h2>
+    <p>Os conteúdos e formulários destinam-se a adultos responsáveis por imóveis. Não recolhemos intencionalmente dados de menores para marketing ou angariação de leads.</p>
 
     <h2>Alterações</h2>
-    <p>Esta política pode ser atualizada, por exemplo se o site passar a oferecer novas funcionalidades. A data da última revisão está no topo. Recomendamos que a consulte periodicamente.</p>
+    <p>Atualizaremos esta política quando mudarem as finalidades, os formulários, os parceiros ou os fornecedores. Uma utilização nova dos dados que exija consentimento não será aplicada com base numa autorização antiga incompatível.</p>
 
     <h2>Contacto</h2>
-    <p>Para qualquer questão sobre privacidade: <EmailProtegido /></p>
+    <p>Para questões de privacidade ou exercício de direitos: <EmailProtegido /></p>
   </article>
 </BaseLayout>
 

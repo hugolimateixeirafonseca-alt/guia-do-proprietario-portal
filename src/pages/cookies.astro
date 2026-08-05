@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout titulo="Política de Cookies" descricao="Que cookies e tecnologias semelhantes podem ser usados no Guia do Proprietário e como alterar a sua escolha.">
+  <article class="article-layout article-body">
+    <p class="eyebrow">Privacidade</p>
+    <h1>Política de Cookies</h1>
+    <p class="article-meta">Última atualização: 5 de agosto de 2026</p>
+
+    <h2>O que são cookies</h2>
+    <p>Cookies são pequenos ficheiros guardados pelo navegador. Podem ser necessários para memorizar uma escolha ou usados, com a sua autorização, para medir visitas e campanhas.</p>
+
+    <h2>Cookies que podemos usar</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nome</th><th>Entidade</th><th>Finalidade</th><th>Categoria</th><th>Duração</th></tr></thead>
+        <tbody>
+          <tr><td><code>gp_cookie_preferences</code></td><td>Guia do Proprietário</td><td>Guardar a versão e as opções escolhidas no aviso de cookies</td><td>Necessário</td><td>6 meses</td></tr>
+          <tr><td><code>_fbp</code> e <code>_fbc</code></td><td>Meta</td><td>Associar visitas e resultados às campanhas no Facebook e Instagram</td><td>Medição</td><td>Até 3 meses, segundo a configuração do Meta</td></tr>
+          <tr><td>Cookies de segurança da Cloudflare, quando necessários</td><td>Cloudflare</td><td>Proteger o site contra tráfego abusivo e confirmar pedidos legítimos</td><td>Necessário</td><td>Prazo técnico definido pela Cloudflare para o mecanismo ativado</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O Meta Pixel e os respetivos cookies só são carregados se a medição estiver configurada no portal e a tiver autorizado. Recusar os cookies opcionais não impede o acesso aos conteúdos nem aos formulários.</p>
+
+    <h2>Analítica sem cookies de rastreio</h2>
+    <p>O Cloudflare Web Analytics mede o desempenho e a utilização do portal de forma agregada. Segundo a documentação da Cloudflare, não recolhe nem usa dados pessoais dos visitantes.</p>
+
+    <h2>Como mudar a escolha</h2>
+    <p>Pode reabrir o painel através de <a href="#cookie-settings" data-cookie-settings>Definições de cookies</a>. Também pode apagar cookies nas definições do navegador. Se retirou a autorização depois de o Meta Pixel ter sido carregado, a página é atualizada e os cookies do Meta definidos neste domínio são removidos.</p>
+
+    <h2>Mais informação</h2>
+    <p>Consulte a nossa <a href="/privacidade/">Política de Privacidade</a> e a <a href="/parceiros/">lista de parceiros e fornecedores</a>.</p>
+  </article>
+</BaseLayout>
+
+<style>
+  .table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+  table { width: 100%; min-width: 720px; border-collapse: collapse; }
+  th, td { padding: 0.85rem; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+  th { background: var(--paper-soft); }
+</style>

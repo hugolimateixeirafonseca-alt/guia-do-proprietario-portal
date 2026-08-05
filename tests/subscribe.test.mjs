@@ -14,7 +14,8 @@ const env = {
   SENDER_API_TOKEN: "token-de-teste",
   SENDER_GROUP_NEWSLETTER: "eEvG4m",
   SENDER_GROUP_GUIA_VENDER_CASA: "dJAl59",
-  SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l"
+  SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l",
+  PARTNER_CONSENT_ENABLED: "true"
 };
 
 const requestFor = (body) => new Request("https://guiadoproprietario.pt/api/subscribe", {
@@ -30,7 +31,7 @@ const ebookBody = {
   email: "Pessoa@Exemplo.pt",
   consent1: true,
   consent2: false,
-  consentVersion: "2026-08-c",
+  consentVersion: "2026-08-d",
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
@@ -84,6 +85,18 @@ test("mantém a recolha desligada quando falta o token", async () => {
     env: { ...env, SENDER_API_TOKEN: "" }
   });
   assert.equal(response.status, 503);
+});
+
+test("recusa autorização de parceiros quando a partilha não está ativa", async () => {
+  globalThis.fetch = async () => {
+    throw new Error("A API não deveria ser chamada");
+  };
+  const response = await onRequestPost({
+    request: requestFor({ ...ebookBody, consent2: true }),
+    env: { ...env, PARTNER_CONSENT_ENABLED: "false" }
+  });
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), { error: "partner_consent_unavailable" });
 });
 
 test("usa os grupos confirmados mesmo sem variáveis adicionais na Cloudflare", async () => {
