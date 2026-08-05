@@ -71,7 +71,16 @@ A criação foi corrigida para adicionar o novo subscritor e os respetivos grupo
 - um endereço novo para o pedido do guia foi aceite com estado 200;
 - um endereço novo para a newsletter foi aceite com estado 200;
 - nenhum dos dois testes autorizou a partilha com empresas parceiras;
-- a confirmação da entrega do email do guia continua a depender da verificação da caixa de correio.
+- a entrega do email do guia foi confirmada pelo responsável, tendo a primeira mensagem chegado à pasta de spam;
+- o funcionamento da ligação de cancelamento continua por confirmar.
+
+## Ajuste de interface e consentimento de 5 de agosto de 2026
+
+- o formulário da landing deixa de mostrar o botão “A enviar...” depois do sucesso;
+- a newsletter passa a mostrar “Subscrição concluída” sem cursor de espera;
+- o consentimento obrigatório do portal e da landing foi uniformizado para conselhos, novidades e comunicações sobre produtos e serviços;
+- as novas versões registadas são `2026-08-c` para o guia e `newsletter-2026-08-b` para a newsletter;
+- os textos anteriores permanecem no histórico para preservar a correspondência com consentimentos já recolhidos.
 
 O Pixel da Meta só deve ser configurado quando estiver aprovado e pronto para utilização.
 
