@@ -12,7 +12,7 @@ const originalFetch = globalThis.fetch;
 
 const env = {
   SENDER_API_TOKEN: "token-de-teste",
-  SENDER_GROUP_NEWSLETTER: "eEvG4m",
+  SENDER_GROUP_MARKETING: "egK8WG",
   SENDER_GROUP_GUIA_VENDER_CASA: "dJAl59",
   SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l"
 };
@@ -30,7 +30,7 @@ const ebookBody = {
   email: "Pessoa@Exemplo.pt",
   consent1: true,
   consent2: false,
-  consentVersion: "2026-08-e",
+  consentVersion: "2026-08-f",
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
@@ -91,7 +91,7 @@ test("recusa versões anteriores que não incluem o novo âmbito das comunicaç�
     throw new Error("A API não deveria ser chamada");
   };
   const response = await onRequestPost({
-    request: requestFor({ ...ebookBody, consentVersion: "2026-08-d" }),
+    request: requestFor({ ...ebookBody, consentVersion: "2026-08-e" }),
     env
   });
   assert.equal(response.status, 400);
@@ -111,7 +111,7 @@ test("usa os grupos confirmados mesmo sem variáveis adicionais na Cloudflare", 
     env: { SENDER_API_TOKEN: "token-de-teste" }
   });
   assert.equal(response.status, 200);
-  assert.match(calls.at(-1).url, /subscribers\/groups\/eEvG4m$/);
+  assert.match(calls.at(-1).url, /subscribers\/groups\/egK8WG$/);
 });
 
 test("atualiza um subscritor e adiciona uma newsletter single opt-in ao grupo ativo", async () => {
@@ -133,7 +133,7 @@ test("atualiza um subscritor e adiciona uma newsletter single opt-in ao grupo at
   assert.equal(calls.length, 3);
   assert.equal(calls[0].init.method, "GET");
   assert.equal(calls[1].init.method, "PATCH");
-  assert.match(calls[2].url, /subscribers\/groups\/eEvG4m$/);
+  assert.match(calls[2].url, /subscribers\/groups\/egK8WG$/);
   assert.deepEqual(JSON.parse(calls[2].init.body), {
     subscribers: ["pessoa@exemplo.pt"],
     trigger_automation: false
@@ -158,7 +158,7 @@ test("cria o pedido do guia, respeita parceiros e aciona a automação no fim", 
   assert.equal(createBody.email, "pessoa@exemplo.pt");
   assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "true");
   assert.equal(createBody.fields["{$LEAD_SOURCE}"], "ebook-vender-casa");
-  assert.deepEqual(createBody.groups, ["eEvG4m", "aKBm4l", "dJAl59"]);
+  assert.deepEqual(createBody.groups, ["egK8WG", "aKBm4l", "dJAl59"]);
   assert.equal(createBody.trigger_automation, true);
 });
 
@@ -181,7 +181,7 @@ test("cria uma subscrição nova da newsletter diretamente no grupo ativo", asyn
   assert.equal(response.status, 200);
   assert.equal(calls.length, 2);
   const createBody = JSON.parse(calls[1].init.body);
-  assert.deepEqual(createBody.groups, ["eEvG4m"]);
+  assert.deepEqual(createBody.groups, ["egK8WG"]);
   assert.equal(createBody.trigger_automation, false);
 });
 

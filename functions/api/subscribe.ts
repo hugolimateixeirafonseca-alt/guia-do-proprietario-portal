@@ -2,7 +2,7 @@ import { CONSENT_TEXT, type ConsentVersion } from "../../src/data/consent";
 
 interface Env {
   SENDER_API_TOKEN?: string;
-  SENDER_GROUP_NEWSLETTER?: string;
+  SENDER_GROUP_MARKETING?: string;
   SENDER_GROUP_GUIA_VENDER_CASA?: string;
   SENDER_GROUP_GUIA_PARCEIROS?: string;
 }
@@ -24,7 +24,7 @@ interface RequestContext {
 
 const SENDER_API = "https://api.sender.net/v2";
 const DEFAULT_GROUPS = {
-  newsletter: "eEvG4m",
+  newsletter: "egK8WG",
   guiaVenderCasa: "dJAl59",
   guiaParceiros: "aKBm4l"
 } as const;
@@ -121,7 +121,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const consentVersion = cleanText(body.consentVersion, 64);
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
   const source = body.source === "newsletter" || body.source === "ebook-vender-casa" ? body.source : "";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-e";
+  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-f";
 
   if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion) {
     return json({ error: "invalid" }, 400);
@@ -132,7 +132,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   }
 
   const groups = {
-    newsletter: env.SENDER_GROUP_NEWSLETTER || DEFAULT_GROUPS.newsletter,
+    newsletter: env.SENDER_GROUP_MARKETING || DEFAULT_GROUPS.newsletter,
     guiaVenderCasa: env.SENDER_GROUP_GUIA_VENDER_CASA || DEFAULT_GROUPS.guiaVenderCasa,
     guiaParceiros: env.SENDER_GROUP_GUIA_PARCEIROS || DEFAULT_GROUPS.guiaParceiros
   };
