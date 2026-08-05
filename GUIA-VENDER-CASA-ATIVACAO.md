@@ -60,7 +60,7 @@ Em 4 de agosto de 2026:
 - a landing, a Política de Privacidade, a lista de parceiros e o PDF responderam com estado 200;
 - um pedido controlado com `geral@guiadoproprietario.pt` e sem autorização de parceiros foi aceite pela API com estado 200;
 - a resposta do portal confirmou a criação ou atualização do contacto no Sender;
-- a receção do email e o funcionamento do cancelamento ainda devem ser confirmados na caixa de correio.
+- a receção do email, o botão do PDF, o cancelamento e uma segunda subscrição sem duplicados foram confirmados pelo responsável em 5 de agosto de 2026.
 
 ## Correção de 5 de agosto de 2026
 
@@ -72,7 +72,9 @@ A criação foi corrigida para adicionar o novo subscritor e os respetivos grupo
 - um endereço novo para a newsletter foi aceite com estado 200;
 - nenhum dos dois testes autorizou a partilha com empresas parceiras;
 - a entrega do email do guia foi confirmada pelo responsável, tendo a primeira mensagem chegado à pasta de spam;
-- o funcionamento da ligação de cancelamento continua por confirmar.
+- o botão do email abre o PDF corretamente;
+- a ligação de cancelamento funciona;
+- uma segunda subscrição do mesmo endereço não cria duplicados.
 
 ## Ajuste de interface e consentimento de 5 de agosto de 2026
 
@@ -84,12 +86,9 @@ A criação foi corrigida para adicionar o novo subscritor e os respetivos grupo
 
 O Pixel da Meta só deve ser configurado quando estiver aprovado e pronto para utilização.
 
-## Antes de recolher contactos
+## Antes de partilhar contactos com empresas parceiras
 
-- validar a redação dos dois consentimentos;
-- identificar a entidade responsável pelo tratamento;
-- concluir a Política de Privacidade;
 - preencher e datar a lista de empresas parceiras;
 - celebrar acordo escrito com cada empresa que receba contactos;
 - confirmar conservação, eliminação e retirada do consentimento;
-- testar subscrição repetida, autorização opcional, email entregue, cancelamento e falha do fornecedor.
+- testar o fluxo específico de partilha com um parceiro autorizado antes do primeiro envio real.
