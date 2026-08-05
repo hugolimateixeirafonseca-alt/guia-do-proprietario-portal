@@ -16,6 +16,7 @@ interface SubscribeBody {
   pageUrl?: unknown;
   eventId?: unknown;
   phone?: unknown;
+  postalCode?: unknown;
 }
 
 interface RequestContext {
@@ -24,6 +25,7 @@ interface RequestContext {
 }
 
 const SENDER_API = "https://api.sender.net/v2";
+const GEO_API = "https://json.geoapi.pt/codigo_postal";
 const DEFAULT_GROUPS = {
   newsletter: "egK8WG",
   guiaVenderCasa: "dJAl59",
@@ -37,6 +39,35 @@ const json = (body: object, status: number) => new Response(JSON.stringify(body)
 
 const cleanText = (value: unknown, maxLength: number) =>
   typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+
+const normalizePostalCode = (value: unknown) => {
+  const digits = cleanText(value, 16).replace(/\D/g, "").slice(0, 7);
+  return digits.length === 7 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : "";
+};
+
+type PostalLookup =
+  | { status: "found"; locality: string }
+  | { status: "not_found"; locality: "" }
+  | { status: "unavailable"; locality: "Por confirmar" };
+
+async function lookupPostalCode(postalCode: string): Promise<PostalLookup> {
+  try {
+    const response = await fetch(`${GEO_API}/${encodeURIComponent(postalCode)}`, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(4000)
+    });
+    if (response.status === 404) return { status: "not_found", locality: "" };
+    if (!response.ok) return { status: "unavailable", locality: "Por confirmar" };
+
+    const data = await response.json() as { Localidade?: unknown; Concelho?: unknown };
+    const locality = cleanText(data.Localidade || data.Concelho, 120);
+    return locality
+      ? { status: "found", locality }
+      : { status: "unavailable", locality: "Por confirmar" };
+  } catch {
+    return { status: "unavailable", locality: "Por confirmar" };
+  }
+}
 
 class SenderError extends Error {
   constructor(readonly code: string) {
@@ -64,43 +95,63 @@ async function createOrUpdateSubscriber(
   triggerAutomation: boolean,
   phone = ""
 ) {
+  const hasLocationFields = "{$CODIGO_POSTAL}" in fields || "{$LOCALIDADE}" in fields;
+  const fieldsWithoutLocation = { ...fields };
+  delete fieldsWithoutLocation["{$CODIGO_POSTAL}"];
+  delete fieldsWithoutLocation["{$LOCALIDADE}"];
+
+  const writeSubscriber = async (path: string, method: "POST" | "PATCH", payload: Record<string, unknown>) => {
+    let response = await senderRequest(env, path, { method, body: JSON.stringify(payload) });
+    let locationStored = hasLocationFields;
+
+    // A lead não se perde se os dois campos personalizados ainda não existirem no Sender.
+    if (!response.ok && hasLocationFields && (response.status === 400 || response.status === 422)) {
+      response = await senderRequest(env, path, {
+        method,
+        body: JSON.stringify({ ...payload, fields: fieldsWithoutLocation })
+      });
+      locationStored = false;
+    }
+
+    return { response, locationStored };
+  };
+
   const identifier = encodeURIComponent(email);
   const existing = await senderRequest(env, `/subscribers/${identifier}`, { method: "GET" });
 
   if (existing.ok) {
-    const updated = await senderRequest(env, `/subscribers/${identifier}`, {
-      method: "PATCH",
-      body: JSON.stringify({ fields, ...(phone ? { phone } : {}), trigger_automation: false })
+    const updated = await writeSubscriber(`/subscribers/${identifier}`, "PATCH", {
+      fields,
+      ...(phone ? { phone } : {}),
+      trigger_automation: false
     });
-    if (!updated.ok) throw new SenderError(`update_${updated.status}`);
-    return false;
+    if (!updated.response.ok) throw new SenderError(`update_${updated.response.status}`);
+    return { created: false, locationStored: updated.locationStored };
   }
 
   if (existing.status !== 404) throw new SenderError(`lookup_${existing.status}`);
 
-  const created = await senderRequest(env, "/subscribers", {
-    method: "POST",
-    body: JSON.stringify({
-      email,
-      groups: groupIds,
-      fields,
-      ...(phone ? { phone } : {}),
-      trigger_automation: triggerAutomation
-    })
+  const created = await writeSubscriber("/subscribers", "POST", {
+    email,
+    groups: groupIds,
+    fields,
+    ...(phone ? { phone } : {}),
+    trigger_automation: triggerAutomation
   });
 
-  if (created.ok) return true;
+  if (created.response.ok) return { created: true, locationStored: created.locationStored };
 
   // Protege contra duas submissões simultâneas do mesmo endereço.
-  if (created.status === 409) {
-    const updated = await senderRequest(env, `/subscribers/${identifier}`, {
-      method: "PATCH",
-      body: JSON.stringify({ fields, ...(phone ? { phone } : {}), trigger_automation: false })
+  if (created.response.status === 409) {
+    const updated = await writeSubscriber(`/subscribers/${identifier}`, "PATCH", {
+      fields,
+      ...(phone ? { phone } : {}),
+      trigger_automation: false
     });
-    if (updated.ok) return false;
+    if (updated.response.ok) return { created: false, locationStored: updated.locationStored };
   }
 
-  throw new SenderError(`create_${created.status}`);
+  throw new SenderError(`create_${created.response.status}`);
 }
 
 async function addSubscriberToGroup(env: Env, groupId: string, email: string, triggerAutomation: boolean) {
@@ -125,12 +176,13 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
   const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" ? body.source : "";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-g";
+  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-h";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");
   const phoneOk = phoneDigits.length >= 9 && phoneDigits.length <= 15;
+  const postalCode = normalizePostalCode(body.postalCode);
 
-  if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion || (isPartnerFollowup && (body.consent2 !== true || !phoneOk))) {
+  if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion || (isPartnerFollowup && (body.consent2 !== true || !phoneOk || !postalCode))) {
     return json({ error: "invalid" }, 400);
   }
 
@@ -144,6 +196,11 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     guiaParceiros: env.SENDER_GROUP_GUIA_PARCEIROS || DEFAULT_GROUPS.guiaParceiros
   };
 
+  const postalLookup = isPartnerFollowup ? await lookupPostalCode(postalCode) : null;
+  if (postalLookup?.status === "not_found") {
+    return json({ error: "postal_not_found" }, 400);
+  }
+
   const consentDate = new Date().toISOString();
   const fields = {
     "{$CONSENT_DATA}": consentDate,
@@ -153,7 +210,11 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     "{$CONSENT_PARCEIROS}": body.consent2 === true ? "true" : "false",
     "{$ORIGEM}": cleanText(body.pageUrl, 2048),
     "{$LEAD_SOURCE}": source,
-    "{$EVENT_ID}": cleanText(body.eventId, 128)
+    "{$EVENT_ID}": cleanText(body.eventId, 128),
+    ...(isPartnerFollowup ? {
+      "{$CODIGO_POSTAL}": postalCode,
+      "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar"
+    } : {})
   };
 
   try {
@@ -162,7 +223,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       ...(body.consent2 === true ? [groups.guiaParceiros] : []),
       ...(source === "ebook-vender-casa" ? [groups.guiaVenderCasa] : [])
     ];
-    const created = await createOrUpdateSubscriber(
+    const subscriberResult = await createOrUpdateSubscriber(
       env,
       email,
       fields,
@@ -171,8 +232,11 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       phone
     );
 
-    if (created) {
-      return json({ ok: true }, 200);
+    if (subscriberResult.created) {
+      return json({
+        ok: true,
+        ...(isPartnerFollowup ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {})
+      }, 200);
     }
 
     await addSubscriberToGroup(env, groups.newsletter, email, false);
@@ -185,7 +249,10 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       await addSubscriberToGroup(env, groups.guiaVenderCasa, email, true);
     }
 
-    return json({ ok: true }, 200);
+    return json({
+      ok: true,
+      ...(isPartnerFollowup ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {})
+    }, 200);
   } catch (error) {
     const code = error instanceof SenderError ? error.code : "unknown";
     return json({ error: "provider_error", code }, 502);

@@ -116,6 +116,15 @@ O tipo texto reduz incompatibilidades na API e permite guardar datas completas, 
 
 O telefone pedido no segundo passo da landing é guardado no campo nativo `phone` do contacto no Sender. Não é necessário criar um campo personalizado para este dado.
 
+O mesmo passo pede agora o código postal. Crie no Sender dois campos personalizados do tipo texto:
+
+| Nome | Identificador |
+|---|---|
+| Código postal | `CODIGO_POSTAL` |
+| Localidade | `LOCALIDADE` |
+
+A localidade é identificada automaticamente a partir do código postal e enviada para o Sender. Não é necessário criar outro grupo. Estes contactos continuam a entrar em `Newsletter - Ofertas de terceiros` (`egK8WG`) e `Guia - Vender Casa - Parceiros` (`aKBm4l`). Se os campos ainda não existirem, o pedido de contacto continua a ser guardado com o telefone, mas sem a localização. Depois de criar os campos, as novas submissões passam a preenchê-los sem nova publicação do site.
+
 ## 6. Single opt-in da newsletter
 
 O formulário utiliza single opt-in. Depois de a pessoa preencher o email e aceitar o consentimento obrigatório, o contacto fica imediatamente ativo.

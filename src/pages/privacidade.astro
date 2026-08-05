@@ -20,7 +20,7 @@ import EmailProtegido from "../components/EmailProtegido.astro";
     <h2>Dados que podemos recolher</h2>
     <p>Consoante o formulário utilizado, podemos recolher:</p>
     <ul>
-      <li>dados de contacto, como nome, email e telefone;</li>
+      <li>dados de contacto, como nome, email e telefone, e dados de localização, como código postal e localidade inferida a partir desse código;</li>
       <li>dados sobre o imóvel, como localização, tipologia, área, estado, relação com o imóvel e intenção ou prazo de venda;</li>
       <li>valores aproximados necessários a um simulador, como faixa de crédito por liquidar, valor e ano de aquisição;</li>
       <li>dados de consentimento, incluindo a opção escolhida, data, versão do texto, página de origem, endereço IP e identificador técnico do pedido;</li>
@@ -50,7 +50,7 @@ import EmailProtegido from "../components/EmailProtegido.astro";
     <p>Ao assinalar a opção correspondente e submeter o formulário, consente em receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas nesta política. O seu endereço de email não é transmitido às empresas anunciantes. Cada email inclui uma forma gratuita e simples de cancelar.</p>
 
     <h3>Partilha do contacto com empresas parceiras</h3>
-    <p>Esta autorização é opcional, independente e apresentada numa opção própria. Se a der, poderemos transmitir os dados indicados no formulário e necessários à finalidade apresentada a parceiros das categorias descritas na <a href="/parceiros/">página de parceiros</a>, para estes o contactarem com informações e ofertas relacionadas com a casa.</p>
+    <p>Esta autorização é opcional, independente e apresentada numa opção própria. Se a der, poderemos transmitir os dados indicados no formulário, incluindo telefone, código postal e localidade, a parceiros das categorias descritas na <a href="/parceiros/">página de parceiros</a>, para estes o contactarem com informações e ofertas relacionadas com a casa. O código postal permite encaminhar o pedido para empresas que trabalham na sua zona.</p>
     <p>Os parceiros podem abranger mediação e avaliação imobiliária; crédito habitação e seguros do imóvel; obras, remodelação e construção; limpeza, mudanças e manutenção; serviços jurídicos e de solicitadoria relacionados com o imóvel; energia e telecomunicações; mobiliário, decoração e equipamento doméstico.</p>
     <p>Depois da transmissão, cada parceiro é responsável independente pelo tratamento que fizer. A página de parceiros será atualizada com a identificação das entidades que participem nesta modalidade.</p>
 
@@ -62,7 +62,7 @@ import EmailProtegido from "../components/EmailProtegido.astro";
     <p>Guardamos a data, a versão do texto aceite, a origem e os elementos técnicos necessários para demonstrar cada autorização. Pode retirar qualquer consentimento através da ligação de cancelamento presente nos emails ou contactando-nos. Retirar um consentimento não afeta os restantes nem torna ilícito o tratamento realizado antes do pedido.</p>
 
     <h2>Destinatários e fornecedores</h2>
-    <p>Usamos a Cloudflare para alojamento, distribuição, segurança e analítica agregada, e o Sender, da UAB Sender.lt, para gerir subscritores, consentimentos e envios. Estes fornecedores tratam dados para prestar os respetivos serviços, ao abrigo dos seus contratos e obrigações de proteção de dados.</p>
+    <p>Usamos a Cloudflare para alojamento, distribuição, segurança e analítica agregada, o Sender, da UAB Sender.lt, para gerir subscritores, consentimentos e envios, e o GEO API PT para identificar a localidade correspondente ao código postal introduzido. Ao GEO API PT é enviado apenas o código postal, sem nome, email ou telefone. Estes fornecedores tratam dados para prestar os respetivos serviços, ao abrigo dos seus contratos e obrigações de proteção de dados.</p>
     <p>O Meta Pixel só é carregado se estiver configurado e aceitar os cookies de medição. Consoante a operação, o Meta Platforms Ireland Limited pode atuar como subcontratante, corresponsável ou responsável independente. Consulte a lista e as ligações relevantes na nossa <a href="/parceiros/">página de parceiros e fornecedores</a>.</p>
 
     <h2>Transferências internacionais</h2>

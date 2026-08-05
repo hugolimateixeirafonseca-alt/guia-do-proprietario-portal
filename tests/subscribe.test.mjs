@@ -30,7 +30,7 @@ const ebookBody = {
   email: "Pessoa@Exemplo.pt",
   consent1: true,
   consent2: false,
-  consentVersion: "2026-08-g",
+  consentVersion: "2026-08-h",
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
@@ -86,12 +86,12 @@ test("mantém a recolha desligada quando falta o token", async () => {
   assert.equal(response.status, 503);
 });
 
-test("recusa versões anteriores que não incluem o novo âmbito das comunicações", async () => {
+test("recusa versões anteriores ao consentimento que inclui a localização", async () => {
   globalThis.fetch = async () => {
     throw new Error("A API não deveria ser chamada");
   };
   const response = await onRequestPost({
-    request: requestFor({ ...ebookBody, consentVersion: "2026-08-f" }),
+    request: requestFor({ ...ebookBody, consentVersion: "2026-08-g" }),
     env
   });
   assert.equal(response.status, 400);
@@ -162,7 +162,7 @@ test("cria o pedido do guia sem autorização de parceiros e aciona a automaçã
   assert.equal(createBody.trigger_automation, true);
 });
 
-test("recusa o pedido de parceiros sem telefone válido ou sem autorização", async () => {
+test("recusa o pedido de parceiros sem telefone, código postal válido ou autorização", async () => {
   globalThis.fetch = async () => {
     throw new Error("A API não deveria ser chamada");
   };
@@ -170,7 +170,8 @@ test("recusa o pedido de parceiros sem telefone válido ou sem autorização", a
   const partnerBody = {
     ...ebookBody,
     source: "ebook-vender-casa-partner",
-    phone: "912 345 678"
+    phone: "912 345 678",
+    postalCode: "1000-001"
   };
 
   const withoutConsent = await onRequestPost({
@@ -181,14 +182,22 @@ test("recusa o pedido de parceiros sem telefone válido ou sem autorização", a
     request: requestFor({ ...partnerBody, consent2: true, phone: "123" }),
     env
   });
+  const withoutPostalCode = await onRequestPost({
+    request: requestFor({ ...partnerBody, consent2: true, postalCode: "1000" }),
+    env
+  });
 
   assert.equal(withoutConsent.status, 400);
   assert.equal(withoutPhone.status, 400);
+  assert.equal(withoutPostalCode.status, 400);
 });
 
-test("atualiza o contacto, guarda o telefone e adiciona apenas o grupo de parceiros", async () => {
+test("atualiza o contacto, guarda telefone e localização e adiciona apenas o grupo de parceiros", async () => {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) {
+      return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
+    }
     return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
   };
 
@@ -197,6 +206,7 @@ test("atualiza o contacto, guarda o telefone e adiciona apenas o grupo de parcei
       ...ebookBody,
       source: "ebook-vender-casa-partner",
       phone: "+351 912 345 678",
+      postalCode: "1000-001",
       consent2: true,
       eventId: "partner-123"
     }),
@@ -204,14 +214,72 @@ test("atualiza o contacto, guarda o telefone e adiciona apenas o grupo de parcei
   });
 
   assert.equal(response.status, 200);
-  assert.equal(calls.length, 4);
-  const updateBody = JSON.parse(calls[1].init.body);
+  assert.equal(calls.length, 5);
+  const updateBody = JSON.parse(calls[2].init.body);
   assert.equal(updateBody.phone, "+351 912 345 678");
   assert.equal(updateBody.fields["{$CONSENT_PARCEIROS}"], "true");
   assert.equal(updateBody.fields["{$LEAD_SOURCE}"], "ebook-vender-casa-partner");
-  assert.match(calls[2].url, /subscribers\/groups\/egK8WG$/);
-  assert.match(calls[3].url, /subscribers\/groups\/aKBm4l$/);
+  assert.equal(updateBody.fields["{$CODIGO_POSTAL}"], "1000-001");
+  assert.equal(updateBody.fields["{$LOCALIDADE}"], "Lisboa");
+  assert.match(calls[3].url, /subscribers\/groups\/egK8WG$/);
+  assert.match(calls[4].url, /subscribers\/groups\/aKBm4l$/);
   assert.equal(calls.some(({ url }) => url.endsWith("/dJAl59")), false);
+  assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", locationStored: true });
+});
+
+test("recusa um código postal que o serviço identifica como inexistente", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    return new Response("{}", { status: 404, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      ...ebookBody,
+      source: "ebook-vender-casa-partner",
+      phone: "912 345 678",
+      postalCode: "9999-999",
+      consent2: true
+    }),
+    env
+  });
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), { error: "postal_not_found" });
+  assert.equal(calls.length, 1);
+});
+
+test("não perde a lead se os campos de localização ainda não existirem no Sender", async () => {
+  let senderWriteAttempts = 0;
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) {
+      return Response.json({ Localidade: "Lisboa" });
+    }
+    if (init.method === "PATCH") {
+      senderWriteAttempts += 1;
+      return new Response("{}", { status: senderWriteAttempts === 1 ? 422 : 200 });
+    }
+    return new Response("{}", { status: 200 });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      ...ebookBody,
+      source: "ebook-vender-casa-partner",
+      phone: "912 345 678",
+      postalCode: "1000-001",
+      consent2: true
+    }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.locationStored, false);
+  const fallbackBody = JSON.parse(calls[3].init.body);
+  assert.equal("{$CODIGO_POSTAL}" in fallbackBody.fields, false);
+  assert.equal("{$LOCALIDADE}" in fallbackBody.fields, false);
 });
 
 test("cria uma subscrição nova da newsletter diretamente no grupo ativo", async () => {

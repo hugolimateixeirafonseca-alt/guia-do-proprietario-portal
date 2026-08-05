@@ -45,11 +45,13 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
             <h3>Já agora: quanto vale a sua casa hoje?</h3>
             <p>Deixe o seu contacto. Empresas parceiras de confiança podem ajudá-lo no que precisar para a sua casa.</p>
             <form id="partner-lead" novalidate>
-              <label class="phone-label" for="phone">Telemóvel</label>
-              <input id="phone" type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="O seu número de telemóvel" />
+              <label class="partner-field-label" for="phone">Telemóvel</label>
+              <input class="partner-input" id="phone" type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="O seu número de telemóvel" />
+              <label class="partner-field-label" for="postal-code">Código postal</label>
+              <input class="partner-input" id="postal-code" type="text" name="postal-code" required autocomplete="postal-code" inputmode="numeric" maxlength="8" pattern="[0-9]{4}-[0-9]{3}" placeholder="Ex.: 1000-001" />
               <label class="chk partner-consent" id="partner-consent-label">
                 <input type="checkbox" id="partner-consent" />
-                <span>Autorizo a partilha do meu contacto com empresas das categorias indicadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem com informações e ofertas relacionadas com a casa.</span>
+                <span>Autorizo a partilha do meu contacto, código postal e localidade com empresas das categorias indicadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem com informações e ofertas relacionadas com a casa.</span>
               </label>
               <button id="partner-submit" type="submit">Quero saber quanto vale a minha casa</button>
               <p id="partner-error" class="field-error" hidden>É preciso autorizar o contacto para avançar.</p>
@@ -110,6 +112,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
     const success = document.getElementById("sucesso");
     const partnerForm = document.getElementById("partner-lead");
     const phoneInput = document.getElementById("phone");
+    const postalCodeInput = document.getElementById("postal-code");
     const partnerConsentInput = document.getElementById("partner-consent");
     const partnerConsentLabel = document.getElementById("partner-consent-label");
     const partnerError = document.getElementById("partner-error");
@@ -180,12 +183,22 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
       }
     });
 
+    postalCodeInput.addEventListener("input", () => {
+      const digits = postalCodeInput.value.replace(/\D/g, "").slice(0, 7);
+      postalCodeInput.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
+    });
+
     partnerForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       partnerStatus.textContent = "";
 
       if (!phoneInput.checkValidity()) {
         phoneInput.reportValidity();
+        return;
+      }
+
+      if (!postalCodeInput.checkValidity()) {
+        postalCodeInput.reportValidity();
         return;
       }
 
@@ -206,6 +219,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
           body: JSON.stringify({
             email: submittedEmail,
             phone: phoneInput.value.trim(),
+            postalCode: postalCodeInput.value.trim(),
             consent1: true,
             consent2: true,
             source: "ebook-vender-casa-partner",
@@ -215,7 +229,18 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
           })
         });
 
-        if (!response.ok) throw new Error("partner_subscribe_failed");
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          if (result.error === "postal_not_found") {
+            postalCodeInput.setCustomValidity("Confirme o código postal.");
+            postalCodeInput.reportValidity();
+            postalCodeInput.setCustomValidity("");
+            partnerSubmit.disabled = false;
+            partnerSubmit.textContent = "Quero saber quanto vale a minha casa";
+            return;
+          }
+          throw new Error("partner_subscribe_failed");
+        }
         partnerForm.hidden = true;
         partnerSuccess.hidden = false;
         partnerSuccess.focus();
@@ -270,9 +295,9 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
   .partner-offer h3 { margin: 0 0 8px; font-size: 23px; line-height: 1.15; }
   .partner-offer > p { margin-bottom: 18px; }
   .partner-offer form { gap: 10px; }
-  .phone-label { color: #19334f; font-size: 13px; font-weight: 800; }
-  .partner-offer input[type="tel"] { width: 100%; min-height: 54px; padding: 0 16px; color: #172238; background: #fff; border: 2px solid #d5d8d6; border-radius: 8px; font-size: 16px; }
-  .partner-offer input[type="tel"]:focus { border-color: #2b6b5b; outline: 0; }
+  .partner-field-label { color: #19334f; font-size: 13px; font-weight: 800; }
+  .partner-input { width: 100%; min-height: 54px; padding: 0 16px; color: #172238; background: #fff; border: 2px solid #d5d8d6; border-radius: 8px; font-size: 16px; }
+  .partner-input:focus { border-color: #2b6b5b; outline: 0; }
   .partner-consent { color: #31495f; padding-inline: 0; }
   .partner-consent a { color: #1f5b4d; }
   .partner-success { padding: 16px; color: #19334f; background: #e2eee8; border-radius: 8px; }

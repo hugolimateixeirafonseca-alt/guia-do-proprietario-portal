@@ -6,7 +6,7 @@
 
 - A newsletter e a entrega do guia usam single opt-in e registam email, data, IP, versão do texto, origem e identificador do pedido no Sender.
 - O consentimento de marketing é obrigatório para a subscrição. A autorização de partilha com parceiros é independente e opcional.
-- A autorização de parceiros surge apenas depois do pedido do manual, num segundo formulário independente. O telefone e a autorização são obrigatórios para enviar esse pedido de contacto.
+- A autorização de parceiros surge apenas depois do pedido do manual, num segundo formulário independente. O telefone, o código postal e a autorização são obrigatórios para enviar esse pedido de contacto. A localidade é identificada automaticamente a partir do código postal.
 - O Meta Pixel só pode ser carregado após consentimento para medição e apenas quando existir um ID configurado.
 - O aviso de cookies está ativo no portal e nas landings. Permite aceitar todos, recusar opcionais, personalizar e alterar a escolha no rodapé.
 - Existem páginas próprias de Privacidade, Cookies e Parceiros e fornecedores.
@@ -31,7 +31,7 @@
 
 - O consentimento das comunicações por email identifica expressamente que pode incluir ofertas de empresas terceiras.
 - O envio permanece sob controlo do Guia do Proprietário e o endereço de email não é transmitido à empresa anunciante.
-- As versões `2026-08-e`, `2026-08-f`, `2026-08-g` e `newsletter-2026-08-c` identificam os subscritores que aceitaram este âmbito. Consentimentos anteriores não devem ser usados para estas ofertas sem nova aceitação.
+- As versões `2026-08-e`, `2026-08-f`, `2026-08-g`, `2026-08-h` e `newsletter-2026-08-c` identificam os subscritores que aceitaram este âmbito. Consentimentos anteriores não devem ser usados para estas ofertas sem nova aceitação.
 - A empresa anunciante deve ser identificada em cada comunicação.
 
 ## Procedimentos internos necessários
@@ -46,10 +46,10 @@
 
 ## Validação técnica de 5 de agosto de 2026
 
-- Dez testes da API de subscrição passaram.
+- A API valida o formato do código postal, consulta o GEO API PT e guarda `CODIGO_POSTAL` e `LOCALIDADE` no Sender quando os campos personalizados existem.
 - A API aceita a autorização opcional de parceiros e adiciona o contacto ao grupo próprio quando essa opção é assinalada.
 - A compilação completa gerou 683 páginas sem erros, avisos ou falhas de conteúdo.
 - A auditoria das dependências terminou com zero vulnerabilidades conhecidas.
-- A landing foi verificada localmente com a subscrição principal separada do pedido de contacto de parceiros. O segundo formulário usa a versão `2026-08-g`, exige telefone e autorização, atualiza o contacto existente e não repete o envio do manual.
+- A landing foi verificada localmente com a subscrição principal separada do pedido de contacto de parceiros. O segundo formulário usa a versão `2026-08-h`, exige telefone, código postal e autorização, atualiza o contacto existente e não repete o envio do manual.
 
 Este documento é um controlo operacional. Não substitui revisão jurídica adaptada à identidade do responsável, aos contratos celebrados e ao tratamento efetivamente realizado.
