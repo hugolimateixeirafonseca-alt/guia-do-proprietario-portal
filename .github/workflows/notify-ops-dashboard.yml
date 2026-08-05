@@ -1,0 +1,33 @@
+name: Avisar dashboard operacional
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/content/artigos/**"
+      - "src/content/config.ts"
+      - "src/pages/**"
+      - "public/imagens/artigos/**"
+      - ".github/workflows/notify-ops-dashboard.yml"
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    env:
+      OPS_DASHBOARD_TOKEN: ${{ secrets.OPS_DASHBOARD_TOKEN }}
+    steps:
+      - name: Pedir atualização imediata
+        if: env.OPS_DASHBOARD_TOKEN != ''
+        shell: bash
+        run: |
+          curl --fail-with-body \
+            --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $OPS_DASHBOARD_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/hugolimateixeirafonseca-alt/guia-do-proprietario-ops/dispatches \
+            --data '{"event_type":"portal_content_changed"}'
+
+      - name: Indicar configuração em falta
+        if: env.OPS_DASHBOARD_TOKEN == ''
+        run: echo "O segredo OPS_DASHBOARD_TOKEN ainda não está configurado. O dashboard usará a sincronização periódica."
