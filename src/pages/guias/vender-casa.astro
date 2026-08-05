@@ -30,11 +30,6 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
             <span>Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na <a href="/politica-de-privacidade/">Política de Privacidade</a>. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.</span>
           </label>
 
-          <label class="chk">
-            <input type="checkbox" id="consent2" />
-            <span>Autorizo a partilha do meu contacto com empresas das categorias indicadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem com informações e ofertas relacionadas com a casa. <em>(Opcional)</em></span>
-          </label>
-
           <button id="submit-button" type="submit">Quero o guia gratuito</button>
           <p id="chk1-erro" class="field-error" hidden>É preciso aceitar para receber o guia.</p>
           <p class="microcopy">Enviamos para o seu email · Tudo num só guia · 24 páginas</p>
@@ -45,6 +40,26 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
           <span aria-hidden="true">✓</span>
           <h2>O guia vai a caminho.</h2>
           <p>Enviámos o link para o seu email. Verifique a caixa de entrada e, se não chegar em poucos minutos, veja o spam ou promoções. Se não aparecer, confirme se escreveu o email corretamente e tente de novo.</p>
+
+          <div class="partner-offer">
+            <h3>Já agora: quanto vale a sua casa hoje?</h3>
+            <p>Deixe o seu contacto. Empresas parceiras de confiança podem ajudá-lo no que precisar para a sua casa.</p>
+            <form id="partner-lead" novalidate>
+              <label class="phone-label" for="phone">Telemóvel</label>
+              <input id="phone" type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="O seu número de telemóvel" />
+              <label class="chk partner-consent" id="partner-consent-label">
+                <input type="checkbox" id="partner-consent" />
+                <span>Autorizo a partilha do meu contacto com empresas das categorias indicadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem com informações e ofertas relacionadas com a casa.</span>
+              </label>
+              <button id="partner-submit" type="submit">Quero saber quanto vale a minha casa</button>
+              <p id="partner-error" class="field-error" hidden>É preciso autorizar o contacto para avançar.</p>
+              <p id="partner-status" class="form-status" role="status" aria-live="polite"></p>
+            </form>
+            <div id="partner-success" class="partner-success" hidden tabindex="-1">
+              <strong>Pedido recebido.</strong>
+              <p>Guardámos o seu contacto e a sua autorização.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -88,12 +103,20 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
     const form = document.getElementById("lead");
     const emailInput = document.getElementById("email");
     const consent1Input = document.getElementById("consent1");
-    const consent2Input = document.getElementById("consent2");
     const consent1Label = document.getElementById("chk1-label");
     const consent1Error = document.getElementById("chk1-erro");
     const status = document.getElementById("form-status");
     const submitButton = document.getElementById("submit-button");
     const success = document.getElementById("sucesso");
+    const partnerForm = document.getElementById("partner-lead");
+    const phoneInput = document.getElementById("phone");
+    const partnerConsentInput = document.getElementById("partner-consent");
+    const partnerConsentLabel = document.getElementById("partner-consent-label");
+    const partnerError = document.getElementById("partner-error");
+    const partnerStatus = document.getElementById("partner-status");
+    const partnerSubmit = document.getElementById("partner-submit");
+    const partnerSuccess = document.getElementById("partner-success");
+    let submittedEmail = "";
 
     consent1Input.addEventListener("change", () => {
       if (consent1Input.checked) {
@@ -129,7 +152,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
           body: JSON.stringify({
             email: emailInput.value.trim(),
             consent1: true,
-            consent2: consent2Input?.checked === true,
+            consent2: false,
             source: "ebook-vender-casa",
             consentVersion: CONSENT_VERSION,
             pageUrl: location.href,
@@ -138,6 +161,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
         });
 
         if (!response.ok) throw new Error("subscribe_failed");
+        submittedEmail = emailInput.value.trim();
         if (window.fbq) window.fbq("track", "Lead", { content_name: "ebook-vender-casa" }, { eventID: eventId });
         form.hidden = true;
         success.hidden = false;
@@ -146,6 +170,59 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
         status.textContent = "Não foi possível enviar agora. Tente novamente dentro de instantes.";
         submitButton.disabled = false;
         submitButton.textContent = "Quero o guia gratuito";
+      }
+    });
+
+    partnerConsentInput.addEventListener("change", () => {
+      if (partnerConsentInput.checked) {
+        partnerConsentLabel.classList.remove("erro");
+        partnerError.hidden = true;
+      }
+    });
+
+    partnerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      partnerStatus.textContent = "";
+
+      if (!phoneInput.checkValidity()) {
+        phoneInput.reportValidity();
+        return;
+      }
+
+      if (!partnerConsentInput.checked) {
+        partnerError.hidden = false;
+        partnerConsentLabel.classList.add("erro");
+        partnerConsentInput.focus();
+        return;
+      }
+
+      partnerSubmit.disabled = true;
+      partnerSubmit.textContent = "A enviar...";
+
+      try {
+        const response = await fetch("/api/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: submittedEmail,
+            phone: phoneInput.value.trim(),
+            consent1: true,
+            consent2: true,
+            source: "ebook-vender-casa-partner",
+            consentVersion: CONSENT_VERSION,
+            pageUrl: location.href,
+            eventId: globalThis.crypto?.randomUUID?.() || `partner-${Date.now()}`
+          })
+        });
+
+        if (!response.ok) throw new Error("partner_subscribe_failed");
+        partnerForm.hidden = true;
+        partnerSuccess.hidden = false;
+        partnerSuccess.focus();
+      } catch {
+        partnerStatus.textContent = "Não foi possível enviar agora. Tente novamente dentro de instantes.";
+        partnerSubmit.disabled = false;
+        partnerSubmit.textContent = "Quero saber quanto vale a minha casa";
       }
     });
   </script>
@@ -189,6 +266,17 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
   .success > span { width: 42px; height: 42px; display: grid; place-items: center; color: white; background: #2b6b5b; border-radius: 50%; font-size: 23px; font-weight: 900; }
   .success h2 { margin: 16px 0 8px; font-size: 28px; }
   .success p { margin: 0; line-height: 1.55; }
+  .partner-offer { margin-top: 24px; padding-top: 24px; border-top: 1px solid #d8cdbd; }
+  .partner-offer h3 { margin: 0 0 8px; font-size: 23px; line-height: 1.15; }
+  .partner-offer > p { margin-bottom: 18px; }
+  .partner-offer form { gap: 10px; }
+  .phone-label { color: #19334f; font-size: 13px; font-weight: 800; }
+  .partner-offer input[type="tel"] { width: 100%; min-height: 54px; padding: 0 16px; color: #172238; background: #fff; border: 2px solid #d5d8d6; border-radius: 8px; font-size: 16px; }
+  .partner-offer input[type="tel"]:focus { border-color: #2b6b5b; outline: 0; }
+  .partner-consent { color: #31495f; padding-inline: 0; }
+  .partner-consent a { color: #1f5b4d; }
+  .partner-success { padding: 16px; color: #19334f; background: #e2eee8; border-radius: 8px; }
+  .partner-success p { margin-top: 5px; }
   .inside { padding: 74px 0 66px; background: #fff; }
   .inside h2, .bottom-cta h2 { margin: 0 0 26px; font-size: clamp(30px, 5vw, 46px); letter-spacing: -.035em; }
   .inside ul { margin: 0; padding: 0; display: grid; gap: 0; list-style: none; }

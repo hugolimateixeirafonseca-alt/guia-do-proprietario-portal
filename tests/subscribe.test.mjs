@@ -30,7 +30,7 @@ const ebookBody = {
   email: "Pessoa@Exemplo.pt",
   consent1: true,
   consent2: false,
-  consentVersion: "2026-08-f",
+  consentVersion: "2026-08-g",
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
@@ -91,7 +91,7 @@ test("recusa versões anteriores que não incluem o novo âmbito das comunicaç�
     throw new Error("A API não deveria ser chamada");
   };
   const response = await onRequestPost({
-    request: requestFor({ ...ebookBody, consentVersion: "2026-08-e" }),
+    request: requestFor({ ...ebookBody, consentVersion: "2026-08-f" }),
     env
   });
   assert.equal(response.status, 400);
@@ -140,7 +140,7 @@ test("atualiza um subscritor e adiciona uma newsletter single opt-in ao grupo at
   });
 });
 
-test("cria o pedido do guia, respeita parceiros e aciona a automação no fim", async () => {
+test("cria o pedido do guia sem autorização de parceiros e aciona a automação no fim", async () => {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
     const status = init.method === "GET" ? 404 : init.method === "POST" && String(url).endsWith("/subscribers") ? 201 : 200;
@@ -148,7 +148,7 @@ test("cria o pedido do guia, respeita parceiros e aciona a automação no fim", 
   };
 
   const response = await onRequestPost({
-    request: requestFor({ ...ebookBody, consent2: true }),
+    request: requestFor(ebookBody),
     env
   });
 
@@ -156,10 +156,62 @@ test("cria o pedido do guia, respeita parceiros e aciona a automação no fim", 
   assert.equal(calls.length, 2);
   const createBody = JSON.parse(calls[1].init.body);
   assert.equal(createBody.email, "pessoa@exemplo.pt");
-  assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "true");
+  assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "false");
   assert.equal(createBody.fields["{$LEAD_SOURCE}"], "ebook-vender-casa");
-  assert.deepEqual(createBody.groups, ["egK8WG", "aKBm4l", "dJAl59"]);
+  assert.deepEqual(createBody.groups, ["egK8WG", "dJAl59"]);
   assert.equal(createBody.trigger_automation, true);
+});
+
+test("recusa o pedido de parceiros sem telefone válido ou sem autorização", async () => {
+  globalThis.fetch = async () => {
+    throw new Error("A API não deveria ser chamada");
+  };
+
+  const partnerBody = {
+    ...ebookBody,
+    source: "ebook-vender-casa-partner",
+    phone: "912 345 678"
+  };
+
+  const withoutConsent = await onRequestPost({
+    request: requestFor(partnerBody),
+    env
+  });
+  const withoutPhone = await onRequestPost({
+    request: requestFor({ ...partnerBody, consent2: true, phone: "123" }),
+    env
+  });
+
+  assert.equal(withoutConsent.status, 400);
+  assert.equal(withoutPhone.status, 400);
+});
+
+test("atualiza o contacto, guarda o telefone e adiciona apenas o grupo de parceiros", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      ...ebookBody,
+      source: "ebook-vender-casa-partner",
+      phone: "+351 912 345 678",
+      consent2: true,
+      eventId: "partner-123"
+    }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(calls.length, 4);
+  const updateBody = JSON.parse(calls[1].init.body);
+  assert.equal(updateBody.phone, "+351 912 345 678");
+  assert.equal(updateBody.fields["{$CONSENT_PARCEIROS}"], "true");
+  assert.equal(updateBody.fields["{$LEAD_SOURCE}"], "ebook-vender-casa-partner");
+  assert.match(calls[2].url, /subscribers\/groups\/egK8WG$/);
+  assert.match(calls[3].url, /subscribers\/groups\/aKBm4l$/);
+  assert.equal(calls.some(({ url }) => url.endsWith("/dJAl59")), false);
 });
 
 test("cria uma subscrição nova da newsletter diretamente no grupo ativo", async () => {

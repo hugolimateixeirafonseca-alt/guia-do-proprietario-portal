@@ -82,13 +82,15 @@ Em `Subscribers → Groups`, criar:
 | Grupo | ID | Função |
 |---|---|---|
 | Test group (geral@guiadoproprietario.pt) | `dPlrkn` | Testes manuais. Nunca recebe subscrições reais automaticamente |
-| Newsletter - Ativa | `eEvG4m` | Recebe imediatamente todos os subscritores da newsletter |
+| Newsletter - Ofertas de terceiros | `egK8WG` | Recebe imediatamente todas as novas subscrições de marketing |
 | Guia - Vender Casa | `dJAl59` | Identifica quem pediu o e-book e aciona a entrega automática |
 | Guia - Vender Casa - Parceiros | `aKBm4l` | Contém apenas quem autorizou expressamente a partilha |
 
+O grupo `Newsletter - Ativa` (`eEvG4m`) fica apenas como histórico e não recebe novas subscrições.
+
 ### Regras de utilização
 
-- uma nova subscrição entra diretamente em `Newsletter - Ativa`;
+- uma nova subscrição entra diretamente em `Newsletter - Ofertas de terceiros`;
 - não é enviado qualquer email de confirmação da subscrição;
 - o pedido do e-book entra em `Guia - Vender Casa`;
 - o grupo `Guia - Vender Casa - Parceiros` só recebe quem marcou a autorização opcional;
@@ -112,6 +114,8 @@ Em `Subscribers → Fields` ou `Custom fields`, criar os seguintes campos:
 
 O tipo texto reduz incompatibilidades na API e permite guardar datas completas, valores booleanos e identificadores sem conversões.
 
+O telefone pedido no segundo passo da landing é guardado no campo nativo `phone` do contacto no Sender. Não é necessário criar um campo personalizado para este dado.
+
 ## 6. Single opt-in da newsletter
 
 O formulário utiliza single opt-in. Depois de a pessoa preencher o email e aceitar o consentimento obrigatório, o contacto fica imediatamente ativo.
@@ -120,7 +124,7 @@ Fluxo a configurar:
 
 1. O portal valida o email e o consentimento obrigatório.
 2. O contacto é criado ou atualizado no Sender.
-3. O contacto entra diretamente em `Newsletter - Ativa` com estado ativo.
+3. O contacto entra diretamente em `Newsletter - Ofertas de terceiros` com estado ativo.
 4. Os campos de consentimento, origem e data ficam registados.
 5. O contacto pode receber a newsletter sem confirmação adicional por email.
 
@@ -191,7 +195,7 @@ A integração utilizará:
 
 Depois da configuração do Sender, recolher:
 
-- identificador de `Newsletter - Ativa`: `eEvG4m`;
+- identificador de `Newsletter - Ofertas de terceiros`: `egK8WG`;
 - identificador de `Guia - Vender Casa`: `dJAl59`;
 - identificador de `Guia - Vender Casa - Parceiros`: `aKBm4l`;
 - identificador do grupo de teste: `dPlrkn`;
@@ -207,7 +211,7 @@ Antes de abrir os formulários ao público:
 
 - [ ] SPF, DKIM e DMARC apresentam validação positiva.
 - [ ] O remetente é `Guia do Proprietário <geral@guiadoproprietario.pt>`.
-- [ ] Uma subscrição entra diretamente em `Newsletter - Ativa`.
+- [ ] Uma subscrição entra diretamente em `Newsletter - Ofertas de terceiros`.
 - [ ] O contacto fica ativo sem receber um pedido de confirmação.
 - [ ] O pedido do e-book entra em `Guia - Vender Casa`.
 - [ ] O email do guia chega e o botão abre o PDF.

@@ -15,6 +15,7 @@ interface SubscribeBody {
   source?: unknown;
   pageUrl?: unknown;
   eventId?: unknown;
+  phone?: unknown;
 }
 
 interface RequestContext {
@@ -60,7 +61,8 @@ async function createOrUpdateSubscriber(
   email: string,
   fields: Record<string, string>,
   groupIds: string[],
-  triggerAutomation: boolean
+  triggerAutomation: boolean,
+  phone = ""
 ) {
   const identifier = encodeURIComponent(email);
   const existing = await senderRequest(env, `/subscribers/${identifier}`, { method: "GET" });
@@ -68,7 +70,7 @@ async function createOrUpdateSubscriber(
   if (existing.ok) {
     const updated = await senderRequest(env, `/subscribers/${identifier}`, {
       method: "PATCH",
-      body: JSON.stringify({ fields, trigger_automation: false })
+      body: JSON.stringify({ fields, ...(phone ? { phone } : {}), trigger_automation: false })
     });
     if (!updated.ok) throw new SenderError(`update_${updated.status}`);
     return false;
@@ -82,6 +84,7 @@ async function createOrUpdateSubscriber(
       email,
       groups: groupIds,
       fields,
+      ...(phone ? { phone } : {}),
       trigger_automation: triggerAutomation
     })
   });
@@ -92,7 +95,7 @@ async function createOrUpdateSubscriber(
   if (created.status === 409) {
     const updated = await senderRequest(env, `/subscribers/${identifier}`, {
       method: "PATCH",
-      body: JSON.stringify({ fields, trigger_automation: false })
+      body: JSON.stringify({ fields, ...(phone ? { phone } : {}), trigger_automation: false })
     });
     if (updated.ok) return false;
   }
@@ -120,10 +123,14 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   const consentVersion = cleanText(body.consentVersion, 64);
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
-  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" ? body.source : "";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-f";
+  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" ? body.source : "";
+  const isPartnerFollowup = source === "ebook-vender-casa-partner";
+  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-g";
+  const phone = cleanText(body.phone, 32);
+  const phoneDigits = phone.replace(/\D/g, "");
+  const phoneOk = phoneDigits.length >= 9 && phoneDigits.length <= 15;
 
-  if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion) {
+  if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion || (isPartnerFollowup && (body.consent2 !== true || !phoneOk))) {
     return json({ error: "invalid" }, 400);
   }
 
@@ -160,7 +167,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       email,
       fields,
       subscriberGroups,
-      source === "ebook-vender-casa"
+      source === "ebook-vender-casa",
+      phone
     );
 
     if (created) {
