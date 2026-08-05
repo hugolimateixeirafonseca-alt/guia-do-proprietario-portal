@@ -5,7 +5,6 @@ import { CONSENT_VERSION } from "../../data/consent";
 const titulo = "Vender a sua casa em Portugal, sem surpresas";
 const descricao = "Receba gratuitamente o guia completo para vender casa em Portugal, calcular custos e reunir os documentos necessários.";
 const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
-const partnerConsentEnabled = import.meta.env.PUBLIC_PARTNER_CONSENT_ENABLED === "true";
 ---
 <Squeeze titulo={titulo} descricao={descricao} imagemOg={imagemEbook}>
   <section class="hero" aria-labelledby="titulo-guia">
@@ -28,15 +27,13 @@ const partnerConsentEnabled = import.meta.env.PUBLIC_PARTNER_CONSENT_ENABLED ===
 
           <label class="chk" id="chk1-label">
             <input type="checkbox" id="consent1" />
-            <span>Aceito receber conselhos, novidades e comunicações sobre produtos e serviços de acordo com a <a href="/politica-de-privacidade/">Política de Privacidade</a>. Posso cancelar a qualquer momento.</span>
+            <span>Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na <a href="/politica-de-privacidade/">Política de Privacidade</a>. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.</span>
           </label>
 
-          {partnerConsentEnabled && (
-            <label class="chk">
-              <input type="checkbox" id="consent2" />
-              <span>Autorizo a partilha do meu contacto com as empresas identificadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem sobre os produtos e serviços aí indicados. <em>(Opcional)</em></span>
-            </label>
-          )}
+          <label class="chk">
+            <input type="checkbox" id="consent2" />
+            <span>Autorizo a partilha do meu contacto com parceiros das áreas de imobiliário e avaliação, crédito e seguros, obras, manutenção, energia, telecomunicações e serviços para o lar, para me contactarem com informações e ofertas relacionadas com a casa. Consulte as categorias e parceiros na <a href="/parceiros/">lista de parceiros</a>. <em>(Opcional)</em></span>
+          </label>
 
           <button id="submit-button" type="submit">Quero o guia gratuito</button>
           <p id="chk1-erro" class="field-error" hidden>É preciso aceitar para receber o guia.</p>

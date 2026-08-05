@@ -6,17 +6,16 @@
 
 - A newsletter e a entrega do guia usam single opt-in e registam email, data, IP, versão do texto, origem e identificador do pedido no Sender.
 - O consentimento de marketing é obrigatório para a subscrição. A autorização de partilha com parceiros é independente e opcional.
-- A autorização de parceiros está desligada no site e bloqueada na API enquanto não existir pelo menos um parceiro identificado publicamente.
+- A autorização de parceiros está ativa como opção separada e opcional na landing do manual.
 - O Meta Pixel só pode ser carregado após consentimento para medição e apenas quando existir um ID configurado.
 - O aviso de cookies está ativo no portal e nas landings. Permite aceitar todos, recusar opcionais, personalizar e alterar a escolha no rodapé.
 - Existem páginas próprias de Privacidade, Cookies e Parceiros e fornecedores.
-- As ofertas de terceiros enviadas pelo Guia não estão ativas. A sua futura ativação exige um terceiro consentimento separado.
+- As ofertas de terceiros enviadas pelo Guia estão incluídas de forma expressa no consentimento das comunicações por email. O contacto não é partilhado com a empresa anunciante.
 
-## Dados ainda necessários para completar a informação legal
+## Identificação publicada
 
-- Nome civil ou denominação legal do responsável pelo tratamento.
-- Morada de contacto do responsável.
-- NIF ou NIPC, caso seja decidido publicá-lo.
+- Responsável pelo tratamento: Hugo Fonseca.
+- Morada de contacto: Alameda da Índia, Parque dos Reis, 2, 8900-440.
 
 ## Antes de ativar a partilha de contactos
 
@@ -24,15 +23,14 @@
 2. Definir por escrito que campos recebe cada parceiro, por que canal, com que frequência e durante quanto tempo.
 3. Celebrar um acordo que clarifique responsabilidades, segurança, tratamento de pedidos dos titulares, incidentes e proibição de reutilização fora da finalidade autorizada.
 4. Atualizar o texto e a versão do consentimento se mudar a finalidade, os dados, os canais ou os parceiros abrangidos.
-5. Ativar em conjunto `PUBLIC_PARTNER_CONSENT_ENABLED=true` na compilação e `PARTNER_CONSENT_ENABLED=true` na função. Nunca ativar apenas uma das duas.
-6. Fazer um teste com dados fictícios antes de transmitir qualquer contacto real.
+5. Fazer um teste com dados fictícios antes de transmitir qualquer contacto real.
 
-## Antes de enviar ofertas de terceiros sem partilhar o contacto
+## Ofertas de terceiros sem partilhar o contacto
 
-1. Criar uma opção separada e opcional nos formulários.
-2. Criar no Sender um campo próprio, um segmento ou grupo próprio e uma versão de consentimento própria.
-3. Garantir que o cancelamento dessa finalidade não cancela automaticamente os restantes consentimentos.
-4. Identificar a empresa anunciante em cada comunicação e manter o envio sob controlo do Guia do Proprietário.
+- O consentimento das comunicações por email identifica expressamente que pode incluir ofertas de empresas terceiras.
+- O envio permanece sob controlo do Guia do Proprietário e o endereço de email não é transmitido à empresa anunciante.
+- As versões `2026-08-e` e `newsletter-2026-08-c` identificam os subscritores que aceitaram este âmbito. Consentimentos anteriores não devem ser usados para estas ofertas sem nova aceitação.
+- A empresa anunciante deve ser identificada em cada comunicação.
 
 ## Procedimentos internos necessários
 
@@ -47,7 +45,7 @@
 ## Validação técnica de 5 de agosto de 2026
 
 - Oito testes da API de subscrição passaram.
-- A API recusa partilha de parceiros enquanto a funcionalidade estiver desligada.
+- A API aceita a autorização opcional de parceiros e adiciona o contacto ao grupo próprio quando essa opção é assinalada.
 - A compilação completa gerou 683 páginas sem erros, avisos ou falhas de conteúdo.
 - A auditoria das dependências terminou com zero vulnerabilidades conhecidas.
 - A landing foi verificada localmente com resposta HTTP 200, aviso de cookies presente e consentimento de parceiros ausente.

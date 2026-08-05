@@ -10,19 +10,21 @@ import EmailProtegido from "../components/EmailProtegido.astro";
     <p>Esta página identifica as empresas a quem o seu contacto pode ser partilhado, as categorias de ofertas de terceiros que poderemos enviar sem partilhar o contacto e os fornecedores técnicos usados para operar o site e enviar comunicações.</p>
 
     <h2>Parceiros a quem o seu contacto pode ser partilhado</h2>
-    <div class="notice">
-      <strong>Neste momento não existem parceiros ativos para receber contactos.</strong>
-      <p>Enquanto esta lista estiver vazia, não pedimos autorização de partilha nos formulários e nenhum contacto é transmitido a terceiros para marketing próprio.</p>
-    </div>
-    <p>Quando esta modalidade estiver ativa, a partilha só acontecerá se a autorizar expressamente numa opção separada. O formulário identificará a finalidade e remeterá para esta lista antes de pedir a sua decisão.</p>
-    <p>Os futuros parceiros poderão pertencer às seguintes categorias: mediação imobiliária e avaliação de imóveis; intermediação de crédito habitação e seguros do imóvel; obras, remodelação e construção; limpeza, mudanças e manutenção do lar; serviços jurídicos e de solicitadoria relacionados com o imóvel; energia e telecomunicações para o lar; mobiliário, decoração e equipamento doméstico.</p>
-    <p>Cada entrada indicará o nome legal e comercial, categoria, licença AMI quando aplicável, zonas cobertas, finalidade do contacto e ligação para a informação de privacidade da empresa. Depois de receber os dados, cada parceiro será responsável independente pelo tratamento que fizer.</p>
-    <p>A sua autorização abrangerá apenas os parceiros identificados nesta página na data em que a der. Um parceiro acrescentado mais tarde não receberá contactos recolhidos anteriormente sem uma nova autorização específica.</p>
+    <p>Os seus dados pessoais poderão ser partilhados com parceiros das categorias indicadas abaixo, para as finalidades apresentadas no formulário, mediante o seu consentimento.</p>
+    <p>Os dados poderão ser partilhados com parceiros pertencentes às seguintes categorias:</p>
+    <ul>
+      <li>mediação imobiliária e avaliação de imóveis;</li>
+      <li>intermediação de crédito à habitação e seguros relacionados com o imóvel;</li>
+      <li>obras, remodelação e construção;</li>
+      <li>limpeza, mudanças e manutenção do lar;</li>
+      <li>serviços jurídicos e de solicitadoria relacionados com imóveis;</li>
+      <li>fornecimento de energia e serviços de telecomunicações para o lar;</li>
+      <li>mobiliário, decoração e equipamento doméstico.</li>
+    </ul>
 
     <h2>Ofertas de terceiros enviadas por nós</h2>
-    <p><strong>Esta modalidade não está ativa neste momento.</strong> Antes de ser ativada, terá uma autorização própria, opcional e separada da newsletter e da partilha de contacto.</p>
-    <p>Se a autorizar no futuro, poderemos enviar por email ofertas e comunicações de empresas terceiras. O email será enviado pelo Guia do Proprietário e o seu contacto não será entregue à empresa anunciante.</p>
-    <p>Estas comunicações poderão abranger: banca, finanças e seguros; ciência, tecnologia e telecomunicações; educação, formação e emprego; energia; imobiliário e casa; saúde, bem-estar e alimentação; turismo e viagens; cultura, entretenimento e lazer.</p>
+    <p>Mediante o seu consentimento, o Guia do Proprietário poderá enviar-lhe por email ofertas, campanhas e comunicações comerciais de empresas terceiras, sem transmitir o seu endereço de email às empresas anunciantes.</p>
+    <p>Estas comunicações poderão incluir conteúdos relacionados com banca, finanças e seguros; ciência, tecnologia e telecomunicações; educação, formação e emprego; energia; imobiliário e casa; saúde, bem-estar e alimentação; turismo e viagens; cultura, entretenimento e lazer.</p>
 
     <h2>Fornecedores que nos ajudam a operar</h2>
     <p>Estes fornecedores prestam serviços técnicos. Não recebem a lista de subscritores para a usarem em marketing próprio.</p>
@@ -37,8 +39,3 @@ import EmailProtegido from "../components/EmailProtegido.astro";
     <p>A retirada não afeta o tratamento realizado antes do pedido. No caso de uma partilha já efetuada, deverá também exercer os seus direitos junto do parceiro que recebeu o contacto. Consulte mais informação na nossa <a href="/privacidade/">Política de Privacidade</a>.</p>
   </article>
 </BaseLayout>
-
-<style>
-  .notice { margin: 1.3rem 0; padding: 1rem 1.1rem; background: #eef5ef; border-left: 4px solid var(--green); }
-  .notice p { margin-bottom: 0; }
-</style>

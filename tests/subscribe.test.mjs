@@ -14,8 +14,7 @@ const env = {
   SENDER_API_TOKEN: "token-de-teste",
   SENDER_GROUP_NEWSLETTER: "eEvG4m",
   SENDER_GROUP_GUIA_VENDER_CASA: "dJAl59",
-  SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l",
-  PARTNER_CONSENT_ENABLED: "true"
+  SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l"
 };
 
 const requestFor = (body) => new Request("https://guiadoproprietario.pt/api/subscribe", {
@@ -31,7 +30,7 @@ const ebookBody = {
   email: "Pessoa@Exemplo.pt",
   consent1: true,
   consent2: false,
-  consentVersion: "2026-08-d",
+  consentVersion: "2026-08-e",
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
@@ -87,16 +86,15 @@ test("mantém a recolha desligada quando falta o token", async () => {
   assert.equal(response.status, 503);
 });
 
-test("recusa autorização de parceiros quando a partilha não está ativa", async () => {
+test("recusa versões anteriores que não incluem o novo âmbito das comunicações", async () => {
   globalThis.fetch = async () => {
     throw new Error("A API não deveria ser chamada");
   };
   const response = await onRequestPost({
-    request: requestFor({ ...ebookBody, consent2: true }),
-    env: { ...env, PARTNER_CONSENT_ENABLED: "false" }
+    request: requestFor({ ...ebookBody, consentVersion: "2026-08-d" }),
+    env
   });
   assert.equal(response.status, 400);
-  assert.deepEqual(await response.json(), { error: "partner_consent_unavailable" });
 });
 
 test("usa os grupos confirmados mesmo sem variáveis adicionais na Cloudflare", async () => {
@@ -108,7 +106,7 @@ test("usa os grupos confirmados mesmo sem variáveis adicionais na Cloudflare", 
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-b"
+      consentVersion: "newsletter-2026-08-c"
     }),
     env: { SENDER_API_TOKEN: "token-de-teste" }
   });
@@ -126,7 +124,7 @@ test("atualiza um subscritor e adiciona uma newsletter single opt-in ao grupo at
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-b"
+      consentVersion: "newsletter-2026-08-c"
     }),
     env
   });
@@ -175,7 +173,7 @@ test("cria uma subscrição nova da newsletter diretamente no grupo ativo", asyn
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-b"
+      consentVersion: "newsletter-2026-08-c"
     }),
     env
   });
