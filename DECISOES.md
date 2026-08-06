@@ -104,3 +104,10 @@ Este ficheiro regista decisões que afetam várias áreas do projeto. Uma altera
 - Decisão: a homepage apresenta, antes de «Mais recentes», uma área «Em destaque» com o manual «Vender a sua casa em Portugal» e ligação direta para a landing.
 - Decisão: cada artigo termina, depois das fontes, com três artigos semelhantes. A seleção privilegia temas específicos e palavras-chave em comum, recorrendo ao pilar apenas como sinal secundário.
 - Estado: implementado, validado localmente e enviado para publicação em 6 de agosto de 2026. A confirmação online não foi realizada.
+
+### D019. Publicação autónoma de novidades no portal
+
+- Decisão: cada novidade é um ficheiro `.mdx` em `src/content/notas`, com o formato definido em `MODELO-NOVIDADE.mdx`.
+- Publicação: depois do commit no ramo principal, o deploy automático atualiza a página individual, o índice `/novidades/`, a secção Novidades da página inicial, o sitemap e o feed JSON.
+- Ordenação: as novidades aparecem da mais recente para a mais antiga através do campo `data`.
+- Página inicial: mantém-se a grelha geral Novidades. O quadro duplicado «Última novidade» é removido.
