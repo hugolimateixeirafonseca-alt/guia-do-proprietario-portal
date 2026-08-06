@@ -94,7 +94,7 @@ h3 { font-size: 21px; }
 .pillar-card p { margin: 0; color: var(--muted); font-size: 13px; }
 .article-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .current-month { padding-top: 64px; }
-.current-grid { display: grid; grid-template-columns: 1.6fr .8fr; gap: 22px; align-items: stretch; }
+.current-grid { display: block; }
 .deadlines { min-width: 0; }
 .deadline-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; }
 .deadline-heading h2 { margin: 0 0 22px; font-size: 27px; }
@@ -107,11 +107,8 @@ h3 { font-size: 21px; }
 .deadline-card h3 { margin: 0 0 6px; font-size: 17px; }
 .deadline-card p { margin: 0 0 5px; color: var(--muted); font-size: 12px; }
 .deadline-card small { color: #52656a; }
-.latest-note { padding: 28px; background: var(--green-soft); border: 1px solid #cce0d8; }
-.latest-note time, .notes-grid time, .note-row time { color: #4c6065; font-size: 11px; }
-.latest-note h3 { margin: 15px 0 12px; font-size: 26px; }
-.latest-note h3 a, .notes-grid a, .note-row a { text-decoration: none; }
-.latest-note p:last-child { color: #4c6065; font-size: 13px; }
+.notes-grid time, .note-row time { color: #4c6065; font-size: 11px; }
+.notes-grid a, .note-row a { text-decoration: none; }
 .situation-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
 .situation-card { overflow: hidden; padding-bottom: 22px; color: inherit; background: white; border: 1px solid var(--line); text-decoration: none; }
 .situation-card:hover { border-color: #8aac9f; transform: translateY(-2px); }

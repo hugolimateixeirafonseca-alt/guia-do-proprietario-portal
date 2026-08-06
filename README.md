@@ -65,6 +65,12 @@ Antes das validações, o build procura ficheiros PNG, JPG e JPEG dentro de `ima
 
 Para preparar um artigo sem o publicar, use `rascunho: true` no frontmatter. O artigo não terá página e não aparecerá nas listagens, no RSS, no feed JSON nem nos cartões sociais.
 
+### Publicar uma novidade
+
+Crie um ficheiro `.mdx` em `src/content/notas`, usando `MODELO-NOVIDADE.mdx` como base. O nome do ficheiro será o endereço da novidade, por exemplo `nova-regra-imi.mdx` gera `/novidades/nova-regra-imi/`.
+
+Depois do commit no ramo principal, o deploy automático reconstrói a página da novidade, o índice `/novidades/`, a secção Novidades da página inicial, o sitemap e o feed JSON. As novidades aparecem por ordem do campo `data`, da mais recente para a mais antiga.
+
 Os dados oficiais podem ser atualizados com `npm run dados:ine` e `npm run dados:imi`. Cada script mantém uma cache local das respostas oficiais e pode ser repetido sem alterar o resultado.
 
 ## Antes de publicar

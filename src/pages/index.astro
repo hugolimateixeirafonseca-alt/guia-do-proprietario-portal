@@ -17,7 +17,6 @@ const artigosRecentes = [...todosArtigos]
   .slice(0, 8);
 const nomesPilares = new Map(pilares.map((pilar) => [pilar.slug, pilar.nome]));
 const notas = (await getCollection("notas")).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
-const notaRecente = notas[0];
 const pilarCasa = pilares.find((pilar) => pilar.slug === "casa")!;
 const situacoes = [
   { titulo: "Vou vender a casa.", url: "/vender/", imagem: "situacao-vender", alt: "Casa portuguesa com placa de venda" },
@@ -163,12 +162,6 @@ const perguntasDoDia = [
       <div class="section-heading"><p class="eyebrow">Calendário</p><h2>Este mês</h2></div>
       <div class="current-grid">
         <ProximosPrazos dataBuild={new Date()} />
-        <article class="latest-note">
-          <p class="eyebrow">Última novidade</p>
-          <time datetime={notaRecente.data.data.toISOString()}>{formatarData(notaRecente.data.data)}</time>
-          <h3><a href={`/novidades/${notaRecente.id}/`}>{notaRecente.data.titulo}</a></h3>
-          <p>{notaRecente.data.resumo}</p>
-        </article>
       </div>
     </div>
   </section>
