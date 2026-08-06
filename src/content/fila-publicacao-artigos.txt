@@ -2,6 +2,11 @@
 # O workflow publica os primeiros ficheiros disponíveis desta lista.
 ar-condicionado-quanto-custa.mdx
 escolher-ar-condicionado.mdx
-ar-condicionado-ou-bomba-de-calor.mdx
 cano-entupido-desentupir.mdx
 quanto-cobra-canalizador.mdx
+ar-condicionado-ou-bomba-de-calor.mdx
+custo-reparar-infiltracao.mdx
+esquentador-reparar-ou-trocar.mdx
+escolher-aquecimento-agua.mdx
+limpeza-profunda-casa.mdx
+empresa-limpeza-mensal.mdx
