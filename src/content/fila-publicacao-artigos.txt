@@ -10,3 +10,8 @@ esquentador-reparar-ou-trocar.mdx
 escolher-aquecimento-agua.mdx
 limpeza-profunda-casa.mdx
 empresa-limpeza-mensal.mdx
+vidro-duplo-compensa.mdx
+escolher-janelas.mdx
+trocar-chao-pavimento-custo.mdx
+escolher-pavimento.mdx
+vale-a-pena-isolar-casa.mdx
