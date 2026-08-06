@@ -109,5 +109,6 @@ Este ficheiro regista decisões que afetam várias áreas do projeto. Uma altera
 
 - Decisão: cada novidade é um ficheiro `.mdx` em `src/content/notas`, com o formato definido em `MODELO-NOVIDADE.mdx`.
 - Publicação: depois do commit no ramo principal, o deploy automático atualiza a página individual, o índice `/novidades/`, a secção Novidades da página inicial, o sitemap e o feed JSON.
-- Ordenação: as novidades aparecem da mais recente para a mais antiga através do campo `data`.
+- Ordenação: as novidades aparecem da mais recente para a mais antiga através do campo `data`. Quando duas novidades têm a mesma data, o identificador do ficheiro garante uma ordem estável.
+- Apresentação: cada novidade tem um botão «Ver mais» na página inicial e no índice `/novidades/`.
 - Página inicial: mantém-se a grelha geral Novidades, imediatamente depois da secção Mais recentes. O quadro duplicado «Última novidade» é removido.

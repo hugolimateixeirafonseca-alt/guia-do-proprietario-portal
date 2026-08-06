@@ -120,6 +120,8 @@ h3 { font-size: 21px; }
 .notes-grid article { padding: 23px; background: white; border: 1px solid var(--line); }
 .notes-grid h3 { margin: 12px 0 0; font-size: 20px; }
 .notes-grid p, .note-row p { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+.notes-grid .news-more, .note-row .news-more { min-height: 38px; margin-top: 18px; padding: 0 15px; display: inline-flex; align-items: center; justify-content: center; color: white; background: var(--green); border-radius: 4px; font-size: 12px; font-weight: 750; }
+.notes-grid .news-more:hover, .note-row .news-more:hover { background: var(--green-dark); }
 .section-link { margin-top: 24px; }
 .article-card a { height: 100%; padding: 25px; display: block; color: inherit; background: var(--paper); border: 1px solid var(--line); text-decoration: none; }
 .article-card a:hover { border-color: #8aac9f; }

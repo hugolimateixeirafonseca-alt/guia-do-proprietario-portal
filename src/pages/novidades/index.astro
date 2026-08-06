@@ -3,8 +3,9 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import { formatarData } from "../../config";
+import { compararNotasRecentes } from "../../lib/notas";
 
-const notas = (await getCollection("notas")).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+const notas = (await getCollection("notas")).sort(compararNotasRecentes);
 ---
 <BaseLayout titulo="Novidades" descricao="Notas curtas sobre prazos, impostos e dados relevantes para proprietários em Portugal.">
   <section class="page-hero">
@@ -22,6 +23,7 @@ const notas = (await getCollection("notas")).sort((a, b) => b.data.data.valueOf(
           <time datetime={nota.data.data.toISOString()}>{formatarData(nota.data.data)}</time>
           <h2><a href={`/novidades/${nota.id}/`}>{nota.data.titulo}</a></h2>
           <p>{nota.data.resumo}</p>
+          <a class="news-more" href={`/novidades/${nota.id}/`}>Ver mais</a>
         </article>
       ))}
     </div>

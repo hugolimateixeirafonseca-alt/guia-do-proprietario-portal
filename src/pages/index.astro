@@ -7,6 +7,7 @@ import ProximosPrazos from "../components/ProximosPrazos.astro";
 import { formatarData, NEWSLETTER_ATIVA, pilares } from "../config";
 import { obterImagensArtigo } from "../lib/imagens-artigos";
 import { compararPorChegada } from "../lib/artigos";
+import { compararNotasRecentes } from "../lib/notas";
 
 const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
 const artigos = todosArtigos
@@ -16,7 +17,7 @@ const artigosRecentes = [...todosArtigos]
   .sort(compararPorChegada)
   .slice(0, 8);
 const nomesPilares = new Map(pilares.map((pilar) => [pilar.slug, pilar.nome]));
-const notas = (await getCollection("notas")).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+const notas = (await getCollection("notas")).sort(compararNotasRecentes);
 const pilarCasa = pilares.find((pilar) => pilar.slug === "casa")!;
 const situacoes = [
   { titulo: "Vou vender a casa.", url: "/vender/", imagem: "situacao-vender", alt: "Casa portuguesa com placa de venda" },
@@ -120,6 +121,7 @@ const perguntasDoDia = [
             <time datetime={nota.data.data.toISOString()}>{formatarData(nota.data.data)}</time>
             <h3><a href={`/novidades/${nota.id}/`}>{nota.data.titulo}</a></h3>
             <p>{nota.data.resumo}</p>
+            <a class="news-more" href={`/novidades/${nota.id}/`}>Ver mais</a>
           </article>
         ))}
       </div>
