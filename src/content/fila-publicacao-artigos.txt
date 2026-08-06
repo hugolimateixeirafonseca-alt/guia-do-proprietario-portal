@@ -1,0 +1,7 @@
+# Ordem de publicação. Uma linha por ficheiro, sem caminho.
+# O workflow publica os primeiros ficheiros disponíveis desta lista.
+ar-condicionado-quanto-custa.mdx
+escolher-ar-condicionado.mdx
+ar-condicionado-ou-bomba-de-calor.mdx
+cano-entupido-desentupir.mdx
+quanto-cobra-canalizador.mdx
