@@ -17,7 +17,7 @@ test("as novidades são ordenadas da mais recente para a mais antiga", () => {
   assert.match(home, /sort\(compararNotasRecentes\)/);
   assert.match(newsIndex, /sort\(compararNotasRecentes\)/);
   assert.match(newsSorting, /b\.data\.data\.valueOf\(\) - a\.data\.data\.valueOf\(\)/);
-  assert.match(newsSorting, /a\.id\.localeCompare\(b\.id/);
+  assert.match(newsSorting, /b\.id\.localeCompare\(a\.id/);
 });
 
 test("cada notícia apresenta o botão Ver mais", () => {

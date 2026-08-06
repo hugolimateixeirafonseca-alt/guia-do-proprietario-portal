@@ -4,5 +4,5 @@ export function compararNotasRecentes(a: CollectionEntry<"notas">, b: Collection
   const diferencaData = b.data.data.valueOf() - a.data.data.valueOf();
   if (diferencaData !== 0) return diferencaData;
 
-  return a.id.localeCompare(b.id, "pt");
+  return b.id.localeCompare(a.id, "pt");
 }
