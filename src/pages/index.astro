@@ -111,6 +111,22 @@ const perguntasDoDia = [
     </div>
   </section>
 
+  <section class="section soft" id="novidades">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Atualidade</p><h2>Novidades</h2></div>
+      <div class="notes-grid">
+        {notas.slice(0, 3).map((nota) => (
+          <article>
+            <time datetime={nota.data.data.toISOString()}>{formatarData(nota.data.data)}</time>
+            <h3><a href={`/novidades/${nota.id}/`}>{nota.data.titulo}</a></h3>
+            <p>{nota.data.resumo}</p>
+          </article>
+        ))}
+      </div>
+      <p class="section-link"><a href="/novidades/">Todas as novidades</a></p>
+    </div>
+  </section>
+
   <section class="section daily-questions-section" id="perguntas-dia">
     <div class="container">
       <div class="section-heading">
@@ -176,20 +192,5 @@ const perguntasDoDia = [
     </div>
   </section>
 
-  <section class="section soft">
-    <div class="container">
-      <div class="section-heading"><p class="eyebrow">Atualidade</p><h2>Novidades</h2></div>
-      <div class="notes-grid">
-        {notas.slice(0, 3).map((nota) => (
-          <article>
-            <time datetime={nota.data.data.toISOString()}>{formatarData(nota.data.data)}</time>
-            <h3><a href={`/novidades/${nota.id}/`}>{nota.data.titulo}</a></h3>
-            <p>{nota.data.resumo}</p>
-          </article>
-        ))}
-      </div>
-      <p class="section-link"><a href="/novidades/">Todas as novidades</a></p>
-    </div>
-  </section>
   {NEWSLETTER_ATIVA && <Newsletter />}
 </BaseLayout>

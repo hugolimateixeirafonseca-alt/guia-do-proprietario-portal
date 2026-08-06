@@ -15,6 +15,8 @@ test("a página inicial mantém a lista automática sem o quadro de última novi
   assert.match(home, /getCollection\("notas"\)/);
   assert.match(home, /notas\.slice\(0, 3\)/);
   assert.doesNotMatch(home, /Última novidade|notaRecente|latest-note/);
+  assert.ok(home.indexOf('id="novidades"') > home.indexOf('aria-labelledby="mais-recentes-titulo"'));
+  assert.ok(home.indexOf('id="novidades"') < home.indexOf('id="perguntas-dia"'));
 });
 
 test("o modelo contém os campos obrigatórios da novidade", () => {
