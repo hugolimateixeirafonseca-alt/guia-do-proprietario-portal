@@ -15,3 +15,9 @@ escolher-janelas.mdx
 trocar-chao-pavimento-custo.mdx
 escolher-pavimento.mdx
 vale-a-pena-isolar-casa.mdx
+portas-janelas-novas-custo.mdx
+limpar-estofos-sofa.mdx
+limpar-telhado-caleiras.mdx
+empresa-mudancas-quanto-custa.mdx
+dedetizacao-controlo-pragas.mdx
+quanto-cobra-eletricista.mdx
