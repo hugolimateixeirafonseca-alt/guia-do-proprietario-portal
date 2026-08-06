@@ -95,3 +95,12 @@ Este ficheiro regista decisões que afetam várias áreas do projeto. Uma altera
 - Decisão: o portal vive em repositório GitHub com deploy automático no Cloudflare Pages a cada commit. Publicar um artigo é adicionar um ficheiro .mdx em src/content/artigos/ pelo browser; o site reconstrói sozinho. O Codex deixa de ser necessário para publicar conteúdo.
 - Analítica: Cloudflare Web Analytics ativa. Conversão automática de PNG/JPG para AVIF e WebP no build. Campo rascunho: true mantém um artigo fora do site e dos feeds.
 - Domínio: guiadoproprietario.pt fica por ligar. Só se aponta ao Cloudflare quando o site estiver pronto para ser promovido, para o endereço definitivo ser o que o Google indexa. Até lá usa-se o endereço .pages.dev.
+
+## 2026-08-06
+
+### D018. Descoberta e continuidade editorial no portal
+
+- Decisão: a área «Mais recentes» ordena os artigos pelo momento em que entram no portal, separado da data editorial de publicação. O workflow regista esse momento automaticamente e preserva a ordem da fila dentro de cada lote.
+- Decisão: a homepage apresenta, antes de «Mais recentes», uma área «Em destaque» com o manual «Vender a sua casa em Portugal» e ligação direta para a landing.
+- Decisão: cada artigo termina, depois das fontes, com três artigos semelhantes. A seleção privilegia temas específicos e palavras-chave em comum, recorrendo ao pilar apenas como sinal secundário.
+- Estado: implementado, validado localmente e enviado para publicação em 6 de agosto de 2026. A confirmação online não foi realizada.

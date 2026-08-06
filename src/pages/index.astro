@@ -6,18 +6,14 @@ import Newsletter from "../components/Newsletter.astro";
 import ProximosPrazos from "../components/ProximosPrazos.astro";
 import { formatarData, NEWSLETTER_ATIVA, pilares } from "../config";
 import { obterImagensArtigo } from "../lib/imagens-artigos";
+import { compararPorChegada } from "../lib/artigos";
 
 const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
 const artigos = todosArtigos
   .filter((artigo) => artigo.data.destaque && artigo.data.nivel === "essencial")
   .sort((a, b) => b.data.revisto.valueOf() - a.data.revisto.valueOf());
 const artigosRecentes = [...todosArtigos]
-  .sort((a, b) => {
-    const diferencaPublicacao = b.data.publicado.valueOf() - a.data.publicado.valueOf();
-    if (diferencaPublicacao !== 0) return diferencaPublicacao;
-
-    return a.data.titulo.localeCompare(b.data.titulo, "pt");
-  })
+  .sort(compararPorChegada)
   .slice(0, 8);
 const nomesPilares = new Map(pilares.map((pilar) => [pilar.slug, pilar.nome]));
 const notas = (await getCollection("notas")).sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
@@ -62,6 +58,24 @@ const perguntasDoDia = [
           <a class="button secondary" href="#este-mes">Ver os prazos deste mês</a>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="section featured-section" aria-labelledby="destaque-titulo">
+    <div class="container">
+      <div class="section-heading featured-heading">
+        <p class="eyebrow">EM DESTAQUE</p>
+        <h2 id="destaque-titulo">Em destaque</h2>
+      </div>
+      <article class="manual-feature">
+        <div class="manual-feature-copy">
+          <p class="eyebrow">MANUAL GRATUITO</p>
+          <h3>Vender a sua casa em Portugal, sem surpresas</h3>
+          <p>Prepare a venda com 24 páginas sobre o valor da casa, custos, mais-valias, documentos e prazos até à entrega das chaves.</p>
+          <a class="button" href="/guias/vender-casa/">Receber o manual gratuito</a>
+        </div>
+        <img src="/imagens/guias/vender-casa-ebook-mockup.webp" alt="Manual Vender a Casa em Portugal apresentado como livro" width="1200" height="800" loading="lazy" />
+      </article>
     </div>
   </section>
 

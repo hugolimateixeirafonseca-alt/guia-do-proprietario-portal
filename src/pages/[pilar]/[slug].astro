@@ -8,6 +8,7 @@ import Custos from "../../components/Custos.astro";
 import Termo from "../../components/Termo.astro";
 import { avisos, formatarData, NEWSLETTER_ATIVA, pilares, redesSociais, site } from "../../config";
 import { obterImagensArtigo } from "../../lib/imagens-artigos";
+import { obterArtigosSemelhantes } from "../../lib/artigos";
 
 export async function getStaticPaths() {
   const artigos = await getCollection("artigos", ({ data }) => !data.rascunho);
@@ -15,6 +16,7 @@ export async function getStaticPaths() {
 }
 const { artigo } = Astro.props;
 const { Content } = await render(artigo);
+const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
 const pilar = pilares.find((item) => item.slug === artigo.data.pilar)!;
 const imagemCapa = obterImagensArtigo(artigo);
 const articleSchema = {
@@ -38,8 +40,9 @@ const faqSchema = artigo.data.perguntas_rapidas ? {
   }))
 } : null;
 const artigoPar = artigo.data.par
-  ? (await getCollection("artigos", ({ data }) => !data.rascunho)).find((item) => item.id === artigo.data.par)
+  ? todosArtigos.find((item) => item.id === artigo.data.par)
   : undefined;
+const artigosSemelhantes = obterArtigosSemelhantes(artigo, todosArtigos);
 ---
 <BaseLayout titulo={artigo.data.titulo} descricao={artigo.data.descricao} tipo="article">
   <article class="article-layout">
@@ -55,6 +58,26 @@ const artigoPar = artigo.data.par
     {artigo.data.pilar === "impostos" && <ProximosPrazos dataBuild={new Date()} quantidade={3} compacto />}
     <section class="sources"><h2>Fontes</h2><ul>{artigo.data.fontes.map((fonte) => <li><a href={fonte.url} rel="noreferrer">{fonte.nome}</a></li>)}</ul></section>
     <p><a href="/metodologia/">Como produzimos e atualizamos os conteúdos</a></p>
+    {artigosSemelhantes.length > 0 && (
+      <section class="similar-articles" aria-labelledby="artigos-semelhantes-titulo">
+        <p class="eyebrow">CONTINUE A EXPLORAR</p>
+        <h2 id="artigos-semelhantes-titulo">Artigos semelhantes</h2>
+        <div class="similar-articles-grid">
+          {artigosSemelhantes.map((semelhante) => {
+            const imagem = obterImagensArtigo(semelhante);
+            const pilarSemelhante = pilares.find((item) => item.slug === semelhante.data.pilar);
+            return (
+              <article>
+                <a href={`/${semelhante.data.pilar}/${semelhante.id}/`}>
+                  <picture><source srcset={imagem.avif} type="image/avif" /><img src={imagem.webp} alt="" width="1200" height="675" loading="lazy" /></picture>
+                  <div><span>{pilarSemelhante?.nome}</span><h3>{semelhante.data.titulo}</h3></div>
+                </a>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    )}
   </article>
   {NEWSLETTER_ATIVA && <Newsletter />}
   <script is:inline type="application/ld+json" set:html={JSON.stringify(articleSchema)} />

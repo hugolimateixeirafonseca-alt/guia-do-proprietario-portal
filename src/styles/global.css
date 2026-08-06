@@ -68,6 +68,16 @@ h3 { font-size: 21px; }
 .section-heading h2 { margin: 0 0 12px; }
 .section-heading p { margin: 0; color: var(--muted); }
 .recent-articles-section { padding-top: 68px; background: var(--paper); }
+.featured-section { padding-bottom: 0; }
+.featured-heading { margin-bottom: 22px; }
+.manual-feature { min-height: 330px; padding: 34px 42px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 390px); gap: 42px; align-items: center; overflow: hidden; color: white; background: #1f3a5f; }
+.manual-feature-copy { max-width: 650px; }
+.manual-feature .eyebrow { color: #e0a24f; }
+.manual-feature h3 { max-width: 620px; margin: 0 0 14px; font-size: clamp(29px, 4vw, 44px); }
+.manual-feature p:not(.eyebrow) { max-width: 610px; margin: 0 0 23px; color: #e8eef6; font-size: 16px; }
+.manual-feature .button { color: #102238; background: #b9f227; }
+.manual-feature .button:hover { background: #ccff42; }
+.manual-feature img { width: 100%; max-height: 280px; display: block; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(4, 15, 31, .32)); }
 .recent-articles-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .recent-article-card { min-width: 0; overflow: hidden; background: white; border: 1px solid var(--line); }
 .recent-article-card:hover { border-color: #6f9c8c; transform: translateY(-2px); }
@@ -193,6 +203,17 @@ h3 { font-size: 21px; }
 .sources { margin-top: 55px; padding-top: 28px; border-top: 1px solid var(--line); }
 .sources h2 { font-size: 24px; }
 .sources li { margin-bottom: 8px; }
+.similar-articles { margin-top: 58px; padding-top: 34px; border-top: 1px solid var(--line); }
+.similar-articles > h2 { margin: 0 0 22px; font-size: 31px; }
+.similar-articles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.similar-articles-grid article { min-width: 0; background: white; border: 1px solid var(--line); }
+.similar-articles-grid article:hover { border-color: #6f9c8c; transform: translateY(-2px); }
+.similar-articles-grid a { height: 100%; display: block; color: inherit; text-decoration: none; }
+.similar-articles-grid picture, .similar-articles-grid img { display: block; }
+.similar-articles-grid img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.similar-articles-grid a > div { padding: 14px; }
+.similar-articles-grid span { color: var(--green); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.similar-articles-grid h3 { margin: 7px 0 0; font-size: 16px; line-height: 1.25; letter-spacing: -.025em; }
 .programmatic-grid { margin: 30px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .data-card { padding: 22px; background: var(--green-soft); border: 1px solid #cce0d8; }
 .data-card span { color: var(--muted); font-size: 10px; text-transform: uppercase; }
@@ -334,6 +355,7 @@ th { font-size: 11px; text-transform: uppercase; }
   .recent-articles-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pillar-grid { grid-template-columns: 1fr 1fr; }
   .situation-grid, .calendar-grid { grid-template-columns: 1fr 1fr; }
+  .manual-feature { grid-template-columns: minmax(0, 1fr) 280px; }
 }
 @media (max-width: 768px) {
   .hero { padding: 16px 0 22px; }
@@ -350,6 +372,13 @@ th { font-size: 11px; text-transform: uppercase; }
   .hero-grid { gap: 42px; }
   .pillar-grid, .article-grid, .recent-articles-grid, .tools-grid, .programmatic-grid, .form-grid, .situation-grid, .notes-grid, .calendar-grid, .pillar-hero, .daily-questions-grid, .glossary-list { grid-template-columns: 1fr; }
   .recent-articles-section { padding-top: 54px; }
+  .featured-section { padding-top: 54px; }
+  .manual-feature { padding: 28px 22px; grid-template-columns: 1fr; gap: 22px; }
+  .manual-feature-copy { display: contents; }
+  .manual-feature .eyebrow, .manual-feature h3, .manual-feature p:not(.eyebrow) { order: 1; }
+  .manual-feature img { order: 2; max-height: 220px; }
+  .manual-feature .button { order: 3; width: 100%; }
+  .similar-articles-grid { grid-template-columns: 1fr; }
   .field.full { grid-column: auto; }
   .newsletter { padding: 28px 22px; }
   .newsletter-email-row { display: grid; }
