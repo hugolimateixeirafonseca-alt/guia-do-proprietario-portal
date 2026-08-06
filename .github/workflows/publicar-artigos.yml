@@ -24,36 +24,57 @@ jobs:
           ref: main
           fetch-depth: 1
 
-      - name: Selecionar e mover até 3 artigos
+      - name: Selecionar e mover até 2 artigos
         shell: bash
         run: |
           set -euo pipefail
 
           SOURCE="src/content/por-publicar"
           DESTINATION="src/content/artigos"
+          QUEUE="src/content/fila-publicacao-artigos.txt"
+          MAX_ARTICLES=2
 
           if [[ ! -d "$SOURCE" ]]; then
             echo "::error::A pasta $SOURCE não existe."
             exit 1
           fi
 
-          mkdir -p "$DESTINATION"
+          if [[ ! -f "$QUEUE" ]]; then
+            echo "::error::O ficheiro de prioridade $QUEUE não existe."
+            exit 1
+          fi
 
-          mapfile -d '' -t FILES < <(
-            find "$SOURCE" -maxdepth 1 -type f -name '*.mdx' -print0               | sort -z               | head -z -n 3
-          )
+          mkdir -p "$DESTINATION"
+          FILES=()
+
+          while IFS= read -r NAME || [[ -n "$NAME" ]]; do
+            NAME="${NAME%$'\r'}"
+            [[ -z "$NAME" ]] && continue
+            [[ "$NAME" == \#* ]] && continue
+
+            if [[ "$NAME" == */* ]] || [[ "$NAME" != *.mdx ]]; then
+              echo "::error::Entrada inválida na fila: $NAME"
+              exit 1
+            fi
+
+            if [[ -f "$SOURCE/$NAME" ]]; then
+              FILES+=("$SOURCE/$NAME")
+            fi
+
+            if [[ "${#FILES[@]}" -ge "$MAX_ARTICLES" ]]; then
+              break
+            fi
+          done < "$QUEUE"
 
           COUNT="${#FILES[@]}"
 
           if [[ "$COUNT" -eq 0 ]]; then
-            echo "Não existem artigos .mdx por publicar."
+            echo "Não existem artigos da fila disponíveis para publicar."
             exit 0
           fi
 
-          # Validar tudo antes de alterar qualquer ficheiro.
           for FILE in "${FILES[@]}"; do
             NAME="$(basename "$FILE")"
-
             if [[ -e "$DESTINATION/$NAME" ]]; then
               echo "::error::Já existe um artigo com o nome $NAME em $DESTINATION."
               exit 1
@@ -68,6 +89,5 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git commit -m "Publicar $COUNT artigos automaticamente"
           git push origin HEAD:main
