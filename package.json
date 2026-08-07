@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "npm run images:convert && npm run validate:data && npm run validate:copy && npm run validate:images && npm run generate:og && astro check && astro build && npm run validate:termo",
+    "build": "npm run images:convert && npm run validate:data && npm run validate:copy && npm run validate:images && npm run generate:og && npm run images:noticias && astro check && astro build && npm run validate:termo",
     "preview": "astro preview",
     "images:convert": "node scripts/converter-imagens.mjs",
+    "images:noticias": "node scripts/processar-imagens-noticias.mjs",
     "validate:copy": "node scripts/validate-copy.mjs",
     "validate:termo": "node scripts/validate-termo.mjs",
     "validate:data": "node scripts/validar-dados.mjs",
