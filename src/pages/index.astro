@@ -54,32 +54,50 @@ const perguntasDoDia = [
         <h1>Tudo o que precisa de saber sobre a sua casa, num só sítio.</h1>
         <p class="hero-copy">Impostos, obras, arrendamento, condomínio e venda: tudo o que dá trabalho numa casa, explicado.</p>
         <div class="hero-actions">
-          <a class="button" href="#perguntas-dia">Começar pelas dúvidas mais comuns</a>
-          <a class="button secondary" href="#este-mes">Ver os prazos deste mês</a>
+          <a class="button" href="#situacao">A sua situação</a>
+          <a class="button secondary" href="#novidades">Novidades</a>
+          <a class="button secondary" href="#mais-recentes">Artigos mais recentes</a>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section featured-section" aria-labelledby="destaque-titulo">
+  <section class="section soft" id="situacao">
     <div class="container">
-      <div class="section-heading featured-heading">
-        <p class="eyebrow">EM DESTAQUE</p>
-        <h2 id="destaque-titulo">Em destaque</h2>
+      <div class="section-heading"><h2>A sua situação</h2><p>Está a tratar de algo maior? Escolha o ponto de partida.</p></div>
+      <div class="situation-grid">
+        {situacoes.map((situacao) => (
+          <a class="situation-card" href={situacao.url}>
+            <picture>
+              <source srcset={`/imagens/${situacao.imagem}.avif`} type="image/avif" />
+              <img src={`/imagens/${situacao.imagem}.webp`} alt={situacao.alt} width="640" height="360" loading="lazy" />
+            </picture>
+            <h3>{situacao.titulo}</h3>
+            <span>Ver o próximo passo</span>
+          </a>
+        ))}
       </div>
-      <article class="manual-feature">
-        <div class="manual-feature-copy">
-          <p class="eyebrow">MANUAL GRATUITO</p>
-          <h3>Vender a sua casa em Portugal, sem surpresas</h3>
-          <p>Prepare a venda com 24 páginas sobre o valor da casa, custos, mais-valias, documentos e prazos até à entrega das chaves.</p>
-          <a class="button" href="/guias/vender-casa/">Receber o manual gratuito</a>
-        </div>
-        <img src="/imagens/guias/vender-casa-ebook-mockup.webp" alt="Manual Vender a Casa em Portugal apresentado como livro" width="1200" height="800" loading="lazy" />
-      </article>
     </div>
   </section>
 
-  <section class="section recent-articles-section" aria-labelledby="mais-recentes-titulo">
+  <section class="section soft" id="novidades">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Atualidade</p><h2>Novidades</h2></div>
+      <div class="notes-grid">
+        {notas.slice(0, 3).map((nota) => (
+          <article>
+            <time datetime={nota.data.data.toISOString()}>{formatarData(nota.data.data)}</time>
+            <h3><a href={`/novidades/${nota.id}/`}>{nota.data.titulo}</a></h3>
+            <p>{nota.data.resumo}</p>
+            <a class="news-more" href={`/novidades/${nota.id}/`}>Ver mais</a>
+          </article>
+        ))}
+      </div>
+      <p class="section-link"><a href="/novidades/">Todas as novidades</a></p>
+    </div>
+  </section>
+
+  <section class="section recent-articles-section" id="mais-recentes" aria-labelledby="mais-recentes-titulo">
     <div class="container">
       <div class="section-heading">
         <p class="eyebrow">ACABADO DE PUBLICAR</p>
@@ -112,20 +130,21 @@ const perguntasDoDia = [
     </div>
   </section>
 
-  <section class="section soft" id="novidades">
+  <section class="section featured-section" aria-labelledby="destaque-titulo">
     <div class="container">
-      <div class="section-heading"><p class="eyebrow">Atualidade</p><h2>Novidades</h2></div>
-      <div class="notes-grid">
-        {notas.slice(0, 3).map((nota) => (
-          <article>
-            <time datetime={nota.data.data.toISOString()}>{formatarData(nota.data.data)}</time>
-            <h3><a href={`/novidades/${nota.id}/`}>{nota.data.titulo}</a></h3>
-            <p>{nota.data.resumo}</p>
-            <a class="news-more" href={`/novidades/${nota.id}/`}>Ver mais</a>
-          </article>
-        ))}
+      <div class="section-heading featured-heading">
+        <p class="eyebrow">EM DESTAQUE</p>
+        <h2 id="destaque-titulo">Em destaque</h2>
       </div>
-      <p class="section-link"><a href="/novidades/">Todas as novidades</a></p>
+      <article class="manual-feature">
+        <div class="manual-feature-copy">
+          <p class="eyebrow">MANUAL GRATUITO</p>
+          <h3>Vender a sua casa em Portugal, sem surpresas</h3>
+          <p>Prepare a venda com 24 páginas sobre o valor da casa, custos, mais-valias, documentos e prazos até à entrega das chaves.</p>
+          <a class="button" href="/guias/vender-casa/">Receber o manual gratuito</a>
+        </div>
+        <img src="/imagens/guias/vender-casa-ebook-mockup.webp" alt="Manual Vender a Casa em Portugal apresentado como livro" width="1200" height="800" loading="lazy" />
+      </article>
     </div>
   </section>
 
@@ -144,24 +163,6 @@ const perguntasDoDia = [
               <img src={obterImagensArtigo(item.artigo).webp} alt={pilarCasa.alt} width="1200" height="675" loading="lazy" />
             </picture>
             <h3>{item.pergunta}</h3>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="section soft">
-    <div class="container">
-      <div class="section-heading"><h2>A sua situação</h2><p>Está a tratar de algo maior? Escolha o ponto de partida.</p></div>
-      <div class="situation-grid">
-        {situacoes.map((situacao) => (
-          <a class="situation-card" href={situacao.url}>
-            <picture>
-              <source srcset={`/imagens/${situacao.imagem}.avif`} type="image/avif" />
-              <img src={`/imagens/${situacao.imagem}.webp`} alt={situacao.alt} width="640" height="360" loading="lazy" />
-            </picture>
-            <h3>{situacao.titulo}</h3>
-            <span>Ver o próximo passo</span>
           </a>
         ))}
       </div>
