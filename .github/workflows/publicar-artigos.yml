@@ -24,7 +24,7 @@ jobs:
           ref: main
           fetch-depth: 1
 
-      - name: Selecionar e mover até 2 artigos
+      - name: Selecionar e mover até 1 artigo
         shell: bash
         run: |
           set -euo pipefail
@@ -32,7 +32,7 @@ jobs:
           SOURCE="src/content/por-publicar"
           DESTINATION="src/content/artigos"
           QUEUE="src/content/fila-publicacao-artigos.txt"
-          MAX_ARTICLES=2
+          MAX_ARTICLES=1
 
           if [[ ! -d "$SOURCE" ]]; then
             echo "::error::A pasta $SOURCE não existe."
