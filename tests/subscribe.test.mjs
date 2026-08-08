@@ -30,7 +30,7 @@ const ebookBody = {
   email: "Pessoa@Exemplo.pt",
   consent1: true,
   consent2: false,
-  consentVersion: "2026-08-i",
+  consentVersion: "2026-08-j",
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
@@ -86,12 +86,12 @@ test("mantém a recolha desligada quando falta o token", async () => {
   assert.equal(response.status, 503);
 });
 
-test("recusa versões anteriores ao consentimento que inclui a localização", async () => {
+test("recusa versões anteriores ao consentimento que inclui o prazo de venda", async () => {
   globalThis.fetch = async () => {
     throw new Error("A API não deveria ser chamada");
   };
   const response = await onRequestPost({
-    request: requestFor({ ...ebookBody, consentVersion: "2026-08-h" }),
+    request: requestFor({ ...ebookBody, consentVersion: "2026-08-i" }),
     env
   });
   assert.equal(response.status, 400);
@@ -162,7 +162,7 @@ test("cria o pedido do guia sem autorização de parceiros e aciona a automaçã
   assert.equal(createBody.trigger_automation, true);
 });
 
-test("recusa o pedido de parceiros sem nome, telefone, código postal válido ou autorização", async () => {
+test("recusa o pedido de parceiros sem nome, telefone, código postal, prazo de venda ou autorização", async () => {
   globalThis.fetch = async () => {
     throw new Error("A API não deveria ser chamada");
   };
@@ -172,7 +172,8 @@ test("recusa o pedido de parceiros sem nome, telefone, código postal válido ou
     source: "ebook-vender-casa-partner",
     name: "Marta Silva",
     phone: "912 345 678",
-    postalCode: "1000-001"
+    postalCode: "1000-001",
+    saleTimeline: "within_3_months"
   };
 
   const withoutConsent = await onRequestPost({
@@ -195,17 +196,23 @@ test("recusa o pedido de parceiros sem nome, telefone, código postal válido ou
     request: requestFor({ ...partnerBody, consent2: true, postalCode: "1000" }),
     env
   });
+  const withoutSaleTimeline = await onRequestPost({
+    request: requestFor({ ...partnerBody, consent2: true, saleTimeline: "" }),
+    env
+  });
 
   assert.equal(withoutConsent.status, 400);
   assert.equal(withoutPhone.status, 400);
   assert.equal(withoutName.status, 400);
   assert.equal(invalidNameCharacter.status, 400);
   assert.equal(withoutPostalCode.status, 400);
+  assert.equal(withoutSaleTimeline.status, 400);
   assert.deepEqual(await withoutConsent.json(), { error: "invalid_consent" });
   assert.deepEqual(await withoutPhone.json(), { error: "invalid_phone" });
   assert.deepEqual(await withoutName.json(), { error: "invalid_name" });
   assert.deepEqual(await invalidNameCharacter.json(), { error: "invalid_name" });
   assert.deepEqual(await withoutPostalCode.json(), { error: "invalid_postal_code" });
+  assert.deepEqual(await withoutSaleTimeline.json(), { error: "invalid_sale_timeline" });
 });
 
 test("atualiza o contacto, guarda nome, telefone e localização e adiciona apenas o grupo de parceiros", async () => {
@@ -224,6 +231,7 @@ test("atualiza o contacto, guarda nome, telefone e localização e adiciona apen
       name: "Marta Silva",
       phone: "+351 912 345 678",
       postalCode: "1000-001",
+      saleTimeline: "3_to_12_months",
       consent2: true,
       eventId: "partner-123"
     }),
@@ -239,6 +247,7 @@ test("atualiza o contacto, guarda nome, telefone e localização e adiciona apen
   assert.equal(updateBody.fields["{$LEAD_SOURCE}"], "ebook-vender-casa-partner");
   assert.equal(updateBody.fields["{$CODIGO_POSTAL}"], "1000-001");
   assert.equal(updateBody.fields["{$LOCALIDADE}"], "Lisboa");
+  assert.equal(updateBody.fields["{$PRAZO_VENDA}"], "Entre 3 e 12 meses");
   assert.match(calls[3].url, /subscribers\/groups\/egK8WG$/);
   assert.match(calls[4].url, /subscribers\/groups\/aKBm4l$/);
   assert.equal(calls.some(({ url }) => url.endsWith("/dJAl59")), false);
@@ -258,6 +267,7 @@ test("recusa um código postal que o serviço identifica como inexistente", asyn
       name: "Marta Silva",
       phone: "912 345 678",
       postalCode: "9999-999",
+      saleTimeline: "undecided",
       consent2: true
     }),
     env
@@ -289,6 +299,7 @@ test("não perde a lead se os campos de localização ainda não existirem no Se
       name: "Marta Silva",
       phone: "912 345 678",
       postalCode: "1000-001",
+      saleTimeline: "value_only",
       consent2: true
     }),
     env
@@ -300,6 +311,7 @@ test("não perde a lead se os campos de localização ainda não existirem no Se
   const fallbackBody = JSON.parse(calls[3].init.body);
   assert.equal("{$CODIGO_POSTAL}" in fallbackBody.fields, false);
   assert.equal("{$LOCALIDADE}" in fallbackBody.fields, false);
+  assert.equal("{$PRAZO_VENDA}" in fallbackBody.fields, false);
 });
 
 test("cria uma subscrição nova da newsletter diretamente no grupo ativo", async () => {

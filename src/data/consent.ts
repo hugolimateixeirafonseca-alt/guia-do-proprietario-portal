@@ -1,4 +1,4 @@
-export const CONSENT_VERSION = "2026-08-i";
+export const CONSENT_VERSION = "2026-08-j";
 export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-08-c";
 
 export const CONSENT_TEXT = {
@@ -41,6 +41,10 @@ export const CONSENT_TEXT = {
   "2026-08-i": {
     c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",
     c2: "Autorizo a partilha do meu nome, contacto, código postal e localidade com empresas das categorias indicadas na lista de parceiros, para me contactarem com informações e ofertas relacionadas com a casa."
+  },
+  "2026-08-j": {
+    c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",
+    c2: "Autorizo a partilha do meu nome, contacto, código postal, localidade e prazo previsto de venda com empresas das categorias indicadas na lista de parceiros, para me contactarem com informações e ofertas relacionadas com a casa."
   },
   "newsletter-2026-08-c": {
     c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",

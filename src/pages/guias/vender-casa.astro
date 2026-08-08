@@ -54,9 +54,19 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
               <label class="partner-field-label" for="postal-code">Código postal</label>
               <input class="partner-input" id="postal-code" type="text" name="postal-code" required autocomplete="postal-code" inputmode="numeric" maxlength="8" pattern="[0-9]{4}-[0-9]{3}" aria-describedby="postal-code-error" placeholder="Ex.: 1000-001" />
               <p id="postal-code-error" class="partner-field-error" hidden></p>
+              <fieldset class="partner-timeline" aria-describedby="sale-timeline-error">
+                <legend>Quando pensa vender?</legend>
+                <div class="partner-timeline-options">
+                  <label><input type="radio" name="sale-timeline" value="within_3_months" required /> <span>Nos próximos 3 meses</span></label>
+                  <label><input type="radio" name="sale-timeline" value="3_to_12_months" /> <span>Entre 3 e 12 meses</span></label>
+                  <label><input type="radio" name="sale-timeline" value="undecided" /> <span>Ainda não decidi</span></label>
+                  <label><input type="radio" name="sale-timeline" value="value_only" /> <span>Só quero saber o valor</span></label>
+                </div>
+              </fieldset>
+              <p id="sale-timeline-error" class="partner-field-error" hidden>Escolha uma das opções.</p>
               <label class="chk partner-consent" id="partner-consent-label">
                 <input type="checkbox" id="partner-consent" />
-                <span>Autorizo a partilha do meu nome, contacto, código postal e localidade com empresas das categorias indicadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem com informações e ofertas relacionadas com a casa.</span>
+                <span>Autorizo a partilha do meu nome, contacto, código postal, localidade e prazo previsto de venda com empresas das categorias indicadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem com informações e ofertas relacionadas com a casa.</span>
               </label>
               <button id="partner-submit" type="submit">Quero a minha avaliação gratuita</button>
               <p id="partner-error" class="field-error" hidden>É preciso autorizar o contacto para avançar.</p>
@@ -122,6 +132,8 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
     const phoneError = document.getElementById("phone-error");
     const postalCodeInput = document.getElementById("postal-code");
     const postalCodeError = document.getElementById("postal-code-error");
+    const saleTimelineInputs = [...document.querySelectorAll('input[name="sale-timeline"]')];
+    const saleTimelineError = document.getElementById("sale-timeline-error");
     const partnerConsentInput = document.getElementById("partner-consent");
     const partnerConsentLabel = document.getElementById("partner-consent-label");
     const partnerError = document.getElementById("partner-error");
@@ -241,6 +253,10 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
       setFieldError(postalCodeInput, postalCodeError);
     });
 
+    saleTimelineInputs.forEach((input) => input.addEventListener("change", () => {
+      saleTimelineError.hidden = true;
+    }));
+
     partnerForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       partnerStatus.textContent = "";
@@ -266,6 +282,13 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
         return;
       }
 
+      const saleTimeline = saleTimelineInputs.find((input) => input.checked)?.value || "";
+      if (!saleTimeline) {
+        saleTimelineError.hidden = false;
+        saleTimelineInputs[0].focus();
+        return;
+      }
+
       if (!partnerConsentInput.checked) {
         partnerError.hidden = false;
         partnerConsentLabel.classList.add("erro");
@@ -285,6 +308,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
             name: nameInput.value.trim(),
             phone: phoneInput.value.trim(),
             postalCode: postalCodeInput.value.trim(),
+            saleTimeline,
             consent1: true,
             consent2: true,
             source: "ebook-vender-casa-partner",
@@ -296,6 +320,13 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
 
         const result = await response.json().catch(() => ({}));
         if (!response.ok) {
+          if (result.error === "invalid_sale_timeline") {
+            saleTimelineError.hidden = false;
+            saleTimelineInputs[0].focus();
+            partnerSubmit.disabled = false;
+            partnerSubmit.textContent = "Quero a minha avaliação gratuita";
+            return;
+          }
           const fieldErrors = {
             invalid_name: [nameInput, nameError, "Use apenas letras, espaços, apóstrofos ou hífen no nome."],
             invalid_phone: [phoneInput, phoneError, "Introduza um telemóvel português válido com 9 algarismos."],
@@ -371,6 +402,12 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
   .partner-input:focus { border-color: #2b6b5b; outline: 0; }
   .partner-input.erro, .partner-input.erro:focus { border-color: #b42318; box-shadow: 0 0 0 3px rgba(180, 35, 24, .12); }
   .partner-field-error { margin: -5px 0 2px; color: #b42318; font-size: 12px; font-weight: 750; line-height: 1.4; }
+  .partner-timeline { margin: 5px 0 2px; padding: 0; border: 0; }
+  .partner-timeline legend { margin-bottom: 9px; color: #19334f; font-size: 13px; font-weight: 800; }
+  .partner-timeline-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .partner-timeline-options label { min-height: 45px; padding: 9px 11px; display: flex; align-items: center; gap: 8px; color: #31495f; background: #fff; border: 1px solid #d5d8d6; border-radius: 7px; font-size: 12px; font-weight: 700; line-height: 1.3; cursor: pointer; }
+  .partner-timeline-options label:has(input:checked) { color: #19334f; background: #e2eee8; border-color: #2b6b5b; }
+  .partner-timeline-options input { flex: 0 0 auto; margin: 0; accent-color: #2b6b5b; }
   .partner-consent { color: #31495f; padding-inline: 0; }
   .partner-consent a { color: #1f5b4d; }
   .partner-success { padding: 16px; color: #19334f; background: #e2eee8; border-radius: 8px; }
@@ -401,6 +438,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
     form { gap: 8px; }
     input[type="email"] { min-height: 52px; font-size: 16px; }
     .chk { padding: 7px 4px; font-size: 10.5px; line-height: 1.35; }
+    .partner-timeline-options { grid-template-columns: 1fr; }
     button { min-height: 52px; }
     .microcopy { font-size: 10px; }
     .inside { padding: 52px 0 46px; }

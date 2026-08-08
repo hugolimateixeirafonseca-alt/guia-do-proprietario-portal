@@ -18,6 +18,7 @@ interface SubscribeBody {
   phone?: unknown;
   postalCode?: unknown;
   name?: unknown;
+  saleTimeline?: unknown;
 }
 
 interface RequestContext {
@@ -31,6 +32,13 @@ const DEFAULT_GROUPS = {
   newsletter: "egK8WG",
   guiaVenderCasa: "dJAl59",
   guiaParceiros: "aKBm4l"
+} as const;
+
+const SALE_TIMELINES = {
+  within_3_months: "Nos próximos 3 meses",
+  "3_to_12_months": "Entre 3 e 12 meses",
+  undecided: "Ainda não decidi",
+  value_only: "Só quero saber o valor"
 } as const;
 
 const json = (body: object, status: number) => new Response(JSON.stringify(body), {
@@ -98,9 +106,10 @@ async function createOrUpdateSubscriber(
   firstname = ""
 ) {
   const hasLocationFields = "{$CODIGO_POSTAL}" in fields || "{$LOCALIDADE}" in fields;
-  const fieldsWithoutLocation = { ...fields };
-  delete fieldsWithoutLocation["{$CODIGO_POSTAL}"];
-  delete fieldsWithoutLocation["{$LOCALIDADE}"];
+  const fieldsWithoutOptionalProfile = { ...fields };
+  delete fieldsWithoutOptionalProfile["{$CODIGO_POSTAL}"];
+  delete fieldsWithoutOptionalProfile["{$LOCALIDADE}"];
+  delete fieldsWithoutOptionalProfile["{$PRAZO_VENDA}"];
 
   const writeSubscriber = async (path: string, method: "POST" | "PATCH", payload: Record<string, unknown>) => {
     let response = await senderRequest(env, path, { method, body: JSON.stringify(payload) });
@@ -110,7 +119,7 @@ async function createOrUpdateSubscriber(
     if (!response.ok && hasLocationFields && (response.status === 400 || response.status === 422)) {
       response = await senderRequest(env, path, {
         method,
-        body: JSON.stringify({ ...payload, fields: fieldsWithoutLocation })
+        body: JSON.stringify({ ...payload, fields: fieldsWithoutOptionalProfile })
       });
       locationStored = false;
     }
@@ -181,7 +190,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
   const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" ? body.source : "";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-i";
+  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-j";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");
   const localPhoneDigits = phoneDigits.startsWith("00351")
@@ -193,6 +202,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const postalCode = normalizePostalCode(body.postalCode);
   const firstname = cleanText(body.name, 80).replace(/\s+/g, " ");
   const nameOk = firstname.length >= 2 && /^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u.test(firstname);
+  const saleTimelineCode = cleanText(body.saleTimeline, 32) as keyof typeof SALE_TIMELINES;
+  const saleTimeline = SALE_TIMELINES[saleTimelineCode] || "";
 
   if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion) {
     return json({ error: "invalid" }, 400);
@@ -203,6 +214,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     if (!nameOk) return json({ error: "invalid_name" }, 400);
     if (!phoneOk) return json({ error: "invalid_phone" }, 400);
     if (!postalCode) return json({ error: "invalid_postal_code" }, 400);
+    if (!saleTimeline) return json({ error: "invalid_sale_timeline" }, 400);
   }
 
   if (!env.SENDER_API_TOKEN) {
@@ -232,7 +244,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     "{$EVENT_ID}": cleanText(body.eventId, 128),
     ...(isPartnerFollowup ? {
       "{$CODIGO_POSTAL}": postalCode,
-      "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar"
+      "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar",
+      "{$PRAZO_VENDA}": saleTimeline
     } : {})
   };
 

@@ -122,8 +122,9 @@ O mesmo passo pede agora o código postal. Crie no Sender dois campos personaliz
 |---|---|
 | Código postal | `CODIGO_POSTAL` |
 | Localidade | `LOCALIDADE` |
+| Prazo de venda | `PRAZO_VENDA` |
 
-A localidade é identificada automaticamente a partir do código postal e enviada para o Sender. Não é necessário criar outro grupo. Estes contactos continuam a entrar em `Newsletter - Ofertas de terceiros` (`egK8WG`) e `Guia - Vender Casa - Parceiros` (`aKBm4l`). Se os campos ainda não existirem, o pedido de contacto continua a ser guardado com o telefone, mas sem a localização. Depois de criar os campos, as novas submissões passam a preenchê-los sem nova publicação do site.
+A localidade é identificada automaticamente a partir do código postal. O prazo de venda guarda uma das quatro respostas apresentadas no formulário. Todos os três campos são enviados para o Sender como texto. Não é necessário criar outro grupo. Estes contactos continuam a entrar em `Newsletter - Ofertas de terceiros` (`egK8WG`) e `Guia - Vender Casa - Parceiros` (`aKBm4l`). Se algum destes campos ainda não existir, o pedido continua a ser guardado com o nome e o telefone, mas sem os campos adicionais. Depois de criar os campos, as novas submissões passam a preenchê-los sem nova publicação do site.
 
 ## 6. Single opt-in da newsletter
 
