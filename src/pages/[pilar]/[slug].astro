@@ -24,7 +24,7 @@ const articleSchema = {
   "@type": "Article",
   headline: artigo.data.titulo,
   description: artigo.data.descricao,
-  datePublished: artigo.data.publicado.toISOString(),
+  datePublished: artigo.data.publicado_em.toISOString(),
   dateModified: artigo.data.revisto.toISOString(),
   author: { "@type": "Organization", name: "Redação Guia do Proprietário" },
   publisher: { "@type": "Organization", name: site.nome, url: site.dominio, sameAs: redesSociais.map((rede) => rede.url) },

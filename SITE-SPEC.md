@@ -110,6 +110,8 @@ custos:                   # opcional, para artigos de quanto custa
       nota: "O que faz variar o valor."
 pilar: impostos
 publicado: 2026-08-01
+chegada: 2026-07-31T16:12:00+01:00 # primeiro registo verificável do ficheiro no repositório
+publicado_em: 2026-08-01T08:00:00+01:00 # momento verificável da publicação efetiva
 revisto: 2026-08-01
 autor: redacao            # valor fixo nesta fase
 revisao_profissional: ""  # nome e título quando existir, vazio até lá
@@ -129,6 +131,8 @@ imagem_capa: auto         # auto usa a imagem do pilar; ou caminho para imagem p
 Regras de renderização:
 
 - `revisto` aparece visível no topo do artigo: "Atualizado a 1 de agosto de 2026".
+- `chegada` é obrigatória nos artigos publicados e regista a primeira entrada verificável do ficheiro no repositório. A automação preserva o valor existente ou obtém-o do histórico Git.
+- `publicado_em` é obrigatório e regista a publicação efetiva. Determina a ordem de "Mais recentes", o RSS, o feed JSON e `datePublished`. Em caso de publicação conjunta, usa-se primeiro `chegada` e depois o título para manter uma ordem estável.
 - `rascunho: true` impede a geração da página e exclui o artigo de todas as listagens, do RSS, do feed JSON e dos cartões sociais.
 - `resposta_rapida` aparece numa caixa "Resposta rápida" imediatamente após o título e a atualização.
 - Nos artigos essenciais, a caixa chama-se "Em duas linhas" e não existe uma etiqueta adicional de nível. Os artigos detalhados mostram "Versão completa".

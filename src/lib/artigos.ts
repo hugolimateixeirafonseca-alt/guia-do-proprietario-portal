@@ -55,16 +55,16 @@ function contarTermos(artigo: Artigo) {
   return pesos;
 }
 
-export function dataDeChegada(artigo: Artigo) {
-  return artigo.data.chegada ?? artigo.data.publicado;
+export function dataDePublicacao(artigo: Artigo) {
+  return artigo.data.publicado_em;
 }
 
-export function compararPorChegada(a: Artigo, b: Artigo) {
-  const diferencaChegada = dataDeChegada(b).valueOf() - dataDeChegada(a).valueOf();
-  if (diferencaChegada !== 0) return diferencaChegada;
-
-  const diferencaPublicacao = b.data.publicado.valueOf() - a.data.publicado.valueOf();
+export function compararPorPublicacao(a: Artigo, b: Artigo) {
+  const diferencaPublicacao = dataDePublicacao(b).valueOf() - dataDePublicacao(a).valueOf();
   if (diferencaPublicacao !== 0) return diferencaPublicacao;
+
+  const diferencaChegada = b.data.chegada.valueOf() - a.data.chegada.valueOf();
+  if (diferencaChegada !== 0) return diferencaChegada;
 
   return a.data.titulo.localeCompare(b.data.titulo, "pt");
 }
@@ -85,7 +85,7 @@ export function obterArtigosSemelhantes(artigo: Artigo, artigos: Artigo[], quant
 
       return { artigo: candidato, afinidade };
     })
-    .sort((a, b) => b.afinidade - a.afinidade || compararPorChegada(a.artigo, b.artigo))
+    .sort((a, b) => b.afinidade - a.afinidade || compararPorPublicacao(a.artigo, b.artigo))
     .slice(0, quantidade)
     .map((item) => item.artigo);
 }

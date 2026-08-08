@@ -6,7 +6,7 @@ import Newsletter from "../components/Newsletter.astro";
 import ProximosPrazos from "../components/ProximosPrazos.astro";
 import { formatarData, NEWSLETTER_ATIVA, pilares } from "../config";
 import { obterImagensArtigo } from "../lib/imagens-artigos";
-import { compararPorChegada } from "../lib/artigos";
+import { compararPorPublicacao } from "../lib/artigos";
 import { compararNotasRecentes } from "../lib/notas";
 
 const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
@@ -14,7 +14,7 @@ const artigos = todosArtigos
   .filter((artigo) => artigo.data.destaque && artigo.data.nivel === "essencial")
   .sort((a, b) => b.data.revisto.valueOf() - a.data.revisto.valueOf());
 const artigosRecentes = [...todosArtigos]
-  .sort(compararPorChegada)
+  .sort(compararPorPublicacao)
   .slice(0, 8);
 const nomesPilares = new Map(pilares.map((pilar) => [pilar.slug, pilar.nome]));
 const notas = (await getCollection("notas")).sort(compararNotasRecentes);

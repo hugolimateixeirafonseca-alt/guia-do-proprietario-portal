@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "npm run images:convert && npm run validate:data && npm run validate:copy && npm run validate:images && npm run generate:og && npm run images:noticias && astro check && astro build && npm run validate:termo",
+    "build": "npm run images:convert && npm run validate:data && npm run validate:dates && npm run validate:copy && npm run validate:images && npm run generate:og && npm run images:noticias && astro check && astro build && npm run validate:termo",
     "preview": "astro preview",
     "images:convert": "node scripts/converter-imagens.mjs",
     "images:noticias": "node scripts/processar-imagens-noticias.mjs",
@@ -15,6 +15,8 @@
     "generate:og": "node scripts/generate-og.mjs",
     "dados:ine": "node scripts/obter-precos-ine.mjs",
     "dados:imi": "node scripts/obter-taxas-imi.mjs --ano 2025",
+    "content:backfill-dates": "node scripts/preencher-chegada-artigos.mjs --write",
+    "validate:dates": "node scripts/preencher-chegada-artigos.mjs",
     "validate:images": "node scripts/validar-imagens-artigos.mjs",
     "test:subscribe": "node --test tests/subscribe.test.mjs"
   },

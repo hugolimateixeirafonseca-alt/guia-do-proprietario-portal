@@ -2,15 +2,16 @@ import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import precos from "../dados/precos-concelhos.json";
 import imi from "../dados/imi-concelhos.json";
+import { compararPorPublicacao } from "../lib/artigos";
 
 export const GET: APIRoute = async ({ site }) => {
   const base = site?.toString() || "https://guiadoproprietario.pt/";
-  const artigos = await getCollection("artigos", ({ data }) => !data.rascunho);
+  const artigos = (await getCollection("artigos", ({ data }) => !data.rascunho)).sort(compararPorPublicacao);
   const notas = await getCollection("notas");
   const og = (route: string) => new URL(`/og${route}index.png`, base).toString();
   const artigoItems = artigos.map((artigo) => {
     const route = `/${artigo.data.pilar}/${artigo.id}/`;
-    return { titulo: artigo.data.titulo, url: new URL(route, base).toString(), descricao: artigo.data.descricao, pilar: artigo.data.pilar, nivel: artigo.data.nivel, publicado: artigo.data.publicado.toISOString(), revisto: artigo.data.revisto.toISOString(), tipo: "artigo", imagem_og: og(route) };
+    return { titulo: artigo.data.titulo, url: new URL(route, base).toString(), descricao: artigo.data.descricao, pilar: artigo.data.pilar, nivel: artigo.data.nivel, publicado: artigo.data.publicado_em.toISOString(), revisto: artigo.data.revisto.toISOString(), tipo: "artigo", imagem_og: og(route) };
   });
   const notaItems = notas.map((nota) => {
     const route = `/novidades/${nota.id}/`;
