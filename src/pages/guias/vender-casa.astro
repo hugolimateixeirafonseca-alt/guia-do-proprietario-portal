@@ -167,7 +167,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
 
       submitButton.disabled = true;
       submitButton.textContent = "A enviar...";
-      const eventId = globalThis.crypto?.randomUUID?.() || `lead-${Date.now()}`;
+      const idLead = globalThis.crypto?.randomUUID?.() || `lead-${Date.now()}`;
 
       try {
         const response = await fetch("/api/subscribe", {
@@ -180,13 +180,13 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
             source: "ebook-vender-casa",
             consentVersion: CONSENT_VERSION,
             pageUrl: location.href,
-            eventId
+            eventId: idLead
           })
         });
 
         if (!response.ok) throw new Error("subscribe_failed");
         submittedEmail = emailInput.value.trim();
-        if (window.fbq) window.fbq("track", "Lead", { content_name: "ebook-vender-casa" }, { eventID: eventId });
+        if (window.fbq) window.fbq("track", "Lead", { content_name: "guia-vender-casa" }, { eventID: idLead });
         form.hidden = true;
         success.hidden = false;
         success.focus();
@@ -298,6 +298,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
 
       partnerSubmit.disabled = true;
       partnerSubmit.textContent = "A enviar...";
+      const idContact = globalThis.crypto?.randomUUID?.() || `contact-${Date.now()}`;
 
       try {
         const response = await fetch("/api/subscribe", {
@@ -314,7 +315,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
             source: "ebook-vender-casa-partner",
             consentVersion: CONSENT_VERSION,
             pageUrl: location.href,
-            eventId: globalThis.crypto?.randomUUID?.() || `partner-${Date.now()}`
+            eventId: idContact
           })
         });
 
@@ -343,6 +344,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
           }
           throw new Error("partner_subscribe_failed");
         }
+        if (window.fbq) window.fbq("track", "Contact", { content_name: "avaliacao-casa" }, { eventID: idContact });
         partnerForm.hidden = true;
         partnerSuccess.hidden = false;
         partnerSuccess.focus();
