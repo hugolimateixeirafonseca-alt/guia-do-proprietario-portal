@@ -56,6 +56,23 @@ const imagemOg = new URL(`/social/noticias/${nota.id}.png`, Astro.url.origin).to
     )}
   </article>
 
+  <script is:inline>
+    (() => {
+      const body = document.querySelector('.news-note-body');
+      if (!body) return;
+      const heading = [...body.querySelectorAll('h2')].find(
+        (node) => (node.textContent || '').trim().toLocaleLowerCase('pt-PT') === 'também pode interessar'
+      );
+      if (!heading) return;
+      let node = heading;
+      while (node) {
+        const next = node.nextElementSibling;
+        node.remove();
+        node = next;
+      }
+    })();
+  </script>
+
   <style>
     .news-note-page { padding-bottom: 18px; }
     .news-note-header { max-width: 900px; }
