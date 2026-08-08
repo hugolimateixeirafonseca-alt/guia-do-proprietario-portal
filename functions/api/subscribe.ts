@@ -35,10 +35,10 @@ const DEFAULT_GROUPS = {
 } as const;
 
 const SALE_TIMELINES = {
+  selling_now: "Já estou a tentar vender",
   within_3_months: "Nos próximos 3 meses",
   "3_to_12_months": "Entre 3 e 12 meses",
-  undecided: "Ainda não decidi",
-  value_only: "Só quero saber o valor"
+  value_only: "Só quero saber o valor, sem intenção de vender para já"
 } as const;
 
 const json = (body: object, status: number) => new Response(JSON.stringify(body), {

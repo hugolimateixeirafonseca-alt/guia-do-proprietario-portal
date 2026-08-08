@@ -267,7 +267,7 @@ test("recusa um código postal que o serviço identifica como inexistente", asyn
       name: "Marta Silva",
       phone: "912 345 678",
       postalCode: "9999-999",
-      saleTimeline: "undecided",
+      saleTimeline: "selling_now",
       consent2: true
     }),
     env
