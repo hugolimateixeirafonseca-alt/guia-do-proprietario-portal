@@ -18,6 +18,7 @@
     "content:backfill-dates": "node scripts/preencher-chegada-artigos.mjs --write",
     "validate:dates": "node scripts/preencher-chegada-artigos.mjs",
     "validate:images": "node scripts/validar-imagens-artigos.mjs",
+    "test": "npm run test:subscribe",
     "test:subscribe": "node --test tests/subscribe.test.mjs"
   },
   "dependencies": {

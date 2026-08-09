@@ -36,7 +36,7 @@ const formatarTaxa = (taxa: number) => `${taxa.toLocaleString("pt-PT", { minimum
 const formatarPontos = (valor: number) => `${valor.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} p.p.`;
 ---
 <BaseLayout titulo={`IMI em ${concelho.nome}`} descricao={`Taxa de IMI em ${concelho.nome}, comparação anual e simulador para estimar o imposto.`}>
-  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "IMI", url: "/impostos/" }, { nome: concelho.nome }]} /><p class="eyebrow">IMI por concelho</p><h1>IMI em {concelho.nome}</h1><p>Taxa municipal, comparação anual e simulador para fazer uma primeira estimativa.</p></div></section>
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "IMI", url: "/imi/" }, { nome: concelho.nome }]} /><p class="eyebrow">IMI por concelho</p><h1>IMI em {concelho.nome}</h1><p>Taxa municipal, comparação anual e simulador para fazer uma primeira estimativa.</p></div></section>
   <article class="article-layout article-body">
     <aside class="data-source"><strong>Fonte: <a href={imiData.fonte_url}>{imiData.fonte}</a></strong><span>Ano de referência: {imiData.periodo_referencia}</span><span>Dados extraídos a {dataExtracao}</span></aside>
     {semPublicacao && <div class="no-data"><strong>A taxa de {imiData.periodo_referencia} ainda não está publicada para {concelho.nome}.</strong><p>A Autoridade Tributária não apresenta uma taxa urbana para este município. Não mostramos um valor estimado nem usamos a taxa de outro concelho.</p></div>}

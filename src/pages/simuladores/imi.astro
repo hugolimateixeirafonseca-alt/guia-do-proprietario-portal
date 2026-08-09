@@ -6,5 +6,5 @@ import ImiCalculator from "../../components/ImiCalculator.astro";
 <BaseLayout titulo="Simulador de IMI" descricao="Escolha o concelho e estime quanto paga de IMI e em quantas prestações.">
   <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Simuladores", url: "/simuladores/" }, { nome: "IMI" }]} /><p class="eyebrow">Simulador aberto</p><h1>Quanto vai pagar de IMI?</h1><p>Escolha o concelho e indique o valor patrimonial da casa. Estimamos quanto poderá pagar de IMI em 2026 e em quantas prestações.</p></div></section>
   <ImiCalculator />
-  <div class="container demo-note">Este simulador não recolhe dados. A estimativa não substitui a liquidação da Autoridade Tributária.</div>
+  <div class="container demo-note">Este simulador não recolhe dados. A estimativa não substitui a liquidação da Autoridade Tributária. <a href="/imi/">Consultar as taxas de IMI por concelho</a>.</div>
 </BaseLayout>
