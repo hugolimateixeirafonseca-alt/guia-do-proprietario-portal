@@ -242,7 +242,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     : isDirectValueLead
       ? "valor-liquido-2026-08-a"
       : isCleaningLead
-        ? "limpeza-2026-08-a"
+        ? "limpeza-2026-08-b"
       : "2026-08-k";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");

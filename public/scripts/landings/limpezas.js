@@ -86,7 +86,7 @@
       if (name.length < 2 || !/^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u.test(name)) fail("name", "Use apenas letras, espaços, apóstrofos ou hífenes no nome.");
       if (!/^9\d{8}$/.test(localPhone) || /[^\d+\s()-]/.test(phone)) fail("phone", "Introduza um telemóvel português com 9 algarismos, começado por 9.");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fail("email", "Introduza um endereço de email válido.");
-      if (!form.querySelector('[name="consent_partner_sharing"]:checked')) fail("consent_partner_sharing", "Aceite esta opção para enviar o pedido.");
+      if (!form.querySelector('[name="consent_partner_sharing"]:checked')) fail("consent_partner_sharing", "Aceite o consentimento de partilha para enviar o pedido");
     }
     return valid;
   };
@@ -123,7 +123,7 @@
     invalid_preferred_date: ["preferred_date", "Escolha uma data válida."],
     invalid_preferred_weekday: ["preferred_weekday", "Escolha o dia preferido."],
     invalid_preferred_time_period: ["preferred_time_period", "Escolha manhã, tarde ou indiferente."],
-    invalid_consent: ["consent_partner_sharing", "Aceite esta opção para enviar o pedido."]
+    invalid_consent: ["consent_partner_sharing", "Aceite o consentimento de partilha para enviar o pedido"]
   };
 
   document.querySelectorAll(".next-step").forEach((button) => button.addEventListener("click", () => {

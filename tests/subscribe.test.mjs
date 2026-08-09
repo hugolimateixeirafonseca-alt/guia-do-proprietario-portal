@@ -53,7 +53,7 @@ const cleaningBody = {
   additionalNotes: "Há um cão em casa.",
   consent1: true,
   consent2: false,
-  consentVersion: "limpeza-2026-08-a",
+  consentVersion: "limpeza-2026-08-b",
   source: "guia_limpeza_preco_disponibilidade",
   pageUrl: "https://guiadoproprietario.pt/servicos-limpeza/?utm_source=meta",
   eventId: "limpeza-123"

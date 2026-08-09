@@ -135,7 +135,7 @@ Na landing direta `Quanto me sobra se vender?`, a autorização de parceiros é 
 - só entra em `Newsletter - Ofertas de terceiros` (`egK8WG`) quando a opção facultativa de marketing estiver marcada;
 - usa a origem `valor-liquido-venda-direct` e a versão de consentimento `valor-liquido-2026-08-a`.
 
-Na landing `Serviços de limpeza`, o pedido entra sempre em `Vender Contacto Parceiros - LIMP` (`bWv1LJ`). Só entra também em `Newsletter - Ofertas de terceiros` (`egK8WG`) quando a opção facultativa de marketing estiver marcada. A origem guardada é `guia_limpeza_preco_disponibilidade` e a versão de consentimento é `limpeza-2026-08-a`.
+Na landing `Serviços de limpeza`, o pedido entra sempre em `Vender Contacto Parceiros - LIMP` (`bWv1LJ`). Só entra também em `Newsletter - Ofertas de terceiros` (`egK8WG`) quando a opção facultativa de marketing estiver marcada. A origem guardada é `guia_limpeza_preco_disponibilidade` e a versão de consentimento é `limpeza-2026-08-b`.
 
 Para ver os detalhes do pedido diretamente na ficha do contacto, criar no Sender campos personalizados do tipo texto com estes identificadores:
 
