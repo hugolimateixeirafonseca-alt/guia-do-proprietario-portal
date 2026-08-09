@@ -26,9 +26,13 @@ const notaValor = dados.fallback_nuts3
   : `Mediana publicada para o município de ${concelho.nome}.`;
 const dataExtracao = formatarData(new Date(`${precosData.extraido_em}T00:00:00`));
 const variacaoPercentagem = dados.variacao_homologa === null ? null : dados.variacao_homologa * 100;
+const vizinhos = concelhosData.dados
+  .filter((item) => item.distrito === concelho.distrito && item.slug !== concelho.slug)
+  .sort((a, b) => a.nome.localeCompare(b.nome, "pt"))
+  .slice(0, 6);
 ---
 <BaseLayout titulo={`Preços das casas em ${concelho.nome}`} descricao={`Mediana de preços de habitação em ${concelho.nome}, evolução recente e nota metodológica.`}>
-  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Preços das casas" }, { nome: concelho.nome }]} /><p class="eyebrow">Dados por concelho</p><h1>Preços das casas em {concelho.nome}</h1><p>Mediana das vendas dos últimos 12 meses, atualizada no {dados.periodo_atual}. Fonte: INE.</p></div></section>
+  <section class="page-hero"><div class="container"><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Preços das casas", url: "/precos-casas/" }, { nome: concelho.nome }]} /><p class="eyebrow">Dados por concelho</p><h1>Preços das casas em {concelho.nome}</h1><p>Mediana das vendas dos últimos 12 meses, atualizada no {dados.periodo_atual}. Fonte: INE.</p></div></section>
   <article class="article-layout article-body">
     <aside class="data-source"><strong>Fonte: <a href={precosData.fonte_url}>{precosData.fonte}</a></strong><span>Período de referência: {precosData.periodo_referencia}</span><span>Dados extraídos a {dataExtracao}</span></aside>
     {dados.valor_atual === null && <div class="no-data"><strong>O INE não publicou um valor para {concelho.nome} nem para a respetiva NUTS III.</strong><p>Não mostramos um zero nem estimamos um preço.</p></div>}
@@ -39,6 +43,7 @@ const variacaoPercentagem = dados.variacao_homologa === null ? null : dados.vari
     <div class="table-wrap"><table><thead><tr><th>Atualização</th><th>Mediana dos últimos 12 meses</th></tr></thead><tbody>{dados.serie.map((item) => <tr><td>{item.periodo}</td><td>{item.valor === null ? "Sem dados" : `${item.valor.toLocaleString("pt-PT")} €/m²`}</td></tr>)}</tbody></table></div>
     <h2>Como ler este valor</h2><p>A mediana resume transações observadas numa geografia. Não representa uma avaliação de um imóvel concreto e não considera estado, piso, exposição, vista ou outras características.</p>
     <p>Este número não corresponde apenas às vendas realizadas em {dados.periodo_atual}. Corresponde às vendas dos 12 meses anteriores e é atualizado trimestralmente.</p>
+    <h2>Concelhos próximos</h2><div class="neighbours">{vizinhos.map((vizinho: any) => <a href={`/precos-casas/${vizinho.slug}/`}>Preços das casas em {vizinho.nome}</a>)}</div>
     <section class="sources"><h2>Fonte e metodologia</h2><p>{precosData.notas}</p><p><a href={precosData.fonte_url}>Consultar a metainformação do indicador {precosData.indicador} no INE</a>.</p></section>
   </article>
 </BaseLayout>

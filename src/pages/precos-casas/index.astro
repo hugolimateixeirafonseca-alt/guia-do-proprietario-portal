@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import concelhosData from "../../dados/concelhos.json";
+import precosData from "../../dados/precos-concelhos.json";
+
+const grupos = [...new Set(concelhosData.dados.map((item) => item.distrito))]
+  .sort((a, b) => a.localeCompare(b, "pt"))
+  .map((distrito) => ({
+    distrito,
+    concelhos: concelhosData.dados
+      .filter((item) => item.distrito === distrito)
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt"))
+      .map((concelho) => ({
+        ...concelho,
+        precos: precosData.dados.find((item) => item.slug === concelho.slug)
+      }))
+  }));
+---
+<BaseLayout
+  titulo="Preços das casas por concelho"
+  descricao="Consulte a mediana de preços de habitação por concelho, evolução recente e dados oficiais do INE."
+>
+  <section class="page-hero">
+    <div class="container">
+      <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Preços das casas" }]} />
+      <p class="eyebrow">Dados por concelho</p>
+      <h1>Preços das casas por concelho</h1>
+      <p>Escolha o município para consultar a mediana de venda por metro quadrado, evolução recente e metodologia do indicador.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      {grupos.map((grupo) => (
+        <section class="municipality-group" aria-labelledby={`precos-${grupo.distrito.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+          <h2 id={`precos-${grupo.distrito.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>{grupo.distrito}</h2>
+          <div class="neighbours">
+            {grupo.concelhos.map((concelho) => (
+              <a href={`/precos-casas/${concelho.slug}/`}>
+                <strong>Preços das casas em {concelho.nome}</strong>
+                <span>{concelho.precos?.valor_atual === null || concelho.precos?.valor_atual === undefined
+                  ? "Sem valor municipal disponível"
+                  : `${concelho.precos.valor_atual.toLocaleString("pt-PT")} €/m²`}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

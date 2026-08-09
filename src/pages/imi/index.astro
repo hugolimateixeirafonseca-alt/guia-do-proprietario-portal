@@ -1,0 +1,55 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import concelhosData from "../../dados/concelhos.json";
+import imiData from "../../dados/imi-concelhos.json";
+
+const grupos = [...new Set(concelhosData.dados.map((item) => item.distrito))]
+  .sort((a, b) => a.localeCompare(b, "pt"))
+  .map((distrito) => ({
+    distrito,
+    concelhos: concelhosData.dados
+      .filter((item) => item.distrito === distrito)
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt"))
+      .map((concelho) => ({
+        ...concelho,
+        imi: imiData.dados.find((item) => item.slug === concelho.slug)
+      }))
+  }));
+
+const formatarTaxa = (taxa: number | null | undefined) =>
+  taxa === null || taxa === undefined
+    ? "Consultar detalhe"
+    : `${(taxa * 100).toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}%`;
+---
+<BaseLayout
+  titulo="IMI por concelho"
+  descricao="Consulte a taxa de IMI dos municípios portugueses, comparação anual, deduções e simulador por concelho."
+>
+  <section class="page-hero">
+    <div class="container">
+      <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "IMI por concelho" }]} />
+      <p class="eyebrow">IMI por concelho</p>
+      <h1>Taxas de IMI por concelho</h1>
+      <p>Escolha o município para consultar a taxa, a comparação com o ano anterior, deduções familiares e fazer uma estimativa do imposto.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      {grupos.map((grupo) => (
+        <section class="municipality-group" aria-labelledby={`imi-${grupo.distrito.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+          <h2 id={`imi-${grupo.distrito.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>{grupo.distrito}</h2>
+          <div class="neighbours">
+            {grupo.concelhos.map((concelho) => (
+              <a href={`/imi/${concelho.slug}/`}>
+                <strong>IMI em {concelho.nome}</strong>
+                <span>{formatarTaxa(concelho.imi?.taxa_urbana)}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
