@@ -84,15 +84,16 @@ const imagemOg = "/imagens/situacao-valor.webp";
           </div>
 
           <div class="consent" data-field="partnerConsent">
-            <input id="partner-consent" name="consent_partners" type="checkbox" />
+            <input id="partner-consent" name="consent_partners" type="checkbox" aria-describedby="partner-consent-error" />
             <label for="partner-consent">Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de mediação imobiliária licenciadas pelo IMPIC, selecionadas de acordo com a localização do imóvel e disponibilidade, para que me possam contactar relativamente à avaliação e eventual venda do meu imóvel. Consulte a <a class="utm-link" href="/parceiros/">Lista de Parceiros</a> e a <a class="utm-link" href="/privacidade/">Política de Privacidade</a>.</label>
-            <p id="partner-consent-error" class="error" aria-live="polite"></p>
           </div>
 
           <div class="consent marketing-consent">
             <input id="marketing-consent" name="consent_marketing" type="checkbox" />
             <label for="marketing-consent">Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. <small>As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a qualquer momento.</small></label>
           </div>
+
+          <p id="partner-consent-error" class="error consent-error" aria-live="polite"></p>
 
           <button class="cta" type="submit" id="submit-button">Quero saber quanto posso receber <span aria-hidden="true">→</span></button>
           <p class="under-cta">Pedido gratuito e sem compromisso. O consentimento de marketing é opcional.</p>
@@ -203,7 +204,7 @@ const imagemOg = "/imagens/situacao-valor.webp";
           postal: /^\d{4}-\d{3}$/.test(inputs.postal.value.trim()) ? "" : "Use o formato 1234-567.",
           email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputs.email.value.trim()) ? "" : "Introduza um endereço de email válido.",
           time: inputs.time.value ? "" : "Escolha uma opção para continuar.",
-          partnerConsent: inputs.partnerConsent.checked ? "" : "Aceite esta opção para enviar o pedido."
+          partnerConsent: inputs.partnerConsent.checked ? "" : "Aceite o consentimento de partilha para enviar o pedido"
         };
         Object.entries(messages).forEach(([key, message]) => setError(key, message));
         const firstInvalid = Object.keys(messages).find((key) => messages[key]);
@@ -259,7 +260,7 @@ const imagemOg = "/imagens/situacao-valor.webp";
               invalid_postal_code: ["postal", "Use um código postal no formato 1234-567."],
               postal_not_found: ["postal", "Este código postal não foi encontrado. Confirme os números."],
               invalid_sale_timeline: ["time", "Escolha uma opção para continuar."],
-              invalid_consent: ["partnerConsent", "Aceite esta opção para enviar o pedido."]
+              invalid_consent: ["partnerConsent", "Aceite o consentimento de partilha para enviar o pedido"]
             };
             const fieldError = fieldErrors[result.error];
             if (fieldError) {
@@ -354,8 +355,7 @@ const imagemOg = "/imagens/situacao-valor.webp";
   .consent label { color: #3f4e63; font-size: 11.5px; line-height: 1.42; }
   .consent label small { display: block; margin-top: 5px; color: #6c7888; font-size: 10.5px; }
   .consent a { color: #d94e00; text-underline-offset: 2px; }
-  .consent .error { grid-column: 2; }
-  .invalid.consent label { color: #9e3128; }
+  .consent-error { font-weight: 700; }
   .cta { min-height: 55px; padding: 10px 18px; display: flex; align-items: center; justify-content: center; gap: 12px; color: #fff; background: linear-gradient(90deg, #ff5a00, #ff7900); border: 0; border-radius: 9px; box-shadow: 0 10px 23px rgba(255, 90, 0, .22); cursor: pointer; font-size: 15px; font-weight: 900; letter-spacing: .015em; text-transform: uppercase; }
   .cta:hover { filter: saturate(1.08); transform: translateY(-1px); }
   .cta:disabled { opacity: .7; cursor: wait; transform: none; }
