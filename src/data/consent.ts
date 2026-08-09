@@ -1,4 +1,4 @@
-export const CONSENT_VERSION = "2026-08-j";
+export const CONSENT_VERSION = "2026-08-k";
 export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-08-c";
 
 export const CONSENT_TEXT = {
@@ -45,6 +45,10 @@ export const CONSENT_TEXT = {
   "2026-08-j": {
     c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",
     c2: "Autorizo a partilha do meu nome, contacto, código postal, localidade e prazo previsto de venda com empresas das categorias indicadas na lista de parceiros, para me contactarem com informações e ofertas relacionadas com a casa."
+  },
+  "2026-08-k": {
+    c1: "Quero receber o Manual para Vender Casa e continuar a receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o seu email não é cedido aos anunciantes. Pode cancelar a subscrição a qualquer momento.",
+    c2: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de mediação imobiliária licenciadas pelo IMPIC, selecionadas de acordo com a localização do imóvel e disponibilidade, para que me possam contactar relativamente à avaliação e eventual venda do meu imóvel. Consulte as empresas que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade."
   },
   "newsletter-2026-08-c": {
     c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",

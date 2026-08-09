@@ -190,7 +190,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
   const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" ? body.source : "";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-j";
+  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-k";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");
   const localPhoneDigits = phoneDigits.startsWith("00351")

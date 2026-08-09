@@ -53,4 +53,12 @@
 - A auditoria das dependências terminou com zero vulnerabilidades conhecidas.
 - A landing foi verificada localmente com a subscrição principal separada do pedido de contacto de parceiros. O segundo formulário usa a versão `2026-08-i`, exige nome, telefone, código postal e autorização, atualiza o contacto existente e não repete o envio do manual.
 
+## Atualização de 9 de agosto de 2026
+
+- A landing do manual usa a versão de consentimento `2026-08-k`.
+- O primeiro formulário associa a entrega do Manual para Vender Casa à continuação das comunicações do Guia, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. Os emails são enviados pelo Guia e o endereço não é cedido aos anunciantes.
+- O segundo formulário pede uma autorização independente para transmitir os dados do pedido a empresas de mediação imobiliária licenciadas pelo IMPIC, selecionadas segundo a localização do imóvel e a disponibilidade.
+- O segundo pedido exige nome, telefone, código postal, prazo previsto de venda e a autorização específica. Atualiza o contacto existente e não repete o envio do manual.
+- Os grupos do Sender mantêm-se: `Newsletter - Ofertas de terceiros` (`egK8WG`), `Guia - Vender Casa` (`dJAl59`) e `Guia - Vender Casa - Parceiros` (`aKBm4l`).
+
 Este documento é um controlo operacional. Não substitui revisão jurídica adaptada à identidade do responsável, aos contratos celebrados e ao tratamento efetivamente realizado.

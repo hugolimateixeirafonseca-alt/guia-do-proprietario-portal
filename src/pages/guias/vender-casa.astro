@@ -27,8 +27,9 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
 
           <label class="chk" id="chk1-label">
             <input type="checkbox" id="consent1" />
-            <span>Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na <a href="/politica-de-privacidade/">Política de Privacidade</a>. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.</span>
+            <span>Quero receber o Manual para Vender Casa e continuar a receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados.</span>
           </label>
+          <p class="consent-note">As comunicações são enviadas pelo Guia do Proprietário e o seu email não é cedido aos anunciantes. Pode cancelar a subscrição a qualquer momento.</p>
 
           <button id="submit-button" type="submit">Quero o guia gratuito</button>
           <p id="chk1-erro" class="field-error" hidden>É preciso aceitar para receber o guia.</p>
@@ -66,8 +67,9 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
               <p id="sale-timeline-error" class="partner-field-error" hidden>Escolha uma das opções.</p>
               <label class="chk partner-consent" id="partner-consent-label">
                 <input type="checkbox" id="partner-consent" />
-                <span>Autorizo a partilha do meu nome, contacto, código postal, localidade e prazo previsto de venda com empresas das categorias indicadas na <a href="/parceiros/">lista de parceiros</a>, para me contactarem com informações e ofertas relacionadas com a casa.</span>
+                <strong>Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de mediação imobiliária licenciadas pelo IMPIC, selecionadas de acordo com a localização do imóvel e disponibilidade, para que me possam contactar relativamente à avaliação e eventual venda do meu imóvel.</strong>
               </label>
+              <p class="partner-consent-note"><em>Consulte as empresas que podem receber pedidos na nossa <a href="/parceiros/">Lista de Parceiros</a> e saiba mais na <a href="/politica-de-privacidade/">Política de Privacidade</a>.</em></p>
               <button id="partner-submit" type="submit">Quero a minha avaliação gratuita</button>
               <p id="partner-error" class="field-error" hidden>É preciso autorizar o contacto para avançar.</p>
               <p id="partner-status" class="form-status" role="status" aria-live="polite"></p>
@@ -381,6 +383,7 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
   .chk a { color: white; text-underline-offset: 2px; }
   .chk em { font-style: normal; font-weight: 800; }
   .chk.erro { color: #ffb4ad; }
+  .consent-note { margin: -6px 0 2px 34px; color: #b9c8da; font-size: 11px; line-height: 1.45; }
   .field-error, .form-status { color: #ffb4ad; font-size: 12px; font-weight: 750; }
   .field-error { margin: -4px 0 0; text-align: center; }
   .form-status { min-height: 18px; margin: -5px 0 0; }
@@ -412,6 +415,9 @@ const imagemEbook = "/imagens/guias/vender-casa-ebook-mockup.webp";
   .partner-timeline-options input { flex: 0 0 auto; margin: 0; accent-color: #2b6b5b; }
   .partner-consent { color: #31495f; padding-inline: 0; }
   .partner-consent a { color: #1f5b4d; }
+  .partner-consent strong { font-weight: 800; }
+  .partner-consent-note { margin: -4px 0 3px 34px !important; color: #51677a; font-size: 11px; line-height: 1.45; }
+  .partner-consent-note a { color: #1f5b4d; }
   .partner-success { padding: 16px; color: #19334f; background: #e2eee8; border-radius: 8px; }
   .partner-success p { margin-top: 5px; }
   .inside { padding: 74px 0 66px; background: #fff; }

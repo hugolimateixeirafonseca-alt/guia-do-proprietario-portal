@@ -30,7 +30,7 @@ const ebookBody = {
   email: "Pessoa@Exemplo.pt",
   consent1: true,
   consent2: false,
-  consentVersion: "2026-08-j",
+  consentVersion: "2026-08-k",
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
@@ -91,7 +91,7 @@ test("recusa versões anteriores ao consentimento que inclui o prazo de venda", 
     throw new Error("A API não deveria ser chamada");
   };
   const response = await onRequestPost({
-    request: requestFor({ ...ebookBody, consentVersion: "2026-08-i" }),
+    request: requestFor({ ...ebookBody, consentVersion: "2026-08-j" }),
     env
   });
   assert.equal(response.status, 400);
