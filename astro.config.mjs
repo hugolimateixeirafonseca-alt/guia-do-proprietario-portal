@@ -7,7 +7,10 @@ export default defineConfig({
   output: "static",
   trailingSlash: "always",
   integrations: [mdx(), sitemap({
-    filter: (page) => page !== "https://guiadoproprietario.pt/quanto-me-sobra-se-vender/"
+    filter: (page) => ![
+      "https://guiadoproprietario.pt/quanto-me-sobra-se-vender/",
+      "https://guiadoproprietario.pt/servicos-limpeza/"
+    ].includes(page)
   })],
   markdown: { shikiConfig: { theme: "github-light" } }
 });

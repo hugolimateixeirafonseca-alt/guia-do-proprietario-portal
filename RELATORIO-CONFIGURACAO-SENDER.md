@@ -85,6 +85,7 @@ Em `Subscribers → Groups`, criar:
 | Newsletter - Ofertas de terceiros | `egK8WG` | Recebe imediatamente todas as novas subscrições de marketing |
 | Guia - Vender Casa | `dJAl59` | Identifica quem pediu o e-book e aciona a entrega automática |
 | Guia - Vender Casa - Parceiros | `aKBm4l` | Contém apenas quem autorizou expressamente a partilha |
+| Vender Contacto Parceiros - LIMP | `bWv1LJ` | Pedidos de preço e disponibilidade para serviços de limpeza |
 
 O grupo `Newsletter - Ativa` (`eEvG4m`) fica apenas como histórico e não recebe novas subscrições.
 
@@ -133,6 +134,25 @@ Na landing direta `Quanto me sobra se vender?`, a autorização de parceiros é 
 - entra sempre em `Guia - Vender Casa - Parceiros` (`aKBm4l`);
 - só entra em `Newsletter - Ofertas de terceiros` (`egK8WG`) quando a opção facultativa de marketing estiver marcada;
 - usa a origem `valor-liquido-venda-direct` e a versão de consentimento `valor-liquido-2026-08-a`.
+
+Na landing `Serviços de limpeza`, o pedido entra sempre em `Vender Contacto Parceiros - LIMP` (`bWv1LJ`). Só entra também em `Newsletter - Ofertas de terceiros` (`egK8WG`) quando a opção facultativa de marketing estiver marcada. A origem guardada é `guia_limpeza_preco_disponibilidade` e a versão de consentimento é `limpeza-2026-08-a`.
+
+Para ver os detalhes do pedido diretamente na ficha do contacto, criar no Sender campos personalizados do tipo texto com estes identificadores:
+
+| Nome | Identificador |
+|---|---|
+| Serviço de limpeza | `LIMPEZA_SERVICO` |
+| Tipo de espaço | `LIMPEZA_ESPACO` |
+| Dimensão | `LIMPEZA_DIMENSAO` |
+| Frequência | `LIMPEZA_FREQUENCIA` |
+| Quando precisa | `LIMPEZA_QUANDO` |
+| Data preferida | `LIMPEZA_DATA` |
+| Dia preferido | `LIMPEZA_DIA` |
+| Período preferido | `LIMPEZA_PERIODO` |
+| Notas do pedido | `LIMPEZA_NOTAS` |
+| Resumo do pedido | `PEDIDO_RESUMO` |
+
+Se estes campos ainda não existirem, a integração faz uma segunda tentativa sem os campos opcionais para não perder o contacto. O grupo `bWv1LJ`, o nome, o telefone, o email, a origem e os registos de consentimento continuam a ser guardados.
 
 ## 6. Single opt-in da newsletter
 

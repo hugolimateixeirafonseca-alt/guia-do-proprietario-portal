@@ -1,0 +1,298 @@
+---
+import Squeeze from "../../layouts/Squeeze.astro";
+import { LIMPEZA_CONSENT_VERSION } from "../../data/consent";
+import "../../styles/limpezas.css";
+
+const titulo = "Serviços de limpeza | Guia do Proprietário";
+const descricao = "Peça preço e disponibilidade para serviços de limpeza na sua zona, em Portugal.";
+const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
+---
+
+<Squeeze titulo={titulo} descricao={descricao} imagemOg={imagemOg} robots="noindex,follow">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="Guia do Proprietário">
+        <img src="/favicon.svg" alt="" class="brand-icon" />
+        <span class="brand-text"><strong>Guia do</strong><strong>Proprietário</strong></span>
+      </a>
+      <div class="header-trust">
+        <div class="header-proof"><span class="proof-icon">✓</span><span><strong>Pedido gratuito</strong><small>Em todo o país</small></span></div>
+        <a class="header-cta" href="#pedido">Pedir preço</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-photo" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Serviços de limpeza</span>
+          <h1>Precisa de serviços de <em>limpeza regulares</em> ou ocasionais para a sua casa ou empresa?</h1>
+          <p class="hero-sub">Peça <strong>preço e disponibilidade</strong>. O seu pedido será encaminhado a empresas parceiras e poderá ser contactado por uma empresa da sua zona com disponibilidade compatível com a sua preferência.</p>
+          <ul class="hero-bullets">
+            <li>Limpeza regular, profunda e pós-obra</li>
+            <li>Casas, apartamentos, escritórios e lojas</li>
+            <li>Escolha o dia e se prefere manhã ou tarde</li>
+          </ul>
+        </div>
+
+        <section class="form-card" id="pedido" aria-labelledby="form-title">
+          <header class="form-card-head">
+            <h2 id="form-title">Peça o seu preço e disponibilidade</h2>
+            <p>Responda a algumas perguntas rápidas.</p>
+          </header>
+
+          <div class="stepper" aria-hidden="true">
+            <span class="step-dot is-active" data-dot="1">1</span><i></i>
+            <span class="step-dot" data-dot="2">2</span><i></i>
+            <span class="step-dot" data-dot="3">3</span><i></i>
+            <span class="step-dot" data-dot="4">4</span><i></i>
+            <span class="step-dot" data-dot="5">5</span>
+          </div>
+          <p class="sr-only" id="stepLabel">Passo 1 de 5</p>
+
+          <form id="quoteForm" data-consent-version={LIMPEZA_CONSENT_VERSION} novalidate>
+            <section class="form-step is-active" data-step="1">
+              <fieldset>
+                <legend>Que tipo de limpeza procura?</legend>
+                <div class="option-grid option-grid-3">
+                  <label class="option-card"><input type="radio" name="service_type" value="regular" required><span class="option-icon">⌂</span><b>Regular</b><small>semanal ou recorrente</small></label>
+                  <label class="option-card"><input type="radio" name="service_type" value="profunda"><span class="option-icon">✦</span><b>Profunda</b><small>mais completa</small></label>
+                  <label class="option-card"><input type="radio" name="service_type" value="pos_obra"><span class="option-icon">⌁</span><b>Pós-obra</b><small>pó e resíduos</small></label>
+                  <label class="option-card"><input type="radio" name="service_type" value="mudanca"><span class="option-icon">□</span><b>Mudança</b><small>entrada ou saída</small></label>
+                  <label class="option-card"><input type="radio" name="service_type" value="empresarial"><span class="option-icon">▦</span><b>Empresa</b><small>escritório ou loja</small></label>
+                  <label class="option-card"><input type="radio" name="service_type" value="outra"><span class="option-icon">•••</span><b>Outra</b><small>explique no final</small></label>
+                </div>
+                <p class="field-error" data-error-for="service_type"></p>
+              </fieldset>
+              <button class="btn btn-primary btn-block next-step" type="button">Continuar →</button>
+            </section>
+
+            <section class="form-step" data-step="2">
+              <fieldset>
+                <legend>Onde e que espaço vamos limpar?</legend>
+                <div class="field-block">
+                  <span class="field-label">Tipo de espaço</span>
+                  <div class="option-grid option-grid-3 compact-options">
+                    <label class="option-card"><input type="radio" name="space_type" value="apartamento" required><b>Apartamento</b></label>
+                    <label class="option-card"><input type="radio" name="space_type" value="moradia"><b>Moradia</b></label>
+                    <label class="option-card"><input type="radio" name="space_type" value="escritorio"><b>Escritório</b></label>
+                    <label class="option-card"><input type="radio" name="space_type" value="loja"><b>Loja</b></label>
+                    <label class="option-card"><input type="radio" name="space_type" value="alojamento_local"><b>Alojamento local</b></label>
+                    <label class="option-card"><input type="radio" name="space_type" value="outro"><b>Outro</b></label>
+                  </div>
+                  <p class="field-error" data-error-for="space_type"></p>
+                </div>
+
+                <div class="two-cols">
+                  <div class="field-block">
+                    <label class="field-label" for="space_size">Dimensão aproximada</label>
+                    <select id="space_size" name="space_size" required>
+                      <option value="">Escolha</option>
+                      <option value="t0_t1">T0 / T1</option>
+                      <option value="t2">T2</option>
+                      <option value="t3">T3</option>
+                      <option value="t4_mais">T4 ou superior</option>
+                      <option value="small_space">Espaço pequeno</option>
+                      <option value="medium_space">Espaço médio</option>
+                      <option value="large_space">Espaço grande</option>
+                      <option value="unknown">Não sei indicar</option>
+                    </select>
+                    <p class="field-error" data-error-for="space_size"></p>
+                  </div>
+                  <div class="field-block">
+                    <label class="field-label" for="postal_code">Código postal</label>
+                    <input id="postal_code" name="postal_code" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="1234-567" required />
+                    <p class="field-error" data-error-for="postal_code"></p>
+                  </div>
+                </div>
+              </fieldset>
+              <div class="form-actions"><button class="btn btn-light prev-step" type="button">Voltar</button><button class="btn btn-primary next-step" type="button">Continuar →</button></div>
+            </section>
+
+            <section class="form-step" data-step="3">
+              <fieldset>
+                <legend>Com que frequência precisa?</legend>
+                <div class="stack-options">
+                  <label class="row-option"><input type="radio" name="service_frequency" value="one_time" required><span><b>Apenas uma vez</b><small>Limpeza pontual</small></span></label>
+                  <label class="row-option"><input type="radio" name="service_frequency" value="weekly"><span><b>Todas as semanas</b><small>Serviço semanal</small></span></label>
+                  <label class="row-option"><input type="radio" name="service_frequency" value="fortnightly"><span><b>De 15 em 15 dias</b><small>Serviço quinzenal</small></span></label>
+                  <label class="row-option"><input type="radio" name="service_frequency" value="monthly"><span><b>Uma vez por mês</b><small>Serviço mensal</small></span></label>
+                  <label class="row-option"><input type="radio" name="service_frequency" value="undecided"><span><b>Ainda não sei</b><small>Quero perceber primeiro preço e opções</small></span></label>
+                </div>
+                <p class="field-error" data-error-for="service_frequency"></p>
+              </fieldset>
+              <div class="form-actions"><button class="btn btn-light prev-step" type="button">Voltar</button><button class="btn btn-primary next-step" type="button">Continuar →</button></div>
+            </section>
+
+            <section class="form-step" data-step="4">
+              <fieldset>
+                <legend>Qual é a sua disponibilidade?</legend>
+                <p class="question-help">Indique a sua preferência. A empresa que receber o pedido confirmará a disponibilidade final.</p>
+
+                <div id="oneTimeFields" class="conditional is-hidden">
+                  <div class="field-block">
+                    <span class="field-label">Quando precisa da limpeza?</span>
+                    <div class="option-grid option-grid-2 compact-options">
+                      <label class="option-card"><input type="radio" name="one_time_timing" value="asap"><b>O mais rápido possível</b></label>
+                      <label class="option-card"><input type="radio" name="one_time_timing" value="this_week"><b>Esta semana</b></label>
+                      <label class="option-card"><input type="radio" name="one_time_timing" value="next_week"><b>Próxima semana</b></label>
+                      <label class="option-card"><input type="radio" name="one_time_timing" value="specific_date"><b>Tenho uma data</b></label>
+                    </div>
+                    <p class="field-error" data-error-for="one_time_timing"></p>
+                  </div>
+                  <div id="dateBlock" class="field-block is-hidden">
+                    <label class="field-label" for="preferred_date">Data preferencial</label>
+                    <input id="preferred_date" name="preferred_date" type="date" />
+                    <p class="field-error" data-error-for="preferred_date"></p>
+                  </div>
+                </div>
+
+                <div id="recurringFields" class="conditional is-hidden">
+                  <div class="field-block">
+                    <span class="field-label">Que dia prefere?</span>
+                    <div class="weekday-grid">
+                      <label><input type="radio" name="preferred_weekday" value="monday"><span>Seg</span></label>
+                      <label><input type="radio" name="preferred_weekday" value="tuesday"><span>Ter</span></label>
+                      <label><input type="radio" name="preferred_weekday" value="wednesday"><span>Qua</span></label>
+                      <label><input type="radio" name="preferred_weekday" value="thursday"><span>Qui</span></label>
+                      <label><input type="radio" name="preferred_weekday" value="friday"><span>Sex</span></label>
+                      <label><input type="radio" name="preferred_weekday" value="saturday"><span>Sáb</span></label>
+                      <label class="wide"><input type="radio" name="preferred_weekday" value="flexible"><span>Sou flexível</span></label>
+                    </div>
+                    <p class="field-error" data-error-for="preferred_weekday"></p>
+                  </div>
+                </div>
+
+                <div class="field-block">
+                  <span class="field-label">Prefere manhã ou tarde?</span>
+                  <div class="option-grid option-grid-3 compact-options">
+                    <label class="option-card"><input type="radio" name="preferred_time_period" value="morning" required><b>Manhã</b></label>
+                    <label class="option-card"><input type="radio" name="preferred_time_period" value="afternoon"><b>Tarde</b></label>
+                    <label class="option-card"><input type="radio" name="preferred_time_period" value="flexible"><b>Indiferente</b></label>
+                  </div>
+                  <p class="field-error" data-error-for="preferred_time_period"></p>
+                </div>
+              </fieldset>
+              <div class="form-actions"><button class="btn btn-light prev-step" type="button">Voltar</button><button class="btn btn-primary next-step" type="button">Continuar →</button></div>
+            </section>
+
+            <section class="form-step" data-step="5">
+              <fieldset>
+                <legend>Como podemos contactá-lo?</legend>
+                <p class="question-help">O pedido será encaminhado para empresas parceiras adequadas à sua zona e preferência de disponibilidade.</p>
+                <div class="field-block">
+                  <label class="field-label" for="name">Nome</label>
+                  <input id="name" name="name" type="text" autocomplete="name" placeholder="O seu nome" required />
+                  <p class="field-error" data-error-for="name"></p>
+                </div>
+                <div class="two-cols">
+                  <div class="field-block">
+                    <label class="field-label" for="phone">Telemóvel</label>
+                    <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="912 345 678" required />
+                    <p class="field-error" data-error-for="phone"></p>
+                  </div>
+                  <div class="field-block">
+                    <label class="field-label" for="email">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" placeholder="nome@exemplo.pt" required />
+                    <p class="field-error" data-error-for="email"></p>
+                  </div>
+                </div>
+                <div class="field-block">
+                  <label class="field-label" for="additional_notes">Alguma informação importante? <span class="optional">opcional</span></label>
+                  <textarea id="additional_notes" name="additional_notes" rows="3" maxlength="500" placeholder="Ex.: animais em casa, muitas janelas, urgência..."></textarea>
+                </div>
+
+                <label class="consent-box"><input type="checkbox" name="consent_partner_sharing" required><span><strong>Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de limpeza e manutenção do lar selecionadas de acordo com a localização, o tipo de serviço e a disponibilidade, para que me possam contactar com informações, disponibilidade e propostas relacionadas com este pedido.</strong><small>Consulte as empresas que podem receber pedidos na nossa <a href="/parceiros/">Lista de Parceiros</a> e saiba mais na <a href="/privacidade/">Política de Privacidade</a>.</small></span></label>
+                <p class="field-error" data-error-for="consent_partner_sharing"></p>
+
+                <label class="consent-box optional-consent"><input type="checkbox" name="consent_marketing"><span><strong>Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados.</strong><small>As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento.</small></span></label>
+
+                <p class="legal-note">Consulte a <a href="/privacidade/">Política de Privacidade</a>, os <a href="/termos/">Termos</a> e a <a href="/parceiros/">Lista de Parceiros</a>.</p>
+              </fieldset>
+              <div id="requestSummary" class="summary"></div>
+              <div class="form-actions"><button class="btn btn-light prev-step" type="button">Voltar</button><button class="btn btn-primary" type="submit">Pedir preço e disponibilidade</button></div>
+            </section>
+          </form>
+
+          <div id="sendingState" class="form-state is-hidden" role="status" aria-live="polite"><span class="spinner"></span><h3>A enviar o pedido...</h3><p>Aguarde enquanto confirmamos os seus dados.</p></div>
+          <div id="successState" class="form-state is-hidden" role="status" aria-live="polite"><span class="state-icon">✓</span><h3>Pedido enviado com sucesso</h3><p>Recebemos os seus dados e vamos encaminhar o pedido de acordo com a sua zona e preferência de disponibilidade.</p><button id="resetForm" type="button" class="btn btn-light">Fazer outro pedido</button></div>
+          <div id="technicalErrorState" class="form-state is-hidden" role="alert"><span class="state-icon error">!</span><h3>Não foi possível enviar agora</h3><p>Tente novamente dentro de alguns minutos.</p><button id="retryForm" type="button" class="btn btn-light">Tentar novamente</button></div>
+
+          <p class="secure-note">⌑ Os dados só são enviados depois de aceitar a partilha do pedido.</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="section services">
+      <div class="container">
+        <div class="section-heading"><h2>Escolha o serviço de que precisa</h2><span></span></div>
+        <div class="services-grid">
+          <article class="service-card"><img src="/imagens/landings/limpezas/service-regular.jpg" alt="Pessoa a realizar uma limpeza regular numa sala"><div><h3>Limpeza Regular</h3><p>Manutenção semanal, quinzenal ou conforme a sua necessidade.</p><a href="#pedido">Pedir preço →</a></div></article>
+          <article class="service-card"><img src="/imagens/landings/limpezas/service-deep.jpg" alt="Casa de banho limpa após uma limpeza profunda"><div><h3>Limpeza Profunda</h3><p>Uma intervenção mais completa quando o espaço precisa de maior detalhe.</p><a href="#pedido">Pedir preço →</a></div></article>
+          <article class="service-card"><img src="/imagens/landings/limpezas/service-postwork.jpg" alt="Divisão em obras a necessitar de limpeza pós-obra"><div><h3>Limpeza Pós-Obra</h3><p>Remoção de pó, resíduos e sujidade depois de obras ou remodelações.</p><a href="#pedido">Pedir preço →</a></div></article>
+          <article class="service-card"><img src="/imagens/landings/limpezas/service-office.jpg" alt="Escritório preparado para serviço de limpeza"><div><h3>Empresas</h3><p>Limpeza de escritórios, lojas e outros espaços profissionais.</p><a href="#pedido">Pedir preço →</a></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section results">
+      <div class="container">
+        <div class="section-heading"><h2>Veja a diferença</h2><span></span></div>
+        <p class="section-intro">Exemplos visuais de situações frequentes antes e depois de uma limpeza.</p>
+        <div class="results-grid">
+          <article><h3>Casa de banho</h3><img src="/imagens/landings/limpezas/before-after-bath-clean.jpg" alt="Antes e depois ilustrativo de uma casa de banho"></article>
+          <article><h3>Cozinha</h3><img src="/imagens/landings/limpezas/before-after-kitchen-clean.jpg" alt="Antes e depois ilustrativo de uma cozinha"></article>
+          <article><h3>Pós-obra</h3><img src="/imagens/landings/limpezas/before-after-postwork-clean.jpg" alt="Antes e depois ilustrativo de uma limpeza pós-obra"></article>
+          <article><h3>Janelas e vidros</h3><img src="/imagens/landings/limpezas/before-after-windows-clean.jpg" alt="Antes e depois ilustrativo de janelas e vidros"></article>
+        </div>
+        <div class="center-cta"><a href="#pedido" class="btn btn-outline">Quero pedir preço para a minha limpeza →</a></div>
+      </div>
+    </section>
+
+    <section class="section how">
+      <div class="container">
+        <div class="section-heading"><h2>Como funciona</h2><span></span></div>
+        <div class="how-grid">
+          <article><span class="how-number">1</span><div class="how-icon">▤</div><h3>Diga-nos o que precisa</h3><p>Escolha o tipo de limpeza, a zona e a frequência.</p></article>
+          <article><span class="how-number">2</span><div class="how-icon">⇥</div><h3>O seu pedido será encaminhado</h3><p>O seu pedido será encaminhado a empresas parceiras do nosso portal adequadas à sua zona.</p></article>
+          <article><span class="how-number">3</span><div class="how-icon">◷</div><h3>Será contactado</h3><p>Será contactado por uma empresa parceira da sua zona, com disponibilidade compatível com o dia e o período que indicou.</p></article>
+          <article><span class="how-number">4</span><div class="how-icon">✦</div><h3>Decide se quer avançar</h3><p>Receba a proposta, esclareça dúvidas e só depois decide se pretende marcar o serviço.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section trust-section">
+      <div class="container trust-box">
+        <div class="trust-copy">
+          <span class="eyebrow light-eyebrow">Guia do Proprietário</span>
+          <h2>Serviços de limpeza para casas e empresas em Portugal.</h2>
+          <p>Envie um único pedido, indique o tipo de limpeza, a sua zona e o horário preferido. O objetivo é encaminhá-lo para empresas parceiras adequadas às suas necessidades, em qualquer ponto do país.</p>
+        </div>
+        <div class="trust-stats">
+          <div><strong>Todo o país</strong><span>pedido por localização</span></div>
+          <div><strong>Empresas parceiras</strong><span>encaminhamento por zona</span></div>
+          <div><strong>Casa + Empresa</strong><span>serviços regulares ou pontuais</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="container final-grid">
+        <div class="final-photo"><img src="/imagens/landings/limpezas/cleaning-kit-clean.jpg" alt="Produtos e utensílios de limpeza"></div>
+        <div class="final-copy"><h2>Peça já o seu preço e disponibilidade</h2><p>Indique o que precisa e a sua preferência de horário. O pedido demora cerca de 1 minuto.</p><div class="final-points"><span>✓ Sem compromisso</span><span>✓ Pedido gratuito</span><span>✓ Todo o país</span></div></div>
+        <div class="final-card"><span class="mini-pill">Rápido e simples</span><h3>Demora cerca de 1 minuto</h3><a href="#pedido" class="btn btn-primary btn-block">Pedir preço e disponibilidade →</a><small>Pedido gratuito e sem compromisso.</small></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="legal" class="site-footer">
+    <div class="container footer-inner">
+      <nav aria-label="Ligações legais"><a href="/privacidade/">Política de Privacidade</a><a href="/termos/">Termos</a><a href="/parceiros/">Lista de Parceiros</a></nav>
+      <span>© Guia do Proprietário</span>
+    </div>
+  </footer>
+
+  <script is:inline src="/scripts/landings/limpezas.js"></script>
+</Squeeze>

@@ -1,6 +1,7 @@
 export const CONSENT_VERSION = "2026-08-k";
 export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-08-c";
 export const VALOR_LIQUIDO_CONSENT_VERSION = "valor-liquido-2026-08-a";
+export const LIMPEZA_CONSENT_VERSION = "limpeza-2026-08-a";
 
 export const CONSENT_TEXT = {
   "2026-08-b": {
@@ -53,6 +54,10 @@ export const CONSENT_TEXT = {
   },
   "valor-liquido-2026-08-a": {
     c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de mediação imobiliária licenciadas pelo IMPIC, selecionadas de acordo com a localização do imóvel e disponibilidade, para que me possam contactar relativamente à avaliação e eventual venda do meu imóvel. Consulte as empresas que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
+    c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
+  },
+  "limpeza-2026-08-a": {
+    c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de limpeza e manutenção do lar selecionadas de acordo com a localização, o tipo de serviço e a disponibilidade, para que me possam contactar com informações, disponibilidade e propostas relacionadas com este pedido. Consulte as empresas que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
     c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
   },
   "newsletter-2026-08-c": {

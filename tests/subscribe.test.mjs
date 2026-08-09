@@ -14,7 +14,8 @@ const env = {
   SENDER_API_TOKEN: "token-de-teste",
   SENDER_GROUP_MARKETING: "egK8WG",
   SENDER_GROUP_GUIA_VENDER_CASA: "dJAl59",
-  SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l"
+  SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l",
+  SENDER_GROUP_LIMPEZA: "bWv1LJ"
 };
 
 const requestFor = (body) => new Request("https://guiadoproprietario.pt/api/subscribe", {
@@ -34,6 +35,28 @@ const ebookBody = {
   source: "ebook-vender-casa",
   pageUrl: "https://guiadoproprietario.pt/guias/vender-casa/",
   eventId: "evento-123"
+};
+
+const cleaningBody = {
+  email: "limpeza@exemplo.pt",
+  name: "Marta Silva",
+  phone: "912 345 678",
+  postalCode: "1000-001",
+  serviceType: "profunda",
+  spaceType: "apartamento",
+  spaceSize: "t2",
+  serviceFrequency: "one_time",
+  oneTimeTiming: "this_week",
+  preferredDate: "",
+  preferredWeekday: "",
+  preferredTimePeriod: "morning",
+  additionalNotes: "Há um cão em casa.",
+  consent1: true,
+  consent2: false,
+  consentVersion: "limpeza-2026-08-a",
+  source: "guia_limpeza_preco_disponibilidade",
+  pageUrl: "https://guiadoproprietario.pt/servicos-limpeza/?utm_source=meta",
+  eventId: "limpeza-123"
 };
 
 before(async () => {
@@ -345,6 +368,61 @@ test("adiciona a lead direta aos grupos de parceiros e marketing quando os dois 
   const createBody = JSON.parse(calls[2].init.body);
   assert.deepEqual(createBody.groups, ["egK8WG", "aKBm4l"]);
   assert.equal(createBody.fields["{$CONSENT_MARKETING}"], "true");
+});
+
+test("cria um pedido de limpeza no grupo próprio e guarda os detalhes do serviço", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) {
+      return Response.json({ Localidade: "Lisboa" });
+    }
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({ request: requestFor(cleaningBody), env });
+  assert.equal(response.status, 200);
+  const createBody = JSON.parse(calls[2].init.body);
+  assert.deepEqual(createBody.groups, ["bWv1LJ"]);
+  assert.equal(createBody.firstname, "Marta Silva");
+  assert.equal(createBody.phone, "912 345 678");
+  assert.equal(createBody.fields["{$LEAD_SOURCE}"], "guia_limpeza_preco_disponibilidade");
+  assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "true");
+  assert.equal("{$CONSENT_MARKETING}" in createBody.fields, false);
+  assert.equal(createBody.fields["{$LIMPEZA_SERVICO}"], "Limpeza profunda");
+  assert.equal(createBody.fields["{$LIMPEZA_ESPACO}"], "Apartamento");
+  assert.equal(createBody.fields["{$LIMPEZA_FREQUENCIA}"], "Apenas uma vez");
+  assert.equal(createBody.fields["{$LIMPEZA_PERIODO}"], "Manhã");
+  assert.equal(createBody.fields["{$LIMPEZA_NOTAS}"], "Há um cão em casa.");
+});
+
+test("adiciona o pedido de limpeza à newsletter apenas com autorização opcional", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Lisboa" });
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({ request: requestFor({ ...cleaningBody, consent2: true }), env });
+  assert.equal(response.status, 200);
+  const createBody = JSON.parse(calls[2].init.body);
+  assert.deepEqual(createBody.groups, ["egK8WG", "bWv1LJ"]);
+  assert.equal(createBody.fields["{$CONSENT_MARKETING}"], "true");
+});
+
+test("recusa pedidos de limpeza incompletos ou com disponibilidade incompatível", async () => {
+  globalThis.fetch = async () => { throw new Error("A API não deveria ser chamada"); };
+  const missingService = await onRequestPost({ request: requestFor({ ...cleaningBody, serviceType: "" }), env });
+  const missingTiming = await onRequestPost({ request: requestFor({ ...cleaningBody, oneTimeTiming: "" }), env });
+  const missingDate = await onRequestPost({ request: requestFor({ ...cleaningBody, oneTimeTiming: "specific_date", preferredDate: "" }), env });
+  const missingWeekday = await onRequestPost({
+    request: requestFor({ ...cleaningBody, serviceFrequency: "weekly", oneTimeTiming: "", preferredWeekday: "" }), env
+  });
+  assert.deepEqual(await missingService.json(), { error: "invalid_service_type" });
+  assert.deepEqual(await missingTiming.json(), { error: "invalid_one_time_timing" });
+  assert.deepEqual(await missingDate.json(), { error: "invalid_preferred_date" });
+  assert.deepEqual(await missingWeekday.json(), { error: "invalid_preferred_weekday" });
 });
 
 test("não perde a lead se os campos de localização ainda não existirem no Sender", async () => {
