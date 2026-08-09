@@ -109,7 +109,7 @@ Em `Subscribers → Fields` ou `Custom fields`, criar os seguintes campos:
 | `CONSENT_MARKETING` | Texto | `true` ou `false` |
 | `CONSENT_PARCEIROS` | Texto | `true` ou `false` |
 | `ORIGEM` | Texto | URL onde ocorreu a subscrição |
-| `LEAD_SOURCE` | Texto | `newsletter` ou `ebook-vender-casa` |
+| `LEAD_SOURCE` | Texto | Origem do formulário, incluindo `newsletter`, `ebook-vender-casa`, `ebook-vender-casa-partner` ou `valor-liquido-venda-direct` |
 | `EVENT_ID` | Texto | Identificador usado na medição e eventual deduplicação |
 
 O tipo texto reduz incompatibilidades na API e permite guardar datas completas, valores booleanos e identificadores sem conversões.
@@ -124,7 +124,15 @@ O mesmo passo pede agora o código postal. Crie no Sender dois campos personaliz
 | Localidade | `LOCALIDADE` |
 | Prazo de venda | `PRAZO_VENDA` |
 
-A localidade é identificada automaticamente a partir do código postal. O prazo de venda guarda uma das quatro respostas apresentadas no formulário. Todos os três campos são enviados para o Sender como texto. Não é necessário criar outro grupo. Estes contactos continuam a entrar em `Newsletter - Ofertas de terceiros` (`egK8WG`) e `Guia - Vender Casa - Parceiros` (`aKBm4l`). Se algum destes campos ainda não existir, o pedido continua a ser guardado com o nome e o telefone, mas sem os campos adicionais. Depois de criar os campos, as novas submissões passam a preenchê-los sem nova publicação do site.
+A localidade é identificada automaticamente a partir do código postal. O prazo de venda guarda uma das quatro respostas apresentadas no formulário. Todos os três campos são enviados para o Sender como texto. Se algum destes campos ainda não existir, o pedido continua a ser guardado com o nome e o telefone, mas sem os campos adicionais. Depois de criar os campos, as novas submissões passam a preenchê-los sem nova publicação do site.
+
+Na landing do Manual, o pedido de avaliação atualiza o contacto que já autorizou o marketing e adiciona-o ao grupo `Guia - Vender Casa - Parceiros` (`aKBm4l`).
+
+Na landing direta `Quanto me sobra se vender?`, a autorização de parceiros é obrigatória e o marketing é opcional:
+
+- entra sempre em `Guia - Vender Casa - Parceiros` (`aKBm4l`);
+- só entra em `Newsletter - Ofertas de terceiros` (`egK8WG`) quando a opção facultativa de marketing estiver marcada;
+- usa a origem `valor-liquido-venda-direct` e a versão de consentimento `valor-liquido-2026-08-a`.
 
 ## 6. Single opt-in da newsletter
 
