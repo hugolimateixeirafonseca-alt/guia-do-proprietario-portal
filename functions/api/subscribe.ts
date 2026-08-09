@@ -188,9 +188,15 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   const consentVersion = cleanText(body.consentVersion, 64);
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
-  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" ? body.source : "";
+  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" || body.source === "valor-liquido-venda-direct" ? body.source : "";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
-  const expectedVersion = source === "newsletter" ? "newsletter-2026-08-c" : "2026-08-k";
+  const isDirectValueLead = source === "valor-liquido-venda-direct";
+  const isQualifiedLead = isPartnerFollowup || isDirectValueLead;
+  const expectedVersion = source === "newsletter"
+    ? "newsletter-2026-08-c"
+    : isDirectValueLead
+      ? "valor-liquido-2026-08-a"
+      : "2026-08-k";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");
   const localPhoneDigits = phoneDigits.startsWith("00351")
@@ -204,13 +210,15 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const nameOk = firstname.length >= 2 && /^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u.test(firstname);
   const saleTimelineCode = cleanText(body.saleTimeline, 32) as keyof typeof SALE_TIMELINES;
   const saleTimeline = SALE_TIMELINES[saleTimelineCode] || "";
+  const partnerConsent = isDirectValueLead ? body.consent1 === true : body.consent2 === true;
+  const marketingConsent = isDirectValueLead ? body.consent2 === true : body.consent1 === true;
 
   if (!emailOk || body.consent1 !== true || !consentText || !source || consentVersion !== expectedVersion) {
     return json({ error: "invalid" }, 400);
   }
 
-  if (isPartnerFollowup) {
-    if (body.consent2 !== true) return json({ error: "invalid_consent" }, 400);
+  if (isQualifiedLead) {
+    if (!partnerConsent) return json({ error: "invalid_consent" }, 400);
     if (!nameOk) return json({ error: "invalid_name" }, 400);
     if (!phoneOk) return json({ error: "invalid_phone" }, 400);
     if (!postalCode) return json({ error: "invalid_postal_code" }, 400);
@@ -227,7 +235,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     guiaParceiros: env.SENDER_GROUP_GUIA_PARCEIROS || DEFAULT_GROUPS.guiaParceiros
   };
 
-  const postalLookup = isPartnerFollowup ? await lookupPostalCode(postalCode) : null;
+  const postalLookup = isQualifiedLead ? await lookupPostalCode(postalCode) : null;
   if (postalLookup?.status === "not_found") {
     return json({ error: "postal_not_found" }, 400);
   }
@@ -237,12 +245,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     "{$CONSENT_DATA}": consentDate,
     "{$CONSENT_IP}": cleanText(request.headers.get("CF-Connecting-IP"), 64),
     "{$CONSENT_VERSAO}": consentVersion,
-    "{$CONSENT_MARKETING}": "true",
-    "{$CONSENT_PARCEIROS}": body.consent2 === true ? "true" : "false",
+    ...(!isDirectValueLead || marketingConsent ? { "{$CONSENT_MARKETING}": marketingConsent ? "true" : "false" } : {}),
+    "{$CONSENT_PARCEIROS}": partnerConsent ? "true" : "false",
     "{$ORIGEM}": cleanText(body.pageUrl, 2048),
     "{$LEAD_SOURCE}": source,
     "{$EVENT_ID}": cleanText(body.eventId, 128),
-    ...(isPartnerFollowup ? {
+    ...(isQualifiedLead ? {
       "{$CODIGO_POSTAL}": postalCode,
       "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar",
       "{$PRAZO_VENDA}": saleTimeline
@@ -251,8 +259,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
   try {
     const subscriberGroups = [
-      groups.newsletter,
-      ...(body.consent2 === true ? [groups.guiaParceiros] : []),
+      ...(!isDirectValueLead || marketingConsent ? [groups.newsletter] : []),
+      ...(partnerConsent ? [groups.guiaParceiros] : []),
       ...(source === "ebook-vender-casa" ? [groups.guiaVenderCasa] : [])
     ];
     const subscriberResult = await createOrUpdateSubscriber(
@@ -268,13 +276,15 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     if (subscriberResult.created) {
       return json({
         ok: true,
-        ...(isPartnerFollowup ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {})
+        ...(isQualifiedLead ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {})
       }, 200);
     }
 
-    await addSubscriberToGroup(env, groups.newsletter, email, false);
+    if (!isDirectValueLead || marketingConsent) {
+      await addSubscriberToGroup(env, groups.newsletter, email, false);
+    }
 
-    if (body.consent2 === true) {
+    if (partnerConsent) {
       await addSubscriberToGroup(env, groups.guiaParceiros, email, false);
     }
 
@@ -284,7 +294,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     return json({
       ok: true,
-      ...(isPartnerFollowup ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {})
+      ...(isQualifiedLead ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {})
     }, 200);
   } catch (error) {
     const code = error instanceof SenderError ? error.code : "unknown";

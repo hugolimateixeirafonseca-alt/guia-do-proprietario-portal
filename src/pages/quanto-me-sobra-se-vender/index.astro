@@ -1,0 +1,433 @@
+---
+import Squeeze from "../../layouts/Squeeze.astro";
+import { VALOR_LIQUIDO_CONSENT_VERSION } from "../../data/consent";
+
+const titulo = "Quanto me sobra se vender a casa? | Guia do Proprietário";
+const descricao = "Vender uma casa não significa receber todo o preço de venda. Peça uma análise gratuita e fale com um profissional da sua zona.";
+const imagemOg = "/imagens/situacao-valor.webp";
+---
+
+<Squeeze titulo={titulo} descricao={descricao} imagemOg={imagemOg} robots="noindex,follow">
+  <header class="header">
+    <div class="container">
+      <a class="brand utm-link" href="/" aria-label="Guia do Proprietário, página inicial">
+        <img src="/imagens/marca/logotipo-horizontal.svg" alt="Guia do Proprietário" width="355" height="85" />
+      </a>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="landing-title">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">€ Análise gratuita para proprietários</p>
+        <h1 id="landing-title">Vender por <span>300.000 €</span><br />não significa receber 300.000 €.</h1>
+        <p class="lead">Perceba <strong>quanto poderá realmente ficar no seu bolso</strong> e peça uma análise gratuita a um profissional da sua zona.</p>
+        <div class="benefits" aria-label="Vantagens">
+          <span><i class="tick" aria-hidden="true">✓</i> Sem custos</span>
+          <span><i class="tick" aria-hidden="true">✓</i> Sem compromisso</span>
+          <span><i class="tick" aria-hidden="true">✓</i> Contacto adaptado à sua zona</span>
+        </div>
+
+        <div class="example" aria-label="Exemplo ilustrativo">
+          <span class="example-label">Exemplo ilustrativo</span>
+          <h2>O valor de venda é só o ponto de partida.</h2>
+          <div class="row"><span>Preço de venda</span><b>300.000 €</b></div>
+          <div class="row"><span>Crédito ainda em dívida</span><b>− 85.000 €</b></div>
+          <div class="row"><span>Comissão e custos da venda</span><b class="uncertain">a confirmar</b></div>
+          <div class="row"><span>Eventual tributação</span><b class="uncertain">depende do caso</b></div>
+          <p class="example-callout"><strong>O que interessa:</strong> perceber o valor real da casa, os custos aplicáveis e quanto poderá efetivamente receber.</p>
+        </div>
+      </div>
+
+      <aside class="form-card" id="pedido" aria-labelledby="form-title">
+        <span class="form-badge">Pedido gratuito · menos de 1 minuto</span>
+        <h2 id="form-title">Saiba quanto pode receber pela sua casa</h2>
+        <p class="form-intro">Deixe os seus dados. Um profissional da sua zona poderá analisar o imóvel e entrar em contacto consigo.</p>
+        <div class="microtrust"><span><b>✓</b> Gratuito</span><span><b>✓</b> Sem compromisso</span><span><b>✓</b> Dados protegidos</span></div>
+
+        <form id="lead-form" novalidate>
+          <div class="field" data-field="name">
+            <label for="name">Nome completo <span class="req">*</span></label>
+            <input id="name" name="name" type="text" autocomplete="name" maxlength="80" placeholder="Ex.: João Silva" aria-describedby="name-error" />
+            <p id="name-error" class="error" aria-live="polite"></p>
+          </div>
+
+          <div class="two">
+            <div class="field" data-field="phone">
+              <label for="phone">Telemóvel <span class="req">*</span></label>
+              <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ex.: 912 345 678" aria-describedby="phone-error" />
+              <p id="phone-error" class="error" aria-live="polite"></p>
+            </div>
+            <div class="field" data-field="postal">
+              <label for="postal">Código postal <span class="req">*</span></label>
+              <input id="postal" name="postal_code" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="Ex.: 1000-001" maxlength="8" aria-describedby="postal-error" />
+              <p id="postal-error" class="error" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <div class="field" data-field="email">
+            <label for="email">Email <span class="req">*</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" placeholder="Ex.: joao@email.pt" aria-describedby="email-error" />
+            <p id="email-error" class="error" aria-live="polite"></p>
+          </div>
+
+          <div class="field" data-field="time">
+            <label for="time">Quando pensa vender? <span class="req">*</span></label>
+            <select id="time" name="sale_timing" aria-describedby="time-error">
+              <option value="">Selecione uma opção</option>
+              <option value="selling_now">Já estou a tentar vender</option>
+              <option value="within_3_months">Nos próximos 3 meses</option>
+              <option value="3_to_12_months">Entre 3 e 12 meses</option>
+              <option value="value_only">Só quero saber o valor, sem intenção de vender para já</option>
+            </select>
+            <p id="time-error" class="error" aria-live="polite"></p>
+          </div>
+
+          <div class="consent" data-field="partnerConsent">
+            <input id="partner-consent" name="consent_partners" type="checkbox" />
+            <label for="partner-consent">Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de mediação imobiliária licenciadas pelo IMPIC, selecionadas de acordo com a localização do imóvel e disponibilidade, para que me possam contactar relativamente à avaliação e eventual venda do meu imóvel. Consulte a <a class="utm-link" href="/parceiros/">Lista de Parceiros</a> e a <a class="utm-link" href="/privacidade/">Política de Privacidade</a>.</label>
+            <p id="partner-consent-error" class="error" aria-live="polite"></p>
+          </div>
+
+          <div class="consent marketing-consent">
+            <input id="marketing-consent" name="consent_marketing" type="checkbox" />
+            <label for="marketing-consent">Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. <small>As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a qualquer momento.</small></label>
+          </div>
+
+          <button class="cta" type="submit" id="submit-button">Quero saber quanto posso receber <span aria-hidden="true">→</span></button>
+          <p class="under-cta">Pedido gratuito e sem compromisso. O consentimento de marketing é opcional.</p>
+          <p id="form-status" class="status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div id="success" class="success" hidden tabindex="-1">
+          <span class="success-icon" aria-hidden="true">✓</span>
+          <h2>Pedido recebido.</h2>
+          <p>Guardámos o seu contacto e a sua autorização. Um profissional elegível da sua zona poderá entrar em contacto consigo relativamente à avaliação e eventual venda do imóvel.</p>
+          <p id="success-locality" class="success-locality"></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="trustbar" aria-label="Características do pedido">
+    <div class="container trustgrid">
+      <div class="trustitem"><div class="trusticon">€</div><div><strong>100% gratuito</strong><small>Sem custo para pedir a análise.</small></div></div>
+      <div class="trustitem"><div class="trusticon">⌂</div><div><strong>Profissional da sua zona</strong><small>Contacto ajustado à localização do imóvel.</small></div></div>
+      <div class="trustitem"><div class="trusticon">✓</div><div><strong>Sem compromisso</strong><small>Pede informação antes de decidir.</small></div></div>
+      <div class="trustitem"><div class="trusticon">□</div><div><strong>Dados protegidos</strong><small>Partilha apenas mediante autorização.</small></div></div>
+    </div>
+  </section>
+
+  <section class="why" aria-labelledby="why-title">
+    <div class="container">
+      <div class="sectionhead"><span>Antes de vender</span><h2 id="why-title">Há três números que importa perceber</h2><p>A análise não serve apenas para saber quanto vale a casa. Serve para perceber a decisão completa.</p></div>
+      <div class="cards">
+        <article class="card"><div class="icon">⌂</div><h3>Quanto vale hoje</h3><p>Uma referência realista para a sua zona e para as características do imóvel.</p></article>
+        <article class="card"><div class="icon">−</div><h3>O que pode sair</h3><p>Crédito em dívida, custos associados à venda e outros encargos que possam aplicar-se.</p></article>
+        <article class="card"><div class="icon">€</div><h3>Quanto pode sobrar</h3><p>Uma visão mais útil do valor que poderá ficar disponível depois da venda.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-cta">
+    <div class="container finalbox">
+      <div><h2>Está a pensar vender? Comece pelos números.</h2><p>Peça gratuitamente uma análise e perceba melhor o valor da sua casa antes de tomar uma decisão.</p></div>
+      <a class="finalbtn" href="#pedido">Quero a minha análise →</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footergrid">
+      <p>© 2026 Guia do Proprietário</p>
+      <nav class="links" aria-label="Ligações legais"><a class="utm-link" href="/privacidade/">Política de Privacidade</a><a class="utm-link" href="/termos/">Termos</a><a class="utm-link" href="/parceiros/">Lista de Parceiros</a><a href="#cookie-settings" data-cookie-settings>Definições de cookies</a></nav>
+    </div>
+  </footer>
+
+  <script is:inline define:vars={{ VALOR_LIQUIDO_CONSENT_VERSION }}>
+    (() => {
+      const form = document.getElementById("lead-form");
+      const submitButton = document.getElementById("submit-button");
+      const status = document.getElementById("form-status");
+      const success = document.getElementById("success");
+      const successLocality = document.getElementById("success-locality");
+      const inputs = {
+        name: document.getElementById("name"),
+        phone: document.getElementById("phone"),
+        postal: document.getElementById("postal"),
+        email: document.getElementById("email"),
+        time: document.getElementById("time"),
+        partnerConsent: document.getElementById("partner-consent"),
+        marketingConsent: document.getElementById("marketing-consent")
+      };
+      const errors = {
+        name: document.getElementById("name-error"),
+        phone: document.getElementById("phone-error"),
+        postal: document.getElementById("postal-error"),
+        email: document.getElementById("email-error"),
+        time: document.getElementById("time-error"),
+        partnerConsent: document.getElementById("partner-consent-error")
+      };
+
+      const setError = (key, message = "") => {
+        const wrapper = document.querySelector(`[data-field="${key}"]`);
+        wrapper?.classList.toggle("invalid", Boolean(message));
+        if (errors[key]) errors[key].textContent = message;
+        inputs[key]?.setAttribute("aria-invalid", message ? "true" : "false");
+      };
+
+      const validateName = () => {
+        const value = inputs.name.value.trim().replace(/\s+/g, " ");
+        if (value.length < 2) return "Introduza o seu nome.";
+        if (/^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u.test(value)) return "";
+        const invalid = value.match(/[^\p{L}\p{M} '\u2019-]/u)?.[0];
+        return invalid ? `O nome contém um carácter não permitido: “${invalid}”.` : "Use apenas letras, espaços, apóstrofos ou hífen no nome.";
+      };
+
+      const validatePhone = () => {
+        const value = inputs.phone.value.trim();
+        if (!value) return "Introduza o seu número de telemóvel.";
+        const invalid = value.match(/[^\d+\s()-]/)?.[0];
+        if (invalid) return `O telemóvel contém um carácter não permitido: “${invalid}”.`;
+        const digits = value.replace(/\D/g, "");
+        const local = digits.startsWith("00351") ? digits.slice(5) : digits.startsWith("351") ? digits.slice(3) : digits;
+        if (local.length < 9) return `Faltam ${9 - local.length} ${9 - local.length === 1 ? "algarismo" : "algarismos"} no telemóvel.`;
+        if (local.length > 9) return `O telemóvel tem ${local.length - 9} ${local.length - 9 === 1 ? "algarismo a mais" : "algarismos a mais"}.`;
+        return local.startsWith("9") ? "" : "O telemóvel deve começar por 9.";
+      };
+
+      const validate = () => {
+        Object.keys(errors).forEach((key) => setError(key));
+        const messages = {
+          name: validateName(),
+          phone: validatePhone(),
+          postal: /^\d{4}-\d{3}$/.test(inputs.postal.value.trim()) ? "" : "Use o formato 1234-567.",
+          email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputs.email.value.trim()) ? "" : "Introduza um endereço de email válido.",
+          time: inputs.time.value ? "" : "Escolha uma opção para continuar.",
+          partnerConsent: inputs.partnerConsent.checked ? "" : "Aceite esta opção para enviar o pedido."
+        };
+        Object.entries(messages).forEach(([key, message]) => setError(key, message));
+        const firstInvalid = Object.keys(messages).find((key) => messages[key]);
+        if (firstInvalid) inputs[firstInvalid]?.focus();
+        return !firstInvalid;
+      };
+
+      inputs.postal.addEventListener("input", () => {
+        const digits = inputs.postal.value.replace(/\D/g, "").slice(0, 7);
+        inputs.postal.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
+        setError("postal");
+      });
+      ["name", "phone", "email", "time", "partnerConsent"].forEach((key) => {
+        inputs[key].addEventListener(key === "time" || key === "partnerConsent" ? "change" : "input", () => setError(key));
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        status.className = "status";
+        status.textContent = "";
+        if (!validate()) return;
+
+        submitButton.disabled = true;
+        submitButton.textContent = "A enviar...";
+        status.className = "status show sending";
+        status.textContent = "A validar e enviar o pedido...";
+        const eventId = globalThis.crypto?.randomUUID?.() || `contact-${Date.now()}`;
+
+        try {
+          const response = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: inputs.email.value.trim(),
+              name: inputs.name.value.trim(),
+              phone: inputs.phone.value.trim(),
+              postalCode: inputs.postal.value.trim(),
+              saleTimeline: inputs.time.value,
+              consent1: true,
+              consent2: inputs.marketingConsent.checked,
+              consentVersion: VALOR_LIQUIDO_CONSENT_VERSION,
+              source: "valor-liquido-venda-direct",
+              pageUrl: location.href,
+              eventId
+            })
+          });
+          const result = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            const fieldErrors = {
+              invalid_name: ["name", "Use apenas letras, espaços, apóstrofos ou hífen no nome."],
+              invalid_phone: ["phone", "Introduza um telemóvel português válido com 9 algarismos."],
+              invalid_postal_code: ["postal", "Use um código postal no formato 1234-567."],
+              postal_not_found: ["postal", "Este código postal não foi encontrado. Confirme os números."],
+              invalid_sale_timeline: ["time", "Escolha uma opção para continuar."],
+              invalid_consent: ["partnerConsent", "Aceite esta opção para enviar o pedido."]
+            };
+            const fieldError = fieldErrors[result.error];
+            if (fieldError) {
+              setError(fieldError[0], fieldError[1]);
+              inputs[fieldError[0]]?.focus();
+              status.className = "status";
+              status.textContent = "";
+              return;
+            }
+            throw new Error("submission_failed");
+          }
+
+          if (window.fbq) window.fbq("track", "Contact", { content_name: "valor-liquido-venda-contacto" }, { eventID: eventId });
+          form.hidden = true;
+          success.hidden = false;
+          if (result.locality && result.locality !== "Por confirmar") successLocality.textContent = `Zona identificada: ${result.locality}.`;
+          success.focus();
+        } catch {
+          status.className = "status show errorbox";
+          status.textContent = "Não foi possível enviar agora. Tente novamente dentro de instantes.";
+        } finally {
+          submitButton.disabled = false;
+          submitButton.innerHTML = 'Quero saber quanto posso receber <span aria-hidden="true">→</span>';
+        }
+      });
+
+      const utmKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+      const incoming = new URLSearchParams(location.search);
+      const kept = Object.fromEntries(utmKeys.filter((key) => incoming.get(key)).map((key) => [key, incoming.get(key)]));
+      document.querySelectorAll("a.utm-link").forEach((link) => {
+        if (!Object.keys(kept).length) return;
+        const url = new URL(link.href, location.href);
+        Object.entries(kept).forEach(([key, value]) => url.searchParams.set(key, value));
+        link.href = `${url.pathname}${url.search}${url.hash}`;
+      });
+    })();
+  </script>
+</Squeeze>
+
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(html) { scroll-behavior: smooth; }
+  :global(body) { margin: 0; color: #152238; background: #fff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.48; -webkit-font-smoothing: antialiased; }
+  :global(button), :global(input), :global(select) { font: inherit; }
+  :global(a:focus-visible), :global(button:focus-visible), :global(input:focus-visible), :global(select:focus-visible) { outline: 3px solid rgba(255, 90, 0, .3); outline-offset: 3px; }
+  .container { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
+  .header { padding: 22px 0 10px; }
+  .brand { display: inline-flex; }
+  .brand img { display: block; width: 355px; max-width: min(100%, 355px); height: auto; }
+  .hero { padding: 34px 0 56px; background: radial-gradient(circle at 80% 8%, rgba(255, 90, 0, .075), transparent 28%), #fff; }
+  .hero-grid { display: grid; grid-template-columns: 1.03fr .97fr; gap: 64px; align-items: start; }
+  .hero-copy { padding-top: 18px; }
+  .eyebrow { width: fit-content; margin: 0; padding: 8px 13px; color: #ff5a00; background: #fff3e9; border-radius: 999px; font-size: 12px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+  h1 { max-width: 700px; margin: 20px 0 18px; color: #0b2442; font-size: clamp(46px, 5vw, 66px); line-height: 1.02; letter-spacing: -.055em; }
+  h1 span { color: #ff5a00; }
+  .lead { max-width: 650px; margin: 0 0 25px; color: #29394f; font-size: 21px; line-height: 1.5; }
+  .lead strong { color: #0b2442; font-weight: 850; }
+  .benefits { margin: 0 0 28px; display: flex; flex-wrap: wrap; gap: 12px 22px; }
+  .benefits span { display: flex; align-items: center; gap: 8px; color: #45546a; font-size: 14px; font-weight: 700; }
+  .tick { width: 20px; height: 20px; display: grid; place-items: center; color: #fff; background: #4c9b53; border-radius: 50%; font-size: 12px; font-style: normal; font-weight: 900; }
+  .example { position: relative; max-width: 540px; padding: 22px 25px; overflow: hidden; background: #fff; border: 1px solid #ebe5df; border-radius: 19px; box-shadow: 0 10px 30px rgba(17, 32, 52, .07); }
+  .example::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 5px; background: #ff5a00; }
+  .example-label { color: #ff5a00; font-size: 11px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+  .example h2 { margin: 7px 0 14px; color: #0b2442; font-size: 20px; }
+  .row { padding: 7px 0; display: flex; justify-content: space-between; gap: 20px; color: #596779; border-bottom: 1px solid #f0eeec; font-size: 14px; }
+  .row b { color: #273b52; white-space: nowrap; }
+  .uncertain { color: #8b6a52 !important; font-weight: 750; }
+  .example-callout { margin: 14px 0 0; padding: 12px 14px; color: #6a4630; background: #fff5ec; border-radius: 11px; font-size: 13px; line-height: 1.42; }
+  .example-callout strong { color: #ff5a00; }
+  .form-card { position: relative; padding: 30px 32px 28px; overflow: hidden; background: #fff; border: 1px solid #ebe6e1; border-radius: 24px; box-shadow: 0 20px 55px rgba(17, 32, 52, .12); }
+  .form-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: linear-gradient(90deg, #ff5a00, #ff9b44); }
+  .form-badge { display: inline-block; padding: 6px 10px; color: #387a40; background: #eef7ed; border-radius: 999px; font-size: 11px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
+  .form-card h2 { margin: 13px 0 8px; color: #0b2442; font-size: 30px; line-height: 1.08; letter-spacing: -.035em; }
+  .form-intro { margin: 0 0 18px; color: #667386; font-size: 14px; }
+  .microtrust { margin: 0 0 19px; padding-bottom: 17px; display: flex; flex-wrap: wrap; gap: 14px; border-bottom: 1px solid #efedeb; }
+  .microtrust span { display: flex; align-items: center; gap: 6px; color: #5b687a; font-size: 12px; }
+  .microtrust b { color: #4c9b53; }
+  form { display: grid; gap: 13px; }
+  form[hidden], .success[hidden] { display: none; }
+  .field { display: grid; gap: 5px; }
+  .field label { color: #1c2d46; font-size: 12.5px; font-weight: 850; }
+  .req { color: #ff5a00; }
+  input, select { width: 100%; height: 48px; padding: 0 14px; color: #203149; background: #fff; border: 1px solid #d8dadd; border-radius: 9px; outline: none; transition: border-color .15s, box-shadow .15s; }
+  input:focus, select:focus { border-color: #9aaabd; box-shadow: 0 0 0 3px rgba(11, 36, 66, .06); }
+  input::placeholder { color: #a0a8b2; }
+  .invalid input, .invalid select { border-color: #c9362b; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .error { min-height: 0; margin: 0; color: #c9362b; font-size: 11px; }
+  .error:not(:empty) { margin-top: 2px; }
+  .consent { margin-top: 3px; display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; }
+  .consent input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: #ff5a00; }
+  .consent label { color: #3f4e63; font-size: 11.5px; line-height: 1.42; }
+  .consent label small { display: block; margin-top: 5px; color: #6c7888; font-size: 10.5px; }
+  .consent a { color: #d94e00; text-underline-offset: 2px; }
+  .consent .error { grid-column: 2; }
+  .invalid.consent label { color: #9e3128; }
+  .cta { min-height: 55px; padding: 10px 18px; display: flex; align-items: center; justify-content: center; gap: 12px; color: #fff; background: linear-gradient(90deg, #ff5a00, #ff7900); border: 0; border-radius: 9px; box-shadow: 0 10px 23px rgba(255, 90, 0, .22); cursor: pointer; font-size: 15px; font-weight: 900; letter-spacing: .015em; text-transform: uppercase; }
+  .cta:hover { filter: saturate(1.08); transform: translateY(-1px); }
+  .cta:disabled { opacity: .7; cursor: wait; transform: none; }
+  .under-cta { margin: 0; color: #667386; font-size: 11.5px; text-align: center; }
+  .status { display: none; margin: 0; padding: 12px 14px; border-radius: 10px; font-size: 12.5px; }
+  .status.show { display: block; }
+  .status.sending { color: #315370; background: #f2f6fa; }
+  .status.errorbox { color: #9e3128; background: #fff3f1; }
+  .success { padding: 24px 4px 10px; text-align: center; }
+  .success-icon { width: 58px; height: 58px; margin: 0 auto 15px; display: grid; place-items: center; color: #fff; background: #4c9b53; border-radius: 50%; font-size: 29px; }
+  .success h2 { margin: 0 0 10px; }
+  .success p { color: #566579; line-height: 1.55; }
+  .success-locality { color: #387a40 !important; font-weight: 800; }
+  .trustbar { padding: 22px 0; color: #fff; background: #071a30; }
+  .trustgrid { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .trustitem { padding: 0 22px; display: flex; align-items: center; gap: 12px; border-right: 1px solid rgba(255, 255, 255, .15); }
+  .trustitem:first-child { padding-left: 0; }
+  .trustitem:last-child { padding-right: 0; border-right: 0; }
+  .trusticon { width: 38px; height: 38px; display: grid; place-items: center; flex: none; border: 1.5px solid rgba(255, 255, 255, .65); border-radius: 50%; font-weight: 900; }
+  .trustitem strong, .trustitem small { display: block; }
+  .trustitem strong { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+  .trustitem small { margin-top: 2px; color: #cfdae6; font-size: 11.5px; line-height: 1.35; }
+  .why { padding: 54px 0; }
+  .sectionhead { max-width: 700px; margin-inline: auto; text-align: center; }
+  .sectionhead span { color: #ff5a00; font-size: 12px; font-weight: 900; letter-spacing: .065em; text-transform: uppercase; }
+  .sectionhead h2 { margin: 9px 0 10px; color: #0b2442; font-size: 34px; line-height: 1.1; letter-spacing: -.04em; }
+  .sectionhead p { margin: 0; color: #667386; font-size: 15px; }
+  .cards { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card { padding: 24px; background: linear-gradient(180deg, #fff, #fffcf9); border: 1px solid #ece8e4; border-radius: 17px; }
+  .icon { width: 46px; height: 46px; margin-bottom: 16px; display: grid; place-items: center; color: #ff5a00; background: #fff1e6; border-radius: 14px; font-size: 22px; font-weight: 900; }
+  .card h3 { margin: 0 0 7px; color: #0b2442; font-size: 18px; }
+  .card p { margin: 0; color: #657286; font-size: 13.5px; }
+  .final-cta { padding: 0 0 58px; }
+  .finalbox { padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; gap: 30px; background: linear-gradient(110deg, #fff5eb, #fff); border: 1px solid #ffe7d3; border-radius: 20px; }
+  .finalbox h2 { margin: 0 0 5px; color: #0b2442; font-size: 26px; }
+  .finalbox p { margin: 0; color: #667386; font-size: 13.5px; }
+  .finalbtn { min-width: 250px; min-height: 50px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: #ff5a00; border-radius: 9px; font-size: 13px; font-weight: 900; text-decoration: none; text-transform: uppercase; }
+  footer { padding: 25px 0; background: #f7f8f9; }
+  .footergrid { display: flex; align-items: center; justify-content: space-between; gap: 25px; }
+  .footergrid p { margin: 0; color: #7b8795; font-size: 11.5px; }
+  .links { display: flex; flex-wrap: wrap; gap: 19px; }
+  .links a { color: #536176; font-size: 11.5px; text-decoration: none; }
+  .links a:hover { text-decoration: underline; }
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 34px; }
+    .hero-copy { padding-top: 0; }
+    .form-card { max-width: 700px; }
+    .trustgrid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .trustitem { padding: 0; border-right: 0; }
+    .cards { grid-template-columns: 1fr; }
+    .finalbox { align-items: flex-start; flex-direction: column; }
+    .finalbtn { width: 100%; }
+  }
+  @media (max-width: 650px) {
+    .container { width: min(1180px, calc(100% - 26px)); }
+    .header { padding: 17px 0 5px; }
+    .brand img { width: 300px; }
+    .hero { padding: 26px 0 38px; }
+    h1 { font-size: 42px; }
+    .lead { font-size: 18px; }
+    .benefits { display: grid; gap: 9px; }
+    .example { padding: 20px 18px; }
+    .form-card { padding: 25px 18px 23px; }
+    .form-card h2 { font-size: 27px; }
+    .two { grid-template-columns: 1fr; }
+    .trustgrid { grid-template-columns: 1fr; }
+    .sectionhead h2 { font-size: 29px; }
+    .why { padding: 42px 0; }
+    .footergrid { align-items: flex-start; flex-direction: column; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(html) { scroll-behavior: auto; }
+    .cta:hover { transform: none; }
+  }
+</style>

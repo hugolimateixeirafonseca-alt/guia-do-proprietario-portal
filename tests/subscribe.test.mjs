@@ -278,6 +278,75 @@ test("recusa um código postal que o serviço identifica como inexistente", asyn
   assert.equal(calls.length, 1);
 });
 
+test("cria uma lead direta de valor líquido apenas no grupo de parceiros quando o marketing não é autorizado", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) {
+      return Response.json({ Localidade: "Lisboa" });
+    }
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      email: "direta@exemplo.pt",
+      name: "Marta Silva",
+      phone: "912 345 678",
+      postalCode: "1000-001",
+      saleTimeline: "within_3_months",
+      consent1: true,
+      consent2: false,
+      consentVersion: "valor-liquido-2026-08-a",
+      source: "valor-liquido-venda-direct",
+      pageUrl: "https://guiadoproprietario.pt/quanto-me-sobra-se-vender/?utm_source=meta",
+      eventId: "valor-liquido-123"
+    }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  const createBody = JSON.parse(calls[2].init.body);
+  assert.deepEqual(createBody.groups, ["aKBm4l"]);
+  assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "true");
+  assert.equal("{$CONSENT_MARKETING}" in createBody.fields, false);
+  assert.equal(createBody.fields["{$LEAD_SOURCE}"], "valor-liquido-venda-direct");
+  assert.equal(createBody.trigger_automation, false);
+});
+
+test("adiciona a lead direta aos grupos de parceiros e marketing quando os dois consentimentos são dados", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) {
+      return Response.json({ Localidade: "Lisboa" });
+    }
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      email: "marketing@exemplo.pt",
+      name: "Marta Silva",
+      phone: "912345678",
+      postalCode: "1000-001",
+      saleTimeline: "selling_now",
+      consent1: true,
+      consent2: true,
+      consentVersion: "valor-liquido-2026-08-a",
+      source: "valor-liquido-venda-direct",
+      pageUrl: "https://guiadoproprietario.pt/quanto-me-sobra-se-vender/",
+      eventId: "valor-liquido-456"
+    }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  const createBody = JSON.parse(calls[2].init.body);
+  assert.deepEqual(createBody.groups, ["egK8WG", "aKBm4l"]);
+  assert.equal(createBody.fields["{$CONSENT_MARKETING}"], "true");
+});
+
 test("não perde a lead se os campos de localização ainda não existirem no Sender", async () => {
   let senderWriteAttempts = 0;
   globalThis.fetch = async (url, init = {}) => {

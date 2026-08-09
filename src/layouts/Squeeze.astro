@@ -6,9 +6,10 @@ interface Props {
   titulo: string;
   descricao: string;
   imagemOg: string;
+  robots?: string;
 }
 
-const { titulo, descricao, imagemOg } = Astro.props;
+const { titulo, descricao, imagemOg, robots = "index,follow" } = Astro.props;
 const canonical = new URL(Astro.url.pathname, site.dominio).toString();
 const imagemOgAbsoluta = new URL(imagemOg, site.dominio).toString();
 ---
@@ -18,7 +19,7 @@ const imagemOgAbsoluta = new URL(imagemOg, site.dominio).toString();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={descricao} />
-    <meta name="robots" content="index,follow" />
+    <meta name="robots" content={robots} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta property="og:type" content="website" />

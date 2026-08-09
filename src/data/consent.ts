@@ -1,5 +1,6 @@
 export const CONSENT_VERSION = "2026-08-k";
 export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-08-c";
+export const VALOR_LIQUIDO_CONSENT_VERSION = "valor-liquido-2026-08-a";
 
 export const CONSENT_TEXT = {
   "2026-08-b": {
@@ -49,6 +50,10 @@ export const CONSENT_TEXT = {
   "2026-08-k": {
     c1: "Quero receber o Manual para Vender Casa e continuar a receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o seu email não é cedido aos anunciantes. Pode cancelar a subscrição a qualquer momento.",
     c2: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de mediação imobiliária licenciadas pelo IMPIC, selecionadas de acordo com a localização do imóvel e disponibilidade, para que me possam contactar relativamente à avaliação e eventual venda do meu imóvel. Consulte as empresas que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade."
+  },
+  "valor-liquido-2026-08-a": {
+    c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com empresas de mediação imobiliária licenciadas pelo IMPIC, selecionadas de acordo com a localização do imóvel e disponibilidade, para que me possam contactar relativamente à avaliação e eventual venda do meu imóvel. Consulte as empresas que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
+    c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
   },
   "newsletter-2026-08-c": {
     c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",
