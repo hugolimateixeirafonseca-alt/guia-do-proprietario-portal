@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-10T11:31:26.997Z",
+  "generatedAt": "2026-08-10T20:05:02.272Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 72,
-    "published": 60,
+    "published": 61,
     "newsOnline": 11
   },
   "articles": [
@@ -912,14 +912,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "empresa-limpeza-mensal.mdx",
       "arrivedAt": "2026-08-06T14:49:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-10T19:16:47Z",
+      "url": "https://guiadoproprietario.pt/casa/empresa-limpeza-mensal/"
     },
     {
       "id": "SC08",
