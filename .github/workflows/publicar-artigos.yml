@@ -90,6 +90,7 @@ jobs:
             NAME="$(basename "$FILE")"
             node scripts/preparar-publicacao-artigos.mjs "$FILE"
             git mv -- "$FILE" "$DESTINATION/$NAME"
+            git add -- "$DESTINATION/$NAME"
             echo "Movido: $NAME"
           done
 
