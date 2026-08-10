@@ -24,6 +24,11 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Preparar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
       - name: Selecionar e mover até 1 artigo
         shell: bash
         run: |
@@ -83,21 +88,12 @@ jobs:
 
           for FILE in "${FILES[@]}"; do
             NAME="$(basename "$FILE")"
-            if ! grep -q '^chegada:' "$FILE"; then
-              ARRIVAL="$(git log --reverse --format=%cI -- "$FILE" | head -n 1)"
-              if [[ -z "$ARRIVAL" ]]; then
-                echo "::error::Não foi possível confirmar a chegada de $NAME no histórico Git."
-                exit 1
-              fi
-              sed -i "/^publicado:/a chegada: $ARRIVAL" "$FILE"
-            fi
-            if ! grep -q '^publicado_em:' "$FILE"; then
-              PUBLISHED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-              sed -i "/^chegada:/a publicado_em: $PUBLISHED_AT" "$FILE"
-            fi
+            node scripts/preparar-publicacao-artigos.mjs "$FILE"
             git mv -- "$FILE" "$DESTINATION/$NAME"
             echo "Movido: $NAME"
           done
+
+          npm run validate:dates
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
