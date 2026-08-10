@@ -16,6 +16,10 @@ concurrency:
 jobs:
   publicar:
     runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_TEXT_MODEL: gpt-4.1-mini
+      OPENAI_IMAGE_MODEL: gpt-image-2
 
     steps:
       - name: Obter repositório
@@ -29,7 +33,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - name: Selecionar e mover até 1 artigo
+      - name: Selecionar, preparar imagem e mover 1 artigo
         shell: bash
         run: |
           set -euo pipefail
@@ -88,15 +92,30 @@ jobs:
 
           for FILE in "${FILES[@]}"; do
             NAME="$(basename "$FILE")"
+            SLUG="${NAME%.mdx}"
+
+            node scripts/preparar-imagem-artigo.mjs "$FILE"
             node scripts/preparar-publicacao-artigos.mjs "$FILE"
+
             git mv -- "$FILE" "$DESTINATION/$NAME"
             git add -- "$DESTINATION/$NAME"
-            echo "Movido: $NAME"
+
+            if [[ -f "imagens/artigos/$SLUG.png" ]]; then
+              git add -- "imagens/artigos/$SLUG.png"
+            fi
+
+            echo "Preparado e movido: $NAME"
           done
 
           npm run validate:dates
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Publicar $COUNT artigos automaticamente"
+
+          if git diff --cached --quiet; then
+            echo "Sem alterações para publicar."
+            exit 0
+          fi
+
+          git commit -m "Publicar $COUNT artigo com imagem automática"
           git push origin HEAD:main
