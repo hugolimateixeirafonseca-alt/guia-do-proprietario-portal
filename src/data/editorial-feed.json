@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-10T11:14:50.717Z",
+  "generatedAt": "2026-08-10T11:31:26.997Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 72,
-    "published": 58,
+    "published": 60,
     "newsOnline": 10
   },
   "articles": [
@@ -880,14 +880,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "limpeza-profunda-casa.mdx",
       "arrivedAt": "2026-08-06T14:49:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-10T11:25:04Z",
+      "url": "https://guiadoproprietario.pt/casa/limpeza-profunda-casa/"
     },
     {
       "id": "SC06",
@@ -1216,14 +1216,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "escolher-aquecimento-agua.mdx",
       "arrivedAt": "2026-08-06T14:49:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-10T11:18:05Z",
+      "url": "https://guiadoproprietario.pt/casa/escolher-aquecimento-agua/"
     },
     {
       "id": "SC27",
