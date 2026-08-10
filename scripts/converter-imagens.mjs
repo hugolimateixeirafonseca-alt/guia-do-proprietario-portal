@@ -6,14 +6,17 @@ const raiz = path.resolve(import.meta.dirname, "..");
 const origem = path.join(raiz, "imagens");
 const destino = path.join(raiz, "public", "imagens");
 const extensoes = new Set([".png", ".jpg", ".jpeg"]);
+const limiteAvif = 35 * 1024;
 
 async function listarImagens(diretorio) {
   const entradas = await fs.readdir(diretorio, { withFileTypes: true });
-  const ficheiros = await Promise.all(entradas.map(async (entrada) => {
-    const caminho = path.join(diretorio, entrada.name);
-    if (entrada.isDirectory()) return listarImagens(caminho);
-    return extensoes.has(path.extname(entrada.name).toLowerCase()) ? [caminho] : [];
-  }));
+  const ficheiros = await Promise.all(
+    entradas.map(async (entrada) => {
+      const caminho = path.join(diretorio, entrada.name);
+      if (entrada.isDirectory()) return listarImagens(caminho);
+      return extensoes.has(path.extname(entrada.name).toLowerCase()) ? [caminho] : [];
+    }),
+  );
   return ficheiros.flat();
 }
 
@@ -30,6 +33,21 @@ async function precisaDeConversao(fonte, alvos) {
   return false;
 }
 
+async function criarAvifAbaixoDoLimite(imagem, fonte) {
+  const qualidades = [58, 54, 50, 46, 42, 38, 34, 30];
+  let ultimo = null;
+
+  for (const quality of qualidades) {
+    ultimo = await imagem.clone().avif({ quality, effort: 5 }).toBuffer();
+    if (ultimo.length < limiteAvif) return ultimo;
+  }
+
+  throw new Error(
+    `${path.relative(raiz, fonte)}: não foi possível obter AVIF abaixo de 35 KB ` +
+      `(último resultado ${(ultimo.length / 1024).toFixed(1)} KB).`,
+  );
+}
+
 const fontes = await listarImagens(origem);
 let convertidas = 0;
 
@@ -43,11 +61,21 @@ for (const fonte of fontes) {
   if (!(await precisaDeConversao(fonte, [avif, webp]))) continue;
 
   await fs.mkdir(pastaAlvo, { recursive: true });
-  const imagem = sharp(fonte).rotate();
-  await Promise.all([
-    imagem.clone().avif({ quality: 58, effort: 5 }).toFile(avif),
-    imagem.clone().webp({ quality: 78, effort: 5 }).toFile(webp)
+
+  const imagem = sharp(fonte)
+    .rotate()
+    .resize(1200, 675, { fit: "cover", position: "centre" });
+
+  const [avifBuffer, webpBuffer] = await Promise.all([
+    criarAvifAbaixoDoLimite(imagem, fonte),
+    imagem.clone().webp({ quality: 78, effort: 5 }).toBuffer(),
   ]);
+
+  await Promise.all([
+    fs.writeFile(avif, avifBuffer),
+    fs.writeFile(webp, webpBuffer),
+  ]);
+
   convertidas += 1;
 }
 
