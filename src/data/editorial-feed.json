@@ -6,7 +6,7 @@
     "planned": 84,
     "written": 72,
     "published": 60,
-    "newsOnline": 10
+    "newsOnline": 11
   },
   "articles": [
     {
@@ -1371,6 +1371,18 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-10-160712115-noticia-41",
+      "title": "Custos de construção de habitação nova aumentaram 7,2% em junho",
+      "summary": "O Índice de Custos de Construção de Habitação Nova subiu 7,2% em junho de 2026 face a junho de 2025. A mão-de-obra registou uma subida de 8%, contribuindo com 3,7 pontos percentuai",
+      "pillar": "casa",
+      "publishedAt": "2026-08-10",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-10-160712115-noticia-41/",
+      "source": {
+        "name": "SAPO",
+        "url": "https://sapo.pt/artigo/custos-de-construcao-de-habitacao-nova-aumentaram-7-2-em-junho-6a79b62a0c6041370057992d"
+      }
+    },
     {
       "slug": "2026-08-08-194805093-noticia-40",
       "title": "Novas regras para a taxa de esforço no crédito à habitação entram em vigor",
