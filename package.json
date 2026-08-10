@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.19 <23"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "npm run images:convert && npm run validate:data && npm run validate:dates && npm run validate:copy && npm run validate:images && npm run generate:og && npm run images:noticias && astro check && astro build && npm run validate:termo",
@@ -16,6 +19,7 @@
     "dados:ine": "node scripts/obter-precos-ine.mjs",
     "dados:imi": "node scripts/obter-taxas-imi.mjs --ano 2025",
     "content:backfill-dates": "node scripts/preencher-chegada-artigos.mjs --write",
+    "content:prepare-publish": "node scripts/preparar-publicacao-artigos.mjs",
     "validate:dates": "node scripts/preencher-chegada-artigos.mjs",
     "validate:images": "node scripts/validar-imagens-artigos.mjs",
     "test": "npm run test:subscribe",

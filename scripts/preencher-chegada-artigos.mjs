@@ -3,6 +3,7 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { lerDatasFrontmatter, preencherDatasFrontmatter } from "./lib/datas-artigos.mjs";
 
 const execFileAsync = promisify(execFile);
 const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -38,32 +39,21 @@ const changes = [];
 for (const file of files) {
   const filePath = path.join(articlesDirectory, file);
   const source = await readFile(filePath, "utf8");
-  const hasArrival = /^chegada:\s*.+$/m.test(source);
-  const hasPublishedAt = /^publicado_em:\s*.+$/m.test(source);
+  const { chegada, publicadoEm } = lerDatasFrontmatter(source);
+  const hasArrival = Boolean(chegada);
+  const hasPublishedAt = Boolean(publicadoEm);
   if (hasArrival && hasPublishedAt) continue;
 
   const { arrivalAt, publishedAt } = await realDates(file);
   if (!arrivalAt) throw new Error("Não foi possível confirmar a chegada de " + file + " no histórico Git.");
   if (!publishedAt) throw new Error("Não foi possível confirmar a publicação de " + file + " no histórico Git.");
 
-  const publicationLine = source.match(/^publicado:[^\r\n]*(\r?\n)/m);
-  if (!publicationLine) throw new Error("O artigo não tem o campo publicado: " + file);
-
   changes.push({ file, arrivalAt, publishedAt });
   if (shouldWrite) {
-    let nextSource = source;
-    if (!hasArrival) {
-      nextSource = nextSource.replace(
-        publicationLine[0],
-        publicationLine[0] + "chegada: " + arrivalAt + publicationLine[1],
-      );
-    }
-    if (!hasPublishedAt) {
-      nextSource = nextSource.replace(
-        /^(chegada:[^\r\n]*)(\r?\n)/m,
-        "$1$2publicado_em: " + publishedAt + "$2",
-      );
-    }
+    const nextSource = preencherDatasFrontmatter(source, {
+      chegada: arrivalAt,
+      publicadoEm: publishedAt,
+    });
     await writeFile(filePath, nextSource, "utf8");
   }
 }
