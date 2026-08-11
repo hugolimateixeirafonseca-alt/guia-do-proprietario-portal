@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-11T22:54:01.562Z",
+  "generatedAt": "2026-08-11T23:05:40.876Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 78,
-    "published": 62,
+    "published": 64,
     "newsOnline": 11
   },
   "articles": [
@@ -848,14 +848,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "vale-a-pena-isolar-casa.mdx",
       "arrivedAt": "2026-08-06T15:14:22+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-11T22:35:11Z",
+      "url": "https://guiadoproprietario.pt/casa/vale-a-pena-isolar-casa/"
     },
     {
       "id": "SC04",
@@ -1232,14 +1232,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "escolher-janelas.mdx",
       "arrivedAt": "2026-08-06T15:14:22+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-11T22:35:11Z",
+      "url": "https://guiadoproprietario.pt/casa/escolher-janelas/"
     },
     {
       "id": "SC28",
