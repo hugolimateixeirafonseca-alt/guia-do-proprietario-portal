@@ -8,12 +8,11 @@ interface ItemCusto {
 interface Props {
   titulo: string;
   itens: ItemCusto[];
-  pilotoMobile?: boolean;
 }
 
-const { titulo, itens, pilotoMobile = false } = Astro.props;
+const { titulo, itens } = Astro.props;
 ---
-<section class:list={["costs", pilotoMobile && "costs-mobile-cards"]} aria-labelledby="custos-titulo">
+<section class="costs costs-mobile-cards" aria-labelledby="custos-titulo">
   <h2 id="custos-titulo">{titulo}</h2>
   <div class="table-wrap">
     <table>
