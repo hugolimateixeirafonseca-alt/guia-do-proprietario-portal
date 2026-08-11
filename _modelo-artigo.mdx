@@ -35,6 +35,8 @@ perguntas_rapidas:
 # Quadro de custos apresentado antes do corpo do artigo. OPCIONAL.
 # Se usar este bloco, inclua pelo menos um item.
 # O intervalo tem obrigatoriamente a palavra «a», por exemplo «4 € a 16 € por m²».
+# No computador, o quadro aparece como tabela. No telemóvel, cada item aparece automaticamente como um cartão vertical sem scroll horizontal.
+# Escreva cada item, intervalo e nota para funcionar isoladamente no respetivo cartão.
 custos:
   titulo: "Intervalos para preparar o orçamento"
   itens:
@@ -108,6 +110,22 @@ Artigo detalhado:
 - exemplo é opcional e pode ser removido
 - perguntas_rapidas é opcional e pode ser removido
 - os restantes campos obrigatórios mantêm-se
+
+QUADROS E TABELAS RESPONSIVOS
+
+- Para preços, custos ou orçamentos, prefira sempre o bloco custos do frontmatter.
+- Para outras comparações, pode usar uma tabela Markdown normal no corpo do artigo.
+- Todas as colunas precisam de cabeçalhos curtos, claros e diferentes entre si. Nunca deixe um cabeçalho vazio.
+- Prefira duas ou três colunas. Divida uma comparação maior em dois quadros quando isso facilitar a leitura.
+- Cada célula deve conter uma ideia completa e compreensível fora da grelha. Evite parágrafos longos, quebras de linha manuais e HTML dentro das células.
+- No telemóvel, cada linha transforma-se automaticamente num cartão vertical com os nomes das colunas. Não crie wrappers com scroll horizontal nem duplique a tabela para mobile.
+
+Exemplo de tabela Markdown:
+
+| Opção | Prazo | Quando faz sentido |
+| --- | --- | --- |
+| Solução A | 2 a 3 dias | Para uma intervenção simples |
+| Solução B | 1 a 2 semanas | Quando existem trabalhos preparatórios |
 
 Para publicar:
 1. Copie este ficheiro para src/content/artigos/.

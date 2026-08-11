@@ -51,7 +51,7 @@ const artigosSemelhantes = obterArtigosSemelhantes(artigo, todosArtigos);
     <aside class="quick-answer"><h2>{artigo.data.nivel === "essencial" ? "O essencial" : "Resposta rápida"}</h2><p>{artigo.data.resposta_rapida}</p></aside>
     {artigo.data.exemplo && <aside class="number-example"><h2>{artigo.data.exemplo.titulo}</h2><p>{artigo.data.exemplo.texto}</p></aside>}
     {artigo.data.aviso !== "nenhum" && <aside class="notice">{avisos[artigo.data.aviso]}</aside>}
-    {artigo.data.custos && <Custos titulo={artigo.data.custos.titulo} itens={artigo.data.custos.itens} pilotoMobile={artigo.id === "ar-condicionado-ou-bomba-de-calor"} />}
+    {artigo.data.custos && <Custos titulo={artigo.data.custos.titulo} itens={artigo.data.custos.itens} />}
     <div class="article-body"><Content components={{ Termo }} /></div>
     {artigo.data.perguntas_rapidas && <section class="quick-questions"><h2>Perguntas rápidas</h2>{artigo.data.perguntas_rapidas.map((item) => <details><summary>{item.pergunta}</summary><p>{item.resposta}</p></details>)}</section>}
     {artigoPar && <aside class="paired-article"><p>{artigo.data.nivel === "essencial" ? "Prefere a versão completa?" : "Prefere a versão simples?"}</p><a href={`/${artigoPar.data.pilar}/${artigoPar.id}/`}>{artigoPar.data.titulo}</a></aside>}
@@ -80,6 +80,20 @@ const artigosSemelhantes = obterArtigosSemelhantes(artigo, todosArtigos);
     )}
   </article>
   {NEWSLETTER_ATIVA && <Newsletter />}
+  <script>
+    document.querySelectorAll<HTMLTableElement>(".article-body table").forEach((table) => {
+      const headers = Array.from(table.querySelectorAll<HTMLTableCellElement>("thead th"))
+        .map((header) => header.textContent?.trim() ?? "");
+      if (!headers.length) return;
+
+      table.classList.add("mobile-card-table");
+      table.querySelectorAll<HTMLTableRowElement>("tbody tr").forEach((row) => {
+        Array.from(row.cells).forEach((cell, index) => {
+          cell.dataset.label = headers[index] || `Coluna ${index + 1}`;
+        });
+      });
+    });
+  </script>
   <script is:inline type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
   {faqSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
 </BaseLayout>
