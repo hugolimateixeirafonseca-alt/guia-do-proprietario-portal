@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-10T20:05:02.272Z",
+  "generatedAt": "2026-08-11T08:02:03.917Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 72,
-    "published": 61,
+    "published": 62,
     "newsOnline": 11
   },
   "articles": [
@@ -864,14 +864,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "vidro-duplo-compensa.mdx",
       "arrivedAt": "2026-08-06T15:14:22+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-11T07:01:23Z",
+      "url": "https://guiadoproprietario.pt/casa/vidro-duplo-compensa/"
     },
     {
       "id": "SC05",
