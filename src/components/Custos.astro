@@ -8,11 +8,12 @@ interface ItemCusto {
 interface Props {
   titulo: string;
   itens: ItemCusto[];
+  pilotoMobile?: boolean;
 }
 
-const { titulo, itens } = Astro.props;
+const { titulo, itens, pilotoMobile = false } = Astro.props;
 ---
-<section class="costs" aria-labelledby="custos-titulo">
+<section class:list={["costs", pilotoMobile && "costs-mobile-cards"]} aria-labelledby="custos-titulo">
   <h2 id="custos-titulo">{titulo}</h2>
   <div class="table-wrap">
     <table>
@@ -20,7 +21,13 @@ const { titulo, itens } = Astro.props;
         <tr><th>Trabalho</th><th>Intervalo de preço</th><th>O que faz variar</th></tr>
       </thead>
       <tbody>
-        {itens.map((item) => <tr><td>{item.item}</td><td><strong>{item.intervalo}</strong></td><td>{item.nota}</td></tr>)}
+        {itens.map((item) => (
+          <tr>
+            <td data-label="Trabalho">{item.item}</td>
+            <td data-label="Intervalo de preço"><strong>{item.intervalo}</strong></td>
+            <td data-label="O que faz variar">{item.nota}</td>
+          </tr>
+        ))}
       </tbody>
     </table>
   </div>
