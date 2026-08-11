@@ -399,6 +399,57 @@ th { font-size: 11px; text-transform: uppercase; }
   .mini-map { min-height: 230px; }
   .termo-definicao { position: absolute; right: 0; left: auto; bottom: calc(100% + 8px); width: min(280px, calc(100vw - 44px)); }
   .costs { padding: 18px; }
+  .costs-mobile-cards .table-wrap { overflow: visible; }
+  .costs-mobile-cards table,
+  .costs-mobile-cards tbody { display: block; width: 100%; }
+  .costs-mobile-cards thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .costs-mobile-cards tbody { display: grid; gap: 12px; }
+  .costs-mobile-cards tr {
+    display: grid;
+    gap: 14px;
+    padding: 18px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .costs-mobile-cards td {
+    display: block;
+    padding: 0;
+    border: 0;
+    line-height: 1.5;
+  }
+  .costs-mobile-cards td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+  .costs-mobile-cards td:first-child {
+    color: var(--ink);
+    font-size: 17px;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+  .costs-mobile-cards td:first-child::before { display: none; }
+  .costs-mobile-cards td strong {
+    display: block;
+    font-size: 18px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+  .costs-mobile-cards td:last-child { color: var(--muted); font-size: 14px; }
   .path-options { grid-template-columns: 1fr; }
   .simulator-shell { width: calc(100% - 28px); padding: 22px 18px; }
 }
