@@ -6,7 +6,7 @@
     "planned": 84,
     "written": 78,
     "published": 65,
-    "newsOnline": 11
+    "newsOnline": 12
   },
   "articles": [
     {
@@ -1483,6 +1483,18 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-12-143351997-noticia-53",
+      "title": "Herdeiros são chamados por ordem e estes são os bens que podem receber",
+      "summary": "Os herdeiros são chamados por uma ordem legal definida para receberem os bens de uma herança. A notícia explica as diferentes categorias de ativos que podem ser transmitidos, inclu",
+      "pillar": "impostos",
+      "publishedAt": "2026-08-12",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-12-143351997-noticia-53/",
+      "source": {
+        "name": "Notícias ao Minuto",
+        "url": "https://www.noticiasaominuto.com/economia/3035057/herdeiros-sao-chamados-por-ordem-e-estes-sao-os-bens-que-podem-receber"
+      }
+    },
     {
       "slug": "2026-08-10-160712115-noticia-41",
       "title": "Custos de construção de habitação nova aumentaram 7,2% em junho",
