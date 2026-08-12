@@ -67,6 +67,8 @@ h3 { font-size: 21px; }
 .section-heading { max-width: 760px; margin-bottom: 36px; }
 .section-heading h2 { margin: 0 0 12px; }
 .section-heading p { margin: 0; color: var(--muted); }
+.section-actions { margin-top: 30px; display: flex; justify-content: center; }
+.section-actions .button { min-width: 220px; }
 .recent-articles-section { padding-top: 68px; background: var(--paper); }
 .featured-section { padding-bottom: 0; }
 .featured-heading { margin-bottom: 22px; }
@@ -93,6 +95,10 @@ h3 { font-size: 21px; }
 .pillar-card h3 { margin: 0 0 8px; }
 .pillar-card p { margin: 0; color: var(--muted); font-size: 13px; }
 .article-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.article-archive-intro { padding-bottom: 34px; }
+.topic-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.topic-links a { padding: 10px 14px; color: var(--green-dark); background: var(--green-soft); border: 1px solid #cbded6; border-radius: 999px; text-decoration: none; font-size: 13px; font-weight: 750; }
+.topic-links a:hover { color: white; background: var(--green); border-color: var(--green); }
 .current-month { padding-top: 64px; }
 .current-grid { display: block; }
 .deadlines { min-width: 0; }

@@ -111,6 +111,9 @@ const perguntasDoDia = [
           </article>
         ))}
       </div>
+      <div class="section-actions">
+        <a class="button" href="/artigos/">Ver todos os artigos</a>
+      </div>
     </div>
   </section>
 
@@ -127,7 +130,9 @@ const perguntasDoDia = [
           </article>
         ))}
       </div>
-      <p class="section-link"><a href="/novidades/">Todas as novidades</a></p>
+      <div class="section-actions">
+        <a class="button" href="/novidades/">Ver todas as novidades</a>
+      </div>
     </div>
   </section>
 
@@ -148,6 +153,9 @@ const perguntasDoDia = [
             <h3>{item.pergunta}</h3>
           </a>
         ))}
+      </div>
+      <div class="section-actions">
+        <a class="button secondary" href="/casa/">Ver mais respostas sobre casa</a>
       </div>
     </div>
   </section>
@@ -174,6 +182,9 @@ const perguntasDoDia = [
     <div class="container">
       <div class="section-heading"><p class="eyebrow">PARA LER COM CALMA</p><h2>Guias que explicam tudo, passo a passo.</h2></div>
       <div class="article-grid">{artigos.map((artigo) => <ArticleCard artigo={artigo} />)}</div>
+      <div class="section-actions">
+        <a class="button" href="/artigos/">Explorar todos os guias e artigos</a>
+      </div>
     </div>
   </section>
 
@@ -182,6 +193,9 @@ const perguntasDoDia = [
       <div class="section-heading"><p class="eyebrow">Calendário</p><h2>Este mês</h2></div>
       <div class="current-grid">
         <ProximosPrazos dataBuild={new Date()} />
+      </div>
+      <div class="section-actions">
+        <a class="button secondary" href="/calendario/">Ver calendário completo</a>
       </div>
     </div>
   </section>

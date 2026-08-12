@@ -1,0 +1,38 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ArticleCard from "../../components/ArticleCard.astro";
+import { pilares } from "../../config";
+import { compararPorPublicacao } from "../../lib/artigos";
+
+const artigos = (await getCollection("artigos", ({ data }) => !data.rascunho))
+  .sort(compararPorPublicacao);
+---
+<BaseLayout
+  titulo="Todos os artigos"
+  descricao="Consulte todos os artigos do Guia do Proprietário sobre casa, impostos, arrendamento, condomínio e venda."
+>
+  <section class="hero article-archive-intro">
+    <div class="container">
+      <p class="eyebrow">GUIA DO PROPRIETÁRIO</p>
+      <h1>Todos os artigos</h1>
+      <p class="hero-copy">Encontre respostas práticas para cuidar da casa, tomar decisões e cumprir obrigações sem perder tempo.</p>
+      <nav class="topic-links" aria-label="Explorar artigos por tema">
+        {pilares.map((pilar) => <a href={`/${pilar.slug}/`}>{pilar.nome}</a>)}
+      </nav>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="arquivo-artigos-titulo">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">ARQUIVO COMPLETO</p>
+        <h2 id="arquivo-artigos-titulo">Explore os artigos mais recentes</h2>
+        <p>{artigos.length} artigos publicados, dos mais recentes para os mais antigos.</p>
+      </div>
+      <div class="article-grid">
+        {artigos.map((artigo) => <ArticleCard artigo={artigo} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
