@@ -79,9 +79,10 @@ async function initSchema() {
   for (const statement of statements) await d1(statement);
 }
 
-const MEDIA_DOMAINS = [
-  'cnnportugal.iol.pt','rtp.pt','eco.sapo.pt','jornaleconomico.sapo.pt','dinheirovivo.dn.pt',
-  'idealista.pt','executivedigest.sapo.pt','publico.pt','expresso.pt','observador.pt'
+const MEDIA_DOMAIN_GROUPS = [
+  ['cnnportugal.iol.pt','rtp.pt','jn.pt','sicnoticias.pt','publico.pt'],
+  ['eco.sapo.pt','jornaleconomico.sapo.pt','jornaldenegocios.pt','dinheirovivo.dn.pt','dn.pt','rr.pt'],
+  ['idealista.pt','executivedigest.sapo.pt','expresso.pt','observador.pt','noticiasaominuto.com']
 ];
 const OFFICIAL_DOMAINS = [
   'diariodarepublica.pt','gov.pt','parlamento.pt','ine.pt','bportugal.pt','portaldasfinancas.gov.pt','adene.pt'
@@ -96,11 +97,14 @@ const thematicSweeps = [
   {name:'herancas_propriedade',topic:'heranças imóveis propriedade Portugal'}
 ];
 const sourceSweeps = [
-  {name:'fontes_media',topic:'habitação casas proprietários arrendamento condomínios impostos crédito obras Portugal',allowedDomains:MEDIA_DOMAINS},
-  {name:'fontes_oficiais',topic:'habitação proprietários imóveis arrendamento impostos crédito energia Portugal',allowedDomains:OFFICIAL_DOMAINS}
+  {name:'fontes_media_a',type:'media',topic:'habitação casas proprietários arrendamento condomínios impostos crédito obras Portugal',allowedDomains:MEDIA_DOMAIN_GROUPS[0]},
+  {name:'fontes_media_b',type:'media',topic:'habitação casas proprietários arrendamento condomínios impostos crédito obras Portugal',allowedDomains:MEDIA_DOMAIN_GROUPS[1]},
+  {name:'fontes_media_c',type:'media',topic:'habitação casas proprietários arrendamento condomínios impostos crédito obras Portugal',allowedDomains:MEDIA_DOMAIN_GROUPS[2]},
+  {name:'fontes_oficiais',type:'official',topic:'habitação proprietários imóveis arrendamento impostos crédito energia Portugal',allowedDomains:OFFICIAL_DOMAINS}
 ];
 const omissionSweep = {
   name:'omissoes_editor_chefe',
+  type:'omission',
   topic:'notícias mais importantes das últimas 36 horas em Portugal para alguém que possui uma casa, mesmo fora das categorias habituais'
 };
 
@@ -117,8 +121,14 @@ function lisbonDateTime(date) {
   return `${parts.day}-${parts.month}-${parts.year} ${parts.hour}:${parts.minute}`;
 }
 
-function searcherPrompt(topic) {
-  return `Pesquisa amplamente na web portuguesa notícias recentes relacionadas com ${topic}. Procura resultados dos últimos dias, privilegiando notícias novas. Apresenta até 10 resultados. Para cada resultado indica título, fonte, data se disponível e uma frase sobre o assunto. Cita cada resultado com a respetiva fonte web. Não faças ainda avaliação editorial.`;
+function searcherPrompt(topic, currentTime, sweepType='thematic') {
+  const windowHours=sweepType==='official' ? 72 : 36;
+  const window={
+    start:lisbonDateTime(new Date(currentTime.getTime() - windowHours * 60 * 60 * 1000)),
+    end:lisbonDateTime(currentTime)
+  };
+  const prompt=`Pesquisa amplamente na web portuguesa notícias recentes relacionadas com ${topic}. Agora são ${window.end} em Portugal. Procura prioritariamente páginas PUBLICADAS entre ${window.start} e ${window.end}. Não cites artigos antigos apenas porque são muito relevantes para o tema. Se encontrares menos resultados dentro da janela, devolve menos resultados em vez de preencher com notícias antigas.\n\nCombina uma pesquisa geral pelo tema, pelo menos uma pesquisa orientada a hoje e pelo menos uma pesquisa orientada a ontem, usando as datas portuguesas atuais em linguagem natural quando for útil. Não uses after:, before:, site:pt ou cadeias extensas de OR. Não obrigues todas as pesquisas a conter uma data.\n\nApresenta até 10 resultados. Para cada resultado indica título, fonte, data se disponível e uma frase sobre o assunto. Cita cada resultado com a respetiva fonte web. Não faças ainda avaliação editorial.`;
+  return {prompt,window};
 }
 
 function canonicalUrl(value) {
@@ -134,7 +144,7 @@ function canonicalUrl(value) {
   } catch { return ''; }
 }
 
-function extractSearchResults(output, sweep) {
+function extractSearchResults(output, sweep, {limit=10,allowSourcesFallback=true}={}) {
   const collect=(entries) => {
     const byUrl=new Map();
     for (const entry of entries) {
@@ -142,7 +152,7 @@ function extractSearchResults(output, sweep) {
       const url=canonicalUrl(urlValue);
       if (!url || byUrl.has(url)) continue;
       byUrl.set(url,{url,title,source_domain:new URL(url).hostname,sweep});
-      if (byUrl.size === 10) break;
+      if (byUrl.size === limit) break;
     }
     return [...byUrl.values()];
   };
@@ -158,6 +168,7 @@ function extractSearchResults(output, sweep) {
   }
   const citedResults=collect(citations);
   if (citedResults.length) return {results:citedResults,citedCount:citedResults.length};
+  if (!allowSourcesFallback) return {results:[],citedCount:0};
 
   const fallbackSources=[];
   for (const item of output || []) {
@@ -170,18 +181,40 @@ function extractSearchResults(output, sweep) {
   return {results:collect(fallbackSources),citedCount:0};
 }
 
-async function searchSweep({name,topic,allowedDomains=[]}) {
-  const response=await openai({model:CFG.openaiModelSearch,prompt:searcherPrompt(topic),web:true,effort:'low',allowedDomains});
+async function searchSweep({name,topic,type='thematic',allowedDomains=[]}, currentTime) {
+  const {prompt,window}=searcherPrompt(topic,currentTime,type);
+  const response=await openai({model:CFG.openaiModelSearch,prompt,web:true,effort:'low',allowedDomains});
   const {results,citedCount}=extractSearchResults(response.raw.output,name);
   if (CFG.dryRun) {
     console.log(JSON.stringify({
       stage:'searcher',
       sweep:name,
+      window_start:window.start,
+      window_end:window.end,
       urls_found:results.length,
       titles:results.map(result => result.title).filter(Boolean).slice(0,10)
     }));
   }
   return {results,citedCount};
+}
+
+async function freshnessRescue(currentTime, processedUrls) {
+  const window={
+    start:lisbonDateTime(new Date(currentTime.getTime() - 36 * 60 * 60 * 1000)),
+    end:lisbonDateTime(currentTime)
+  };
+  const prompt=`Procura apenas notícias publicadas hoje ou ontem em Portugal que possam ser úteis para alguém que possui uma casa. Dá prioridade a legislação, condomínios, arrendamento, preços das casas, venda, crédito habitação, Euribor, impostos, obras, energia e direitos de propriedade. Agora são ${window.end} em Portugal e a janela começa em ${window.start}. Não cites páginas anteriores à janela indicada. Apresenta até 12 resultados, com título, fonte, data e uma frase factual. Cita cada resultado com a respetiva fonte web.`;
+  const response=await openai({model:CFG.openaiModelSearch,prompt,web:true,effort:'low'});
+  const {results}=extractSearchResults(response.raw.output,'freshness_rescue',{limit:12,allowSourcesFallback:false});
+  const freshResults=results.filter(result => !processedUrls.has(canonicalUrl(result.url)));
+  if (CFG.dryRun) {
+    console.log(JSON.stringify({
+      stage:'freshness_rescue',
+      urls_found:freshResults.length,
+      titles:freshResults.map(result => result.title).filter(Boolean).slice(0,12)
+    }));
+  }
+  return freshResults;
 }
 
 function validatorPrompt(sources, window) {
@@ -273,7 +306,7 @@ async function discover() {
   const sweepDefinitions=[...selectedThemes,...sourceSweeps,omissionSweep];
   const searches=[];
   for (const definition of sweepDefinitions) {
-    const search=await searchSweep(definition);
+    const search=await searchSweep(definition,currentTime);
     searches.push({...search,name:definition.name});
     await sleep(250);
   }
@@ -293,7 +326,21 @@ async function discover() {
       unique_urls:sources.length
     }));
   }
-  return validateSearchResults(sources,currentTime);
+  const firstPass=await validateSearchResults(sources,currentTime);
+  let rescue=[];
+  if (!firstPass.length) {
+    const rescueSources=await freshnessRescue(currentTime,new Set(sourceMap.keys()));
+    if (rescueSources.length) rescue=await validateSearchResults(rescueSources,currentTime);
+  }
+  if (CFG.dryRun) {
+    console.log(JSON.stringify({
+      stage:'freshness_summary',
+      validated_first_pass:firstPass.length,
+      validated_rescue:rescue.length,
+      validated_total:firstPass.length+rescue.length
+    }));
+  }
+  return [...firstPass,...rescue];
 }
 
 async function historicalContext(candidate) {
