@@ -85,10 +85,12 @@ def main() -> int:
         outro_path = work / "scene-outro.png"
         outro.save(outro_path)
 
-        save_contact_sheet(
-            [("Introdução", intro), ("Passo 1", steps[0]), ("Passo 3", steps[min(2, len(steps) - 1)]), ("Passos completos", steps[-1]), ("Aviso", warning), ("Fecho", outro)],
-            contact,
-        )
+        if data["template"] == "ordered_steps":
+            review_items = [("Introdução", intro), ("Passo 1", steps[0]), ("Passo 3", steps[min(2, len(steps) - 1)]), ("Passos completos", steps[-1]), ("Aviso", warning), ("Fecho", outro)]
+        else:
+            item_label = "Fator" if data["template"] == "cost_highlight" else "Passo"
+            review_items = [("Introdução", intro), (f"{item_label} 1", steps[0]), (f"{item_label} {min(3, len(steps))}", steps[min(2, len(steps) - 1)]), ("Progressão completa", steps[-1]), ("Destaque", warning), ("Fecho", outro)]
+        save_contact_sheet(review_items, contact)
         audio_added = encode_video(args.ffmpeg, args.ffprobe, {"intro": intro_path, "steps": step_paths, "warning": warning_path, "outro": outro_path}, output, work, audio)
 
     result = probe_video(args.ffprobe, output, expected_audio=audio_added)

@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "template": "problem_solution",
+  "slug": "vizinho-barulhento",
+  "category": "CASA",
+  "heroImage": "public/imagens/artigos/vizinho-barulhento.avif",
+  "intro": {
+    "title": "Vizinho barulhento?",
+    "accent": "Comece por aqui.",
+    "label": "3 PASSOS, POR ORDEM",
+    "subtitle": "Tente resolver primeiro. Escale apenas quando for necessário."
+  },
+  "progress": {
+    "eyebrow": "3 passos, por ordem",
+    "title": "Comece pelo mais simples.",
+    "itemLabel": "passos"
+  },
+  "steps": [
+    { "number": 1, "title": "Fale primeiro com o vizinho" },
+    { "number": 2, "title": "Entre as 23h e as 7h, pode chamar as autoridades" },
+    { "number": 3, "title": "Obras ruidosas: dias úteis, 8h–20h" }
+  ],
+  "warning": {
+    "eyebrow": "Antes de escalar",
+    "title": "Não comece logo pela queixa formal.",
+    "body": "Esgote primeiro a conversa e, se existir, a via do condomínio.",
+    "secondary": "Os passos legais existem, mas são os últimos, não os primeiros."
+  },
+  "outro": {
+    "title": "Primeiro tente resolver. Depois escale.",
+    "label": "Artigo completo no",
+    "brand": "Guia do Proprietário",
+    "domain": "guiadoproprietario.pt"
+  }
+}

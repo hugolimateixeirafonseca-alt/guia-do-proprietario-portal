@@ -213,7 +213,7 @@ def probe_video(ffprobe_value: str, output: Path, expected_audio: bool = False) 
     audio_duration = float(audio_streams[0].get("duration", duration)) if audio_streams else None
     if audio_duration is not None and abs(audio_duration - duration) > 0.05:
         errors.append(f"duração do áudio {audio_duration:.3f}s difere do vídeo {duration:.3f}s")
-    if not 29 <= duration <= 32:
+    if not 25 <= duration <= 32:
         errors.append(f"duração {duration:.3f}s")
     if errors:
         raise RuntimeError("O MP4 falhou a validação: " + ", ".join(errors))

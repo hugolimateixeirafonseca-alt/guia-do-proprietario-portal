@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "template": "cost_highlight",
+  "slug": "ar-condicionado-quanto-custa",
+  "category": "CASA",
+  "heroImage": "public/imagens/artigos/ar-condicionado-quanto-custa.avif",
+  "intro": {
+    "title": "Quanto custa instalar",
+    "accent": "ar condicionado?",
+    "label": "CUSTO PARA UMA DIVISÃO",
+    "subtitle": "O preço da máquina é apenas uma parte do orçamento."
+  },
+  "highlight": {
+    "amount": "400 € a 900 €",
+    "caption": "Para uma divisão, com equipamento e instalação"
+  },
+  "progress": {
+    "eyebrow": "O que faz o preço subir",
+    "title": "A casa também conta.",
+    "itemLabel": "fatores"
+  },
+  "steps": [
+    { "number": 1, "title": "Tubagem e distância" },
+    { "number": 2, "title": "Falta de pré-instalação" },
+    { "number": 3, "title": "Acesso difícil à unidade exterior" }
+  ],
+  "warning": {
+    "eyebrow": "Várias divisões",
+    "title": "Vai climatizar várias divisões?",
+    "body": "Um sistema multisplit exige mais equipamento, tubagem e planeamento.",
+    "secondary": "O número de unidades e as obras necessárias fazem subir o preço."
+  },
+  "outro": {
+    "title": "O preço da máquina não conta a história toda.",
+    "label": "Artigo completo no",
+    "brand": "Guia do Proprietário",
+    "domain": "guiadoproprietario.pt"
+  }
+}

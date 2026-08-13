@@ -102,7 +102,8 @@ def _eyebrow(draw: ImageDraw.ImageDraw, text: str, xy: tuple[int, int]) -> None:
 
 
 def render_intro(data: dict) -> Image.Image:
-    image = _canvas(data["category"], "01  •  HERDEI UMA CASA")
+    folio = "01  •  HERDEI UMA CASA" if data["template"] == "ordered_steps" else f"01  •  {data['category']}"
+    image = _canvas(data["category"], folio)
     draw = ImageDraw.Draw(image)
     hero = _cover(data["_hero_path"], (896, 610), 0.45)
     _paste_card(image, hero, (MARGIN, CONTENT_TOP), radius=20)
@@ -116,10 +117,20 @@ def render_intro(data: dict) -> Image.Image:
 
 
 def render_steps(data: dict, visible: int) -> Image.Image:
-    image = _canvas(data["category"], f"02  •  {visible} DE {len(data['steps'])} PASSOS")
+    if data["template"] == "cost_highlight":
+        return _render_cost_steps(data, visible)
+    if data["template"] == "ordered_steps":
+        eyebrow = "5 passos, por ordem"
+        title = "A ordem é esta.\nSem complicar."
+        item_label = "PASSOS"
+    else:
+        eyebrow = data["progress"]["eyebrow"]
+        title = data["progress"]["title"]
+        item_label = data["progress"]["itemLabel"].upper()
+    image = _canvas(data["category"], f"02  •  {visible} DE {len(data['steps'])} {item_label}")
     draw = ImageDraw.Draw(image)
-    _eyebrow(draw, "5 passos, por ordem", (MARGIN, 358))
-    _text_box(image, "A ordem é esta.\nSem complicar.", (MARGIN, 420, WIDTH - MARGIN, 610), 68, 54, INK, True, 4)
+    _eyebrow(draw, eyebrow, (MARGIN, 358))
+    _text_box(image, title, (MARGIN, 420, WIDTH - MARGIN, 610), 68, 54, INK, True, 4)
 
     start_y = 672
     row_height = 166
@@ -134,8 +145,30 @@ def render_steps(data: dict, visible: int) -> Image.Image:
     return image
 
 
+def _render_cost_steps(data: dict, visible: int) -> Image.Image:
+    image = _canvas(data["category"], f"02  •  {visible} DE {len(data['steps'])} FATORES")
+    draw = ImageDraw.Draw(image)
+    _eyebrow(draw, data["progress"]["eyebrow"], (MARGIN, 350))
+    _text_box(image, data["highlight"]["amount"], (MARGIN, 410, WIDTH - MARGIN, 565), 112, 82, GREEN, True, 4)
+    _text_box(image, data["highlight"]["caption"], (MARGIN, 575, WIDTH - MARGIN, 650), 34, 29, MUTED, False)
+    draw.line((MARGIN, 700, WIDTH - MARGIN, 700), fill=LINE, width=2)
+    _text_box(image, data["progress"]["title"], (MARGIN, 760, WIDTH - MARGIN, 900), 52, 42, INK, True, 4)
+
+    start_y = 980
+    row_height = 178
+    for index, step in enumerate(data["steps"][:visible]):
+        y = start_y + index * row_height
+        draw.rounded_rectangle((MARGIN, y, MARGIN + 82, y + 82), radius=12, fill=GREEN)
+        draw.text((MARGIN + 41, y + 41), str(step["number"]), font=font(34, True), fill=PAPER, anchor="mm")
+        _text_box(image, step["title"], (MARGIN + 125, y - 1, WIDTH - MARGIN, y + 92), 39, 31)
+        if index < visible - 1:
+            draw.line((MARGIN + 125, y + 116, WIDTH - MARGIN, y + 116), fill=LINE, width=2)
+    return image
+
+
 def render_warning(data: dict) -> Image.Image:
-    image = _canvas(data["category"], "03  •  EVITE O BLOQUEIO")
+    folio = "03  •  EVITE O BLOQUEIO" if data["template"] == "ordered_steps" else f"03  •  {data['warning']['eyebrow'].upper()}"
+    image = _canvas(data["category"], folio)
     draw = ImageDraw.Draw(image)
     hero = _cover(data["_hero_path"], (370, 480), 0.52)
     _paste_card(image, hero, (MARGIN, 370), radius=18)

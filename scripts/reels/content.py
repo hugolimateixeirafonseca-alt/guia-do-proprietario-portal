@@ -37,6 +37,10 @@ def load_content(input_path: Path, repository_root: Path) -> dict[str, Any]:
     if not SLUG_PATTERN.fullmatch(slug):
         raise ValueError("slug só pode conter minúsculas, números e hífenes.")
     _text(data, "category", "raiz")
+    template = data.get("template", "ordered_steps")
+    if template not in {"ordered_steps", "cost_highlight", "problem_solution"}:
+        raise ValueError("template tem de ser ordered_steps, cost_highlight ou problem_solution.")
+    data["template"] = template
     hero_relative = Path(_text(data, "heroImage", "raiz"))
     if hero_relative.is_absolute() or ".." in hero_relative.parts:
         raise ValueError("heroImage tem de ser um caminho relativo dentro do repositório.")
@@ -54,6 +58,15 @@ def load_content(input_path: Path, repository_root: Path) -> dict[str, Any]:
         section = _object(data.get(section_name), section_name)
         for key in required:
             _text(section, key, section_name)
+
+    if template != "ordered_steps":
+        progress = _object(data.get("progress"), "progress")
+        for key in ("eyebrow", "title", "itemLabel"):
+            _text(progress, key, "progress")
+    if template == "cost_highlight":
+        highlight = _object(data.get("highlight"), "highlight")
+        for key in ("amount", "caption"):
+            _text(highlight, key, "highlight")
 
     steps = data.get("steps")
     if not isinstance(steps, list) or not steps:
