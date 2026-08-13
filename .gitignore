@@ -4,4 +4,7 @@ dist/
 public/og/
 public/og.png
 public/og-1200x630.png
+out/reels/
+__pycache__/
+*.py[cod]
 .DS_Store

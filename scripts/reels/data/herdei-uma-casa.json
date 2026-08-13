@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "slug": "herdei-uma-casa",
+  "category": "VENDER CASA",
+  "heroImage": "public/imagens/artigos/herdei-uma-casa.avif",
+  "intro": {
+    "title": "Herdei uma casa.",
+    "accent": "E agora?",
+    "label": "5 PASSOS, POR ORDEM",
+    "subtitle": "Um guia simples para perceber o que tratar primeiro."
+  },
+  "steps": [
+    { "number": 1, "title": "Participar o óbito" },
+    { "number": 2, "title": "Habilitar herdeiros" },
+    { "number": 3, "title": "Tratar do imposto do selo" },
+    { "number": 4, "title": "Registar o imóvel" },
+    { "number": 5, "title": "Decidir o que fazer" }
+  ],
+  "warning": {
+    "eyebrow": "O erro mais comum?",
+    "title": "Começar pela venda.",
+    "body": "Antes disso, há 4 passos a tratar.",
+    "secondary": "É essa ordem que evita bloqueios e atrasos."
+  },
+  "outro": {
+    "title": "Primeiro trate da ordem. Depois decida.",
+    "label": "Artigo completo no",
+    "brand": "Guia do Proprietário",
+    "domain": "guiadoproprietario.pt"
+  }
+}
