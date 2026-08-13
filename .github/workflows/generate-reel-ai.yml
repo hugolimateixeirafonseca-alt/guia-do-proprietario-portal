@@ -8,6 +8,19 @@ on:
         required: true
         default: herdei-uma-casa
         type: string
+  workflow_call:
+    inputs:
+      slug:
+        required: true
+        type: string
+      publication_sha:
+        required: false
+        default: ""
+        type: string
+    outputs:
+      generation_id:
+        description: Identificador único da geração criada
+        value: ${{ jobs.generate.outputs.generation_id }}
 
 permissions:
   contents: read
@@ -15,8 +28,11 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    outputs:
+      generation_id: ${{ steps.generation.outputs.generation_id }}
     env:
       REEL_SLUG: ${{ inputs.slug }}
+      PUBLICATION_SHA: ${{ inputs.publication_sha || '' }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -30,6 +46,8 @@ jobs:
     steps:
       - name: Obter repositório
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.publication_sha || github.sha }}
 
       - name: Preparar Python
         uses: actions/setup-python@v6
@@ -38,7 +56,27 @@ jobs:
           cache: pip
           cache-dependency-path: scripts/reels/requirements.txt
 
+      - name: Reservar tentativa automática inicial
+        id: claim
+        if: ${{ env.PUBLICATION_SHA != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_D1_DATABASE_ID CLOUDFLARE_API_TOKEN; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::$name não está configurada para reservar o trigger automático."
+              exit 1
+            fi
+          done
+          CLAIMED="$(python scripts/reels/automatic_trigger.py claim \
+            --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA")"
+          echo "claimed=$CLAIMED" >> "$GITHUB_OUTPUT"
+          if [[ "$CLAIMED" == "false" ]]; then
+            echo "Já existe uma tentativa automática inicial para $REEL_SLUG. Nada será gerado."
+          fi
+
       - name: Validar configuração
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -58,6 +96,7 @@ jobs:
           done
 
       - name: Instalar FFmpeg, Inter e dependências Python
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -66,26 +105,32 @@ jobs:
           python -m pip install --requirement scripts/reels/requirements.txt
 
       - name: Criar identificador único da geração
+        id: generation
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
           GENERATION_ID="$(python scripts/reels/publish_review.py --new-generation-id)"
           echo "GENERATION_ID=$GENERATION_ID" >> "$GITHUB_ENV"
+          echo "generation_id=$GENERATION_ID" >> "$GITHUB_OUTPUT"
           echo "Geração: $GENERATION_ID"
 
       - name: Gerar e validar JSON
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         run: >-
           python scripts/reels/generate_json.py
           --slug "$REEL_SLUG"
           --output "out/reels-json/$REEL_SLUG.json"
 
       - name: Renderizar Reel
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         run: >-
           python scripts/reels/render.py
           --input "out/reels-json/$REEL_SLUG.json"
           --output "out/reels-ai/$REEL_SLUG.mp4"
 
       - name: Confirmar metadados
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -104,6 +149,7 @@ jobs:
           fi
 
       - name: Guardar em R2 e criar revisão pendente
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         run: >-
           python scripts/reels/publish_review.py
           --slug "$REEL_SLUG"
@@ -112,8 +158,16 @@ jobs:
           --video "out/reels-ai/$REEL_SLUG.mp4"
           --contact "out/reels-ai/$REEL_SLUG-contact.jpg"
 
+      - name: Concluir tentativa automática inicial
+        if: ${{ env.PUBLICATION_SHA != '' && steps.claim.outputs.claimed == 'true' }}
+        run: >-
+          python scripts/reels/automatic_trigger.py complete
+          --slug "$REEL_SLUG"
+          --publication-sha "$PUBLICATION_SHA"
+          --generation-id "$GENERATION_ID"
+
       - name: Registar geração falhada
-        if: ${{ failure() && env.GENERATION_ID != '' }}
+        if: ${{ failure() && env.GENERATION_ID != '' && (env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true') }}
         continue-on-error: true
         run: >-
           python scripts/reels/publish_review.py
@@ -122,8 +176,20 @@ jobs:
           --generation-id "$GENERATION_ID"
           --error "workflow_failed"
 
+      - name: Marcar tentativa automática como falhada
+        if: ${{ failure() && env.PUBLICATION_SHA != '' && steps.claim.outputs.claimed == 'true' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARGS=(fail --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA" --error "workflow_failed")
+          if [[ -n "${GENERATION_ID:-}" ]]; then
+            ARGS+=(--generation-id "$GENERATION_ID")
+          fi
+          python scripts/reels/automatic_trigger.py "${ARGS[@]}"
+
       - name: Guardar JSON, Reel e contact sheet
-        if: ${{ always() }}
+        if: ${{ always() && (env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true') }}
         uses: actions/upload-artifact@v7
         with:
           name: reel-ai-${{ env.REEL_SLUG }}-${{ env.GENERATION_ID }}
