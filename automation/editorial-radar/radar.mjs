@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {inspectSourceUrl} from './source-metadata.mjs';
-import {harvestDirectSources} from './source-harvest.mjs';
+import {harvestDirectSources,prefilterHarvestSources} from './source-harvest.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -327,7 +327,8 @@ async function inspectSources(sources, currentTime, context) {
             date_status:'verified',
             date_source:inspection.date_source,
             article_type:inspection.article_type,
-            probable_article:inspection.probable_article
+            probable_article:inspection.probable_article,
+            fetch_ok:inspection.fetch_ok
           });
         } else {
           context.stats.outside_window++;
@@ -383,7 +384,8 @@ async function inspectSources(sources, currentTime, context) {
           date_source:'web_search_evidence',
           date_evidence:String(result.date_evidence),
           article_type:source.inspection.article_type,
-          probable_article:source.inspection.probable_article
+          probable_article:source.inspection.probable_article,
+          fetch_ok:source.inspection.fetch_ok
         });
       } else {
         context.stats.outside_window++;
@@ -412,7 +414,7 @@ async function validateSearchResults(sources, currentTime) {
       model:CFG.openaiModelValidator,
       prompt:validatorPrompt(batch,window),
       purpose:'validator',
-      web:true,
+      web:false,
       effort:'low',
       searchContextSize:'medium'
     });
@@ -541,19 +543,14 @@ async function discover() {
   const currentTime = new Date();
   let sweepDefinitions;
   let directSources=[];
+  let benchmarkSource=null;
   if (CFG.mode === 'smoke') {
     directSources=await harvestDirectSources(smokeDirectSeeds,{currentTime,dryRun:CFG.dryRun});
-    const benchmark=directSources.find(source=>
+    benchmarkSource=directSources.find(source=>
       source.direct_source==='CNN Portugal' &&
       norm(`${source.title} ${source.url}`).includes('condominio') &&
       new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon'}).format(new Date(source.verified_published_at))==='2026-08-13'
-    );
-    console.log(JSON.stringify({
-      stage:'benchmark',
-      name:'cnn_condominios_2026_08_13',
-      found:Boolean(benchmark),
-      url:benchmark?.url||''
-    }));
+    )||null;
     sweepDefinitions=[omissionSweep];
   } else {
     const selectedThemes=CFG.mode === 'morning' ? thematicSweeps : thematicSweeps.filter(sweep => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito'].includes(sweep.name));
@@ -587,7 +584,18 @@ async function discover() {
     dateFallbackRemaining:CFG.mode==='smoke' ? 6 : 12
   };
   const inspectedSources=await inspectSources(sources,currentTime,inspectionContext);
-  const firstPass=await validateSearchResults(inspectedSources,currentTime);
+  let validatorSources=inspectedSources;
+  if (CFG.mode==='smoke') {
+    validatorSources=prefilterHarvestSources(inspectedSources,{limit:24,dryRun:CFG.dryRun}).selected;
+    const benchmark=benchmarkSource && validatorSources.find(source=>source.url===benchmarkSource.url);
+    console.log(JSON.stringify({
+      stage:'benchmark',
+      name:'cnn_condominios_2026_08_13',
+      found:Boolean(benchmark),
+      url:benchmark?.url||''
+    }));
+  }
+  const firstPass=await validateSearchResults(validatorSources,currentTime);
   let rescue=[];
   if (!firstPass.length && CFG.mode !== 'smoke') {
     const rescueSources=await freshnessRescue(currentTime,new Set(sourceMap.keys()));

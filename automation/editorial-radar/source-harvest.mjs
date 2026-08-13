@@ -3,6 +3,22 @@ import {inspectSourceUrl} from './source-metadata.mjs';
 const USER_AGENT='Mozilla/5.0 (compatible; GuiaDoProprietario-EditorialRadar/21.2; +https://guiadoproprietario.pt/)';
 const RELEVANT_TERMS=['casa','casas','habitação','imóvel','imobiliário','condomínio','renda','arrendamento','senhorio','crédito','euribor','imi','imt','irs','obras','energia','herança','propriedade','venda','preços'];
 const EXCLUDED=/(?:^|\/)(?:login|newsletter|autor(?:es)?|author|tags?|pesquisa|search|contactos?|contacts?|politica(?:-de)?-cookies?|cookies?|privacy|privacidade|facebook|instagram|linkedin|twitter|x\.com)(?:\/|$)/i;
+const ARTICLE_TYPES=new Set(['newsarticle','article','reportagenewsarticle','blogposting']);
+const HIGH_RELEVANCE=[
+  'condomínio','condomínios','habitação','arrendamento','senhorio','senhorios','inquilino','inquilinos',
+  'renda','rendas','imóvel','imóveis','imobiliário','casa','casas','moradia','moradias','crédito habitação',
+  'crédito à habitação','euribor','imi','imt','mais-valias','propriedade','proprietário','proprietários',
+  'herança','heranças','despejo','despejos'
+];
+const MEDIUM_RELEVANCE=[
+  'obras','construção','eficiência energética','energia','hipoteca','prestação','prestações','preços das casas',
+  'compra de casa','venda de casa','alojamento','fiscalidade habitação','irs rendas','reabilitação','licença','licenciamento'
+];
+const CONTEXT_RELEVANCE=['impostos','juros','banco','financiamento','seguros','calor','eficiência','município','prédio','edifício'];
+const NEGATIVE_TOPICS=[
+  'futebol','benfica','sporting','fc porto','voleibol','andebol','atletismo','desporto','trump','ucrânia','rússia',
+  'bolsa internacional','petróleo','automóvel','turismo','aviação','telecomunicações','celebridades'
+];
 
 function decodeHtml(value='') {
   return value
@@ -113,6 +129,120 @@ function isSectionSeed(seed) {
   return seed.section===true || /(?:economia|imobiliario|news)(?:\/|$)/i.test(new URL(seed.url).pathname);
 }
 
+function termMatches(text,terms) {
+  const haystack=` ${normalized(text)} `;
+  return terms.filter(term=>haystack.includes(` ${normalized(term)} `));
+}
+
+function decodedPathname(value) {
+  try {
+    const pathname=new URL(value).pathname;
+    try { return decodeURIComponent(pathname).toLowerCase().replace(/\/+$/,'') || '/'; }
+    catch { return pathname.toLowerCase().replace(/\/+$/,'') || '/'; }
+  } catch { return ''; }
+}
+
+function genericPage(source) {
+  const pathname=decodedPathname(source.url);
+  const seedPath=source.source_seed ? decodedPathname(source.source_seed) : '';
+  if (seedPath && pathname===seedPath) return true;
+  if (/(?:^|\/)(?:topico|tópico|etiquetas)(?:\/|$)/i.test(pathname)) return true;
+  if (normalized(source.direct_source||'')==='idealista news portugal' && !/\/\d{4}\/\d{2}\/\d{2}\//.test(pathname)) return true;
+  return new Set([
+    '/','/noticias','/imobiliario','/imobiliario/habitacao','/news','/news/imobiliario',
+    '/news/imobiliario/habitacao','/news/imobiliario/construcao'
+  ]).has(pathname);
+}
+
+export function scoreHarvestRelevance(source) {
+  const title=source.verified_title || source.title || '';
+  const titleForScoring=title.replace(/\bcasa branca\b/gi,'');
+  const anchor=source.anchor_text || '';
+  const pathname=decodedPathname(source.url);
+  const contentText=[titleForScoring,anchor,pathname,source.article_type||''].join(' ');
+  const high=termMatches(contentText,HIGH_RELEVANCE);
+  const medium=termMatches(contentText,MEDIUM_RELEVANCE);
+  const contextual=termMatches(contentText,CONTEXT_RELEVANCE);
+  const titleHigh=termMatches(titleForScoring,HIGH_RELEVANCE);
+  const negative=termMatches(`${title} ${pathname}`,NEGATIVE_TOPICS);
+  const articleType=ARTICLE_TYPES.has(normalized(source.article_type).replace(/\s+/g,''));
+  let score=high.length*5 + medium.length*3 + contextual.length*1 + (articleType ? 2 : 0);
+  let reason='';
+
+  if (genericPage(source)) reason='non_article';
+  const directSource=normalized(source.direct_source||'');
+  if (!reason && directSource==='rtp economia') {
+    if (/\/(?:desporto|benfica|outras-modalidades)(?:\/|$)|\/futebol-[^/]*(?:\/|$)/i.test(pathname)) reason='excluded_section';
+    else if (pathname.startsWith('/noticias/economia/')) score+=1;
+  }
+  if (!reason && directSource==='dinheiro vivo imobiliario') {
+    if (pathname.startsWith('/imobiliario/')) score+=4;
+    else if (!titleHigh.length) reason='excluded_section';
+  }
+  if (!reason && negative.length && !titleHigh.length) reason='excluded_section';
+
+  const hasCoreSignal=high.length>0 || medium.length>0;
+  const minimum=directSource==='cnn portugal' ? 5 : 5;
+  if (!reason && (!hasCoreSignal || score<minimum)) reason='low_relevance';
+  return {
+    score,
+    relevant:!reason,
+    reason,
+    signals:{high,medium,contextual,negative,article_type:articleType}
+  };
+}
+
+export function prefilterHarvestSources(sources,{limit=24,dryRun=false}={}) {
+  const rejectionCounts={non_article:0,low_relevance:0,excluded_section:0};
+  const relevant=[];
+  for (const source of sources) {
+    const result=scoreHarvestRelevance(source);
+    if (!result.relevant) {
+      rejectionCounts[result.reason]++;
+      continue;
+    }
+    relevant.push({...source,harvest_relevance_score:result.score});
+  }
+  relevant.sort((a,b)=>
+    b.harvest_relevance_score-a.harvest_relevance_score ||
+    Date.parse(b.verified_published_at)-Date.parse(a.verified_published_at)
+  );
+  const selected=[];
+  const deferred=[];
+  const perSource=new Map();
+  for (const source of relevant) {
+    const key=source.direct_source || source.source_domain || 'unknown';
+    const count=perSource.get(key)||0;
+    if (count<8 && selected.length<limit) {
+      selected.push(source);
+      perSource.set(key,count+1);
+    } else deferred.push(source);
+  }
+  for (const source of deferred) {
+    if (selected.length>=limit) break;
+    selected.push(source);
+  }
+  if (dryRun) {
+    console.log(JSON.stringify({
+      stage:'harvest_prefilter',
+      fresh_input:sources.length,
+      relevant:relevant.length,
+      rejected:sources.length-relevant.length,
+      sent_to_validator:selected.length
+    }));
+    for (const source of selected) console.log(JSON.stringify({
+      stage:'harvest_selected',
+      source:source.direct_source || source.source_domain || '',
+      title:source.verified_title || source.title || '',
+      score:source.harvest_relevance_score,
+      published_at:source.verified_published_at || '',
+      url:source.url
+    }));
+    console.log(JSON.stringify({stage:'harvest_prefilter_rejections',...rejectionCounts}));
+  }
+  return {selected,relevant,rejectionCounts};
+}
+
 export function rankHarvestCandidates(seed, pageLinks, sitemapEntries, currentTime=new Date(), limit=30) {
   const candidates=new Map();
   const cutoff=currentTime.getTime()-48*60*60*1000;
@@ -216,12 +346,15 @@ export async function harvestDirectSources(seeds,{currentTime=new Date(),fetchIm
           source_domain:new URL(url).hostname,
           sweep:`direct_${seed.slug}`,
           direct_source:seed.name,
+          source_seed:seed.url,
+          anchor_text:candidate.title || '',
           verified_published_at:inspection.published_at,
           verified_title:inspection.title || candidate.title || '',
           date_status:'verified',
           date_source:inspection.date_source,
           article_type:inspection.article_type,
-          probable_article:inspection.probable_article
+          probable_article:inspection.probable_article,
+          fetch_ok:true
         });
       }
     }

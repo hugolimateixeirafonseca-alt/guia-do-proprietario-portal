@@ -4,7 +4,9 @@ import {
   extractPageLinks,
   extractRobotsSitemaps,
   extractSitemap,
-  rankHarvestCandidates
+  rankHarvestCandidates,
+  scoreHarvestRelevance,
+  prefilterHarvestSources
 } from './source-harvest.mjs';
 
 const seed={name:'Publisher',slug:'publisher',url:'https://news.example.pt/economia',section:true};
@@ -62,4 +64,66 @@ test('ranking prioritizes fresh news sitemap URLs and ignores lastmod as publica
     {url:'https://news.example.pt/economia/habitacao',title:'Crédito habitação',publication_date:'2026-08-13T08:00:00Z'}
   ],currentTime,30);
   assert.deepEqual(homepageRanked.map(item=>item.url),['https://news.example.pt/economia/habitacao']);
+});
+
+test('relevance scoring preserves the required housing benchmarks',()=>{
+  const titles=[
+    'Nova lei dos condomínios entra em vigor',
+    'Euribor sobe a três meses',
+    'Oferta de moradias recua e preços sobem',
+    'Despejos para obras profundas têm novas regras'
+  ];
+  for (const [index,title] of titles.entries()) {
+    const result=scoreHarvestRelevance({
+      url:`https://publisher.pt/artigo/${index}`,
+      verified_title:title,
+      article_type:'NewsArticle',
+      direct_source:'CNN Portugal'
+    });
+    assert.equal(result.relevant,true,title);
+    assert.ok(result.score>=5,title);
+  }
+});
+
+test('relevance scoring rejects context-only, sports and generic pages before Validator',()=>{
+  assert.equal(scoreHarvestRelevance({
+    url:'https://publisher.pt/economia/banco-seguros',
+    verified_title:'Banco revê seguros',
+    article_type:'NewsArticle'
+  }).reason,'low_relevance');
+  assert.equal(scoreHarvestRelevance({
+    url:'https://www.rtp.pt/desporto/futebol-benfica',
+    verified_title:'Benfica vence no futebol',
+    article_type:'NewsArticle',
+    direct_source:'RTP Economia'
+  }).reason,'excluded_section');
+  assert.equal(scoreHarvestRelevance({
+    url:'https://www.idealista.pt/news/imobiliario/habitacao',
+    verified_title:'Habitação',
+    article_type:'Article',
+    direct_source:'Idealista News Portugal'
+  }).reason,'non_article');
+  assert.equal(scoreHarvestRelevance({
+    url:'https://cnnportugal.iol.pt/donald-trump/casa-branca/noticia/20260813/id',
+    verified_title:'Trump anuncia mudanças na Casa Branca',
+    article_type:'NewsArticle',
+    direct_source:'CNN Portugal'
+  }).reason,'excluded_section');
+});
+
+test('smoke prefilter caps at 24 and takes up to eight per source before filling',()=>{
+  const sources=[];
+  for (const source of ['Fonte A','Fonte B','Fonte C']) {
+    for (let index=0; index<12; index++) sources.push({
+      url:`https://${source.toLowerCase().replace(' ','')}.pt/casas/${index}`,
+      verified_title:`Casas e habitação ${index}`,
+      verified_published_at:new Date(Date.UTC(2026,7,13,12,index)).toISOString(),
+      article_type:'NewsArticle',
+      direct_source:source
+    });
+  }
+  const {selected}=prefilterHarvestSources(sources,{limit:24});
+  assert.equal(selected.length,24);
+  const counts=selected.reduce((map,item)=>map.set(item.direct_source,(map.get(item.direct_source)||0)+1),new Map());
+  assert.deepEqual([...counts.values()].sort((a,b)=>a-b),[8,8,8]);
 });
