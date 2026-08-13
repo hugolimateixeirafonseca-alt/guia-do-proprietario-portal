@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-12T15:47:21.105Z",
+  "generatedAt": "2026-08-13T07:29:21.668Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 92,
-    "published": 65,
+    "published": 66,
     "newsOnline": 12
   },
   "articles": [
@@ -1248,14 +1248,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "escolher-pavimento.mdx",
       "arrivedAt": "2026-08-06T15:14:22+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-13T07:01:28Z",
+      "url": "https://guiadoproprietario.pt/casa/escolher-pavimento/"
     },
     {
       "id": "SC29",
