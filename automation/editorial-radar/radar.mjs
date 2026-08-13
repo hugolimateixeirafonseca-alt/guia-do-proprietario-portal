@@ -26,10 +26,10 @@ const norm = (s='') => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLower
 const slugify = (s='') => norm(s).replace(/\s+/g,'-').slice(0,120);
 const id = (prefix, value) => `${prefix}_${sha(value).slice(0,20)}`;
 
-async function openai({model, prompt, web=false, effort='low'}) {
+async function openai({model, prompt, web=false, effort='low', allowedDomains=[]}) {
   const body = { model, input: prompt, reasoning: { effort } };
   if (web) {
-    body.tools = [{
+    const webSearch = {
       type: 'web_search',
       search_context_size: 'high',
       user_location: {
@@ -38,8 +38,11 @@ async function openai({model, prompt, web=false, effort='low'}) {
         city: 'Lisbon',
         timezone: 'Europe/Lisbon'
       }
-    }];
+    };
+    if (allowedDomains.length) webSearch.filters = { allowed_domains: allowedDomains };
+    body.tools = [webSearch];
     body.tool_choice = 'required';
+    body.include = ['web_search_call.action.sources'];
   }
   const res = await fetch('https://api.openai.com/v1/responses', {
     method:'POST',
@@ -76,16 +79,30 @@ async function initSchema() {
   for (const statement of statements) await d1(statement);
 }
 
-const sweeps = [
-  ['legislacao_fiscalidade', `Procura notícias publicadas nas últimas 36 horas em Portugal sobre legislação, Governo, Parlamento, Diário da República, IMI, AIMI, IMT, VPT, IRS sobre rendas, mais-valias, benefícios fiscais, prazos e obrigações que afetem proprietários de imóveis.`],
-  ['condominio_vizinhos', `Procura notícias publicadas nas últimas 36 horas em Portugal sobre condomínios, propriedade horizontal, administradores de condomínio, quotas, assembleias, partes comuns, obras, elevadores, fachadas, ruído, vizinhos, muros e conflitos entre proprietários.`],
-  ['arrendamento', `Procura notícias publicadas nas últimas 36 horas em Portugal sobre arrendamento, senhorios, inquilinos, rendas, contratos, despejos, apoios à renda, alojamento local e alterações regulamentares relevantes para proprietários.`],
-  ['mercado_credito', `Procura notícias publicadas nas últimas 36 horas em Portugal sobre preços das casas, oferta, procura, vendas, avaliações, crédito habitação, Euribor, BCE, Banco de Portugal, escrituras e CPCV que sejam materialmente úteis a proprietários, vendedores ou compradores.`],
-  ['casa_energia_obras', `Procura notícias publicadas nas últimas 36 horas em Portugal sobre obras em casa, remodelação, licenciamento, energia, eletricidade, gás, eficiência energética, certificados, solar, seguros da casa, água, manutenção e custos domésticos com impacto concreto no proprietário.`],
-  ['herancas_propriedade', `Procura notícias publicadas nas últimas 36 horas em Portugal sobre heranças com imóveis, partilhas, usufruto, compropriedade, registos, escrituras, terrenos e direitos de propriedade.`],
-  ['fontes_oficiais', `Procura nas últimas 72 horas fontes oficiais portuguesas relevantes para proprietários de imóveis: Governo, Diário da República, Parlamento, Autoridade Tributária, Banco de Portugal, INE, ADENE, reguladores e municípios apenas quando a medida tenha impacto material e amplo.`],
-  ['catch_all', `Sem te limitares às categorias habituais, procura acontecimentos publicados nas últimas 36 horas em Portugal que possam alterar materialmente quanto alguém que possui uma casa paga ou recebe, o que tem de fazer ou pode fazer, ou uma decisão importante sobre vender, arrendar, manter, financiar ou gerir um imóvel.`]
+const MEDIA_DOMAINS = [
+  'cnnportugal.iol.pt','rtp.pt','eco.sapo.pt','jornaleconomico.sapo.pt','dinheirovivo.dn.pt',
+  'idealista.pt','executivedigest.sapo.pt','publico.pt','expresso.pt','observador.pt'
 ];
+const OFFICIAL_DOMAINS = [
+  'diariodarepublica.pt','gov.pt','parlamento.pt','ine.pt','bportugal.pt','portaldasfinancas.gov.pt','adene.pt'
+];
+
+const thematicSweeps = [
+  {name:'legislacao_fiscalidade',topic:'legislação impostos habitação proprietários Portugal'},
+  {name:'condominio_vizinhos',topic:'condomínios administradores vizinhos Portugal'},
+  {name:'arrendamento',topic:'arrendamento senhorios rendas Portugal'},
+  {name:'mercado_credito',topic:'mercado habitação preços moradias crédito Euribor Portugal'},
+  {name:'casa_energia_obras',topic:'obras energia casa eficiência Portugal'},
+  {name:'herancas_propriedade',topic:'heranças imóveis propriedade Portugal'}
+];
+const sourceSweeps = [
+  {name:'fontes_media',topic:'habitação casas proprietários arrendamento condomínios impostos crédito obras Portugal',allowedDomains:MEDIA_DOMAINS},
+  {name:'fontes_oficiais',topic:'habitação proprietários imóveis arrendamento impostos crédito energia Portugal',allowedDomains:OFFICIAL_DOMAINS}
+];
+const omissionSweep = {
+  name:'omissoes_editor_chefe',
+  topic:'notícias mais importantes das últimas 36 horas em Portugal para alguém que possui uma casa, mesmo fora das categorias habituais'
+};
 
 function lisbonDateTime(date) {
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
@@ -100,102 +117,127 @@ function lisbonDateTime(date) {
   return `${parts.day}-${parts.month}-${parts.year} ${parts.hour}:${parts.minute}`;
 }
 
-function discoveryPrompt(name, query, window) {
-  return `És o radar editorial do Guia do Proprietário, portal português para proprietários de imóveis.\n\nMISSÃO DO SWEEP: ${name}\n${query}\n\nJANELA TEMPORAL ABSOLUTA: Agora são ${window.end} em Portugal. Procura acontecimentos publicados entre ${window.start} e ${window.end}, inclusive.\n\nMÉTODO OBRIGATÓRIO:\n1. Faz pesquisa real na web.\n2. Pesquisa primeiro de forma abrangente dentro do tema e da janela indicada.\n3. Só depois aplica o teste de relevância para proprietários de imóveis em Portugal.\n4. Se encontrares resultados potencialmente relevantes, devolve-os como candidatos para o Editor-chefe decidir. Privilegia recall nesta fase; a seleção posterior tratará a precision.\n5. Não exijas nesta descoberta prova completa de toda a materialidade.\n\nDevolve APENAS JSON válido neste formato:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"https://...","source_type":"media|official","is_official":false,"why_material":""}]}\n\nRegras: só acontecimentos reais e recentes; exclui lifestyle, classificados, publicidade e movimentos empresariais sem utilidade concreta. Não inventes URLs. Prefere a fonte original ou oficial quando existir. Máximo 10 candidatos por sweep.`;
+function searcherPrompt(topic) {
+  return `Pesquisa amplamente na web portuguesa notícias recentes relacionadas com ${topic}. Procura resultados dos últimos dias, privilegiando notícias novas. Apresenta até 10 resultados. Para cada resultado indica título, fonte, data se disponível e uma frase sobre o assunto. Cita cada resultado com a respetiva fonte web. Não faças ainda avaliação editorial.`;
 }
 
-function webSearchDiagnostics(output) {
-  const calls = (output || []).filter(item => item.type === 'web_search_call');
-  const queries=[];
-  const actionTypes=[];
-  const sourceUrls=[];
-  for (const item of calls) {
-    const action=item.action || {};
-    const actionQueries=Array.isArray(action.queries) ? action.queries : action.queries ? [action.queries] : [];
-    for (const query of [...actionQueries, action.query]) {
-      if (typeof query === 'string' && query.trim()) queries.push(query.trim());
-    }
-    if (typeof action.type === 'string' && action.type.trim()) actionTypes.push(action.type.trim());
-    const sources=Array.isArray(action.sources) ? action.sources : [];
-    for (const source of sources) {
-      const url=typeof source === 'string' ? source : source?.url;
-      if (typeof url === 'string' && url.trim()) sourceUrls.push(url.trim());
-    }
-  }
-  const urls=[...new Set(sourceUrls)].slice(0,20);
-  const domains=[...new Set(urls.map(url => {
-    try { return new URL(url).hostname; } catch { return ''; }
-  }).filter(Boolean))];
-  return {
-    calls,
-    queries:[...new Set(queries)],
-    actionTypes:[...new Set(actionTypes)],
-    urls,
-    domains
-  };
-}
-
-async function runDiscoveryFallback(name, currentDate) {
-  const topic=name.replaceAll('_',' ');
-  const prompt=`Hoje é ${currentDate} em Portugal. Encontra 5 notícias portuguesas publicadas nas últimas 48 horas sobre ${topic}. Não avalies ainda se são boas para o Guia do Proprietário. Devolve apenas JSON válido neste formato: {"results":[{"title":"","date":"YYYY-MM-DD","source":"","url":"https://..."}]}`;
+function canonicalUrl(value) {
   try {
-    const response=await openai({model:CFG.openaiModelSearch,prompt,web:true,effort:'low'});
-    const parsed=parseJson(response.text);
-    return (Array.isArray(parsed.results) ? parsed.results : []).slice(0,5);
-  } catch {
-    return [{error:'fallback_failed'}];
+    const url=new URL(value);
+    url.hash='';
+    url.hostname=url.hostname.toLowerCase();
+    for (const key of [...url.searchParams.keys()]) {
+      if (/^(utm_|fbclid$|gclid$|mc_cid$|mc_eid$)/i.test(key)) url.searchParams.delete(key);
+    }
+    url.pathname=url.pathname.replace(/\/+$/,'') || '/';
+    return url.toString();
+  } catch { return ''; }
+}
+
+function extractSearchResults(output, sweep) {
+  const byUrl=new Map();
+  const add=(urlValue,title='') => {
+    const url=canonicalUrl(urlValue);
+    if (!url) return;
+    const existing=byUrl.get(url);
+    const result={url,title:title||existing?.title||'',source_domain:new URL(url).hostname,sweep};
+    byUrl.set(url,result);
+  };
+  for (const item of output || []) {
+    if (item.type === 'web_search_call') {
+      for (const source of Array.isArray(item.action?.sources) ? item.action.sources : []) {
+        if (typeof source === 'string') add(source);
+        else add(source?.url,source?.title);
+      }
+    }
+    for (const content of item.content || []) {
+      for (const annotation of content.annotations || []) {
+        if (annotation.type !== 'url_citation') continue;
+        const citation=annotation.url_citation || annotation;
+        add(citation.url,citation.title);
+      }
+    }
   }
+  return [...byUrl.values()];
+}
+
+async function searchSweep({name,topic,allowedDomains=[]}) {
+  const response=await openai({model:CFG.openaiModelSearch,prompt:searcherPrompt(topic),web:true,effort:'low',allowedDomains});
+  const results=extractSearchResults(response.raw.output,name);
+  if (CFG.dryRun) {
+    console.log(JSON.stringify({
+      stage:'searcher',
+      sweep:name,
+      web_search_calls:(response.raw.output || []).filter(item => item.type === 'web_search_call').length,
+      urls_found:results.length,
+      titles:results.map(result => result.title).filter(Boolean).slice(0,10)
+    }));
+  }
+  return {results,text:response.text};
+}
+
+function discoveryEditorPrompt(sources, searcherTexts, window) {
+  return `És o Editor de discovery do Guia do Proprietário. Recebes resultados encontrados por pesquisas web. Faz agora a seleção editorial e devolve apenas acontecimentos potencialmente relevantes para proprietários de imóveis em Portugal.\n\nAGORA EM PORTUGAL: ${window.end}\nJANELA NORMAL PARA MEDIA: ${window.normalStart} a ${window.end} (36 horas).\nJANELA PARA FONTES OFICIAIS MATERIALMENTE RELEVANTES: ${window.officialStart} a ${window.end} (72 horas).\n\nFONTES AUTORIZADAS, ÚNICA FONTE DE VERDADE PARA URLs:\n${JSON.stringify(sources)}\n\nRESUMOS DO SEARCHER:\n${JSON.stringify(searcherTexts)}\n\nRegras: verifica a janela pela data de publicação; exclui lixo, publicidade, classificados e resultados sem utilidade concreta; preserva acontecimentos potencialmente relevantes para o Editor-chefe; nunca cries, completes ou alteres um URL; article_url tem de ser exatamente um URL da lista FONTES AUTORIZADAS. Para fontes oficiais usa source_type=official e is_official=true.\n\nDevolve APENAS JSON válido:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"https://...","source_type":"media|official","is_official":false,"why_material":""}]}`;
+}
+
+async function editSearchResults(searches, currentTime) {
+  const sourceMap=new Map();
+  for (const search of searches) {
+    for (const result of search.results) {
+      const key=canonicalUrl(result.url);
+      if (!sourceMap.has(key)) sourceMap.set(key,result);
+      else if (!sourceMap.get(key).title && result.title) sourceMap.set(key,result);
+    }
+  }
+  const sources=[...sourceMap.values()];
+  const window={
+    normalStart:lisbonDateTime(new Date(currentTime.getTime() - 36 * 60 * 60 * 1000)),
+    officialStart:lisbonDateTime(new Date(currentTime.getTime() - 72 * 60 * 60 * 1000)),
+    end:lisbonDateTime(currentTime)
+  };
+  if (!sources.length) {
+    if (CFG.dryRun) console.log(JSON.stringify({stage:'editor',input_urls:0,accepted_candidates:0,rejected:0}));
+    return [];
+  }
+  const response=await openai({
+    model:CFG.openaiModelEditor,
+    prompt:discoveryEditorPrompt(sources,searches.map(search => ({sweep:search.name,text:search.text})),window),
+    web:false,
+    effort:'medium'
+  });
+  const data=parseJson(response.text);
+  const proposed=Array.isArray(data.candidates) ? data.candidates : [];
+  const accepted=[];
+  const acceptedUrls=new Set();
+  for (const candidate of proposed) {
+    const key=canonicalUrl(candidate.article_url);
+    const source=sourceMap.get(key);
+    if (!source || acceptedUrls.has(key)) continue;
+    acceptedUrls.add(key);
+    accepted.push({...candidate,article_url:source.url,sweep:source.sweep});
+  }
+  if (CFG.dryRun) {
+    console.log(JSON.stringify({
+      stage:'editor',
+      input_urls:sources.length,
+      accepted_candidates:accepted.length,
+      rejected:sources.length-accepted.length
+    }));
+  }
+  return accepted;
 }
 
 async function discover() {
-  const selected = CFG.mode === 'morning' ? sweeps : sweeps.filter(([n]) => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito','fontes_oficiais','catch_all'].includes(n));
   const currentTime = new Date();
-  const windows = {
-    normal: { start: lisbonDateTime(new Date(currentTime.getTime() - 36 * 60 * 60 * 1000)), end: lisbonDateTime(currentTime) },
-    official: { start: lisbonDateTime(new Date(currentTime.getTime() - 72 * 60 * 60 * 1000)), end: lisbonDateTime(currentTime) }
-  };
-  const all=[];
-  for (const [name,q] of selected) {
-    const window = name === 'fontes_oficiais' ? windows.official : windows.normal;
-    const r = await openai({model:CFG.openaiModelSearch,prompt:discoveryPrompt(name,q,window),web:true,effort:'low'});
-    const diagnostics=webSearchDiagnostics(r.raw.output);
-    if (CFG.dryRun) {
-      console.log(JSON.stringify({
-        stage:'web_search_debug',
-        sweep:name,
-        queries:diagnostics.queries,
-        action_types:diagnostics.actionTypes
-      }));
-      console.log(JSON.stringify({
-        stage:'web_sources_debug',
-        sweep:name,
-        source_count:diagnostics.urls.length,
-        urls:diagnostics.urls,
-        domains:diagnostics.domains
-      }));
-      console.log(JSON.stringify({stage:'discovery_model_output',sweep:name,text:r.text.slice(0,2000)}));
-    }
-    const data=parseJson(r.text);
-    const candidates = (Array.isArray(data.candidates) ? data.candidates : []).slice(0,10);
-    const webSearchCalls = diagnostics.calls.length;
-    console.log(JSON.stringify({
-      stage:'discovery',
-      sweep:name,
-      web_search_calls:webSearchCalls,
-      candidate_count:candidates.length,
-      titles:candidates.map(candidate => candidate.title || '')
-    }));
-    if (!candidates.length) {
-      console.log(JSON.stringify({stage:'discovery_warning',sweep:name,reason:'zero_candidates'}));
-      if (CFG.dryRun) {
-        const fallbackResult=await runDiscoveryFallback(name,lisbonDateTime(currentTime).slice(0,10));
-        console.log(JSON.stringify({stage:'discovery_fallback_debug',sweep:name,result:fallbackResult}));
-      }
-    }
-    for (const c of candidates) all.push({...c,sweep:name});
+  const selectedThemes=CFG.mode === 'morning' ? thematicSweeps : thematicSweeps.filter(sweep => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito'].includes(sweep.name));
+  const sweepDefinitions=[...selectedThemes,...sourceSweeps,omissionSweep];
+  const searches=[];
+  for (const definition of sweepDefinitions) {
+    const search=await searchSweep(definition);
+    searches.push({...search,name:definition.name});
     await sleep(250);
   }
-  return all;
+  return editSearchResults(searches,currentTime);
 }
 
 async function historicalContext(candidate) {
