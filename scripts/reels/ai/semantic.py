@@ -6,6 +6,13 @@ from pathlib import Path
 from typing import Any
 
 from .article import Article
+from .schema import (
+    EDITORIAL_LIMITS,
+    STEP_TITLE_LIMIT,
+    EditorialFieldIssue,
+    EditorialValidationError,
+    editorial_target,
+)
 
 
 NUMBER_PATTERN = re.compile(r"(?<![\w])\d+(?:[ .\u00a0]\d{3})*(?:[,.]\d+)?")
@@ -14,25 +21,6 @@ ZERO_WIDTH_PATTERN = re.compile(r"[\u200b\u200c\u200d\ufeff]")
 ACRONYM_JOIN_PATTERN = re.compile(r"\b[A-ZÁÉÍÓÚÂÊÔÃÕÇ]{2,}[a-záéíóúâêôãõç]{2,}\b")
 KNOWN_JOIN_PATTERN = re.compile(r"\b(?:câmaraourec)\b", re.IGNORECASE)
 TRAILING_FRAGMENT_PATTERN = re.compile(r"(?:[-‐‑‒–—,;:]|\b(?:a|à|ao|aos|as|às|com|como|da|das|de|do|dos|e|em|entre|mas|na|nas|no|nos|o|ou|para|pela|pelas|pelo|pelos|por|porque|que|se|sem|só|um|uma))\s*$", re.IGNORECASE)
-EDITORIAL_LIMITS = {
-    "intro.title": 32,
-    "intro.accent": 30,
-    "intro.label": 40,
-    "intro.subtitle": 80,
-    "highlight.amount": 35,
-    "highlight.caption": 80,
-    "progress.eyebrow": 45,
-    "progress.title": 60,
-    "progress.itemLabel": 18,
-    "warning.eyebrow": 35,
-    "warning.title": 60,
-    "warning.body": 90,
-    "warning.secondary": 100,
-    "outro.title": 75,
-}
-STEP_TITLE_LIMIT = 55
-
-
 def _normalise_number(value: str) -> str:
     return value.replace(" ", "").replace("\u00a0", "").replace(".", "").replace(",", ".")
 
@@ -67,25 +55,26 @@ def _truncation_reason(value: str, limit: int) -> str | None:
     return None
 
 
-def _validate_no_truncation(payload: dict) -> list[str]:
-    errors: list[str] = []
+def _validate_no_truncation(payload: dict) -> list[EditorialFieldIssue]:
+    issues: list[EditorialFieldIssue] = []
     for path, limit in EDITORIAL_LIMITS.items():
         value = _nested_string(payload, path)
         if value:
             reason = _truncation_reason(value, limit)
             if reason:
-                errors.append(f"{path} {reason} (comprimento={len(value)}): {value!r}")
+                issues.append(EditorialFieldIssue(path, value, limit, editorial_target(path) or limit, reason))
     for index, step in enumerate(payload.get("steps", []), start=1):
         value = step.get("title", "") if isinstance(step, dict) else ""
         if isinstance(value, str) and value:
             reason = _truncation_reason(value, STEP_TITLE_LIMIT)
             if reason:
-                errors.append(f"steps[{index}].title {reason} (comprimento={len(value)}): {value!r}")
-    return errors
+                path = f"steps[{index - 1}].title"
+                issues.append(EditorialFieldIssue(path, value, STEP_TITLE_LIMIT, editorial_target(path) or STEP_TITLE_LIMIT, reason))
+    return issues
 
 
-def validate_semantics(payload: dict, article: Article, repository_root: Path) -> None:
-    errors = _validate_no_truncation(payload)
+def validate_facts(payload: dict, article: Article, repository_root: Path) -> None:
+    errors: list[str] = []
     if payload.get("slug") != article.slug:
         errors.append("o slug final não corresponde ao artigo solicitado")
     if payload.get("heroImage") != article.hero_image:
@@ -112,6 +101,13 @@ def validate_semantics(payload: dict, article: Article, repository_root: Path) -
 
     if errors:
         raise ValueError("Validação semântica falhou: " + "; ".join(errors))
+
+
+def validate_semantics(payload: dict, article: Article, repository_root: Path) -> None:
+    validate_facts(payload, article, repository_root)
+    editorial_issues = _validate_no_truncation(payload)
+    if editorial_issues:
+        raise EditorialValidationError(editorial_issues)
 
 
 def write_validated_json(payload: dict, output: Path, article: Article, repository_root: Path) -> None:

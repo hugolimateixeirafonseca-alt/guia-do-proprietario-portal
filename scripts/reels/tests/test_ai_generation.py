@@ -12,15 +12,19 @@ REPOSITORY_ROOT = REELS_DIR.parents[1]
 sys.path.insert(0, str(REELS_DIR))
 
 from ai.article import Article, read_article
-from ai.openai_client import create_openai_client, generate_editorial, route_template
+from ai.openai_client import create_openai_client, generate_editorial, repair_editorial, route_template
 from ai.schema import (
     FINAL_REEL_ADAPTER,
     CostHighlightOutput,
+    EditorialFieldIssue,
+    EditorialValidationError,
     OrderedStepsOutput,
     ProblemSolutionOutput,
     TemplateRouterOutput,
+    assemble_final_reel,
     build_final_reel,
     parse_generated_json,
+    repair_output_schema,
 )
 from ai.semantic import validate_semantics
 from pydantic import ValidationError
@@ -87,6 +91,8 @@ class AIGenerationTests(unittest.TestCase):
         template, metadata = route_template({}, api_key="teste", client=SimpleNamespace(responses=responses), logger=lambda _: None)
         self.assertEqual(template, "cost_highlight")
         self.assertEqual(metadata.total_tokens, 30)
+        self.assertEqual(responses.calls[0]["reasoning"], {"effort": "minimal"})
+        self.assertEqual(responses.calls[0]["text"], {"verbosity": "low"})
 
     def test_schema_especifico_correto_e_selecionado(self):
         cases = (
@@ -102,6 +108,31 @@ class AIGenerationTests(unittest.TestCase):
                 )
                 self.assertIsInstance(generated, schema)
                 self.assertIs(responses.calls[0]["text_format"], schema)
+                self.assertEqual(responses.calls[0]["reasoning"], {"effort": "low"})
+                self.assertEqual(responses.calls[0]["text"], {"verbosity": "low"})
+
+    def test_repair_so_aceita_e_substitui_paths_com_falha(self):
+        generated = OrderedStepsOutput.model_validate(valid_ordered())
+        issue = EditorialFieldIssue("steps[0].title", generated.steps[0].title, 55, 42, "texto excessivo")
+        responses = FakeResponses([{"repairs": [{"path": "steps[0].title", "value": "Participar o óbito"}]}])
+        repaired, metadata, paths = repair_editorial(
+            {}, template="ordered_steps", editorial=generated, issues=(issue,), api_key="teste",
+            client=SimpleNamespace(responses=responses), logger=lambda _: None,
+        )
+        self.assertEqual(repaired.steps[0].title, "Participar o óbito")
+        self.assertEqual(paths, ["steps[0].title"])
+        self.assertEqual(metadata.total_tokens, 30)
+        self.assertEqual(responses.calls[0]["reasoning"], {"effort": "minimal"})
+        self.assertEqual(responses.calls[0]["text"], {"verbosity": "low"})
+        schema_json = json.dumps(responses.calls[0]["text_format"].model_json_schema())
+        self.assertNotIn('"oneOf"', schema_json)
+        self.assertNotIn('"anyOf"', schema_json)
+        self.assertIn('"const": "steps[0].title"', schema_json)
+
+    def test_repair_rejeita_path_nao_solicitado(self):
+        schema = repair_output_schema(["steps[0].title"])
+        with self.assertRaises(ValidationError):
+            schema.model_validate({"repairs": [{"path": "warning.body", "value": "Outro texto"}]})
 
     def test_gerador_nao_pode_alterar_template_do_router(self):
         payload = valid_ordered()
@@ -208,8 +239,40 @@ class AIGenerationTests(unittest.TestCase):
         )
         payload["highlight"]["amount"] = "999 €"
         article = read_article(REPOSITORY_ROOT, "ar-condicionado-quanto-custa")
-        with self.assertRaisesRegex(ValueError, "valor monetário ausente"):
+        with self.assertRaisesRegex(ValueError, "valor monetário ausente") as raised:
             validate_semantics(payload, article, REPOSITORY_ROOT)
+        self.assertNotIsInstance(raised.exception, EditorialValidationError)
+
+    def test_falha_factual_impede_repair_mesmo_com_falha_editorial(self):
+        generated_payload = valid_cost()
+        generated_payload["highlight"]["amount"] = "999 €"
+        generated_payload["warning"]["body"] = "x" * 91
+        raw = assemble_final_reel(
+            CostHighlightOutput.model_validate(generated_payload),
+            template="cost_highlight",
+            slug="ar-condicionado-quanto-custa",
+            category="CASA",
+            hero_image="public/imagens/artigos/ar-condicionado-quanto-custa.avif",
+        )
+        article = read_article(REPOSITORY_ROOT, "ar-condicionado-quanto-custa")
+        with self.assertRaisesRegex(ValueError, "valor monetário ausente") as raised:
+            validate_semantics(raw, article, REPOSITORY_ROOT)
+        self.assertNotIsInstance(raised.exception, EditorialValidationError)
+
+    def test_eval_templates_dos_tres_fixtures(self):
+        accepted = {
+            "herdei-uma-casa": {"ordered_steps"},
+            "ar-condicionado-quanto-custa": {"cost_highlight"},
+            "vizinho-barulhento": {"problem_solution", "ordered_steps"},
+        }
+        observed = {
+            "herdei-uma-casa": "ordered_steps",
+            "ar-condicionado-quanto-custa": "cost_highlight",
+            "vizinho-barulhento": "ordered_steps",
+        }
+        for slug, template in observed.items():
+            with self.subTest(slug=slug):
+                self.assertIn(template, accepted[slug])
 
     def test_fixtures_aprovadas_cumprem_schema_e_semantica(self):
         for slug, template in (

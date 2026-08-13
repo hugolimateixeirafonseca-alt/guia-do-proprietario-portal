@@ -1,12 +1,59 @@
 from __future__ import annotations
 
 import json
+import re
+from dataclasses import dataclass
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError, create_model
 
 
 TemplateName = Literal["ordered_steps", "cost_highlight", "problem_solution"]
+
+EDITORIAL_LIMITS = {
+    "intro.title": 32, "intro.accent": 30, "intro.label": 40, "intro.subtitle": 80,
+    "highlight.amount": 35, "highlight.caption": 80,
+    "progress.eyebrow": 45, "progress.title": 60, "progress.itemLabel": 18,
+    "warning.eyebrow": 35, "warning.title": 60, "warning.body": 90, "warning.secondary": 100,
+    "outro.title": 75,
+}
+EDITORIAL_TARGETS = {
+    "intro.title": 25, "intro.accent": 23, "intro.label": 30, "intro.subtitle": 60,
+    "highlight.amount": 26, "highlight.caption": 60,
+    "progress.eyebrow": 34, "progress.title": 45, "progress.itemLabel": 13,
+    "warning.eyebrow": 26, "warning.title": 45, "warning.body": 65, "warning.secondary": 75,
+    "outro.title": 55,
+}
+STEP_PATH_PATTERN = re.compile(r"^steps\[\d+]\.title$")
+STEP_TITLE_LIMIT = 55
+STEP_TITLE_TARGET = 42
+
+
+@dataclass(frozen=True)
+class EditorialFieldIssue:
+    path: str
+    value: str
+    limit: int
+    target: int
+    reason: str
+
+
+class EditorialValidationError(ValueError):
+    def __init__(self, issues: list[EditorialFieldIssue]):
+        self.issues = tuple(issues)
+        details = [
+            f"{issue.path}: {issue.reason}; comprimento={len(issue.value)}; limite={issue.limit}; objetivo={issue.target}"
+            for issue in issues
+        ]
+        super().__init__("Validação editorial local falhou:\n- " + "\n- ".join(details))
+
+
+def editorial_limit(path: str) -> int | None:
+    return STEP_TITLE_LIMIT if STEP_PATH_PATTERN.fullmatch(path) else EDITORIAL_LIMITS.get(path)
+
+
+def editorial_target(path: str) -> int | None:
+    return STEP_TITLE_TARGET if STEP_PATH_PATTERN.fullmatch(path) else EDITORIAL_TARGETS.get(path)
 
 
 class StrictModel(BaseModel):
@@ -168,6 +215,49 @@ def editorial_schema(template: TemplateName) -> type[StrictModel]:
         raise ValueError(f"Template não suportado: {template}") from exc
 
 
+def repair_output_schema(paths: list[str]) -> type[StrictModel]:
+    if not paths or len(paths) != len(set(paths)):
+        raise ValueError("Os paths de repair têm de ser únicos e não vazios.")
+    path_literal = Literal.__getitem__(tuple(paths))
+    item_model = create_model(
+        "RepairItem",
+        __base__=StrictModel,
+        path=(path_literal, ...),
+        value=(str, ...),
+    )
+    return create_model(
+        "RepairOutput",
+        __base__=StrictModel,
+        repairs=(list[item_model], Field(min_length=len(paths), max_length=len(paths))),
+    )
+
+
+def apply_editorial_repairs(
+    editorial: StrictModel,
+    *,
+    template: TemplateName,
+    repairs: list[dict],
+    allowed_paths: list[str],
+) -> StrictModel:
+    received_paths = [repair.get("path") for repair in repairs]
+    if len(received_paths) != len(set(received_paths)) or set(received_paths) != set(allowed_paths):
+        raise ValueError("O repair não devolveu exatamente uma substituição por campo permitido.")
+    payload = editorial.model_dump()
+    for repair in repairs:
+        value = repair.get("value")
+        if not isinstance(value, str):
+            raise ValueError(f"O repair de {repair.get('path')} não devolveu texto.")
+        current: object = payload
+        clean_tokens: list[str | int] = []
+        for match in re.finditer(r"([^.\[\]]+)|\[(\d+)\]", repair["path"]):
+            clean_tokens.append(int(match.group(2)) if match.group(2) is not None else match.group(1))
+        for token in clean_tokens[:-1]:
+            current = current[token] if isinstance(token, int) else current[token]  # type: ignore[index]
+        last = clean_tokens[-1]
+        current[last] = value  # type: ignore[index]
+    return editorial_schema(template).model_validate(payload)
+
+
 def parse_generated_json(raw: str, schema: type[StrictModel]) -> StrictModel:
     try:
         return schema.model_validate_json(raw)
@@ -175,7 +265,7 @@ def parse_generated_json(raw: str, schema: type[StrictModel]) -> StrictModel:
         raise ValueError(f"Resposta JSON inválida: {exc}") from exc
 
 
-def build_final_reel(
+def assemble_final_reel(
     editorial: StrictModel,
     *,
     template: TemplateName,
@@ -196,14 +286,43 @@ def build_final_reel(
             "domain": "guiadoproprietario.pt",
         }
     )
+    return payload
+
+
+def build_final_reel(
+    editorial: StrictModel,
+    *,
+    template: TemplateName,
+    slug: str,
+    category: str,
+    hero_image: str,
+) -> dict:
+    payload = assemble_final_reel(
+        editorial,
+        template=template,
+        slug=slug,
+        category=category,
+        hero_image=hero_image,
+    )
     try:
         return FINAL_REEL_ADAPTER.validate_python(payload).model_dump()
     except ValidationError as exc:
-        details: list[str] = []
+        issues: list[EditorialFieldIssue] = []
+        other_errors: list[str] = []
         for error in exc.errors(include_url=False):
-            location = ".".join(str(part) for part in error["loc"] if part != template)
+            parts = [part for part in error["loc"] if part != template]
+            location = ""
+            for part in parts:
+                location += f"[{part}]" if isinstance(part, int) else (f".{part}" if location else str(part))
             value = error.get("input")
-            length = len(value) if isinstance(value, (str, list)) else None
-            suffix = f"; comprimento={length}" if length is not None else ""
-            details.append(f"{location}: {error['msg']}{suffix}")
-        raise ValueError("Validação editorial local falhou:\n- " + "\n- ".join(details)) from exc
+            limit = editorial_limit(location)
+            target = editorial_target(location)
+            if error["type"] in {"string_too_long", "string_too_short"} and isinstance(value, str) and limit and target:
+                issues.append(EditorialFieldIssue(location, value, limit, target, error["msg"]))
+            else:
+                length = len(value) if isinstance(value, (str, list)) else None
+                suffix = f"; comprimento={length}" if length is not None else ""
+                other_errors.append(f"{location}: {error['msg']}{suffix}")
+        if other_errors:
+            raise ValueError("Validação estrutural local falhou:\n- " + "\n- ".join(other_errors)) from exc
+        raise EditorialValidationError(issues) from exc

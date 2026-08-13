@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 
+from .schema import EditorialFieldIssue
 
-PROMPT_VERSION = "reels-editorial-v2"
+
+PROMPT_VERSION = "reels-editorial-v3"
 
 ROUTER_SYSTEM_PROMPT = """És o router editorial do Guia do Proprietário, em Portugal. Escolhes apenas o template mais adequado ao artigo fornecido.
 
@@ -100,4 +102,51 @@ def editorial_user_prompt(article_payload: dict, template: str) -> str:
         f"O template já foi escolhido: {template}. Não o alteres.\n"
         "Cria o guião a partir deste único artigo MDX normalizado:\n"
         + json.dumps(article_payload, ensure_ascii=False, indent=2)
+    )
+
+
+REPAIR_SYSTEM_PROMPT = """És um revisor editorial do Guia do Proprietário, em Portugal. Recebes apenas campos que falharam a validação editorial de um guião já aprovado estrutural e factualmente.
+
+Regras obrigatórias:
+- Não alteres o template.
+- Não alteres factos nem acrescentes informação.
+- Reescreve apenas os paths fornecidos e devolve exatamente uma substituição por path.
+- Mantém a ideia factual do texto atual.
+- O limite absoluto indicado para cada campo é uma restrição obrigatória, contando letras, espaços e pontuação.
+- Produz cada valor com comprimento igual ou inferior ao objetivo recomendado. Se isso for impossível sem perder a ideia factual, ainda assim nunca ultrapasses o limite absoluto.
+- Confirma internamente o comprimento de cada valor antes de responder. Não devolvas essa contagem.
+- Não truncar palavras ou frases.
+- Não colar palavras, usar abreviações artificiais ou reticências.
+- Cada valor deve soar natural e completo quando lido isoladamente.
+- Não regeneres o Reel inteiro.
+
+Devolve apenas o Structured Output de repair pedido."""
+
+
+def repair_user_prompt(article_payload: dict, template: str, issues: tuple[EditorialFieldIssue, ...]) -> str:
+    frontmatter = article_payload.get("frontmatter", {})
+    factual_context = {}
+    if isinstance(frontmatter, dict):
+        factual_context = {
+            key: frontmatter[key]
+            for key in ("titulo", "descricao", "resposta_rapida", "custos", "aviso")
+            if key in frontmatter
+        }
+    fields = [
+        {
+            "path": issue.path,
+            "currentValue": issue.value,
+            "currentLength": len(issue.value),
+            "absoluteLimit": issue.limit,
+            "recommendedTarget": issue.target,
+            "failure": issue.reason,
+        }
+        for issue in issues
+    ]
+    return (
+        f"Versão do prompt: {PROMPT_VERSION}\n"
+        f"Template imutável: {template}\n"
+        "Reescreve apenas os campos abaixo. Cada recommendedTarget é o comprimento máximo pretendido; "
+        "cada absoluteLimit é um teto inviolável.\n"
+        + json.dumps({"fields": fields, "minimalFactualContext": factual_context}, ensure_ascii=False, indent=2)
     )
