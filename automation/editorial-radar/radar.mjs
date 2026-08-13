@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {inspectSourceUrl} from './source-metadata.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -254,11 +255,123 @@ async function freshnessRescue(currentTime, processedUrls) {
 }
 
 function validatorPrompt(sources, window) {
-  return `És o Validador factual do discovery do Guia do Proprietário. Não decides importância editorial nem atribuis scores. Verifica e enriquece cada URL de input.\n\nVerifica apenas os URLs fornecidos. Podes abrir ou pesquisar informação necessária para validar essas páginas, mas article_url no output tem obrigatoriamente de ser exatamente um dos URLs de input.\n\nAGORA EM PORTUGAL: ${window.end}\nJANELA NORMAL PARA MEDIA: ${window.normalStart} a ${window.end} (36 horas).\nJANELA PARA FONTES OFICIAIS: ${window.officialStart} a ${window.end} (72 horas).\n\nURLS DE INPUT:\n${JSON.stringify(sources)}\n\nPara cada URL confirma: se é notícia ou artigo concreto e não página genérica; título; fonte; data de publicação; resumo factual; entidades; factos principais; ligação a Portugal; relação potencial com proprietários de imóveis; fase jurídica quando aplicável.\n\nRejeita apenas páginas de categoria, home ou pesquisa; classificados; publicidade evidente; URL inacessível sem informação suficiente; conteúdo claramente fora do âmbito imobiliário ou dos proprietários; media fora das 36 horas; fontes oficiais fora das 72 horas. Não apliques um teste exigente de importância editorial. Se houver dúvida razoável, preserva o candidato para o Editor-chefe.\n\nDevolve APENAS JSON válido:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"URL EXATO DO INPUT","source_type":"media|official","is_official":false,"why_material":""}],"rejections":[{"article_url":"URL EXATO DO INPUT","reason":"outside_window|generic_page|irrelevant|unverifiable|other"}]}`;
+  return `És o Validador factual do discovery do Guia do Proprietário. Não decides importância editorial nem atribuis scores. Verifica e enriquece cada URL de input.\n\nVerifica apenas os URLs fornecidos. Podes abrir ou pesquisar informação necessária para validar essas páginas, mas article_url no output tem obrigatoriamente de ser exatamente um dos URLs de input.\n\nAGORA EM PORTUGAL: ${window.end}\n\nURLS DE INPUT:\n${JSON.stringify(sources)}\n\nCada URL inclui verified_published_at e verified_title determinados antes desta chamada. A data de publicação fornecida é factual e já foi validada pelo sistema. Não a alteres nem infiras outra data. Copia para event_date apenas o dia de verified_published_at.\n\nPara cada URL confirma: se é notícia ou artigo concreto e não página genérica; título; fonte; resumo factual; entidades; factos principais; ligação a Portugal; relação potencial com proprietários de imóveis; fase jurídica quando aplicável. article_type e probable_article são apenas sinais auxiliares, não substituem o teu julgamento factual.\n\nRejeita apenas páginas de categoria, home ou pesquisa; classificados; publicidade evidente; URL inacessível sem informação suficiente; conteúdo claramente fora do âmbito imobiliário ou dos proprietários. Não apliques um teste exigente de importância editorial. Se houver dúvida razoável, preserva o candidato para o Editor-chefe.\n\nDevolve APENAS JSON válido:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"URL EXATO DO INPUT","source_type":"media|official","is_official":false,"why_material":""}],"rejections":[{"article_url":"URL EXATO DO INPUT","reason":"generic_page|irrelevant|unverifiable|other"}]}`;
 }
 
 function isOfficialDomain(hostname) {
   return OFFICIAL_DOMAINS.some(domain => hostname === domain || hostname.endsWith(`.${domain}`));
+}
+
+function sourceIsOfficial(source) {
+  let hostname=source.source_domain || '';
+  if (!hostname) {
+    try { hostname=new URL(source.url).hostname; } catch {}
+  }
+  return isOfficialDomain(hostname);
+}
+
+function normalizePublishedAt(value) {
+  const timestamp=Date.parse(value);
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : '';
+}
+
+function publicationInsideWindow(source, publishedAt, currentTime) {
+  const publishedTime=Date.parse(publishedAt);
+  if (!Number.isFinite(publishedTime)) return false;
+  const hours=sourceIsOfficial(source) ? 72 : 36;
+  return publishedTime >= currentTime.getTime() - hours * 60 * 60 * 1000;
+}
+
+function dateFallbackPrompt(sources, currentTime) {
+  return `Verifica exclusivamente a data de publicação dos URLs abaixo. Pesquisa ou abre cada URL e procura prova explícita da data original de publicação. Não uses dateModified, datas de atualização, datas de outros artigos nem a data de hoje por suposição. article_url tem de ser exatamente um dos URLs de input. Agora é ${lisbonDateTime(currentTime)} em Portugal.\n\nURLS:\n${JSON.stringify(sources.map(source=>({article_url:source.url,title:source.title||''})))}\n\nDevolve APENAS JSON válido:\n{"results":[{"article_url":"URL EXATO DO INPUT","published_at":"ISO 8601","date_evidence":"prova explícita e curta encontrada na fonte","confidence":0}]}`;
+}
+
+async function inspectSources(sources, currentTime, context) {
+  const eligible=[];
+  const unknown=[];
+  for (let start=0; start<sources.length; start+=6) {
+    const batch=sources.slice(start,start+6);
+    const inspections=await Promise.all(batch.map(source=>inspectSourceUrl(source)));
+    for (let index=0; index<batch.length; index++) {
+      const source=batch[index];
+      const inspection=inspections[index];
+      context.stats.total++;
+      const inside=inspection.published_at ? publicationInsideWindow(source,inspection.published_at,currentTime) : null;
+      if (inspection.published_at) {
+        context.stats.dated++;
+        if (inside) {
+          context.stats.inside_window++;
+          eligible.push({
+            ...source,
+            verified_published_at:inspection.published_at,
+            verified_title:inspection.title || source.title || '',
+            date_status:'verified',
+            date_source:inspection.date_source,
+            article_type:inspection.article_type,
+            probable_article:inspection.probable_article
+          });
+        } else {
+          context.stats.outside_window++;
+        }
+      } else if (inspection.fetch_ok) {
+        context.stats.unknown_date++;
+        unknown.push({...source,inspection});
+      } else {
+        context.stats.fetch_failed++;
+      }
+      if (CFG.dryRun) {
+        console.log(JSON.stringify({
+          stage:'source_inspection',
+          url:source.url,
+          published_at:inspection.published_at,
+          date_source:inspection.date_source,
+          inside_window:inside,
+          fetch_ok:inspection.fetch_ok
+        }));
+      }
+    }
+  }
+
+  const fallbackBatch=unknown.slice(0,context.dateFallbackRemaining);
+  context.dateFallbackRemaining-=fallbackBatch.length;
+  if (fallbackBatch.length) {
+    const inputByUrl=new Map(fallbackBatch.map(item=>[item.url,item]));
+    const response=await openai({
+      model:CFG.openaiModelValidator,
+      prompt:dateFallbackPrompt(fallbackBatch,currentTime),
+      purpose:'date_verification',
+      web:true,
+      effort:'low',
+      searchContextSize:'medium'
+    });
+    const data=parseJson(response.text);
+    const results=Array.isArray(data.results) ? data.results : Array.isArray(data) ? data : [data];
+    const decided=new Set();
+    for (const result of results) {
+      const source=inputByUrl.get(result?.article_url);
+      const publishedAt=normalizePublishedAt(result?.published_at);
+      if (!source || decided.has(source.url) || Number(result?.confidence)<90 || !String(result?.date_evidence||'').trim() || !publishedAt) continue;
+      decided.add(source.url);
+      context.stats.unknown_date--;
+      context.stats.dated++;
+      if (publicationInsideWindow(source,publishedAt,currentTime)) {
+        context.stats.inside_window++;
+        eligible.push({
+          ...source,
+          verified_published_at:publishedAt,
+          verified_title:source.inspection.title || source.title || '',
+          date_status:'inferred',
+          date_source:'web_search_evidence',
+          date_evidence:String(result.date_evidence),
+          article_type:source.inspection.article_type,
+          probable_article:source.inspection.probable_article
+        });
+      } else {
+        context.stats.outside_window++;
+      }
+    }
+  }
+  return eligible;
 }
 
 async function validateSearchResults(sources, currentTime) {
@@ -292,9 +405,11 @@ async function validateSearchResults(sources, currentTime) {
       const source=inputByUrl.get(candidate.article_url);
       if (!source || decidedUrls.has(source.url)) continue;
       decidedUrls.add(source.url);
-      const official=isOfficialDomain(source.source_domain);
+      const official=sourceIsOfficial(source);
       const validated={
         ...candidate,
+        title:candidate.title || source.verified_title,
+        event_date:source.verified_published_at.slice(0,10),
         article_url:source.url,
         source_type:official?'official':'media',
         is_official:official,
@@ -356,9 +471,11 @@ async function validateSearchResults(sources, currentTime) {
       const source=inputByUrl.get(candidate.article_url);
       if (!source || acceptedUrls.has(source.url)) continue;
       acceptedUrls.add(source.url);
-      const official=isOfficialDomain(source.source_domain);
+      const official=sourceIsOfficial(source);
       const validated={
         ...candidate,
+        title:candidate.title || source.verified_title,
+        event_date:source.verified_published_at.slice(0,10),
         article_url:source.url,
         source_type:official?'official':'media',
         is_official:official,
@@ -437,13 +554,22 @@ async function discover() {
       unique_urls:sources.length
     }));
   }
-  const firstPass=await validateSearchResults(sources,currentTime);
+  const inspectionContext={
+    stats:{total:0,dated:0,inside_window:0,outside_window:0,unknown_date:0,fetch_failed:0},
+    dateFallbackRemaining:CFG.mode==='smoke' ? 6 : 12
+  };
+  const inspectedSources=await inspectSources(sources,currentTime,inspectionContext);
+  const firstPass=await validateSearchResults(inspectedSources,currentTime);
   let rescue=[];
   if (!firstPass.length) {
     const rescueSources=await freshnessRescue(currentTime,new Set(sourceMap.keys()));
-    if (rescueSources.length) rescue=await validateSearchResults(rescueSources,currentTime);
+    if (rescueSources.length) {
+      const inspectedRescueSources=await inspectSources(rescueSources,currentTime,inspectionContext);
+      rescue=await validateSearchResults(inspectedRescueSources,currentTime);
+    }
   }
   if (CFG.dryRun) {
+    console.log(JSON.stringify({stage:'source_inspection_summary',...inspectionContext.stats}));
     console.log(JSON.stringify({
       stage:'freshness_summary',
       validated_first_pass:firstPass.length,
