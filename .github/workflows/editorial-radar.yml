@@ -56,8 +56,9 @@ jobs:
       - name: Resolve run mode
         shell: bash
         run: |
+          # TEMPORÁRIO: homologação final; remover trigger push antes do merge para main.
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "RADAR_MODE=smoke" >> "$GITHUB_ENV"
+            echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=true" >> "$GITHUB_ENV"
             echo "BACKFILL=false" >> "$GITHUB_ENV"
             echo "MAX_RUN_TOKENS=150000" >> "$GITHUB_ENV"
