@@ -1,0 +1,94 @@
+name: Generate Reel AI
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: Slug do artigo a transformar em Reel
+        required: true
+        default: herdei-uma-casa
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    env:
+      REEL_SLUG: ${{ inputs.slug }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+
+    steps:
+      - name: Obter repositório
+        uses: actions/checkout@v6
+
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: scripts/reels/requirements.txt
+
+      - name: Validar configuração
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$REEL_SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+            echo "::error::Slug inválido: $REEL_SLUG"
+            exit 1
+          fi
+          if [[ -z "$OPENAI_API_KEY" ]]; then
+            echo "::error::OPENAI_API_KEY não está configurada nos GitHub Actions Secrets."
+            exit 1
+          fi
+
+      - name: Instalar FFmpeg, Inter e dependências Python
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg fonts-inter
+          python -m pip install --requirement scripts/reels/requirements.txt
+
+      - name: Gerar e validar JSON
+        run: >-
+          python scripts/reels/generate_json.py
+          --slug "$REEL_SLUG"
+          --output "out/reels-json/$REEL_SLUG.json"
+
+      - name: Renderizar Reel
+        run: >-
+          python scripts/reels/render.py
+          --input "out/reels-json/$REEL_SLUG.json"
+          --output "out/reels-ai/$REEL_SLUG.mp4"
+
+      - name: Confirmar metadados
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="out/reels-ai/$REEL_SLUG.mp4"
+          ffprobe -v error \
+            -show_entries stream=codec_name,codec_type,width,height,avg_frame_rate,pix_fmt,duration \
+            -show_entries format=duration \
+            -of json "$FILE"
+          VIDEO_COUNT="$(ffprobe -v error -select_streams v -show_entries stream=index -of csv=p=0 "$FILE" | wc -l)"
+          AUDIO_COUNT="$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$FILE" | wc -l)"
+          [[ "$VIDEO_COUNT" == "1" ]] || { echo "::error::O MP4 não contém exatamente uma pista de vídeo."; exit 1; }
+          if [[ -f scripts/reels/assets/background.mp3 ]]; then
+            [[ "$AUDIO_COUNT" == "1" ]] || { echo "::error::O MP4 não contém exatamente uma pista de áudio."; exit 1; }
+          else
+            [[ "$AUDIO_COUNT" == "0" ]] || { echo "::error::Foi encontrado áudio sem background.mp3."; exit 1; }
+          fi
+
+      - name: Guardar JSON, Reel e contact sheet
+        uses: actions/upload-artifact@v7
+        with:
+          name: reel-ai-${{ env.REEL_SLUG }}
+          path: |
+            out/reels-json/${{ env.REEL_SLUG }}.json
+            out/reels-ai/${{ env.REEL_SLUG }}.mp4
+            out/reels-ai/${{ env.REEL_SLUG }}-contact.jpg
+          if-no-files-found: error
+          compression-level: 0
