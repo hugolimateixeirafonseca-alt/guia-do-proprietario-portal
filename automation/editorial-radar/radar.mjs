@@ -104,6 +104,49 @@ function discoveryPrompt(name, query, window) {
   return `És o radar editorial do Guia do Proprietário, portal português para proprietários de imóveis.\n\nMISSÃO DO SWEEP: ${name}\n${query}\n\nJANELA TEMPORAL ABSOLUTA: Agora são ${window.end} em Portugal. Procura acontecimentos publicados entre ${window.start} e ${window.end}, inclusive.\n\nMÉTODO OBRIGATÓRIO:\n1. Faz pesquisa real na web.\n2. Pesquisa primeiro de forma abrangente dentro do tema e da janela indicada.\n3. Só depois aplica o teste de relevância para proprietários de imóveis em Portugal.\n4. Se encontrares resultados potencialmente relevantes, devolve-os como candidatos para o Editor-chefe decidir. Privilegia recall nesta fase; a seleção posterior tratará a precision.\n5. Não exijas nesta descoberta prova completa de toda a materialidade.\n\nDevolve APENAS JSON válido neste formato:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"https://...","source_type":"media|official","is_official":false,"why_material":""}]}\n\nRegras: só acontecimentos reais e recentes; exclui lifestyle, classificados, publicidade e movimentos empresariais sem utilidade concreta. Não inventes URLs. Prefere a fonte original ou oficial quando existir. Máximo 10 candidatos por sweep.`;
 }
 
+function webSearchDiagnostics(output) {
+  const calls = (output || []).filter(item => item.type === 'web_search_call');
+  const queries=[];
+  const actionTypes=[];
+  const sourceUrls=[];
+  for (const item of calls) {
+    const action=item.action || {};
+    const actionQueries=Array.isArray(action.queries) ? action.queries : action.queries ? [action.queries] : [];
+    for (const query of [...actionQueries, action.query]) {
+      if (typeof query === 'string' && query.trim()) queries.push(query.trim());
+    }
+    if (typeof action.type === 'string' && action.type.trim()) actionTypes.push(action.type.trim());
+    const sources=Array.isArray(action.sources) ? action.sources : [];
+    for (const source of sources) {
+      const url=typeof source === 'string' ? source : source?.url;
+      if (typeof url === 'string' && url.trim()) sourceUrls.push(url.trim());
+    }
+  }
+  const urls=[...new Set(sourceUrls)].slice(0,20);
+  const domains=[...new Set(urls.map(url => {
+    try { return new URL(url).hostname; } catch { return ''; }
+  }).filter(Boolean))];
+  return {
+    calls,
+    queries:[...new Set(queries)],
+    actionTypes:[...new Set(actionTypes)],
+    urls,
+    domains
+  };
+}
+
+async function runDiscoveryFallback(name, currentDate) {
+  const topic=name.replaceAll('_',' ');
+  const prompt=`Hoje é ${currentDate} em Portugal. Encontra 5 notícias portuguesas publicadas nas últimas 48 horas sobre ${topic}. Não avalies ainda se são boas para o Guia do Proprietário. Devolve apenas JSON válido neste formato: {"results":[{"title":"","date":"YYYY-MM-DD","source":"","url":"https://..."}]}`;
+  try {
+    const response=await openai({model:CFG.openaiModelSearch,prompt,web:true,effort:'low'});
+    const parsed=parseJson(response.text);
+    return (Array.isArray(parsed.results) ? parsed.results : []).slice(0,5);
+  } catch {
+    return [{error:'fallback_failed'}];
+  }
+}
+
 async function discover() {
   const selected = CFG.mode === 'morning' ? sweeps : sweeps.filter(([n]) => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito','fontes_oficiais','catch_all'].includes(n));
   const currentTime = new Date();
@@ -115,9 +158,26 @@ async function discover() {
   for (const [name,q] of selected) {
     const window = name === 'fontes_oficiais' ? windows.official : windows.normal;
     const r = await openai({model:CFG.openaiModelSearch,prompt:discoveryPrompt(name,q,window),web:true,effort:'low'});
+    const diagnostics=webSearchDiagnostics(r.raw.output);
+    if (CFG.dryRun) {
+      console.log(JSON.stringify({
+        stage:'web_search_debug',
+        sweep:name,
+        queries:diagnostics.queries,
+        action_types:diagnostics.actionTypes
+      }));
+      console.log(JSON.stringify({
+        stage:'web_sources_debug',
+        sweep:name,
+        source_count:diagnostics.urls.length,
+        urls:diagnostics.urls,
+        domains:diagnostics.domains
+      }));
+      console.log(JSON.stringify({stage:'discovery_model_output',sweep:name,text:r.text.slice(0,2000)}));
+    }
     const data=parseJson(r.text);
     const candidates = (Array.isArray(data.candidates) ? data.candidates : []).slice(0,10);
-    const webSearchCalls = (r.raw.output || []).filter(item => item.type === 'web_search_call').length;
+    const webSearchCalls = diagnostics.calls.length;
     console.log(JSON.stringify({
       stage:'discovery',
       sweep:name,
@@ -127,6 +187,10 @@ async function discover() {
     }));
     if (!candidates.length) {
       console.log(JSON.stringify({stage:'discovery_warning',sweep:name,reason:'zero_candidates'}));
+      if (CFG.dryRun) {
+        const fallbackResult=await runDiscoveryFallback(name,lisbonDateTime(currentTime).slice(0,10));
+        console.log(JSON.stringify({stage:'discovery_fallback_debug',sweep:name,result:fallbackResult}));
+      }
     }
     for (const c of candidates) all.push({...c,sweep:name});
     await sleep(250);
