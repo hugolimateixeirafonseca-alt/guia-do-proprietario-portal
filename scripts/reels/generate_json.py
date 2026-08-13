@@ -11,7 +11,7 @@ REPOSITORY_ROOT = SCRIPT_DIR.parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from ai.article import read_article
-from ai.openai_client import generate_editorial
+from ai.openai_client import create_openai_client, generate_editorial, route_template
 from ai.prompt import PROMPT_VERSION
 from ai.schema import build_final_reel
 from ai.semantic import write_validated_json
@@ -38,9 +38,13 @@ def main() -> int:
         }, ensure_ascii=False, indent=2))
         return 0
 
-    generated, metadata = generate_editorial(article.api_payload)
+    client = create_openai_client()
+    template, _router_metadata = route_template(article.api_payload, client=client)
+    print(f"Template selecionado: {template}")
+    generated, _generator_metadata = generate_editorial(article.api_payload, template=template, client=client)
     final = build_final_reel(
-        generated.reel,
+        generated,
+        template=template,
         slug=article.slug,
         category=article.category,
         hero_image=article.hero_image,
@@ -49,11 +53,6 @@ def main() -> int:
     output = output.resolve() if output.is_absolute() else (Path.cwd() / output).resolve()
     write_validated_json(final, output, article, REPOSITORY_ROOT)
 
-    print(f"Modelo: {metadata.model}")
-    print(f"Response ID: {metadata.response_id}")
-    print(f"Tokens de entrada: {metadata.input_tokens}")
-    print(f"Tokens de saída: {metadata.output_tokens}")
-    print(f"Tokens totais: {metadata.total_tokens}")
     print(f"Template: {final['template']}")
     print(f"JSON: {output}")
     return 0

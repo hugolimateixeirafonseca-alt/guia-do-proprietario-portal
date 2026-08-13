@@ -23,9 +23,9 @@ Quando `scripts/reels/assets/background.mp3` existe, o renderer adiciona-a autom
 
 ## Geração automática do JSON com OpenAI
 
-A geração por IA é uma etapa separada e não altera o renderer. O módulo lê apenas o artigo MDX indicado, envia o frontmatter relevante e o texto editorial para a Responses API e exige Structured Outputs através de um schema Pydantic estrito. A OpenAI escolhe um dos três templates congelados: `ordered_steps`, `cost_highlight` ou `problem_solution`.
+A geração por IA é uma etapa separada e não altera o renderer. O módulo lê apenas o artigo MDX indicado e envia o frontmatter relevante e o texto editorial para a Responses API. Uma primeira chamada curta escolhe um dos três templates congelados através de Structured Outputs: `ordered_steps`, `cost_highlight` ou `problem_solution`. Uma segunda chamada recebe essa escolha e usa o schema Pydantic estrito específico do template, sem voltar a classificar o artigo.
 
-O código preenche deterministicamente `version`, `slug`, `category`, `heroImage` e os campos fixos do fecho. Antes de gravar, valida campos extra, densidade, quantidade de passos, imagem, números e valores monetários. O JSON final passa ainda pelo validador usado pelo renderer. Uma falha editorial ou semântica interrompe o processo e não é corrigida silenciosamente.
+O código regista modelo, response ID e tokens logo após cada resposta. Depois preenche deterministicamente `version`, `template`, `slug`, `category`, `heroImage` e os campos fixos do fecho. Antes de gravar, valida campos extra, densidade, quantidade de passos, truncagem, imagem, números e valores monetários. O JSON final passa ainda pelo validador usado pelo renderer. Uma falha editorial ou semântica interrompe o processo e não é corrigida silenciosamente.
 
 Variáveis:
 

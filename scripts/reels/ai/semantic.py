@@ -10,6 +10,27 @@ from .article import Article
 
 NUMBER_PATTERN = re.compile(r"(?<![\w])\d+(?:[ .\u00a0]\d{3})*(?:[,.]\d+)?")
 MONEY_PATTERN = re.compile(r"(\d+(?:[ .\u00a0]\d{3})*(?:[,.]\d+)?)\s*€")
+ZERO_WIDTH_PATTERN = re.compile(r"[\u200b\u200c\u200d\ufeff]")
+ACRONYM_JOIN_PATTERN = re.compile(r"\b[A-ZÁÉÍÓÚÂÊÔÃÕÇ]{2,}[a-záéíóúâêôãõç]{2,}\b")
+KNOWN_JOIN_PATTERN = re.compile(r"\b(?:câmaraourec)\b", re.IGNORECASE)
+TRAILING_FRAGMENT_PATTERN = re.compile(r"(?:[-‐‑‒–—,;:]|\b(?:a|à|ao|aos|as|às|com|como|da|das|de|do|dos|e|em|entre|mas|na|nas|no|nos|o|ou|para|pela|pelas|pelo|pelos|por|porque|que|se|sem|só|um|uma))\s*$", re.IGNORECASE)
+EDITORIAL_LIMITS = {
+    "intro.title": 32,
+    "intro.accent": 30,
+    "intro.label": 40,
+    "intro.subtitle": 80,
+    "highlight.amount": 35,
+    "highlight.caption": 80,
+    "progress.eyebrow": 45,
+    "progress.title": 60,
+    "progress.itemLabel": 18,
+    "warning.eyebrow": 35,
+    "warning.title": 60,
+    "warning.body": 90,
+    "warning.secondary": 100,
+    "outro.title": 75,
+}
+STEP_TITLE_LIMIT = 55
 
 
 def _normalise_number(value: str) -> str:
@@ -27,8 +48,44 @@ def _strings(value: Any):
             yield from _strings(item)
 
 
-def validate_semantics(payload: dict, article: Article, repository_root: Path) -> None:
+def _nested_string(payload: dict, path: str) -> str:
+    value: Any = payload
+    for part in path.split("."):
+        value = value.get(part) if isinstance(value, dict) else None
+    return value if isinstance(value, str) else ""
+
+
+def _truncation_reason(value: str, limit: int) -> str | None:
+    if ZERO_WIDTH_PATTERN.search(value):
+        return "contém um carácter invisível associado a corte"
+    if ACRONYM_JOIN_PATTERN.search(value) or KNOWN_JOIN_PATTERN.search(value):
+        return "contém uma junção anormal de palavras"
+    if TRAILING_FRAGMENT_PATTERN.search(value):
+        return "termina de forma fragmentada"
+    if len(value) == limit and value[-1:].isalnum():
+        return "atinge exatamente o limite e termina sem fecho natural"
+    return None
+
+
+def _validate_no_truncation(payload: dict) -> list[str]:
     errors: list[str] = []
+    for path, limit in EDITORIAL_LIMITS.items():
+        value = _nested_string(payload, path)
+        if value:
+            reason = _truncation_reason(value, limit)
+            if reason:
+                errors.append(f"{path} {reason} (comprimento={len(value)}): {value!r}")
+    for index, step in enumerate(payload.get("steps", []), start=1):
+        value = step.get("title", "") if isinstance(step, dict) else ""
+        if isinstance(value, str) and value:
+            reason = _truncation_reason(value, STEP_TITLE_LIMIT)
+            if reason:
+                errors.append(f"steps[{index}].title {reason} (comprimento={len(value)}): {value!r}")
+    return errors
+
+
+def validate_semantics(payload: dict, article: Article, repository_root: Path) -> None:
+    errors = _validate_no_truncation(payload)
     if payload.get("slug") != article.slug:
         errors.append("o slug final não corresponde ao artigo solicitado")
     if payload.get("heroImage") != article.hero_image:

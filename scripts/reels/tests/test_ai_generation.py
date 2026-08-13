@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -13,33 +12,58 @@ REPOSITORY_ROOT = REELS_DIR.parents[1]
 sys.path.insert(0, str(REELS_DIR))
 
 from ai.article import Article, read_article
-from ai.openai_client import generate_editorial
-from ai.schema import FINAL_REEL_ADAPTER, GeneratedResponse, build_final_reel, parse_generated_json
+from ai.openai_client import create_openai_client, generate_editorial, route_template
+from ai.schema import (
+    FINAL_REEL_ADAPTER,
+    CostHighlightOutput,
+    OrderedStepsOutput,
+    ProblemSolutionOutput,
+    TemplateRouterOutput,
+    build_final_reel,
+    parse_generated_json,
+)
 from ai.semantic import validate_semantics
 from pydantic import ValidationError
 
 
 def valid_ordered() -> dict:
     return {
-        "reel": {
-            "template": "ordered_steps",
-            "intro": {"title": "Herdei uma casa", "accent": "E agora?", "label": "5 PASSOS", "subtitle": "Comece pela ordem certa."},
-            "steps": [{"title": "Participar o óbito"}, {"title": "Habilitar herdeiros"}, {"title": "Registar o imóvel"}],
-            "warning": {"eyebrow": "Atenção", "title": "Não comece pela venda", "body": "Há passos a tratar primeiro.", "secondary": "A ordem evita bloqueios."},
-            "outro": {"title": "Primeiro trate da ordem. Depois decida."},
-        }
+        "intro": {"title": "Herdei uma casa", "accent": "E agora?", "label": "5 PASSOS", "subtitle": "Comece pela ordem certa."},
+        "steps": [{"title": "Participar o óbito"}, {"title": "Habilitar herdeiros"}, {"title": "Registar o imóvel"}],
+        "warning": {"eyebrow": "Atenção", "title": "Não comece pela venda", "body": "Há passos a tratar primeiro.", "secondary": "A ordem evita bloqueios."},
+        "outro": {"title": "Primeiro trate da ordem. Depois decida."},
     }
 
 
+def valid_cost() -> dict:
+    return {
+        "intro": {"title": "Quanto custa?", "accent": "Veja o essencial", "label": "CUSTOS", "subtitle": "Prepare o orçamento."},
+        "highlight": {"amount": "400 € a 900 €", "caption": "Para uma divisão"},
+        "progress": {"eyebrow": "O que pesa", "title": "A casa conta", "itemLabel": "fatores"},
+        "steps": [{"title": "Tubagem"}, {"title": "Acesso"}, {"title": "Instalação"}],
+        "warning": {"eyebrow": "Atenção", "title": "Compare", "body": "Peça orçamento.", "secondary": "Confirme o que está incluído."},
+        "outro": {"title": "O preço não conta tudo."},
+    }
+
+
+def valid_problem() -> dict:
+    payload = valid_cost()
+    payload.pop("highlight")
+    return payload
+
+
 class FakeResponses:
-    def __init__(self, parsed: GeneratedResponse):
-        self.parsed = parsed
+    def __init__(self, outputs):
+        self.outputs = list(outputs)
+        self.calls = []
 
     def parse(self, **kwargs):
+        self.calls.append(kwargs)
+        parsed = self.outputs.pop(0)
         return SimpleNamespace(
-            output_parsed=self.parsed,
+            output_parsed=parsed,
             model=kwargs["model"],
-            id="resp_test",
+            id=f"resp_test_{len(self.calls)}",
             usage=SimpleNamespace(input_tokens=10, output_tokens=20, total_tokens=30),
         )
 
@@ -51,66 +75,141 @@ class AIGenerationTests(unittest.TestCase):
 
     def test_api_key_ausente(self):
         with self.assertRaisesRegex(ValueError, "OPENAI_API_KEY"):
-            generate_editorial({}, api_key="")
+            create_openai_client(api_key="")
 
-    def test_template_invalido(self):
-        payload = valid_ordered()
-        payload["reel"]["template"] = "novo_template"
+    def test_router_invalido(self):
+        responses = FakeResponses([{"template": "novo_template"}])
         with self.assertRaises(ValidationError):
-            GeneratedResponse.model_validate(payload)
+            route_template({}, api_key="teste", client=SimpleNamespace(responses=responses), logger=lambda _: None)
+
+    def test_router_escolhe_template_permitido(self):
+        responses = FakeResponses([{"template": "cost_highlight"}])
+        template, metadata = route_template({}, api_key="teste", client=SimpleNamespace(responses=responses), logger=lambda _: None)
+        self.assertEqual(template, "cost_highlight")
+        self.assertEqual(metadata.total_tokens, 30)
+
+    def test_schema_especifico_correto_e_selecionado(self):
+        cases = (
+            ("ordered_steps", OrderedStepsOutput, valid_ordered()),
+            ("cost_highlight", CostHighlightOutput, valid_cost()),
+            ("problem_solution", ProblemSolutionOutput, valid_problem()),
+        )
+        for template, schema, payload in cases:
+            with self.subTest(template=template):
+                responses = FakeResponses([payload])
+                generated, _ = generate_editorial(
+                    {}, template=template, api_key="teste", client=SimpleNamespace(responses=responses), logger=lambda _: None
+                )
+                self.assertIsInstance(generated, schema)
+                self.assertIs(responses.calls[0]["text_format"], schema)
+
+    def test_gerador_nao_pode_alterar_template_do_router(self):
+        payload = valid_ordered()
+        payload["template"] = "cost_highlight"
+        responses = FakeResponses([payload])
+        with self.assertRaises(ValidationError):
+            generate_editorial(
+                {}, template="ordered_steps", api_key="teste", client=SimpleNamespace(responses=responses), logger=lambda _: None
+            )
 
     def test_steps_a_mais(self):
         payload = valid_ordered()
-        payload["reel"]["steps"] *= 2
+        payload["steps"] *= 2
         with self.assertRaises(ValidationError):
-            GeneratedResponse.model_validate(payload)
+            OrderedStepsOutput.model_validate(payload)
 
     def test_campo_obrigatorio_ausente(self):
         payload = valid_ordered()
-        del payload["reel"]["intro"]["title"]
+        del payload["intro"]["title"]
         with self.assertRaises(ValidationError):
-            GeneratedResponse.model_validate(payload)
+            OrderedStepsOutput.model_validate(payload)
 
     def test_campo_extra_inesperado(self):
         payload = valid_ordered()
-        payload["reel"]["campo_extra"] = "não permitido"
+        payload["campo_extra"] = "não permitido"
         with self.assertRaises(ValidationError):
-            GeneratedResponse.model_validate(payload)
+            OrderedStepsOutput.model_validate(payload)
+
+    def test_schemas_openai_nao_usam_unioes_nem_limites_editoriais(self):
+        for schema in (TemplateRouterOutput, OrderedStepsOutput, CostHighlightOutput, ProblemSolutionOutput):
+            with self.subTest(schema=schema.__name__):
+                serialised = json.dumps(schema.model_json_schema())
+                self.assertNotIn('"oneOf"', serialised)
+                self.assertNotIn('"anyOf"', serialised)
+                self.assertNotIn('"maxLength"', serialised)
+                self.assertNotIn('"minLength"', serialised)
+
+    def test_limites_editoriais_continuam_na_validacao_local(self):
+        payload = valid_ordered()
+        payload["intro"]["title"] = "x" * 33
+        generated = OrderedStepsOutput.model_validate(payload)
+        with self.assertRaisesRegex(ValueError, r"intro\.title.*comprimento=33"):
+            build_final_reel(
+                generated, template="ordered_steps", slug="teste", category="CASA", hero_image="public/teste.avif"
+            )
+
+    def test_usage_e_registado_antes_de_validacao_local_falhar(self):
+        payload = valid_ordered()
+        payload["intro"]["title"] = "x" * 33
+        responses = FakeResponses([payload])
+        logs: list[str] = []
+        generated, metadata = generate_editorial(
+            {}, template="ordered_steps", api_key="teste", client=SimpleNamespace(responses=responses), logger=logs.append
+        )
+        with self.assertRaises(ValueError):
+            build_final_reel(
+                generated, template="ordered_steps", slug="teste", category="CASA", hero_image="public/teste.avif"
+            )
+        self.assertEqual(metadata.total_tokens, 30)
+        self.assertTrue(any("Gerador tokens totais: 30" in line for line in logs))
+
+    def test_sinais_claros_de_truncagem(self):
+        fixture_path = REELS_DIR / "data" / "vizinho-barulhento.json"
+        original = json.loads(fixture_path.read_text(encoding="utf-8"))
+        original.setdefault("template", "problem_solution")
+        article = read_article(REPOSITORY_ROOT, "vizinho-barulhento")
+        cases = (
+            ("hífen final", "intro.title", "Texto cortado‑"),
+            ("fragmento final", "warning.body", "A frase termina para"),
+            ("acrónimo colado", "steps.0.title", "Pode chamar PSPou aguardar"),
+            ("palavras coladas", "steps.0.title", "Queixa na câmaraourec"),
+            ("carácter invisível", "steps.0.title", "Texto cortado\u200b"),
+        )
+        for label, path, value in cases:
+            with self.subTest(label=label):
+                payload = json.loads(json.dumps(original))
+                if path == "intro.title":
+                    payload["intro"]["title"] = value
+                elif path == "warning.body":
+                    payload["warning"]["body"] = value
+                else:
+                    payload["steps"][0]["title"] = value
+                with self.assertRaisesRegex(ValueError, "fragmentada|junção anormal|invisível"):
+                    validate_semantics(payload, article, REPOSITORY_ROOT)
 
     def test_json_malformado(self):
         with self.assertRaisesRegex(ValueError, "JSON inválida"):
-            parse_generated_json('{"reel":')
+            parse_generated_json('{"intro":', OrderedStepsOutput)
 
     def test_hero_image_inexistente(self):
-        generated = GeneratedResponse.model_validate(valid_ordered())
-        final = build_final_reel(generated.reel, slug="teste", category="CASA", hero_image="public/inexistente.avif")
+        generated = OrderedStepsOutput.model_validate(valid_ordered())
+        final = build_final_reel(
+            generated, template="ordered_steps", slug="teste", category="CASA", hero_image="public/inexistente.avif"
+        )
         article = Article("teste", Path("teste.mdx"), "public/inexistente.avif", Path("inexistente"), "CASA", {}, "5")
         with self.assertRaisesRegex(ValueError, "heroImage não existe"):
             validate_semantics(final, article, REPOSITORY_ROOT)
 
     def test_valor_monetario_inventado(self):
-        payload = {
-            "version": 1,
-            "template": "cost_highlight",
-            "slug": "teste",
-            "category": "CASA",
-            "heroImage": "public/imagens/artigos/ar-condicionado-quanto-custa.avif",
-            "intro": {"title": "Quanto custa?", "accent": "Veja o essencial", "label": "CUSTOS", "subtitle": "Prepare o orçamento."},
-            "highlight": {"amount": "999 €", "caption": "Para uma divisão"},
-            "progress": {"eyebrow": "O que pesa", "title": "A casa conta", "itemLabel": "fatores"},
-            "steps": [{"number": 1, "title": "Tubagem"}, {"number": 2, "title": "Acesso"}, {"number": 3, "title": "Instalação"}],
-            "warning": {"eyebrow": "Atenção", "title": "Compare", "body": "Peça orçamento.", "secondary": "Confirme o que está incluído."},
-            "outro": {"title": "O preço não conta tudo.", "label": "Artigo completo no", "brand": "Guia do Proprietário", "domain": "guiadoproprietario.pt"},
-        }
+        generated = CostHighlightOutput.model_validate(valid_cost())
+        payload = build_final_reel(
+            generated, template="cost_highlight", slug="teste", category="CASA",
+            hero_image="public/imagens/artigos/ar-condicionado-quanto-custa.avif",
+        )
+        payload["highlight"]["amount"] = "999 €"
         article = read_article(REPOSITORY_ROOT, "ar-condicionado-quanto-custa")
         with self.assertRaisesRegex(ValueError, "valor monetário ausente"):
             validate_semantics(payload, article, REPOSITORY_ROOT)
-
-    def test_api_mockada(self):
-        parsed = GeneratedResponse.model_validate(valid_ordered())
-        result, metadata = generate_editorial({}, api_key="teste", model="gpt-5-mini", client=SimpleNamespace(responses=FakeResponses(parsed)))
-        self.assertEqual(result.reel.template, "ordered_steps")
-        self.assertEqual(metadata.total_tokens, 30)
 
     def test_fixtures_aprovadas_cumprem_schema_e_semantica(self):
         for slug, template in (

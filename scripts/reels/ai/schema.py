@@ -46,41 +46,72 @@ class Highlight(StrictModel):
     caption: str = Field(min_length=1, max_length=80)
 
 
-class OrderedStepsEditorial(StrictModel):
-    template: Literal["ordered_steps"]
-    intro: Intro
-    steps: list[EditorialStep] = Field(min_length=3, max_length=5)
-    warning: Warning
-    outro: OutroEditorial
+class GeneratedIntro(StrictModel):
+    title: str
+    accent: str
+    label: str
+    subtitle: str
 
 
-class CostHighlightEditorial(StrictModel):
-    template: Literal["cost_highlight"]
-    intro: Intro
-    highlight: Highlight
-    progress: Progress
-    steps: list[EditorialStep] = Field(min_length=3, max_length=3)
-    warning: Warning
-    outro: OutroEditorial
+class GeneratedStep(StrictModel):
+    title: str
 
 
-class ProblemSolutionEditorial(StrictModel):
-    template: Literal["problem_solution"]
-    intro: Intro
-    progress: Progress
-    steps: list[EditorialStep] = Field(min_length=3, max_length=3)
-    warning: Warning
-    outro: OutroEditorial
+class GeneratedWarning(StrictModel):
+    eyebrow: str
+    title: str
+    body: str
+    secondary: str
 
 
-EditorialReel = Annotated[
-    OrderedStepsEditorial | CostHighlightEditorial | ProblemSolutionEditorial,
-    Field(discriminator="template"),
-]
+class GeneratedOutro(StrictModel):
+    title: str
 
 
-class GeneratedResponse(StrictModel):
-    reel: EditorialReel
+class GeneratedProgress(StrictModel):
+    eyebrow: str
+    title: str
+    itemLabel: str
+
+
+class GeneratedHighlight(StrictModel):
+    amount: str
+    caption: str
+
+
+class TemplateRouterOutput(StrictModel):
+    template: TemplateName
+
+
+class OrderedStepsOutput(StrictModel):
+    intro: GeneratedIntro
+    steps: list[GeneratedStep] = Field(min_length=3, max_length=5)
+    warning: GeneratedWarning
+    outro: GeneratedOutro
+
+
+class CostHighlightOutput(StrictModel):
+    intro: GeneratedIntro
+    highlight: GeneratedHighlight
+    progress: GeneratedProgress
+    steps: list[GeneratedStep] = Field(min_length=3, max_length=3)
+    warning: GeneratedWarning
+    outro: GeneratedOutro
+
+
+class ProblemSolutionOutput(StrictModel):
+    intro: GeneratedIntro
+    progress: GeneratedProgress
+    steps: list[GeneratedStep] = Field(min_length=3, max_length=3)
+    warning: GeneratedWarning
+    outro: GeneratedOutro
+
+
+EDITORIAL_SCHEMAS = {
+    "ordered_steps": OrderedStepsOutput,
+    "cost_highlight": CostHighlightOutput,
+    "problem_solution": ProblemSolutionOutput,
+}
 
 
 class NumberedStep(StrictModel):
@@ -130,16 +161,30 @@ FinalReel = Annotated[
 FINAL_REEL_ADAPTER = TypeAdapter(FinalReel)
 
 
-def parse_generated_json(raw: str) -> GeneratedResponse:
+def editorial_schema(template: TemplateName) -> type[StrictModel]:
     try:
-        return GeneratedResponse.model_validate_json(raw)
+        return EDITORIAL_SCHEMAS[template]
+    except KeyError as exc:
+        raise ValueError(f"Template não suportado: {template}") from exc
+
+
+def parse_generated_json(raw: str, schema: type[StrictModel]) -> StrictModel:
+    try:
+        return schema.model_validate_json(raw)
     except (json.JSONDecodeError, ValidationError) as exc:
         raise ValueError(f"Resposta JSON inválida: {exc}") from exc
 
 
-def build_final_reel(editorial: EditorialReel, *, slug: str, category: str, hero_image: str) -> dict:
+def build_final_reel(
+    editorial: StrictModel,
+    *,
+    template: TemplateName,
+    slug: str,
+    category: str,
+    hero_image: str,
+) -> dict:
     payload = editorial.model_dump()
-    payload.update({"version": 1, "slug": slug, "category": category, "heroImage": hero_image})
+    payload.update({"version": 1, "template": template, "slug": slug, "category": category, "heroImage": hero_image})
     payload["steps"] = [
         {"number": index, "title": step["title"]}
         for index, step in enumerate(payload["steps"], start=1)
@@ -151,4 +196,14 @@ def build_final_reel(editorial: EditorialReel, *, slug: str, category: str, hero
             "domain": "guiadoproprietario.pt",
         }
     )
-    return FINAL_REEL_ADAPTER.validate_python(payload).model_dump()
+    try:
+        return FINAL_REEL_ADAPTER.validate_python(payload).model_dump()
+    except ValidationError as exc:
+        details: list[str] = []
+        for error in exc.errors(include_url=False):
+            location = ".".join(str(part) for part in error["loc"] if part != template)
+            value = error.get("input")
+            length = len(value) if isinstance(value, (str, list)) else None
+            suffix = f"; comprimento={length}" if length is not None else ""
+            details.append(f"{location}: {error['msg']}{suffix}")
+        raise ValueError("Validação editorial local falhou:\n- " + "\n- ".join(details)) from exc
