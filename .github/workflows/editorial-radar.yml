@@ -7,8 +7,14 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'morning ou incremental'
+        description: 'Modo do radar ou ação de manutenção'
         required: false
+        type: choice
+        options:
+          - morning
+          - incremental
+          - maintenance-report
+          - maintenance-cleanup
         default: 'morning'
       dry_run:
         description: 'true = não envia ao Make'
@@ -51,6 +57,7 @@ jobs:
         with:
           node-version: '22'
       - name: Resolve run mode
+        if: ${{ github.event_name == 'schedule' || (inputs.mode != 'maintenance-report' && inputs.mode != 'maintenance-cleanup') }}
         shell: bash
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -63,4 +70,11 @@ jobs:
             echo "BACKFILL=false" >> "$GITHUB_ENV"
           fi
       - name: Run editorial radar
+        if: ${{ github.event_name == 'schedule' || (inputs.mode != 'maintenance-report' && inputs.mode != 'maintenance-cleanup') }}
         run: node automation/editorial-radar/radar.mjs
+      - name: Report test events
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'maintenance-report' }}
+        run: node automation/editorial-radar/cleanup-test-events.mjs
+      - name: Cleanup test events
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'maintenance-cleanup' }}
+        run: node automation/editorial-radar/cleanup-test-events.mjs --apply
