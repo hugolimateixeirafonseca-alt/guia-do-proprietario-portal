@@ -38,5 +38,15 @@ test('limite do plano morning é aplicado pelo prefilter',()=>{
 test('workflow mantém um único cron diário e schedule morning',async()=>{
   const workflow=await fs.readFile(new URL('../../.github/workflows/editorial-radar.yml',import.meta.url),'utf8');
   assert.deepEqual([...workflow.matchAll(/- cron:\s*'([^']+)'/g)].map(match=>match[1]),['30 6 * * *']);
+  assert.doesNotMatch(workflow,/^\s*push:/m);
   assert.match(workflow,/github\.event_name \}\}" == "schedule"[\s\S]*RADAR_MODE=morning[\s\S]*RADAR_DRY_RUN=false[\s\S]*BACKFILL=false/);
+});
+
+test('workflow de manutenção é exclusivamente manual e oferece relatório ou limpeza',async()=>{
+  const workflow=await fs.readFile(new URL('../../.github/workflows/editorial-radar-maintenance.yml',import.meta.url),'utf8');
+  assert.match(workflow,/^\s*workflow_dispatch:/m);
+  assert.doesNotMatch(workflow,/^\s*(?:push|schedule):/m);
+  assert.match(workflow,/report-test-events/);
+  assert.match(workflow,/cleanup-test-events/);
+  assert.match(workflow,/cleanup-test-events\.mjs --apply/);
 });

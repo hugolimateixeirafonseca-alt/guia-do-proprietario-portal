@@ -3,6 +3,7 @@ const REQUIRED=['CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing required environment variable: ${key}`);
 
 const cutoff='2026-08-13T00:00:00Z';
+const MAX_APPLY_EVENTS=20;
 const condition='e.published = 0 AND e.make_sent_at IS NULL AND e.first_seen_at >= ?';
 
 async function d1(sql,params=[]) {
@@ -28,6 +29,10 @@ const report=await d1(`
 `,[cutoff]);
 const events=report.results||[];
 console.log(JSON.stringify({stage:'cleanup_test_events_report',apply:APPLY,cutoff,count:events.length,events},null,2));
+
+if (APPLY && events.length>MAX_APPLY_EVENTS) {
+  throw new Error(`Cleanup aborted: ${events.length} events exceed safety limit of ${MAX_APPLY_EVENTS}`);
+}
 
 if (APPLY && events.length) {
   const guardedIds=`SELECT id FROM events e WHERE ${condition}`;

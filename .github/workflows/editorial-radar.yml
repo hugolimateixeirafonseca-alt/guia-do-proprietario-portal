@@ -1,9 +1,6 @@
 name: Editorial Radar v21.2
 
 on:
-  push:
-    branches:
-      - agent/editorial-radar-v21
   schedule:
     # GitHub cron usa UTC. Em Lisboa, estes horários deslocam 1h entre verão/inverno.
     - cron: '30 6 * * *'
@@ -56,21 +53,11 @@ jobs:
       - name: Resolve run mode
         shell: bash
         run: |
-          # TEMPORÁRIO: homologação final; remover trigger push antes do merge para main.
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
-            echo "RADAR_DRY_RUN=true" >> "$GITHUB_ENV"
-            echo "BACKFILL=false" >> "$GITHUB_ENV"
-            echo "MAX_RUN_TOKENS=150000" >> "$GITHUB_ENV"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "RADAR_MODE=${{ inputs.mode }}" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=${{ inputs.dry_run }}" >> "$GITHUB_ENV"
             echo "BACKFILL=${{ inputs.backfill }}" >> "$GITHUB_ENV"
           elif [[ "${{ github.event_name }}" == "schedule" ]]; then
-            echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
-            echo "RADAR_DRY_RUN=false" >> "$GITHUB_ENV"
-            echo "BACKFILL=false" >> "$GITHUB_ENV"
-          else
             echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=false" >> "$GITHUB_ENV"
             echo "BACKFILL=false" >> "$GITHUB_ENV"
