@@ -6,7 +6,8 @@ const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_AP
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
 
 const CFG = {
-  openaiModelSearch: process.env.OPENAI_SEARCH_MODEL || 'gpt-5.6-terra',
+  openaiModelSearcher: process.env.OPENAI_SEARCHER_MODEL || 'gpt-5.6-luna',
+  openaiModelValidator: process.env.OPENAI_VALIDATOR_MODEL || 'gpt-5.6-luna',
   openaiModelEditor: process.env.OPENAI_EDITOR_MODEL || 'gpt-5.6-sol',
   openaiModelImpact: process.env.OPENAI_IMPACT_MODEL || 'gpt-5.6-terra',
   openaiModelCopy: process.env.OPENAI_COPY_MODEL || 'gpt-5.6-luna',
@@ -17,7 +18,12 @@ const CFG = {
   minNewsScore: Number(process.env.MIN_NEWS_SCORE || 80),
   minImpactConfidence: Number(process.env.MIN_IMPACT_CONFIDENCE || 80),
   dryRun: /^(1|true|yes)$/i.test(process.env.RADAR_DRY_RUN || ''),
+  maxRunTokens: Math.max(0,Number(process.env.MAX_RUN_TOKENS || 0)||0),
 };
+
+const usageTotals = {calls:0,input_tokens:0,output_tokens:0,total_tokens:0,web_search_calls:0};
+const validatorTerraFallback = {used:false};
+class BudgetGuardStop extends Error {}
 
 const nowIso = () => new Date().toISOString();
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -26,12 +32,25 @@ const norm = (s='') => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLower
 const slugify = (s='') => norm(s).replace(/\s+/g,'-').slice(0,120);
 const id = (prefix, value) => `${prefix}_${sha(value).slice(0,20)}`;
 
-async function openai({model, prompt, web=false, effort='low', allowedDomains=[]}) {
+function logUsageSummary() {
+  console.log(JSON.stringify({stage:'usage_summary',...usageTotals}));
+}
+
+async function openai({model, prompt, purpose, web=false, effort='low', allowedDomains=[], searchContextSize='medium'}) {
+  if (CFG.maxRunTokens > 0 && usageTotals.total_tokens >= CFG.maxRunTokens) {
+    console.log(JSON.stringify({
+      stage:'budget_guard',
+      reason:'max_run_tokens',
+      tokens_used:usageTotals.total_tokens,
+      limit:CFG.maxRunTokens
+    }));
+    throw new BudgetGuardStop('Maximum run token budget reached');
+  }
   const body = { model, input: prompt, reasoning: { effort } };
   if (web) {
     const webSearch = {
       type: 'web_search',
-      search_context_size: 'high',
+      search_context_size: searchContextSize,
       user_location: {
         type: 'approximate',
         country: 'PT',
@@ -53,6 +72,23 @@ async function openai({model, prompt, web=false, effort='low', allowedDomains=[]
   if (!res.ok) throw new Error(`OpenAI ${res.status}: ${raw.slice(0,1000)}`);
   const data = JSON.parse(raw);
   const text = data.output_text || (data.output || []).flatMap(x => x.content || []).map(c => c.text || '').join('\n');
+  const usage=data.usage || {};
+  const inputTokens=Number(usage.input_tokens || 0);
+  const outputTokens=Number(usage.output_tokens || 0);
+  const totalTokens=Number(usage.total_tokens ?? (inputTokens+outputTokens));
+  const webSearchCalls=(data.output || []).filter(item => item.type === 'web_search_call').length;
+  usageTotals.calls++;
+  usageTotals.input_tokens+=inputTokens;
+  usageTotals.output_tokens+=outputTokens;
+  usageTotals.total_tokens+=totalTokens;
+  usageTotals.web_search_calls+=webSearchCalls;
+  console.log(JSON.stringify({
+    stage:'openai_usage',purpose,model,
+    input_tokens:inputTokens,
+    output_tokens:outputTokens,
+    total_tokens:totalTokens,
+    web_search_calls:webSearchCalls
+  }));
   return {text, usage:data.usage, raw:data};
 }
 
@@ -183,7 +219,7 @@ function extractSearchResults(output, sweep, {limit=10,allowSourcesFallback=true
 
 async function searchSweep({name,topic,type='thematic',allowedDomains=[]}, currentTime) {
   const {prompt,window}=searcherPrompt(topic,currentTime,type);
-  const response=await openai({model:CFG.openaiModelSearch,prompt,web:true,effort:'low',allowedDomains});
+  const response=await openai({model:CFG.openaiModelSearcher,prompt,purpose:'searcher',web:true,effort:'low',allowedDomains,searchContextSize:'medium'});
   const {results,citedCount}=extractSearchResults(response.raw.output,name);
   if (CFG.dryRun) {
     console.log(JSON.stringify({
@@ -204,7 +240,7 @@ async function freshnessRescue(currentTime, processedUrls) {
     end:lisbonDateTime(currentTime)
   };
   const prompt=`Procura apenas notícias publicadas hoje ou ontem em Portugal que possam ser úteis para alguém que possui uma casa. Dá prioridade a legislação, condomínios, arrendamento, preços das casas, venda, crédito habitação, Euribor, impostos, obras, energia e direitos de propriedade. Agora são ${window.end} em Portugal e a janela começa em ${window.start}. Não cites páginas anteriores à janela indicada. Apresenta até 12 resultados, com título, fonte, data e uma frase factual. Cita cada resultado com a respetiva fonte web.`;
-  const response=await openai({model:CFG.openaiModelSearch,prompt,web:true,effort:'low'});
+  const response=await openai({model:CFG.openaiModelSearcher,prompt,purpose:'freshness_rescue',web:true,effort:'low',searchContextSize:'high'});
   const {results}=extractSearchResults(response.raw.output,'freshness_rescue',{limit:12,allowSourcesFallback:false});
   const freshResults=results.filter(result => !processedUrls.has(canonicalUrl(result.url)));
   if (CFG.dryRun) {
@@ -233,16 +269,20 @@ async function validateSearchResults(sources, currentTime) {
   };
   const accepted=[];
   const rejectionReasons={outside_window:0,generic_page:0,irrelevant:0,unverifiable:0,other:0};
+  const terraFallbackSources=[];
+  const terraFallbackUrls=new Set();
   let batchNumber=0;
   for (let start=0; start<sources.length; start+=12) {
     batchNumber++;
     const batch=sources.slice(start,start+12);
     const inputByUrl=new Map(batch.map(source => [source.url,source]));
     const response=await openai({
-      model:CFG.openaiModelSearch,
+      model:CFG.openaiModelValidator,
       prompt:validatorPrompt(batch,window),
+      purpose:'validator',
       web:true,
-      effort:'low'
+      effort:'low',
+      searchContextSize:'medium'
     });
     const data=parseJson(response.text);
     const proposed=Array.isArray(data.candidates) ? data.candidates : [];
@@ -268,6 +308,10 @@ async function validateSearchResults(sources, currentTime) {
       if (!inputByUrl.has(rejection.article_url) || decidedUrls.has(rejection.article_url)) continue;
       const reason=Object.hasOwn(rejectionReasons,rejection.reason) ? rejection.reason : 'other';
       reportedRejections.set(rejection.article_url,reason);
+      if (reason==='unverifiable' && !validatorTerraFallback.used && terraFallbackSources.length<6 && !terraFallbackUrls.has(rejection.article_url)) {
+        terraFallbackUrls.add(rejection.article_url);
+        terraFallbackSources.push(inputByUrl.get(rejection.article_url));
+      }
     }
     for (const source of batch) {
       if (decidedUrls.has(source.url)) continue;
@@ -294,6 +338,63 @@ async function validateSearchResults(sources, currentTime) {
     }
     await sleep(250);
   }
+  if (!validatorTerraFallback.used && terraFallbackSources.length) {
+    validatorTerraFallback.used=true;
+    const inputByUrl=new Map(terraFallbackSources.map(source => [source.url,source]));
+    const response=await openai({
+      model:'gpt-5.6-terra',
+      prompt:validatorPrompt(terraFallbackSources,window),
+      purpose:'validator_terra_fallback',
+      web:true,
+      effort:'low',
+      searchContextSize:'medium'
+    });
+    const data=parseJson(response.text);
+    const acceptedUrls=new Set();
+    const acceptedByTerra=[];
+    for (const candidate of Array.isArray(data.candidates) ? data.candidates : []) {
+      const source=inputByUrl.get(candidate.article_url);
+      if (!source || acceptedUrls.has(source.url)) continue;
+      acceptedUrls.add(source.url);
+      const official=isOfficialDomain(source.source_domain);
+      const validated={
+        ...candidate,
+        article_url:source.url,
+        source_type:official?'official':'media',
+        is_official:official,
+        sweep:source.sweep
+      };
+      acceptedByTerra.push(validated);
+      accepted.push(validated);
+    }
+    const terraRejections=new Map();
+    for (const rejection of Array.isArray(data.rejections) ? data.rejections : []) {
+      if (!inputByUrl.has(rejection.article_url) || acceptedUrls.has(rejection.article_url)) continue;
+      terraRejections.set(rejection.article_url,Object.hasOwn(rejectionReasons,rejection.reason)?rejection.reason:'other');
+    }
+    for (const source of terraFallbackSources) {
+      rejectionReasons.unverifiable=Math.max(0,rejectionReasons.unverifiable-1);
+      if (!acceptedUrls.has(source.url)) rejectionReasons[terraRejections.get(source.url)||'unverifiable']++;
+    }
+    console.log(JSON.stringify({
+      stage:'validator_terra_fallback',
+      input:terraFallbackSources.length,
+      accepted:acceptedByTerra.length,
+      rejected:terraFallbackSources.length-acceptedByTerra.length
+    }));
+    if (CFG.dryRun) {
+      for (const candidate of acceptedByTerra) {
+        console.log(JSON.stringify({
+          stage:'validated_candidate',
+          title:candidate.title||'',
+          event_date:candidate.event_date||'',
+          source_name:candidate.source_name||'',
+          article_url:candidate.article_url,
+          sweep:candidate.sweep
+        }));
+      }
+    }
+  }
   if (CFG.dryRun) {
     console.log(JSON.stringify({stage:'validator_rejections',reasons:rejectionReasons}));
   }
@@ -302,8 +403,18 @@ async function validateSearchResults(sources, currentTime) {
 
 async function discover() {
   const currentTime = new Date();
-  const selectedThemes=CFG.mode === 'morning' ? thematicSweeps : thematicSweeps.filter(sweep => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito'].includes(sweep.name));
-  const sweepDefinitions=[...selectedThemes,...sourceSweeps,omissionSweep];
+  let sweepDefinitions;
+  if (CFG.mode === 'smoke') {
+    sweepDefinitions=[
+      thematicSweeps.find(sweep => sweep.name==='condominio_vizinhos'),
+      thematicSweeps.find(sweep => sweep.name==='mercado_credito'),
+      sourceSweeps.find(sweep => sweep.name==='fontes_media_a'),
+      omissionSweep
+    ];
+  } else {
+    const selectedThemes=CFG.mode === 'morning' ? thematicSweeps : thematicSweeps.filter(sweep => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito'].includes(sweep.name));
+    sweepDefinitions=[...selectedThemes,...sourceSweeps,omissionSweep];
+  }
   const searches=[];
   for (const definition of sweepDefinitions) {
     const search=await searchSweep(definition,currentTime);
@@ -353,7 +464,7 @@ async function historicalContext(candidate) {
 
 async function classifyEvent(candidate, history) {
   const prompt=`És editor-chefe do Guia do Proprietário. Decide se o candidato é um acontecimento NOVO, DUPLICADO de algo já registado/publicado, ou NOVO_MARCO de um processo anterior.\n\nCANDIDATO:\n${JSON.stringify(candidate)}\n\nHISTÓRICO PRÓXIMO:\n${JSON.stringify(history)}\n\nDUPLICADO = mesmo acontecimento central, ainda que fonte/título diferentes. NOVO_MARCO = houve mudança material de estado/facto (ex.: proposta -> aprovação -> publicação -> entrada em vigor), não simples repetição.\n\nAvalia também relevância para o Guia. Devolve apenas JSON:\n{"decision":"NOVO|DUPLICADO|NOVO_MARCO|IGNORAR","duplicate_event_id":"","parent_event_id":"","event_key":"slug-estavel-do-acontecimento","news_score":0,"seo_score":0,"lead_score":0,"reason":"","verified_title":"","verified_summary":"","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao"}`;
-  return parseJson((await openai({model:CFG.openaiModelEditor,prompt,web:false,effort:'medium'})).text);
+  return parseJson((await openai({model:CFG.openaiModelEditor,prompt,purpose:'editor',web:false,effort:'medium'})).text);
 }
 
 async function upsertEvent(candidate, cls) {
@@ -377,7 +488,7 @@ async function loadContentCandidates(event) {
 async function assessContentImpact(event, articles) {
   if (!articles.length) return [];
   const prompt=`Analisa se FACTOS NOVOS deste acontecimento tornam algum artigo evergreen do Guia do Proprietário desatualizado, contraditório ou materialmente incompleto. Não proponhas atualização só porque o tema é semelhante.\n\nACONTECIMENTO:\n${JSON.stringify(event)}\n\nARTIGOS CANDIDATOS:\n${JSON.stringify(articles)}\n\nRegras jurídicas/fiscais: anúncio/proposta NÃO substitui regra em vigor. Pode justificar apenas nota de acompanhamento. Publicação/entrada em vigor pode exigir correção do corpo.\n\nDevolve apenas JSON:\n{"impacts":[{"article_path":"","impact_type":"NONE|ADDENDUM|PARTIAL_UPDATE|REWRITE|URGENT_CORRECTION","severity":"low|medium|high|critical","confidence":0,"old_claim":"","new_fact":"","recommendation":"","proposed_patch":""}]}`;
-  return parseJson((await openai({model:CFG.openaiModelImpact,prompt,web:false,effort:'medium'})).text).impacts || [];
+  return parseJson((await openai({model:CFG.openaiModelImpact,prompt,purpose:'content_impact',web:false,effort:'medium'})).text).impacts || [];
 }
 
 async function saveImpact(eventId, impact) {
@@ -429,7 +540,7 @@ TEXTO SITE:
 
 Devolve APENAS JSON válido:
 {"texto_fb":"","texto_site":""}`;
-  const out = parseJson((await openai({model:CFG.openaiModelCopy,prompt,web:false,effort:'low'})).text);
+  const out = parseJson((await openai({model:CFG.openaiModelCopy,prompt,purpose:'copy',web:false,effort:'low'})).text);
   if (!out.texto_fb || !out.texto_site) throw new Error('Publication generation returned incomplete content');
   return out;
 }
@@ -487,7 +598,7 @@ async function main(){
   const indexedContent = await indexContent();
   console.log(JSON.stringify({stage:'content_index',count:indexedContent}));
   let backfilledNews = 0;
-  if (/^(1|true|yes)$/i.test(process.env.BACKFILL || '')) backfilledNews = await backfillPublishedNews();
+  if (CFG.mode !== 'smoke' && /^(1|true|yes)$/i.test(process.env.BACKFILL || '')) backfilledNews = await backfillPublishedNews();
   console.log(JSON.stringify({stage:'news_backfill',count:backfilledNews}));
   const runId=id('run',`${nowIso()}:${CFG.mode}`); await d1(`INSERT INTO radar_runs (id,started_at,mode,status) VALUES (?,?,?,?)`,[runId,nowIso(),CFG.mode,'running']);
   let candidates=[]; let created=0, duplicates=0;
@@ -574,8 +685,15 @@ async function main(){
     await d1(`UPDATE radar_runs SET finished_at=?,status='ok',candidates_found=?,events_created=?,duplicates_discarded=? WHERE id=?`,[nowIso(),candidates.length,created,duplicates,runId]);
     console.log(JSON.stringify({ok:true,runId,candidates:candidates.length,created,duplicates,dryRun:CFG.dryRun}));
   }catch(err){
+    if (err instanceof BudgetGuardStop) {
+      await d1(`UPDATE radar_runs SET finished_at=?,status='budget_guard',candidates_found=?,events_created=?,duplicates_discarded=? WHERE id=?`,[nowIso(),candidates.length,created,duplicates,runId]).catch(()=>{});
+      console.log(JSON.stringify({ok:true,runId,status:'budget_guard',candidates:candidates.length,created,duplicates,dryRun:CFG.dryRun}));
+      return;
+    }
     await d1(`UPDATE radar_runs SET finished_at=?,status='error',notes=? WHERE id=?`,[nowIso(),String(err.stack||err).slice(0,4000),runId]).catch(()=>{});
     throw err;
+  }finally{
+    logUsageSummary();
   }
 }
 

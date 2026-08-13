@@ -43,9 +43,12 @@ jobs:
       CF_D1_API_TOKEN: ${{ secrets.CF_D1_API_TOKEN }}
       MAKE_RADAR_WEBHOOK: ${{ secrets.MAKE_RADAR_WEBHOOK }}
       MAKE_RADAR_WEBHOOK_SECRET: ${{ secrets.MAKE_RADAR_WEBHOOK_SECRET }}
-      OPENAI_SEARCH_MODEL: gpt-5.6-terra
+      OPENAI_SEARCHER_MODEL: gpt-5.6-luna
+      OPENAI_VALIDATOR_MODEL: gpt-5.6-luna
       OPENAI_EDITOR_MODEL: gpt-5.6-sol
       OPENAI_IMPACT_MODEL: gpt-5.6-terra
+      OPENAI_COPY_MODEL: gpt-5.6-luna
+      MAX_RUN_TOKENS: '0'
       MIN_NEWS_SCORE: '80'
       MIN_IMPACT_CONFIDENCE: '80'
     steps:
@@ -58,9 +61,10 @@ jobs:
         run: |
           hour=$(date -u +%H)
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
+            echo "RADAR_MODE=smoke" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=true" >> "$GITHUB_ENV"
-            echo "BACKFILL=true" >> "$GITHUB_ENV"
+            echo "BACKFILL=false" >> "$GITHUB_ENV"
+            echo "MAX_RUN_TOKENS=150000" >> "$GITHUB_ENV"
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "RADAR_MODE=${{ inputs.mode }}" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=${{ inputs.dry_run }}" >> "$GITHUB_ENV"
