@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-13T22:10:21.248Z",
+  "generatedAt": "2026-08-13T23:04:28.414Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 92,
-    "published": 67,
+    "published": 68,
     "newsOnline": 12
   },
   "articles": [
@@ -896,14 +896,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "limpar-estofos-sofa.mdx",
       "arrivedAt": "2026-08-06T15:58:33+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-13T22:42:11Z",
+      "url": "https://guiadoproprietario.pt/casa/limpar-estofos-sofa/"
     },
     {
       "id": "SC07",
