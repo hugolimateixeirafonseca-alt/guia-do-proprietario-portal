@@ -1,0 +1,71 @@
+name: Editorial Radar v21.2
+
+on:
+  schedule:
+    # GitHub cron usa UTC. Em Lisboa, estes horários deslocam 1h entre verão/inverno.
+    # A redundância editorial é mais importante do que o minuto exato.
+    - cron: '30 6 * * *'
+    - cron: '0 12 * * *'
+    - cron: '30 17 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'morning ou incremental'
+        required: false
+        default: 'morning'
+      dry_run:
+        description: 'true = não envia ao Make'
+        required: false
+        default: 'true'
+      backfill:
+        description: 'true = importa arquivo de /novidades para memória histórica'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editorial-radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_D1_DATABASE_ID: ${{ secrets.CF_D1_DATABASE_ID }}
+      CF_D1_API_TOKEN: ${{ secrets.CF_D1_API_TOKEN }}
+      MAKE_RADAR_WEBHOOK: ${{ secrets.MAKE_RADAR_WEBHOOK }}
+      MAKE_RADAR_WEBHOOK_SECRET: ${{ secrets.MAKE_RADAR_WEBHOOK_SECRET }}
+      OPENAI_SEARCH_MODEL: gpt-5.6-terra
+      OPENAI_EDITOR_MODEL: gpt-5.6-sol
+      OPENAI_IMPACT_MODEL: gpt-5.6-terra
+      MIN_NEWS_SCORE: '80'
+      MIN_IMPACT_CONFIDENCE: '80'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve run mode
+        shell: bash
+        run: |
+          hour=$(date -u +%H)
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "RADAR_MODE=${{ inputs.mode }}" >> "$GITHUB_ENV"
+            echo "RADAR_DRY_RUN=${{ inputs.dry_run }}" >> "$GITHUB_ENV"
+            echo "BACKFILL=${{ inputs.backfill }}" >> "$GITHUB_ENV"
+          elif [[ "$hour" == "06" ]]; then
+            echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
+            echo "RADAR_DRY_RUN=false" >> "$GITHUB_ENV"
+            echo "BACKFILL=false" >> "$GITHUB_ENV"
+          else
+            echo "RADAR_MODE=incremental" >> "$GITHUB_ENV"
+            echo "RADAR_DRY_RUN=false" >> "$GITHUB_ENV"
+            echo "BACKFILL=false" >> "$GITHUB_ENV"
+          fi
+      - name: Run editorial radar
+        run: node automation/editorial-radar/radar.mjs
