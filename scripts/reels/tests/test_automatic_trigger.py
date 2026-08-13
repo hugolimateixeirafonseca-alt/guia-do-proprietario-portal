@@ -39,7 +39,7 @@ class SQLiteQuery:
 
 
 class AutomaticTriggerTests(unittest.TestCase):
-    def test_check_duplicado_e_idempotencia_concorrente(self):
+    def test_repository_dispatch_duplicado_e_idempotencia_concorrente(self):
         database = SQLiteQuery()
         with ThreadPoolExecutor(max_workers=12) as executor:
             results = list(executor.map(
@@ -48,6 +48,13 @@ class AutomaticTriggerTests(unittest.TestCase):
             ))
         self.assertEqual(results.count(True), 1)
         self.assertEqual(results.count(False), 23)
+
+    def test_push_e_repository_dispatch_do_mesmo_artigo_criam_uma_reserva(self):
+        database = SQLiteQuery()
+        publication_sha = "a" * 40
+        self.assertTrue(claim_initial_trigger("novo", publication_sha, query=database, claimed_at="dispatch"))
+        self.assertFalse(claim_initial_trigger("novo", publication_sha, query=database, claimed_at="push"))
+        self.assertEqual(database.row("novo"), ("novo", publication_sha, "claimed", None, None))
 
     def test_completa_com_generation_id(self):
         database = SQLiteQuery()

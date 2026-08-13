@@ -5,19 +5,16 @@ import json
 import os
 import re
 import subprocess
+import time
 import urllib.error
-import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
 
 
-CLOUDFLARE_APP_SLUG = "cloudflare-workers-and-pages"
-CLOUDFLARE_CHECK_NAME = "Cloudflare Pages"
-DEPLOYMENT_PATH = re.compile(
-    r"^/(?P<account>[0-9a-f]{32})/pages/view/(?P<project>[a-z0-9-]+)/(?P<deployment>[0-9a-f-]{36})$"
-)
+SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
+TERMINAL_FAILURE_STATES = {"failure", "failed", "canceled", "cancelled", "skipped"}
 
 
 @dataclass(frozen=True)
@@ -36,33 +33,29 @@ class PagesReadConfig:
         return cls(*(values[name].strip() for name in names))
 
 
-def extract_check(payload: dict) -> tuple[str, str, str, str]:
-    check = payload.get("check_run", {})
-    if payload.get("action") != "completed":
-        raise ValueError("O check ainda não terminou.")
-    if check.get("conclusion") != "success":
-        raise ValueError("O check Cloudflare Pages não terminou com sucesso.")
-    if check.get("name") != CLOUDFLARE_CHECK_NAME:
-        raise ValueError("O check não é o Cloudflare Pages esperado.")
-    if check.get("app", {}).get("slug") != CLOUDFLARE_APP_SLUG:
-        raise ValueError("O check não pertence à aplicação Cloudflare esperada.")
-    details_url = check.get("details_url", "")
-    parsed = urllib.parse.urlparse(details_url)
-    query_path = urllib.parse.parse_qs(parsed.query).get("to", [""])
-    deployment_path = parsed.path if parsed.path != "/" else query_path[0]
-    match = DEPLOYMENT_PATH.fullmatch(deployment_path)
-    if parsed.scheme != "https" or parsed.netloc != "dash.cloudflare.com" or not match:
-        raise ValueError("O check não contém um deployment Cloudflare Pages reconhecível.")
-    sha = check.get("head_sha", "")
-    if not re.fullmatch(r"[0-9a-f]{40}", sha):
-        raise ValueError("O check não contém um SHA válido.")
-    return sha, match.group("account"), match.group("project"), match.group("deployment")
+def extract_candidate_sha(payload: dict, event_name: str) -> str:
+    if event_name == "repository_dispatch":
+        if payload.get("action") != "reel_publish_candidate":
+            raise ValueError("O repository_dispatch não tem o tipo esperado.")
+        client_payload = payload.get("client_payload")
+        if not isinstance(client_payload, dict) or set(client_payload) != {"sha"}:
+            raise ValueError("O client_payload deve conter exclusivamente o SHA publicado.")
+        sha = client_payload.get("sha", "")
+    elif event_name == "push":
+        if payload.get("ref") != "refs/heads/main":
+            raise ValueError("O push não pertence à branch main.")
+        sha = payload.get("after", "")
+    else:
+        raise ValueError("Evento não suportado para publicação automática de Reels.")
+    if not isinstance(sha, str) or not SHA_PATTERN.fullmatch(sha):
+        raise ValueError("O evento não contém um SHA completo válido.")
+    return sha
 
 
-def fetch_deployment(deployment_id: str, config: PagesReadConfig) -> dict:
+def fetch_production_deployments(config: PagesReadConfig) -> list[dict]:
     url = (
         f"https://api.cloudflare.com/client/v4/accounts/{config.account_id}"
-        f"/pages/projects/{config.project_name}/deployments/{deployment_id}"
+        f"/pages/projects/{config.project_name}/deployments?env=production&per_page=25"
     )
     request = urllib.request.Request(url, headers={"Authorization": f"Bearer {config.api_token}"})
     try:
@@ -70,8 +63,8 @@ def fetch_deployment(deployment_id: str, config: PagesReadConfig) -> dict:
             payload = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         raise RuntimeError(f"A validação Pages Read falhou com HTTP {exc.code}.") from None
-    if not payload.get("success") or not payload.get("result"):
-        raise RuntimeError("A API Cloudflare não devolveu o deployment esperado.")
+    if not payload.get("success") or not isinstance(payload.get("result"), list):
+        raise RuntimeError("A API Cloudflare não devolveu a lista de deployments esperada.")
     return payload["result"]
 
 
@@ -85,12 +78,50 @@ def validate_production_deployment(deployment: dict, *, sha: str, project_name: 
         raise ValueError("O deployment é Preview, não Production.")
     if deployment.get("is_skipped"):
         raise ValueError("O deployment Production foi ignorado.")
-    if deployment.get("latest_stage", {}).get("status") != "success":
-        raise ValueError("O deployment Production falhou ou foi cancelado.")
+    status = str(deployment.get("latest_stage", {}).get("status", "")).lower()
+    if status in TERMINAL_FAILURE_STATES:
+        raise ValueError(f"O deployment Production terminou no estado {status}.")
+    if status != "success":
+        raise ValueError("O deployment Production ainda não terminou.")
     if metadata.get("branch") != "main" or source.get("production_branch") != "main":
         raise ValueError("O deployment não corresponde à branch Production main.")
     if metadata.get("commit_hash") != sha:
-        raise ValueError("O deployment não corresponde ao SHA do check.")
+        raise ValueError("O deployment não corresponde ao SHA publicado.")
+
+
+def wait_for_production_deployment(
+    config: PagesReadConfig,
+    *,
+    sha: str,
+    timeout_seconds: float = 600,
+    poll_interval_seconds: float = 15,
+    fetcher=fetch_production_deployments,
+    sleeper=time.sleep,
+    monotonic=time.monotonic,
+) -> dict:
+    deadline = monotonic() + timeout_seconds
+    while True:
+        deployments = fetcher(config)
+        matching = [
+            item for item in deployments
+            if item.get("deployment_trigger", {}).get("metadata", {}).get("commit_hash") == sha
+            and item.get("environment") == "production"
+        ]
+        if matching:
+            deployment = matching[0]
+            if deployment.get("project_name") != config.project_name:
+                raise ValueError("O deployment pertence a outro projeto Pages.")
+            if deployment.get("is_skipped"):
+                raise ValueError("O deployment Production foi ignorado.")
+            status = str(deployment.get("latest_stage", {}).get("status", "")).lower()
+            if status == "success":
+                validate_production_deployment(deployment, sha=sha, project_name=config.project_name)
+                return deployment
+            if status in TERMINAL_FAILURE_STATES:
+                raise ValueError(f"O deployment Production terminou no estado {status}.")
+        if monotonic() >= deadline:
+            raise RuntimeError(f"Timeout à espera do deployment Production para {sha}.")
+        sleeper(poll_interval_seconds)
 
 
 def _is_ancestor(repository: Path, ancestor: str, descendant: str) -> bool:
@@ -110,21 +141,20 @@ def validate_sha(repository: Path, *, sha: str, activation_sha: str, main_ref: s
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Valida um check Production do Cloudflare Pages.")
+    parser = argparse.ArgumentParser(description="Valida o deployment Production do SHA publicado.")
     parser.add_argument("--event", type=Path, required=True)
+    parser.add_argument("--event-name", required=True)
     parser.add_argument("--activation-sha", required=True)
     parser.add_argument("--repository", type=Path, default=Path.cwd())
     parser.add_argument("--github-output", type=Path, default=os.environ.get("GITHUB_OUTPUT"))
     args = parser.parse_args()
 
     payload = json.loads(args.event.read_text(encoding="utf-8"))
-    sha, event_account, event_project, deployment_id = extract_check(payload)
+    sha = extract_candidate_sha(payload, args.event_name)
     config = PagesReadConfig.from_env()
-    if event_account != config.account_id or event_project != config.project_name:
-        raise ValueError("O check pertence a outro projeto Pages.")
-    deployment = fetch_deployment(deployment_id, config)
-    validate_production_deployment(deployment, sha=sha, project_name=config.project_name)
     validate_sha(args.repository.resolve(), sha=sha, activation_sha=args.activation_sha)
+    deployment = wait_for_production_deployment(config, sha=sha)
+    deployment_id = deployment.get("id", "")
 
     print(f"Deployment Production confirmado para {sha}.")
     if args.github_output:

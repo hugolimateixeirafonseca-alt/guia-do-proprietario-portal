@@ -1,23 +1,23 @@
 name: Generate Reel on Production publish
 
 on:
-  check_run:
-    types: [completed]
+  repository_dispatch:
+    types: [reel_publish_candidate]
+  push:
+    branches: [main]
+    paths:
+      - src/content/artigos/**
 
 permissions:
   contents: read
 
 concurrency:
-  group: reel-auto-publish-${{ github.event.check_run.head_sha }}
+  group: reel-auto-publish-${{ github.event.client_payload.sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
   detect:
-    if: >-
-      vars.REELS_AUTO_PUBLISH_ENABLED == 'true' &&
-      github.event.check_run.name == 'Cloudflare Pages' &&
-      github.event.check_run.app.slug == 'cloudflare-workers-and-pages' &&
-      github.event.check_run.conclusion == 'success'
+    if: ${{ vars.REELS_AUTO_PUBLISH_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.check.outputs.sha }}
@@ -49,6 +49,7 @@ jobs:
         run: >-
           python scripts/reels/validate_publish_check.py
           --event "$GITHUB_EVENT_PATH"
+          --event-name "$GITHUB_EVENT_NAME"
           --activation-sha "$ACTIVATION_SHA"
 
       - name: Detetar artigos publicados pela primeira vez

@@ -20,6 +20,8 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_TEXT_MODEL: gpt-4.1-mini
       OPENAI_IMAGE_MODEL: gpt-image-2
+      REELS_AUTO_PUBLISH_ENABLED: ${{ vars.REELS_AUTO_PUBLISH_ENABLED }}
+      GH_TOKEN: ${{ github.token }}
 
     steps:
       - name: Obter repositório
@@ -119,3 +121,18 @@ jobs:
 
           git commit -m "Publicar $COUNT artigo com imagem automática"
           git push origin HEAD:main
+
+          PUBLISHED_SHA="$(git rev-parse HEAD)"
+          echo "Artigo publicado no SHA $PUBLISHED_SHA."
+
+          if [[ "$REELS_AUTO_PUBLISH_ENABLED" == "true" ]]; then
+            if ! gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
+              -f event_type='reel_publish_candidate' \
+              -f "client_payload[sha]=$PUBLISHED_SHA"; then
+              echo "::error::O artigo foi publicado, mas não foi possível emitir o repository_dispatch para o Reel."
+              exit 1
+            fi
+            echo "Candidato a Reel enviado para validação: $PUBLISHED_SHA."
+          else
+            echo "Geração automática de Reels desligada. Nenhum dispatch foi emitido."
+          fi
