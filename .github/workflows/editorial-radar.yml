@@ -1,6 +1,9 @@
 name: Editorial Radar v21.2
 
 on:
+  push:
+    branches:
+      - agent/editorial-radar-v21
   schedule:
     # GitHub cron usa UTC. Em Lisboa, estes horários deslocam 1h entre verão/inverno.
     # A redundância editorial é mais importante do que o minuto exato.
@@ -54,7 +57,11 @@ jobs:
         shell: bash
         run: |
           hour=$(date -u +%H)
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
+            echo "RADAR_DRY_RUN=true" >> "$GITHUB_ENV"
+            echo "BACKFILL=true" >> "$GITHUB_ENV"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "RADAR_MODE=${{ inputs.mode }}" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=${{ inputs.dry_run }}" >> "$GITHUB_ENV"
             echo "BACKFILL=${{ inputs.backfill }}" >> "$GITHUB_ENV"

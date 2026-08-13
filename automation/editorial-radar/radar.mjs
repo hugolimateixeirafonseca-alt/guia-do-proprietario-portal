@@ -291,6 +291,22 @@ async function main(){
         estado:cls.decision==='NOVO_MARCO' ? 'novo_marco' : 'novo',
         content_impacts:qualifyingImpacts
       };
+      if (CFG.dryRun) {
+        console.log(JSON.stringify({
+          event_id:eventId,
+          event_key:eventKey,
+          titulo:cls.verified_title||c.title,
+          pilar:cls.pillar||c.pillar,
+          decision:cls.decision,
+          legal_stage:cls.legal_stage||c.legal_stage||'na',
+          news_score:cls.news_score||0,
+          seo_score:cls.seo_score||0,
+          lead_score:cls.lead_score||0,
+          impacto_conteudo:strongestImpact?.impact_type||'NONE',
+          fonte_nome:c.source_name||'',
+          url_original:c.article_url||''
+        }));
+      }
       const sent=await sendMake(payload);
       if(sent.sent) await d1(`UPDATE events SET make_sent_at=? WHERE id=?`,[nowIso(),eventId]);
     }
