@@ -192,7 +192,7 @@ export function scoreHarvestRelevance(source) {
   };
 }
 
-export function prefilterHarvestSources(sources,{limit=24,dryRun=false}={}) {
+export function prefilterHarvestSources(sources,{limit=24,dryRun=false,telemetry=dryRun}={}) {
   const rejectionCounts={non_article:0,low_relevance:0,excluded_section:0};
   const relevant=[];
   for (const source of sources) {
@@ -222,7 +222,7 @@ export function prefilterHarvestSources(sources,{limit=24,dryRun=false}={}) {
     if (selected.length>=limit) break;
     selected.push(source);
   }
-  if (dryRun) {
+  if (telemetry) {
     console.log(JSON.stringify({
       stage:'harvest_prefilter',
       fresh_input:sources.length,
@@ -318,7 +318,7 @@ async function sitemapCandidates(seed,fetchImpl,currentTime) {
   return entries;
 }
 
-export async function harvestDirectSources(seeds,{currentTime=new Date(),fetchImpl=fetch,dryRun=false}={}) {
+export async function harvestDirectSources(seeds,{currentTime=new Date(),fetchImpl=fetch,dryRun=false,telemetry=dryRun}={}) {
   const freshByUrl=new Map();
   let totalFreshArticles=0;
   for (const seed of seeds) {
@@ -359,7 +359,7 @@ export async function harvestDirectSources(seeds,{currentTime=new Date(),fetchIm
       }
     }
     totalFreshArticles+=freshArticles;
-    if (dryRun) console.log(JSON.stringify({
+    if (telemetry) console.log(JSON.stringify({
       stage:'direct_source',
       source:seed.name,
       seed_fetch_ok:seedResponse.ok,
@@ -370,7 +370,7 @@ export async function harvestDirectSources(seeds,{currentTime=new Date(),fetchIm
     }));
   }
   const fresh=[...freshByUrl.values()];
-  if (dryRun) console.log(JSON.stringify({
+  if (telemetry) console.log(JSON.stringify({
     stage:'direct_source_summary',
     sources:seeds.length,
     fresh_articles:totalFreshArticles,

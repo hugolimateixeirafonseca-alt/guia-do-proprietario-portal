@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import {inspectSourceUrl} from './source-metadata.mjs';
 import {harvestDirectSources,prefilterHarvestSources} from './source-harvest.mjs';
 import {prefilterContentImpact} from './content-impact-prefilter.mjs';
+import {getDiscoveryModePlan} from './discovery-mode.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -147,7 +148,7 @@ const omissionSweep = {
   type:'omission',
   topic:'notícias mais importantes das últimas 36 horas em Portugal para alguém que possui uma casa, mesmo fora das categorias habituais'
 };
-const smokeDirectSeeds = [
+const directSourceSeeds = [
   {name:'CNN Portugal',slug:'cnn_portugal',url:'https://cnnportugal.iol.pt/',allowedDomains:['cnnportugal.iol.pt']},
   {name:'RTP Economia',slug:'rtp_economia',url:'https://www.rtp.pt/noticias/economia',allowedDomains:['rtp.pt'],section:true},
   {name:'ECO',slug:'eco',url:'https://eco.sapo.pt/',allowedDomains:['eco.sapo.pt']},
@@ -398,6 +399,7 @@ async function inspectSources(sources, currentTime, context) {
 }
 
 async function validateSearchResults(sources, currentTime) {
+  const detailedTelemetry=CFG.dryRun || CFG.mode==='morning';
   const window={
     normalStart:lisbonDateTime(new Date(currentTime.getTime() - 36 * 60 * 60 * 1000)),
     officialStart:lisbonDateTime(new Date(currentTime.getTime() - 72 * 60 * 60 * 1000)),
@@ -455,7 +457,7 @@ async function validateSearchResults(sources, currentTime) {
       if (decidedUrls.has(source.url)) continue;
       rejectionReasons[reportedRejections.get(source.url)||'other']++;
     }
-    if (CFG.dryRun) {
+    if (detailedTelemetry) {
       console.log(JSON.stringify({
         stage:'validator_batch',
         batch:batchNumber,
@@ -522,7 +524,7 @@ async function validateSearchResults(sources, currentTime) {
       accepted:acceptedByTerra.length,
       rejected:terraFallbackSources.length-acceptedByTerra.length
     }));
-    if (CFG.dryRun) {
+    if (detailedTelemetry) {
       for (const candidate of acceptedByTerra) {
         console.log(JSON.stringify({
           stage:'validated_candidate',
@@ -543,21 +545,22 @@ async function validateSearchResults(sources, currentTime) {
 
 async function discover() {
   const currentTime = new Date();
-  let sweepDefinitions;
+  const modePlan=getDiscoveryModePlan(CFG.mode);
+  const detailedTelemetry=CFG.dryRun || CFG.mode==='morning';
   let directSources=[];
   let benchmarkSource=null;
-  if (CFG.mode === 'smoke') {
-    directSources=await harvestDirectSources(smokeDirectSeeds,{currentTime,dryRun:CFG.dryRun});
+  if (modePlan.directHarvest) {
+    directSources=await harvestDirectSources(directSourceSeeds,{currentTime,dryRun:CFG.dryRun,telemetry:detailedTelemetry});
+  }
+  if (modePlan.benchmark) {
     benchmarkSource=directSources.find(source=>
       source.direct_source==='CNN Portugal' &&
       norm(`${source.title} ${source.url}`).includes('condominio') &&
       new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon'}).format(new Date(source.verified_published_at))==='2026-08-13'
     )||null;
-    sweepDefinitions=[omissionSweep];
-  } else {
-    const selectedThemes=CFG.mode === 'morning' ? thematicSweeps : thematicSweeps.filter(sweep => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito'].includes(sweep.name));
-    sweepDefinitions=[...selectedThemes,...sourceSweeps,omissionSweep];
   }
+  const sweepByName=new Map([...thematicSweeps,...sourceSweeps,omissionSweep].map(sweep=>[sweep.name,sweep]));
+  const sweepDefinitions=modePlan.sweepNames.map(name=>sweepByName.get(name)).filter(Boolean);
   const searches=[];
   for (const definition of sweepDefinitions) {
     const search=await searchSweep(definition,currentTime);
@@ -587,8 +590,10 @@ async function discover() {
   };
   const inspectedSources=await inspectSources(sources,currentTime,inspectionContext);
   let validatorSources=inspectedSources;
-  if (CFG.mode==='smoke') {
-    validatorSources=prefilterHarvestSources(inspectedSources,{limit:24,dryRun:CFG.dryRun}).selected;
+  if (modePlan.prefilterLimit) {
+    validatorSources=prefilterHarvestSources(inspectedSources,{limit:modePlan.prefilterLimit,dryRun:CFG.dryRun,telemetry:detailedTelemetry}).selected;
+  }
+  if (modePlan.benchmark) {
     const benchmark=benchmarkSource && validatorSources.find(source=>source.url===benchmarkSource.url);
     console.log(JSON.stringify({
       stage:'benchmark',
@@ -599,7 +604,7 @@ async function discover() {
   }
   const firstPass=await validateSearchResults(validatorSources,currentTime);
   let rescue=[];
-  if (!firstPass.length && CFG.mode !== 'smoke') {
+  if (!firstPass.length && !modePlan.directHarvest) {
     const rescueSources=await freshnessRescue(currentTime,new Set(sourceMap.keys()));
     if (rescueSources.length) {
       const inspectedRescueSources=await inspectSources(rescueSources,currentTime,inspectionContext);
