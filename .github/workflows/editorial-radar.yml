@@ -6,10 +6,7 @@ on:
       - agent/editorial-radar-v21
   schedule:
     # GitHub cron usa UTC. Em Lisboa, estes horários deslocam 1h entre verão/inverno.
-    # A redundância editorial é mais importante do que o minuto exato.
     - cron: '30 6 * * *'
-    - cron: '0 12 * * *'
-    - cron: '30 17 * * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -59,7 +56,6 @@ jobs:
       - name: Resolve run mode
         shell: bash
         run: |
-          hour=$(date -u +%H)
           if [[ "${{ github.event_name }}" == "push" ]]; then
             echo "RADAR_MODE=smoke" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=true" >> "$GITHUB_ENV"
@@ -69,12 +65,12 @@ jobs:
             echo "RADAR_MODE=${{ inputs.mode }}" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=${{ inputs.dry_run }}" >> "$GITHUB_ENV"
             echo "BACKFILL=${{ inputs.backfill }}" >> "$GITHUB_ENV"
-          elif [[ "$hour" == "06" ]]; then
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
             echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=false" >> "$GITHUB_ENV"
             echo "BACKFILL=false" >> "$GITHUB_ENV"
           else
-            echo "RADAR_MODE=incremental" >> "$GITHUB_ENV"
+            echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
             echo "RADAR_DRY_RUN=false" >> "$GITHUB_ENV"
             echo "BACKFILL=false" >> "$GITHUB_ENV"
           fi

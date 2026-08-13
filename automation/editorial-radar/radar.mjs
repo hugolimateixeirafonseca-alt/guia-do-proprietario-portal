@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {inspectSourceUrl} from './source-metadata.mjs';
 import {harvestDirectSources,prefilterHarvestSources} from './source-harvest.mjs';
+import {prefilterContentImpact} from './content-impact-prefilter.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -24,6 +25,7 @@ const CFG = {
 };
 
 const usageTotals = {calls:0,input_tokens:0,output_tokens:0,total_tokens:0,web_search_calls:0};
+const contentImpactTotals = {events_checked:0,model_calls:0,skipped:0,impacts_found:0};
 const validatorTerraFallback = {used:false};
 class BudgetGuardStop extends Error {}
 
@@ -640,11 +642,8 @@ async function upsertEvent(candidate, cls) {
   return {eventId,eventKey};
 }
 
-async function loadContentCandidates(event) {
-  const words=norm(`${event.title} ${event.summary} ${(event.entities||[]).join(' ')} ${(event.key_facts||[]).join(' ')}`).split(' ').filter(w=>w.length>4).slice(0,10);
-  if (!words.length) return [];
-  const clauses=words.map(()=>'(lower(title) LIKE ? OR lower(summary) LIKE ? OR lower(body_excerpt) LIKE ?)').join(' OR ');
-  return d1(`SELECT path,slug,title,pillar,summary,body_excerpt FROM content_index WHERE ${clauses} LIMIT 12`,words.flatMap(w=>Array(3).fill(`%${w}%`)));
+async function loadContentCandidates() {
+  return d1(`SELECT path,slug,title,pillar,summary,body_excerpt FROM content_index`);
 }
 
 async function assessContentImpact(event, articles) {
@@ -763,7 +762,7 @@ async function main(){
   if (CFG.mode !== 'smoke' && /^(1|true|yes)$/i.test(process.env.BACKFILL || '')) backfilledNews = await backfillPublishedNews();
   console.log(JSON.stringify({stage:'news_backfill',count:backfilledNews}));
   const runId=id('run',`${nowIso()}:${CFG.mode}`); await d1(`INSERT INTO radar_runs (id,started_at,mode,status) VALUES (?,?,?,?)`,[runId,nowIso(),CFG.mode,'running']);
-  let candidates=[]; let created=0, duplicates=0;
+  let candidates=[]; let created=0, duplicates=0, contentArticles=null;
   try{
     candidates=await discover();
     const urlSeen=new Set();
@@ -776,11 +775,29 @@ async function main(){
       if(['DUPLICADO','IGNORAR'].includes(cls.decision)){duplicates++;continue;}
       const {eventId,eventKey}=await upsertEvent(c,cls); created++;
       const event={...c,...cls,event_id:eventId,event_key:eventKey};
-      const articles=await loadContentCandidates(event);
-      const impacts=await assessContentImpact(event,articles);
+      const articles=contentArticles ??= await loadContentCandidates();
+      const impactPrefilter=prefilterContentImpact(event,articles);
+      contentImpactTotals.events_checked++;
+      console.log(JSON.stringify({
+        stage:'content_impact_prefilter',
+        event_key:eventKey,
+        articles_considered:impactPrefilter.articlesConsidered,
+        matches:impactPrefilter.matches,
+        sent_to_model:impactPrefilter.selected.length,
+        top_scores:impactPrefilter.topScores
+      }));
+      let impacts=[];
+      if (!impactPrefilter.selected.length) {
+        contentImpactTotals.skipped++;
+        console.log(JSON.stringify({stage:'content_impact_skip',event_key:eventKey,reason:'no_relevant_articles'}));
+      } else {
+        contentImpactTotals.model_calls++;
+        impacts=await assessContentImpact(event,impactPrefilter.selected);
+      }
       for(const imp of impacts) await saveImpact(eventId,imp);
       const publishableNews = Number(cls.news_score||0) >= CFG.minNewsScore;
       const qualifyingImpacts = impacts.filter(x => x.impact_type !== 'NONE' && Number(x.confidence||0) >= CFG.minImpactConfidence);
+      contentImpactTotals.impacts_found+=qualifyingImpacts.length;
       const impactRank = { NONE:0, ADDENDUM:1, PARTIAL_UPDATE:2, REWRITE:3, URGENT_CORRECTION:4 };
       const strongestImpact = qualifyingImpacts.reduce((best, x) => {
         if (!best) return x;
@@ -855,6 +872,7 @@ async function main(){
     await d1(`UPDATE radar_runs SET finished_at=?,status='error',notes=? WHERE id=?`,[nowIso(),String(err.stack||err).slice(0,4000),runId]).catch(()=>{});
     throw err;
   }finally{
+    console.log(JSON.stringify({stage:'content_impact_summary',...contentImpactTotals}));
     logUsageSummary();
   }
 }
