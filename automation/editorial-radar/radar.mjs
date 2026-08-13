@@ -5,6 +5,7 @@ import {inspectSourceUrl} from './source-metadata.mjs';
 import {harvestDirectSources,prefilterHarvestSources} from './source-harvest.mjs';
 import {prefilterContentImpact} from './content-impact-prefilter.mjs';
 import {getDiscoveryModePlan} from './discovery-mode.mjs';
+import {combinedHistoricalContext,createIsolationController} from './dry-run-isolation.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -623,12 +624,13 @@ async function discover() {
   return [...firstPass,...rescue];
 }
 
-async function historicalContext(candidate) {
+async function historicalContext(candidate, runAcceptedEvents=[]) {
   const words = norm(`${candidate.title} ${(candidate.entities||[]).join(' ')} ${(candidate.key_facts||[]).join(' ')}`).split(' ').filter(w=>w.length>4).slice(0,8);
-  if (!words.length) return [];
+  if (!words.length) return combinedHistoricalContext([],runAcceptedEvents);
   const clauses=words.map(()=>'(lower(title) LIKE ? OR lower(summary) LIKE ? OR lower(entities_json) LIKE ? OR lower(key_facts_json) LIKE ?)').join(' OR ');
   const params=words.flatMap(w=>Array(4).fill(`%${w}%`));
-  return d1(`SELECT id,event_key,parent_event_id,title,summary,pillar,event_date,legal_stage,entities_json,key_facts_json,published,published_url FROM events WHERE ${clauses} ORDER BY event_date DESC LIMIT 12`,params);
+  const persistent=await d1(`SELECT id,event_key,parent_event_id,title,summary,pillar,event_date,legal_stage,entities_json,key_facts_json,published,published_url FROM events WHERE ${clauses} ORDER BY event_date DESC LIMIT 12`,params);
+  return combinedHistoricalContext(persistent,runAcceptedEvents);
 }
 
 async function classifyEvent(candidate, history) {
@@ -658,10 +660,11 @@ async function assessContentImpact(event, articles) {
 }
 
 async function saveImpact(eventId, impact) {
-  if (impact.impact_type==='NONE' || Number(impact.confidence||0)<CFG.minImpactConfidence) return;
+  if (impact.impact_type==='NONE' || Number(impact.confidence||0)<CFG.minImpactConfidence) return false;
   await d1(`INSERT OR IGNORE INTO content_impacts (id,event_id,article_path,impact_type,severity,confidence,old_claim,new_fact,recommendation,proposed_patch,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,[
     id('imp',`${eventId}:${impact.article_path}`),eventId,impact.article_path,impact.impact_type,impact.severity,Number(impact.confidence||0),impact.old_claim||null,impact.new_fact||null,impact.recommendation||'',impact.proposed_patch||null,'proposed',nowIso()
   ]);
+  return true;
 }
 
 
@@ -764,10 +767,13 @@ async function main(){
   const indexedContent = await indexContent();
   console.log(JSON.stringify({stage:'content_index',count:indexedContent}));
   let backfilledNews = 0;
-  if (CFG.mode !== 'smoke' && /^(1|true|yes)$/i.test(process.env.BACKFILL || '')) backfilledNews = await backfillPublishedNews();
+  if (!CFG.dryRun && CFG.mode !== 'smoke' && /^(1|true|yes)$/i.test(process.env.BACKFILL || '')) backfilledNews = await backfillPublishedNews();
   console.log(JSON.stringify({stage:'news_backfill',count:backfilledNews}));
   const runId=id('run',`${nowIso()}:${CFG.mode}`); await d1(`INSERT INTO radar_runs (id,started_at,mode,status) VALUES (?,?,?,?)`,[runId,nowIso(),CFG.mode,'running']);
   let candidates=[]; let created=0, duplicates=0, contentArticles=null;
+  const runAcceptedEvents=[];
+  const isolation=createIsolationController({dryRun:CFG.dryRun,writeEvent:upsertEvent,writeImpact:saveImpact,sendMake});
+  console.log(JSON.stringify({stage:'dry_run_isolation',enabled:CFG.dryRun,...isolation.telemetry}));
   try{
     candidates=await discover();
     const urlSeen=new Set();
@@ -775,10 +781,11 @@ async function main(){
       if(!c.article_url || urlSeen.has(c.article_url)) continue; urlSeen.add(c.article_url);
       const existingUrl=await d1(`SELECT e.id,e.event_key,e.published FROM event_sources s JOIN events e ON e.id=s.event_id WHERE s.article_url=? LIMIT 1`,[c.article_url]);
       if(existingUrl.length){duplicates++;continue;}
-      const history=await historicalContext(c);
+      const history=await historicalContext(c,CFG.dryRun?runAcceptedEvents:[]);
       const cls=await classifyEvent(c,history);
       if(['DUPLICADO','IGNORAR'].includes(cls.decision)){duplicates++;continue;}
-      const {eventId,eventKey}=await upsertEvent(c,cls); created++;
+      const {eventId,eventKey,record}=await isolation.acceptEvent(c,cls); created++;
+      if (CFG.dryRun) runAcceptedEvents.push(record);
       const event={...c,...cls,event_id:eventId,event_key:eventKey};
       const articles=contentArticles ??= await loadContentCandidates();
       const impactPrefilter=prefilterContentImpact(event,articles);
@@ -799,7 +806,7 @@ async function main(){
         contentImpactTotals.model_calls++;
         impacts=await assessContentImpact(event,impactPrefilter.selected);
       }
-      for(const imp of impacts) await saveImpact(eventId,imp);
+      for(const imp of impacts) await isolation.saveImpact(eventId,imp);
       const publishableNews = Number(cls.news_score||0) >= CFG.minNewsScore;
       const qualifyingImpacts = impacts.filter(x => x.impact_type !== 'NONE' && Number(x.confidence||0) >= CFG.minImpactConfidence);
       contentImpactTotals.impacts_found+=qualifyingImpacts.length;
@@ -863,20 +870,21 @@ async function main(){
           url_original:c.article_url||''
         }));
       }
-      const sent=await sendMake(payload);
+      const sent=await isolation.send(payload);
       if(sent.sent) await d1(`UPDATE events SET make_sent_at=? WHERE id=?`,[nowIso(),eventId]);
     }
     await d1(`UPDATE radar_runs SET finished_at=?,status='ok',candidates_found=?,events_created=?,duplicates_discarded=? WHERE id=?`,[nowIso(),candidates.length,created,duplicates,runId]);
-    console.log(JSON.stringify({ok:true,runId,candidates:candidates.length,created,duplicates,dryRun:CFG.dryRun}));
+    console.log(JSON.stringify({ok:true,runId,candidates:candidates.length,created,duplicates,would_create:CFG.dryRun?created:0,persistent_writes:isolation.telemetry.event_writes+isolation.telemetry.event_source_writes+isolation.telemetry.impact_writes,dryRun:CFG.dryRun}));
   }catch(err){
     if (err instanceof BudgetGuardStop) {
       await d1(`UPDATE radar_runs SET finished_at=?,status='budget_guard',candidates_found=?,events_created=?,duplicates_discarded=? WHERE id=?`,[nowIso(),candidates.length,created,duplicates,runId]).catch(()=>{});
-      console.log(JSON.stringify({ok:true,runId,status:'budget_guard',candidates:candidates.length,created,duplicates,dryRun:CFG.dryRun}));
+      console.log(JSON.stringify({ok:true,runId,status:'budget_guard',candidates:candidates.length,created,duplicates,would_create:CFG.dryRun?created:0,persistent_writes:isolation.telemetry.event_writes+isolation.telemetry.event_source_writes+isolation.telemetry.impact_writes,dryRun:CFG.dryRun}));
       return;
     }
     await d1(`UPDATE radar_runs SET finished_at=?,status='error',notes=? WHERE id=?`,[nowIso(),String(err.stack||err).slice(0,4000),runId]).catch(()=>{});
     throw err;
   }finally{
+    console.log(JSON.stringify({stage:'dry_run_isolation',enabled:CFG.dryRun,...isolation.telemetry}));
     console.log(JSON.stringify({stage:'content_impact_summary',...contentImpactTotals}));
     logUsageSummary();
   }
