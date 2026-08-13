@@ -101,9 +101,21 @@ def _eyebrow(draw: ImageDraw.ImageDraw, text: str, xy: tuple[int, int]) -> None:
     draw.text(xy, text.upper(), font=font(22, True), fill=GREEN)
 
 
+def _intro_folio(data: dict) -> str:
+    value = data["intro"]["title"].upper() if data["template"] == "ordered_steps" else data["category"]
+    return f"01  •  {value}"
+
+
+def _steps_eyebrow(data: dict) -> str:
+    return f"{len(data['steps'])} passos, por ordem"
+
+
+def _warning_folio(data: dict) -> str:
+    return f"03  •  {data['warning']['eyebrow'].upper()}"
+
+
 def render_intro(data: dict) -> Image.Image:
-    folio = "01  •  HERDEI UMA CASA" if data["template"] == "ordered_steps" else f"01  •  {data['category']}"
-    image = _canvas(data["category"], folio)
+    image = _canvas(data["category"], _intro_folio(data))
     draw = ImageDraw.Draw(image)
     hero = _cover(data["_hero_path"], (896, 610), 0.45)
     _paste_card(image, hero, (MARGIN, CONTENT_TOP), radius=20)
@@ -120,7 +132,7 @@ def render_steps(data: dict, visible: int) -> Image.Image:
     if data["template"] == "cost_highlight":
         return _render_cost_steps(data, visible)
     if data["template"] == "ordered_steps":
-        eyebrow = "5 passos, por ordem"
+        eyebrow = _steps_eyebrow(data)
         title = "A ordem é esta.\nSem complicar."
         item_label = "PASSOS"
     else:
@@ -167,8 +179,7 @@ def _render_cost_steps(data: dict, visible: int) -> Image.Image:
 
 
 def render_warning(data: dict) -> Image.Image:
-    folio = "03  •  EVITE O BLOQUEIO" if data["template"] == "ordered_steps" else f"03  •  {data['warning']['eyebrow'].upper()}"
-    image = _canvas(data["category"], folio)
+    image = _canvas(data["category"], _warning_folio(data))
     draw = ImageDraw.Draw(image)
     hero = _cover(data["_hero_path"], (370, 480), 0.52)
     _paste_card(image, hero, (MARGIN, 370), radius=18)
