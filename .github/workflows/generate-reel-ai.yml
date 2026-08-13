@@ -1,0 +1,201 @@
+name: Generate Reel AI
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: Slug do artigo a transformar em Reel
+        required: true
+        default: herdei-uma-casa
+        type: string
+  workflow_call:
+    inputs:
+      slug:
+        required: true
+        type: string
+      publication_sha:
+        required: false
+        default: ""
+        type: string
+    outputs:
+      generation_id:
+        description: Identificador único da geração criada
+        value: ${{ jobs.generate.outputs.generation_id }}
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      generation_id: ${{ steps.generation.outputs.generation_id }}
+    env:
+      REEL_SLUG: ${{ inputs.slug }}
+      PUBLICATION_SHA: ${{ inputs.publication_sha || '' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+
+    steps:
+      - name: Obter repositório
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.publication_sha || github.sha }}
+
+      - name: Preparar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: scripts/reels/requirements.txt
+
+      - name: Reservar tentativa automática inicial
+        id: claim
+        if: ${{ env.PUBLICATION_SHA != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_D1_DATABASE_ID CLOUDFLARE_API_TOKEN; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::$name não está configurada para reservar o trigger automático."
+              exit 1
+            fi
+          done
+          CLAIMED="$(python scripts/reels/automatic_trigger.py claim \
+            --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA")"
+          echo "claimed=$CLAIMED" >> "$GITHUB_OUTPUT"
+          if [[ "$CLAIMED" == "false" ]]; then
+            echo "Já existe uma tentativa automática inicial para $REEL_SLUG. Nada será gerado."
+          fi
+
+      - name: Validar configuração
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$REEL_SLUG" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+            echo "::error::Slug inválido: $REEL_SLUG"
+            exit 1
+          fi
+          if [[ -z "$OPENAI_API_KEY" ]]; then
+            echo "::error::OPENAI_API_KEY não está configurada nos GitHub Actions Secrets."
+            exit 1
+          fi
+          for name in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_D1_DATABASE_ID CLOUDFLARE_API_TOKEN R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::$name não está configurada nos GitHub Actions Secrets."
+              exit 1
+            fi
+          done
+
+      - name: Instalar FFmpeg, Inter e dependências Python
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg fonts-inter
+          python -m pip install --requirement scripts/reels/requirements.txt
+
+      - name: Criar identificador único da geração
+        id: generation
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          GENERATION_ID="$(python scripts/reels/publish_review.py --new-generation-id)"
+          echo "GENERATION_ID=$GENERATION_ID" >> "$GITHUB_ENV"
+          echo "generation_id=$GENERATION_ID" >> "$GITHUB_OUTPUT"
+          echo "Geração: $GENERATION_ID"
+
+      - name: Gerar e validar JSON
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
+        run: >-
+          python scripts/reels/generate_json.py
+          --slug "$REEL_SLUG"
+          --output "out/reels-json/$REEL_SLUG.json"
+
+      - name: Renderizar Reel
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
+        run: >-
+          python scripts/reels/render.py
+          --input "out/reels-json/$REEL_SLUG.json"
+          --output "out/reels-ai/$REEL_SLUG.mp4"
+
+      - name: Confirmar metadados
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE="out/reels-ai/$REEL_SLUG.mp4"
+          ffprobe -v error \
+            -show_entries stream=codec_name,codec_type,width,height,avg_frame_rate,pix_fmt,duration \
+            -show_entries format=duration \
+            -of json "$FILE"
+          VIDEO_COUNT="$(ffprobe -v error -select_streams v -show_entries stream=index -of csv=p=0 "$FILE" | wc -l)"
+          AUDIO_COUNT="$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$FILE" | wc -l)"
+          [[ "$VIDEO_COUNT" == "1" ]] || { echo "::error::O MP4 não contém exatamente uma pista de vídeo."; exit 1; }
+          if [[ -f scripts/reels/assets/background.mp3 ]]; then
+            [[ "$AUDIO_COUNT" == "1" ]] || { echo "::error::O MP4 não contém exatamente uma pista de áudio."; exit 1; }
+          else
+            [[ "$AUDIO_COUNT" == "0" ]] || { echo "::error::Foi encontrado áudio sem background.mp3."; exit 1; }
+          fi
+
+      - name: Guardar em R2 e criar revisão pendente
+        if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
+        run: >-
+          python scripts/reels/publish_review.py
+          --slug "$REEL_SLUG"
+          --generation-id "$GENERATION_ID"
+          --json "out/reels-json/$REEL_SLUG.json"
+          --video "out/reels-ai/$REEL_SLUG.mp4"
+          --contact "out/reels-ai/$REEL_SLUG-contact.jpg"
+
+      - name: Concluir tentativa automática inicial
+        if: ${{ env.PUBLICATION_SHA != '' && steps.claim.outputs.claimed == 'true' }}
+        run: >-
+          python scripts/reels/automatic_trigger.py complete
+          --slug "$REEL_SLUG"
+          --publication-sha "$PUBLICATION_SHA"
+          --generation-id "$GENERATION_ID"
+
+      - name: Registar geração falhada
+        if: ${{ failure() && env.GENERATION_ID != '' && (env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true') }}
+        continue-on-error: true
+        run: >-
+          python scripts/reels/publish_review.py
+          --record-failure
+          --slug "$REEL_SLUG"
+          --generation-id "$GENERATION_ID"
+          --error "workflow_failed"
+
+      - name: Marcar tentativa automática como falhada
+        if: ${{ failure() && env.PUBLICATION_SHA != '' && steps.claim.outputs.claimed == 'true' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARGS=(fail --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA" --error "workflow_failed")
+          if [[ -n "${GENERATION_ID:-}" ]]; then
+            ARGS+=(--generation-id "$GENERATION_ID")
+          fi
+          python scripts/reels/automatic_trigger.py "${ARGS[@]}"
+
+      - name: Guardar JSON, Reel e contact sheet
+        if: ${{ always() && (env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: reel-ai-${{ env.REEL_SLUG }}-${{ env.GENERATION_ID }}
+          path: |
+            out/reels-json/${{ env.REEL_SLUG }}.json
+            out/reels-ai/${{ env.REEL_SLUG }}.mp4
+            out/reels-ai/${{ env.REEL_SLUG }}-contact.jpg
+          if-no-files-found: warn
+          compression-level: 0

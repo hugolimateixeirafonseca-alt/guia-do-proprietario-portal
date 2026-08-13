@@ -1,0 +1,71 @@
+name: Generate Reel on Production publish
+
+on:
+  check_run:
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reel-auto-publish-${{ github.event.check_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    if: >-
+      vars.REELS_AUTO_PUBLISH_ENABLED == 'true' &&
+      github.event.check_run.name == 'Cloudflare Pages' &&
+      github.event.check_run.app.slug == 'cloudflare-workers-and-pages' &&
+      github.event.check_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.check.outputs.sha }}
+      slugs: ${{ steps.detect.outputs.slugs }}
+      count: ${{ steps.detect.outputs.count }}
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PAGES_READ_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_READ_TOKEN }}
+      CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'guia-do-proprietario-portal' }}
+      ACTIVATION_SHA: ${{ vars.REELS_AUTO_PUBLISH_ACTIVATION_SHA }}
+    steps:
+      - name: Obter main com histórico completo
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Exigir ponto de ativação explícito
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$ACTIVATION_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::REELS_AUTO_PUBLISH_ACTIVATION_SHA não está configurado com um SHA completo."
+            exit 1
+          fi
+
+      - name: Confirmar deployment Production
+        id: check
+        run: >-
+          python scripts/reels/validate_publish_check.py
+          --event "$GITHUB_EVENT_PATH"
+          --activation-sha "$ACTIVATION_SHA"
+
+      - name: Detetar artigos publicados pela primeira vez
+        id: detect
+        run: >-
+          python scripts/reels/detect_new_publications.py
+          --sha "${{ steps.check.outputs.sha }}"
+
+  generate:
+    needs: detect
+    if: ${{ needs.detect.result == 'success' && needs.detect.outputs.count != '0' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        slug: ${{ fromJSON(needs.detect.outputs.slugs) }}
+    uses: ./.github/workflows/generate-reel-ai.yml
+    with:
+      slug: ${{ matrix.slug }}
+      publication_sha: ${{ needs.detect.outputs.sha }}
+    secrets: inherit
