@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {inspectSourceUrl} from './source-metadata.mjs';
+import {harvestDirectSources} from './source-harvest.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -144,6 +145,14 @@ const omissionSweep = {
   type:'omission',
   topic:'notícias mais importantes das últimas 36 horas em Portugal para alguém que possui uma casa, mesmo fora das categorias habituais'
 };
+const smokeDirectSeeds = [
+  {name:'CNN Portugal',slug:'cnn_portugal',url:'https://cnnportugal.iol.pt/',allowedDomains:['cnnportugal.iol.pt']},
+  {name:'RTP Economia',slug:'rtp_economia',url:'https://www.rtp.pt/noticias/economia',allowedDomains:['rtp.pt'],section:true},
+  {name:'ECO',slug:'eco',url:'https://eco.sapo.pt/',allowedDomains:['eco.sapo.pt']},
+  {name:'Dinheiro Vivo Imobiliário',slug:'dinheiro_vivo_imobiliario',url:'https://dinheirovivo.dn.pt/imobiliario',allowedDomains:['dinheirovivo.dn.pt'],section:true},
+  {name:'Idealista News Portugal',slug:'idealista_news_portugal',url:'https://www.idealista.pt/news/',allowedDomains:['idealista.pt'],section:true},
+  {name:'Jornal Económico',slug:'jornal_economico',url:'https://jornaleconomico.sapo.pt/',allowedDomains:['jornaleconomico.sapo.pt']}
+];
 
 function lisbonDateTime(date) {
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
@@ -291,7 +300,17 @@ async function inspectSources(sources, currentTime, context) {
   const unknown=[];
   for (let start=0; start<sources.length; start+=6) {
     const batch=sources.slice(start,start+6);
-    const inspections=await Promise.all(batch.map(source=>inspectSourceUrl(source)));
+    const inspections=await Promise.all(batch.map(source=>source.verified_published_at ? {
+      url:source.url,
+      http_status:200,
+      published_at:source.verified_published_at,
+      date_source:source.date_source,
+      date_status:'verified',
+      title:source.verified_title || source.title || '',
+      article_type:source.article_type || '',
+      probable_article:Boolean(source.probable_article),
+      fetch_ok:true
+    } : inspectSourceUrl(source)));
     for (let index=0; index<batch.length; index++) {
       const source=batch[index];
       const inspection=inspections[index];
@@ -521,13 +540,21 @@ async function validateSearchResults(sources, currentTime) {
 async function discover() {
   const currentTime = new Date();
   let sweepDefinitions;
+  let directSources=[];
   if (CFG.mode === 'smoke') {
-    sweepDefinitions=[
-      thematicSweeps.find(sweep => sweep.name==='condominio_vizinhos'),
-      thematicSweeps.find(sweep => sweep.name==='mercado_credito'),
-      sourceSweeps.find(sweep => sweep.name==='fontes_media_a'),
-      omissionSweep
-    ];
+    directSources=await harvestDirectSources(smokeDirectSeeds,{currentTime,dryRun:CFG.dryRun});
+    const benchmark=directSources.find(source=>
+      source.direct_source==='CNN Portugal' &&
+      norm(`${source.title} ${source.url}`).includes('condominio') &&
+      new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Lisbon'}).format(new Date(source.verified_published_at))==='2026-08-13'
+    );
+    console.log(JSON.stringify({
+      stage:'benchmark',
+      name:'cnn_condominios_2026_08_13',
+      found:Boolean(benchmark),
+      url:benchmark?.url||''
+    }));
+    sweepDefinitions=[omissionSweep];
   } else {
     const selectedThemes=CFG.mode === 'morning' ? thematicSweeps : thematicSweeps.filter(sweep => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito'].includes(sweep.name));
     sweepDefinitions=[...selectedThemes,...sourceSweeps,omissionSweep];
@@ -539,11 +566,12 @@ async function discover() {
     await sleep(250);
   }
   const sourceMap=new Map();
+  for (const source of directSources) sourceMap.set(canonicalUrl(source.url),source);
   for (const search of searches) {
     for (const result of search.results) {
       const key=canonicalUrl(result.url);
       if (!sourceMap.has(key)) sourceMap.set(key,result);
-      else if (!sourceMap.get(key).title && result.title) sourceMap.set(key,result);
+      else if (!sourceMap.get(key).title && result.title) sourceMap.set(key,{...sourceMap.get(key),title:result.title});
     }
   }
   const sources=[...sourceMap.values()];
@@ -561,7 +589,7 @@ async function discover() {
   const inspectedSources=await inspectSources(sources,currentTime,inspectionContext);
   const firstPass=await validateSearchResults(inspectedSources,currentTime);
   let rescue=[];
-  if (!firstPass.length) {
+  if (!firstPass.length && CFG.mode !== 'smoke') {
     const rescueSources=await freshnessRescue(currentTime,new Set(sourceMap.keys()));
     if (rescueSources.length) {
       const inspectedRescueSources=await inspectSources(rescueSources,currentTime,inspectionContext);
