@@ -15,6 +15,7 @@ from video import encode_video, probe_video
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_AUDIO = Path(__file__).resolve().parent / "assets" / "background.mp3"
 
 
 def arguments() -> argparse.Namespace:
@@ -24,6 +25,7 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--contact-sheet", type=Path, help="JPG de revisão; por omissão usa <output>-contact.jpg")
     parser.add_argument("--ffmpeg", default="ffmpeg", help="Executável ffmpeg")
     parser.add_argument("--ffprobe", default="ffprobe", help="Executável ffprobe")
+    parser.add_argument("--audio", type=Path, help="Faixa opcional; por omissão usa scripts/reels/assets/background.mp3 quando existir")
     return parser.parse_args()
 
 
@@ -39,7 +41,7 @@ def save_contact_sheet(items: list[tuple[str, Image.Image]], output: Path) -> No
     rows = (len(items) + columns - 1) // columns
     sheet = Image.new("RGB", (1080, top + rows * (thumb_height + gap_y) + 25), CREAM)
     draw = ImageDraw.Draw(sheet)
-    draw.text((45, 34), "Revisão do Reel", font=font(38, True), fill=INK)
+    draw.text((45, 34), "Revisão visual v4", font=font(38, True), fill=INK)
     for index, (label, frame) in enumerate(items):
         column, row = index % columns, index // columns
         x = 45 + column * (thumb_width + gap_x)
@@ -60,6 +62,7 @@ def main() -> int:
     output.parent.mkdir(parents=True, exist_ok=True)
     contact.parent.mkdir(parents=True, exist_ok=True)
     data = load_content(input_path, REPOSITORY_ROOT)
+    audio = resolve_from_working_directory(args.audio) if args.audio else DEFAULT_AUDIO
 
     print(f"Fonte regular: {font_path(False)}")
     print(f"Fonte bold: {font_path(True)}")
@@ -86,9 +89,10 @@ def main() -> int:
             [("Introdução", intro), ("Passo 1", steps[0]), ("Passo 3", steps[min(2, len(steps) - 1)]), ("Passos completos", steps[-1]), ("Aviso", warning), ("Fecho", outro)],
             contact,
         )
-        encode_video(args.ffmpeg, {"intro": intro_path, "steps": step_paths, "warning": warning_path, "outro": outro_path}, output, work)
+        audio_added = encode_video(args.ffmpeg, args.ffprobe, {"intro": intro_path, "steps": step_paths, "warning": warning_path, "outro": outro_path}, output, work, audio)
 
-    result = probe_video(args.ffprobe, output)
+    result = probe_video(args.ffprobe, output, expected_audio=audio_added)
+    print(f"Faixa de fundo: {audio if audio_added else 'não encontrada; vídeo gerado sem áudio'}")
     print(json.dumps(result, ensure_ascii=False, indent=2))
     print(f"MP4: {output}")
     print(f"Contact sheet: {contact}")

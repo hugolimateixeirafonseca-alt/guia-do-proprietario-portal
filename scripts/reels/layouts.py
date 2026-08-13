@@ -2,27 +2,34 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
 from brand import CREAM, GREEN, GREEN_DARK, GREEN_SOFT, INK, LINE, MUTED, PAPER, SAND, draw_mark, draw_wordmark, font
 
 
 WIDTH = 1080
 HEIGHT = 1920
-MARGIN = 100
+MARGIN = 92
+CONTENT_TOP = 330
+CONTENT_BOTTOM = 1580
 
 
-def _canvas(category: str) -> Image.Image:
+def _canvas(category: str, folio: str) -> Image.Image:
     image = Image.new("RGB", (WIDTH, HEIGHT), CREAM)
     draw = ImageDraw.Draw(image)
-    draw_mark(image, (MARGIN, 184), 58)
-    draw_wordmark(image, (176, 196), 29)
-    category_font = font(22, True)
-    bbox = draw.textbbox((0, 0), category, font=category_font)
-    draw.text((WIDTH - MARGIN - (bbox[2] - bbox[0]), 204), category, font=category_font, fill=GREEN)
-    draw.line((MARGIN, 280, WIDTH - MARGIN, 280), fill=LINE, width=2)
-    draw.rectangle((0, 1690, WIDTH, 1760), fill=GREEN)
-    draw.rectangle((MARGIN, 1668, WIDTH - 210, 1690), fill=SAND)
+    draw_mark(image, (MARGIN, 190), 64)
+    draw_wordmark(image, (174, 205), 30)
+
+    category_font = font(21, True)
+    category_width = draw.textbbox((0, 0), category, font=category_font)[2]
+    draw.text((WIDTH - MARGIN - category_width, 210), category, font=category_font, fill=GREEN)
+    draw.line((MARGIN, 286, WIDTH - MARGIN, 286), fill="#cfdad5", width=2)
+
+    # A mesma fita editorial atravessa todas as cenas sem competir com o conteúdo.
+    draw.rounded_rectangle((MARGIN, 1650, WIDTH - MARGIN, 1668), radius=9, fill=SAND)
+    draw.rounded_rectangle((MARGIN, 1682, WIDTH - MARGIN, 1718), radius=18, fill=GREEN)
+    draw.text((MARGIN, 1760), folio, font=font(18, True), fill=MUTED)
+    draw.text((WIDTH - MARGIN, 1760), "GUIADOPROPRIETARIO.PT", font=font(18, True), fill=MUTED, anchor="ra")
     return image
 
 
@@ -43,22 +50,36 @@ def _cover(path: Path, size: tuple[int, int], focal_y: float = 0.5) -> Image.Ima
         return source.crop(box).resize(size, Image.Resampling.LANCZOS)
 
 
+def _paste_card(image: Image.Image, content: Image.Image, xy: tuple[int, int], radius: int = 18, shadow: int = 18) -> None:
+    x, y = xy
+    width, height = content.size
+    layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(layer)
+    shadow_draw.rounded_rectangle((x + 5, y + 9, x + width + 5, y + height + 9), radius=radius, fill=(16, 42, 49, 32))
+    layer = layer.filter(ImageFilter.GaussianBlur(shadow))
+    image.paste(layer.convert("RGB"), mask=layer.getchannel("A"))
+    mask = Image.new("L", content.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, width, height), radius=radius, fill=255)
+    image.paste(content, xy, mask)
+
+
 def _fit_text(draw: ImageDraw.ImageDraw, text: str, box: tuple[int, int, int, int], maximum: int, minimum: int, bold: bool = True, spacing: int = 8) -> tuple[object, str]:
     width = box[2] - box[0]
     height = box[3] - box[1]
-    words = text.split()
+    paragraphs = text.split("\n")
     for size in range(maximum, minimum - 1, -2):
         candidate_font = font(size, bold)
         lines: list[str] = []
-        current = ""
-        for word in words:
-            attempt = f"{current} {word}".strip()
-            if draw.textbbox((0, 0), attempt, font=candidate_font)[2] <= width or not current:
-                current = attempt
-            else:
-                lines.append(current)
-                current = word
-        if current:
+        for paragraph in paragraphs:
+            words = paragraph.split()
+            current = ""
+            for word in words:
+                attempt = f"{current} {word}".strip()
+                if draw.textbbox((0, 0), attempt, font=candidate_font)[2] <= width or not current:
+                    current = attempt
+                else:
+                    lines.append(current)
+                    current = word
             lines.append(current)
         wrapped = "\n".join(lines)
         bbox = draw.multiline_textbbox((0, 0), wrapped, font=candidate_font, spacing=spacing)
@@ -67,68 +88,78 @@ def _fit_text(draw: ImageDraw.ImageDraw, text: str, box: tuple[int, int, int, in
     raise ValueError(f"O texto não cabe no layout: {text}")
 
 
-def _text_box(image: Image.Image, text: str, box: tuple[int, int, int, int], maximum: int, minimum: int = 28, fill: str = INK, bold: bool = True, spacing: int = 8, anchor: str | None = None) -> None:
+def _text_box(image: Image.Image, text: str, box: tuple[int, int, int, int], maximum: int, minimum: int = 28, fill: str = INK, bold: bool = True, spacing: int = 8, centered: bool = False) -> None:
     draw = ImageDraw.Draw(image)
     chosen_font, wrapped = _fit_text(draw, text, box, maximum, minimum, bold, spacing)
-    xy = (box[0], box[1])
-    if anchor == "center":
-        xy = ((box[0] + box[2]) // 2, box[1])
-    draw.multiline_text(xy, wrapped, font=chosen_font, fill=fill, spacing=spacing, align="center" if anchor == "center" else "left", anchor="ma" if anchor == "center" else None)
+    if centered:
+        draw.multiline_text(((box[0] + box[2]) // 2, box[1]), wrapped, font=chosen_font, fill=fill, spacing=spacing, align="center", anchor="ma")
+    else:
+        draw.multiline_text((box[0], box[1]), wrapped, font=chosen_font, fill=fill, spacing=spacing)
+
+
+def _eyebrow(draw: ImageDraw.ImageDraw, text: str, xy: tuple[int, int]) -> None:
+    draw.text(xy, text.upper(), font=font(22, True), fill=GREEN)
 
 
 def render_intro(data: dict) -> Image.Image:
-    image = _canvas(data["category"])
+    image = _canvas(data["category"], "01  •  HERDEI UMA CASA")
     draw = ImageDraw.Draw(image)
-    hero = _cover(data["_hero_path"], (880, 570), 0.45)
-    image.paste(hero, (MARGIN, 342))
-    draw.rectangle((MARGIN, 912, WIDTH - MARGIN, 920), fill=SAND)
-    _text_box(image, data["intro"]["title"].upper(), (MARGIN, 1000, 900, 1130), 78, 58)
-    _text_box(image, data["intro"]["accent"].upper(), (MARGIN, 1125, 900, 1235), 72, 54, GREEN)
-    label = data["intro"]["label"]
-    label_font = font(24, True)
-    label_width = draw.textbbox((0, 0), label, font=label_font)[2]
-    draw.rounded_rectangle((MARGIN, 1280, MARGIN + label_width + 54, 1338), radius=6, fill=GREEN_SOFT)
-    draw.text((MARGIN + 27, 1295), label, font=label_font, fill=GREEN_DARK)
-    _text_box(image, data["intro"]["subtitle"], (MARGIN, 1402, WIDTH - MARGIN, 1550), 34, 28, MUTED, False, 7)
+    hero = _cover(data["_hero_path"], (896, 610), 0.45)
+    _paste_card(image, hero, (MARGIN, CONTENT_TOP), radius=20)
+    draw.rounded_rectangle((MARGIN + 32, 885, MARGIN + 342, 945), radius=8, fill=PAPER)
+    draw.text((MARGIN + 56, 903), data["intro"]["label"], font=font(22, True), fill=GREEN_DARK)
+    _text_box(image, data["intro"]["title"].upper(), (MARGIN, 1030, WIDTH - MARGIN, 1155), 78, 60)
+    _text_box(image, data["intro"]["accent"].upper(), (MARGIN, 1155, WIDTH - MARGIN, 1270), 78, 60, GREEN)
+    draw.line((MARGIN, 1328, MARGIN + 86, 1328), fill=SAND, width=8)
+    _text_box(image, data["intro"]["subtitle"], (MARGIN, 1380, WIDTH - MARGIN, 1515), 35, 29, MUTED, False, 8)
     return image
 
 
 def render_steps(data: dict, visible: int) -> Image.Image:
-    image = _canvas(data["category"])
+    image = _canvas(data["category"], f"02  •  {visible} DE {len(data['steps'])} PASSOS")
     draw = ImageDraw.Draw(image)
-    _text_box(image, "A ordem é esta.\nSem complicar.", (MARGIN, 360, WIDTH - MARGIN, 575), 68, 54, INK, True, 5)
-    start_y = 650
+    _eyebrow(draw, "5 passos, por ordem", (MARGIN, 358))
+    _text_box(image, "A ordem é esta.\nSem complicar.", (MARGIN, 420, WIDTH - MARGIN, 610), 68, 54, INK, True, 4)
+
+    start_y = 672
+    row_height = 166
     for index, step in enumerate(data["steps"][:visible]):
-        y = start_y + index * 170
-        draw.ellipse((MARGIN, y, MARGIN + 88, y + 88), fill=GREEN)
-        number_font = font(38, True)
-        draw.text((MARGIN + 44, y + 43), str(step["number"]), font=number_font, fill=PAPER, anchor="mm")
-        _text_box(image, step["title"], (MARGIN + 128, y - 2, WIDTH - MARGIN, y + 102), 39, 30)
-        if index < visible - 1:
-            draw.line((MARGIN + 44, y + 88, MARGIN + 44, y + 154), fill="#b9cdc5", width=4)
+        y = start_y + index * row_height
+        if index:
+            draw.line((MARGIN + 48, y - 74, MARGIN + 48, y - 20), fill="#abc3b9", width=4)
+        draw.ellipse((MARGIN, y - 8, MARGIN + 96, y + 88), fill=GREEN)
+        draw.text((MARGIN + 48, y + 40), str(step["number"]), font=font(39, True), fill=PAPER, anchor="mm")
+        _text_box(image, step["title"], (MARGIN + 140, y - 3, WIDTH - MARGIN, y + 96), 40, 31)
+        draw.line((MARGIN + 140, y + 112, WIDTH - MARGIN, y + 112), fill=LINE, width=2)
     return image
 
 
 def render_warning(data: dict) -> Image.Image:
-    image = _canvas(data["category"])
+    image = _canvas(data["category"], "03  •  EVITE O BLOQUEIO")
     draw = ImageDraw.Draw(image)
-    hero = _cover(data["_hero_path"], (880, 500), 0.56)
-    image.paste(hero, (MARGIN, 342))
-    draw.text((MARGIN, 920), data["warning"]["eyebrow"].upper(), font=font(24, True), fill=GREEN)
-    _text_box(image, data["warning"]["title"], (MARGIN, 982, WIDTH - MARGIN, 1110), 62, 48)
-    draw.rounded_rectangle((MARGIN, 1170, WIDTH - MARGIN, 1322), radius=10, fill=GREEN_SOFT)
-    _text_box(image, data["warning"]["body"], (MARGIN + 42, 1205, WIDTH - MARGIN - 42, 1292), 35, 29, GREEN_DARK)
-    _text_box(image, data["warning"]["secondary"], (MARGIN, 1390, WIDTH - MARGIN, 1545), 34, 28, MUTED, False, 8)
+    hero = _cover(data["_hero_path"], (370, 480), 0.52)
+    _paste_card(image, hero, (MARGIN, 370), radius=18)
+    draw.rectangle((MARGIN + 405, 370, MARGIN + 423, 850), fill=SAND)
+    _eyebrow(draw, data["warning"]["eyebrow"], (MARGIN + 470, 405))
+    _text_box(image, data["warning"]["title"], (MARGIN + 470, 480, WIDTH - MARGIN, 720), 61, 45)
+
+    draw.rounded_rectangle((MARGIN, 960, WIDTH - MARGIN, 1190), radius=18, fill=GREEN_SOFT)
+    draw.ellipse((MARGIN + 40, 1015, MARGIN + 112, 1087), fill=GREEN)
+    draw.text((MARGIN + 76, 1051), "!", font=font(38, True), fill=PAPER, anchor="mm")
+    _text_box(image, data["warning"]["body"], (MARGIN + 145, 1010, WIDTH - MARGIN - 38, 1135), 40, 32, GREEN_DARK)
+    draw.line((MARGIN, 1290, MARGIN + 86, 1290), fill=SAND, width=8)
+    _text_box(image, data["warning"]["secondary"], (MARGIN, 1340, WIDTH - MARGIN, 1490), 38, 30, MUTED, False, 8)
     return image
 
 
 def render_outro(data: dict) -> Image.Image:
-    image = _canvas(data["category"])
+    image = _canvas(data["category"], "04  •  GUIA COMPLETO")
     draw = ImageDraw.Draw(image)
-    _text_box(image, data["outro"]["title"], (MARGIN, 470, WIDTH - MARGIN, 720), 68, 50, INK, True, 8, "center")
-    draw.line((320, 800, 760, 800), fill=SAND, width=5)
-    draw.text((WIDTH // 2, 900), data["outro"]["label"], font=font(28), fill=MUTED, anchor="ma")
-    draw_mark(image, (WIDTH // 2 - 58, 1000), 116)
-    draw.text((WIDTH // 2, 1150), data["outro"]["brand"], font=font(43, True), fill=INK, anchor="ma")
-    draw.text((WIDTH // 2, 1280), data["outro"]["domain"], font=font(31, True), fill=GREEN, anchor="ma")
+    draw.ellipse((WIDTH // 2 - 170, 365, WIDTH // 2 + 170, 705), fill=GREEN_SOFT)
+    draw_mark(image, (WIDTH // 2 - 78, 458), 156)
+    _text_box(image, data["outro"]["title"], (MARGIN, 810, WIDTH - MARGIN, 1055), 68, 48, INK, True, 8, True)
+    draw.line((WIDTH // 2 - 70, 1130, WIDTH // 2 + 70, 1130), fill=SAND, width=7)
+    draw.text((WIDTH // 2, 1215), data["outro"]["label"], font=font(28), fill=MUTED, anchor="ma")
+    draw.text((WIDTH // 2, 1300), data["outro"]["brand"], font=font(46, True), fill=INK, anchor="ma")
+    draw.text((WIDTH // 2, 1400), data["outro"]["domain"], font=font(31, True), fill=GREEN, anchor="ma")
     return image

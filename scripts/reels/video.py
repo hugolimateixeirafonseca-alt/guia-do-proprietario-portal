@@ -14,6 +14,9 @@ INTRO_SECONDS = 6.5
 STEP_SECONDS = 2.2
 WARNING_SECONDS = 7.5
 OUTRO_SECONDS = 7.0
+AUDIO_VOLUME = 0.04
+AUDIO_FADE_IN = 1.2
+AUDIO_FADE_OUT = 1.8
 
 
 def require_binary(name_or_path: str) -> str:
@@ -69,7 +72,53 @@ def _steps_clip(ffmpeg: str, images: list[Path], output: Path) -> None:
     run(command, "Criação da cena progressiva")
 
 
-def encode_video(ffmpeg_value: str, frames: dict[str, object], output: Path, work: Path) -> None:
+def _mux_background_audio(ffmpeg: str, video: Path, audio: Path, output: Path, duration: float) -> None:
+    fade_out_start = max(0.0, duration - AUDIO_FADE_OUT)
+    audio_filter = (
+        f"volume={AUDIO_VOLUME},"
+        f"aresample=async=1:first_pts=0,"
+        f"apad=whole_dur={duration:.6f},"
+        f"atrim=duration={duration:.6f},"
+        f"afade=t=in:st=0:d={AUDIO_FADE_IN},"
+        f"afade=t=out:st={fade_out_start:.6f}:d={AUDIO_FADE_OUT},"
+        f"asetpts=N/SR/TB[a]"
+    )
+    run(
+        [
+            ffmpeg,
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            str(video),
+            "-stream_loop",
+            "-1",
+            "-i",
+            str(audio),
+            "-filter_complex",
+            audio_filter,
+            "-map",
+            "0:v:0",
+            "-map",
+            "[a]",
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "160k",
+            "-t",
+            f"{duration:.6f}",
+            "-movflags",
+            "+faststart",
+            str(output),
+        ],
+        "Adição da faixa de fundo",
+    )
+
+
+def encode_video(ffmpeg_value: str, ffprobe_value: str, frames: dict[str, object], output: Path, work: Path, audio: Path | None = None) -> bool:
     ffmpeg = require_binary(ffmpeg_value)
     intro_clip = work / "intro.mp4"
     steps_clip = work / "steps.mp4"
@@ -92,6 +141,7 @@ def encode_video(ffmpeg_value: str, frames: dict[str, object], output: Path, wor
     command = [ffmpeg, "-hide_banner", "-loglevel", "error", "-y"]
     for clip in (intro_clip, steps_clip, warning_clip, outro_clip):
         command += ["-i", str(clip)]
+    video_only = work / "video-only.mp4" if audio and audio.is_file() else output
     command += [
         "-filter_complex",
         graph,
@@ -110,14 +160,22 @@ def encode_video(ffmpeg_value: str, frames: dict[str, object], output: Path, wor
         str(FPS),
         "-movflags",
         "+faststart",
-        str(output),
+        str(video_only),
     ]
     run(command, "Codificação final do MP4")
+    audio_added = bool(audio and audio.is_file())
+    if audio_added:
+        visual_probe = _read_probe(ffprobe_value, video_only)
+        duration = float(visual_probe.get("format", {}).get("duration", 0))
+        if duration <= 0:
+            raise RuntimeError("Não foi possível determinar a duração do vídeo antes de adicionar áudio.")
+        _mux_background_audio(ffmpeg, video_only, audio, output, duration)
     if not output.is_file() or output.stat().st_size == 0:
         raise RuntimeError(f"O MP4 não foi gerado: {output}")
+    return audio_added
 
 
-def probe_video(ffprobe_value: str, output: Path) -> dict:
+def _read_probe(ffprobe_value: str, output: Path) -> dict:
     ffprobe = require_binary(ffprobe_value)
     result = subprocess.run(
         [ffprobe, "-v", "error", "-show_streams", "-show_format", "-of", "json", str(output)],
@@ -126,7 +184,11 @@ def probe_video(ffprobe_value: str, output: Path) -> dict:
     )
     if result.returncode != 0:
         raise RuntimeError(f"ffprobe falhou.\n{result.stderr.strip()}")
-    probe = json.loads(result.stdout)
+    return json.loads(result.stdout)
+
+
+def probe_video(ffprobe_value: str, output: Path, expected_audio: bool = False) -> dict:
+    probe = _read_probe(ffprobe_value, output)
     video_streams = [stream for stream in probe.get("streams", []) if stream.get("codec_type") == "video"]
     audio_streams = [stream for stream in probe.get("streams", []) if stream.get("codec_type") == "audio"]
     if len(video_streams) != 1:
@@ -142,8 +204,15 @@ def probe_video(ffprobe_value: str, output: Path) -> dict:
         errors.append(f"pixel format {stream.get('pix_fmt')}")
     if stream.get("avg_frame_rate") != f"{FPS}/1":
         errors.append(f"fps {stream.get('avg_frame_rate')}")
-    if audio_streams:
-        errors.append("foi encontrada uma pista de áudio")
+    if expected_audio and len(audio_streams) != 1:
+        errors.append(f"eram esperadas 1 pista de áudio e foram encontradas {len(audio_streams)}")
+    if not expected_audio and audio_streams:
+        errors.append("foi encontrada uma pista de áudio sem background.mp3")
+    if audio_streams and audio_streams[0].get("codec_name") != "aac":
+        errors.append(f"codec de áudio {audio_streams[0].get('codec_name')}")
+    audio_duration = float(audio_streams[0].get("duration", duration)) if audio_streams else None
+    if audio_duration is not None and abs(audio_duration - duration) > 0.05:
+        errors.append(f"duração do áudio {audio_duration:.3f}s difere do vídeo {duration:.3f}s")
     if not 29 <= duration <= 32:
         errors.append(f"duração {duration:.3f}s")
     if errors:
@@ -155,4 +224,6 @@ def probe_video(ffprobe_value: str, output: Path) -> dict:
         "duration": duration,
         "pixel_format": stream["pix_fmt"],
         "audio_streams": len(audio_streams),
+        "audio_codec": audio_streams[0].get("codec_name") if audio_streams else None,
+        "audio_duration": audio_duration,
     }
