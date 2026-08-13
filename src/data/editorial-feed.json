@@ -6,7 +6,7 @@
     "planned": 84,
     "written": 92,
     "published": 68,
-    "newsOnline": 12
+    "newsOnline": 13
   },
   "articles": [
     {
@@ -1483,6 +1483,18 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-14-000931072-noticia-45",
+      "title": "Nova lei dos condomínios é anunciada com reforço da segurança e possível aumento de custos",
+      "summary": "Foi anunciada uma nova lei dos condomínios, segundo uma notícia da CNN Portugal de 13 de agosto de 2026. A alteração é apresentada como uma forma de reforçar a segurança e a confia",
+      "pillar": "condominio",
+      "publishedAt": "2026-08-14",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-14-000931072-noticia-45/",
+      "source": {
+        "name": "CNN Portugal",
+        "url": "https://cnnportugal.iol.pt/condominios/habitacao/vem-ai-uma-nova-lei-dos-condominios-havera-maior-seguranca-e-confianca-mas-precos-tambem-poderao-aumentar/20260813/6a74abd9d34e511da0b320cc"
+      }
+    },
     {
       "slug": "2026-08-12-143351997-noticia-53",
       "title": "Herdeiros são chamados por ordem e estes são os bens que podem receber",
