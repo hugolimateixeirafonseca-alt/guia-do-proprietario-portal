@@ -135,94 +135,134 @@ function canonicalUrl(value) {
 }
 
 function extractSearchResults(output, sweep) {
-  const byUrl=new Map();
-  const add=(urlValue,title='') => {
-    const url=canonicalUrl(urlValue);
-    if (!url) return;
-    const existing=byUrl.get(url);
-    const result={url,title:title||existing?.title||'',source_domain:new URL(url).hostname,sweep};
-    byUrl.set(url,result);
-  };
-  for (const item of output || []) {
-    if (item.type === 'web_search_call') {
-      for (const source of Array.isArray(item.action?.sources) ? item.action.sources : []) {
-        if (typeof source === 'string') add(source);
-        else add(source?.url,source?.title);
-      }
+  const collect=(entries) => {
+    const byUrl=new Map();
+    for (const entry of entries) {
+      const {urlValue,title=''}=entry;
+      const url=canonicalUrl(urlValue);
+      if (!url || byUrl.has(url)) continue;
+      byUrl.set(url,{url,title,source_domain:new URL(url).hostname,sweep});
+      if (byUrl.size === 10) break;
     }
+    return [...byUrl.values()];
+  };
+  const citations=[];
+  for (const item of output || []) {
     for (const content of item.content || []) {
       for (const annotation of content.annotations || []) {
         if (annotation.type !== 'url_citation') continue;
         const citation=annotation.url_citation || annotation;
-        add(citation.url,citation.title);
+        citations.push({urlValue:citation.url,title:citation.title});
       }
     }
   }
-  return [...byUrl.values()];
+  const citedResults=collect(citations);
+  if (citedResults.length) return {results:citedResults,citedCount:citedResults.length};
+
+  const fallbackSources=[];
+  for (const item of output || []) {
+    if (item.type !== 'web_search_call') continue;
+    for (const source of Array.isArray(item.action?.sources) ? item.action.sources : []) {
+      if (typeof source === 'string') fallbackSources.push({urlValue:source});
+      else fallbackSources.push({urlValue:source?.url,title:source?.title});
+    }
+  }
+  return {results:collect(fallbackSources),citedCount:0};
 }
 
 async function searchSweep({name,topic,allowedDomains=[]}) {
   const response=await openai({model:CFG.openaiModelSearch,prompt:searcherPrompt(topic),web:true,effort:'low',allowedDomains});
-  const results=extractSearchResults(response.raw.output,name);
+  const {results,citedCount}=extractSearchResults(response.raw.output,name);
   if (CFG.dryRun) {
     console.log(JSON.stringify({
       stage:'searcher',
       sweep:name,
-      web_search_calls:(response.raw.output || []).filter(item => item.type === 'web_search_call').length,
       urls_found:results.length,
       titles:results.map(result => result.title).filter(Boolean).slice(0,10)
     }));
   }
-  return {results,text:response.text};
+  return {results,citedCount};
 }
 
-function discoveryEditorPrompt(sources, searcherTexts, window) {
-  return `És o Editor de discovery do Guia do Proprietário. Recebes resultados encontrados por pesquisas web. Faz agora a seleção editorial e devolve apenas acontecimentos potencialmente relevantes para proprietários de imóveis em Portugal.\n\nAGORA EM PORTUGAL: ${window.end}\nJANELA NORMAL PARA MEDIA: ${window.normalStart} a ${window.end} (36 horas).\nJANELA PARA FONTES OFICIAIS MATERIALMENTE RELEVANTES: ${window.officialStart} a ${window.end} (72 horas).\n\nFONTES AUTORIZADAS, ÚNICA FONTE DE VERDADE PARA URLs:\n${JSON.stringify(sources)}\n\nRESUMOS DO SEARCHER:\n${JSON.stringify(searcherTexts)}\n\nRegras: verifica a janela pela data de publicação; exclui lixo, publicidade, classificados e resultados sem utilidade concreta; preserva acontecimentos potencialmente relevantes para o Editor-chefe; nunca cries, completes ou alteres um URL; article_url tem de ser exatamente um URL da lista FONTES AUTORIZADAS. Para fontes oficiais usa source_type=official e is_official=true.\n\nDevolve APENAS JSON válido:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"https://...","source_type":"media|official","is_official":false,"why_material":""}]}`;
+function validatorPrompt(sources, window) {
+  return `És o Validador factual do discovery do Guia do Proprietário. Não decides importância editorial nem atribuis scores. Verifica e enriquece cada URL de input.\n\nVerifica apenas os URLs fornecidos. Podes abrir ou pesquisar informação necessária para validar essas páginas, mas article_url no output tem obrigatoriamente de ser exatamente um dos URLs de input.\n\nAGORA EM PORTUGAL: ${window.end}\nJANELA NORMAL PARA MEDIA: ${window.normalStart} a ${window.end} (36 horas).\nJANELA PARA FONTES OFICIAIS: ${window.officialStart} a ${window.end} (72 horas).\n\nURLS DE INPUT:\n${JSON.stringify(sources)}\n\nPara cada URL confirma: se é notícia ou artigo concreto e não página genérica; título; fonte; data de publicação; resumo factual; entidades; factos principais; ligação a Portugal; relação potencial com proprietários de imóveis; fase jurídica quando aplicável.\n\nRejeita apenas páginas de categoria, home ou pesquisa; classificados; publicidade evidente; URL inacessível sem informação suficiente; conteúdo claramente fora do âmbito imobiliário ou dos proprietários; media fora das 36 horas; fontes oficiais fora das 72 horas. Não apliques um teste exigente de importância editorial. Se houver dúvida razoável, preserva o candidato para o Editor-chefe.\n\nDevolve APENAS JSON válido:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"URL EXATO DO INPUT","source_type":"media|official","is_official":false,"why_material":""}],"rejections":[{"article_url":"URL EXATO DO INPUT","reason":"outside_window|generic_page|irrelevant|unverifiable|other"}]}`;
 }
 
-async function editSearchResults(searches, currentTime) {
-  const sourceMap=new Map();
-  for (const search of searches) {
-    for (const result of search.results) {
-      const key=canonicalUrl(result.url);
-      if (!sourceMap.has(key)) sourceMap.set(key,result);
-      else if (!sourceMap.get(key).title && result.title) sourceMap.set(key,result);
-    }
-  }
-  const sources=[...sourceMap.values()];
+function isOfficialDomain(hostname) {
+  return OFFICIAL_DOMAINS.some(domain => hostname === domain || hostname.endsWith(`.${domain}`));
+}
+
+async function validateSearchResults(sources, currentTime) {
   const window={
     normalStart:lisbonDateTime(new Date(currentTime.getTime() - 36 * 60 * 60 * 1000)),
     officialStart:lisbonDateTime(new Date(currentTime.getTime() - 72 * 60 * 60 * 1000)),
     end:lisbonDateTime(currentTime)
   };
-  if (!sources.length) {
-    if (CFG.dryRun) console.log(JSON.stringify({stage:'editor',input_urls:0,accepted_candidates:0,rejected:0}));
-    return [];
-  }
-  const response=await openai({
-    model:CFG.openaiModelEditor,
-    prompt:discoveryEditorPrompt(sources,searches.map(search => ({sweep:search.name,text:search.text})),window),
-    web:false,
-    effort:'medium'
-  });
-  const data=parseJson(response.text);
-  const proposed=Array.isArray(data.candidates) ? data.candidates : [];
   const accepted=[];
-  const acceptedUrls=new Set();
-  for (const candidate of proposed) {
-    const key=canonicalUrl(candidate.article_url);
-    const source=sourceMap.get(key);
-    if (!source || acceptedUrls.has(key)) continue;
-    acceptedUrls.add(key);
-    accepted.push({...candidate,article_url:source.url,sweep:source.sweep});
+  const rejectionReasons={outside_window:0,generic_page:0,irrelevant:0,unverifiable:0,other:0};
+  let batchNumber=0;
+  for (let start=0; start<sources.length; start+=12) {
+    batchNumber++;
+    const batch=sources.slice(start,start+12);
+    const inputByUrl=new Map(batch.map(source => [source.url,source]));
+    const response=await openai({
+      model:CFG.openaiModelSearch,
+      prompt:validatorPrompt(batch,window),
+      web:true,
+      effort:'low'
+    });
+    const data=parseJson(response.text);
+    const proposed=Array.isArray(data.candidates) ? data.candidates : [];
+    const acceptedInBatch=[];
+    const decidedUrls=new Set();
+    for (const candidate of proposed) {
+      const source=inputByUrl.get(candidate.article_url);
+      if (!source || decidedUrls.has(source.url)) continue;
+      decidedUrls.add(source.url);
+      const official=isOfficialDomain(source.source_domain);
+      const validated={
+        ...candidate,
+        article_url:source.url,
+        source_type:official?'official':'media',
+        is_official:official,
+        sweep:source.sweep
+      };
+      acceptedInBatch.push(validated);
+      accepted.push(validated);
+    }
+    const reportedRejections=new Map();
+    for (const rejection of Array.isArray(data.rejections) ? data.rejections : []) {
+      if (!inputByUrl.has(rejection.article_url) || decidedUrls.has(rejection.article_url)) continue;
+      const reason=Object.hasOwn(rejectionReasons,rejection.reason) ? rejection.reason : 'other';
+      reportedRejections.set(rejection.article_url,reason);
+    }
+    for (const source of batch) {
+      if (decidedUrls.has(source.url)) continue;
+      rejectionReasons[reportedRejections.get(source.url)||'other']++;
+    }
+    if (CFG.dryRun) {
+      console.log(JSON.stringify({
+        stage:'validator_batch',
+        batch:batchNumber,
+        input:batch.length,
+        accepted:acceptedInBatch.length,
+        rejected:batch.length-acceptedInBatch.length
+      }));
+      for (const candidate of acceptedInBatch) {
+        console.log(JSON.stringify({
+          stage:'validated_candidate',
+          title:candidate.title||'',
+          event_date:candidate.event_date||'',
+          source_name:candidate.source_name||'',
+          article_url:candidate.article_url,
+          sweep:candidate.sweep
+        }));
+      }
+    }
+    await sleep(250);
   }
   if (CFG.dryRun) {
-    console.log(JSON.stringify({
-      stage:'editor',
-      input_urls:sources.length,
-      accepted_candidates:accepted.length,
-      rejected:sources.length-accepted.length
-    }));
+    console.log(JSON.stringify({stage:'validator_rejections',reasons:rejectionReasons}));
   }
   return accepted;
 }
@@ -237,7 +277,23 @@ async function discover() {
     searches.push({...search,name:definition.name});
     await sleep(250);
   }
-  return editSearchResults(searches,currentTime);
+  const sourceMap=new Map();
+  for (const search of searches) {
+    for (const result of search.results) {
+      const key=canonicalUrl(result.url);
+      if (!sourceMap.has(key)) sourceMap.set(key,result);
+      else if (!sourceMap.get(key).title && result.title) sourceMap.set(key,result);
+    }
+  }
+  const sources=[...sourceMap.values()];
+  if (CFG.dryRun) {
+    console.log(JSON.stringify({
+      stage:'searcher_total',
+      cited_urls:searches.reduce((sum,search) => sum+search.citedCount,0),
+      unique_urls:sources.length
+    }));
+  }
+  return validateSearchResults(sources,currentTime);
 }
 
 async function historicalContext(candidate) {
