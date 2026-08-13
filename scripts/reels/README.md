@@ -71,3 +71,15 @@ Os testes não fazem chamadas reais à OpenAI:
 ```bash
 python -m unittest discover -s scripts/reels/tests -p "test_*.py" -v
 ```
+
+## Revisão privada em R2
+
+O workflow `Generate Reel AI` só envia uma geração depois de o JSON, o render e o ffprobe passarem. Cada execução recebe um `generation_id` no formato `timestamp UTC + identificador curto` e grava três objetos sem substituir versões anteriores:
+
+```text
+reels/{slug}/{generation_id}/video.mp4
+reels/{slug}/{generation_id}/contact.jpg
+reels/{slug}/{generation_id}/reel.json
+```
+
+O upload usa `CLOUDFLARE_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` e, opcionalmente, `R2_ENDPOINT`. O registo de revisão reutiliza a D1 operacional através de `CLOUDFLARE_D1_DATABASE_ID` e `CLOUDFLARE_API_TOKEN`. Nenhuma credencial é impressa nos logs.

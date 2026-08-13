@@ -19,6 +19,13 @@ jobs:
       REEL_SLUG: ${{ inputs.slug }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-5-mini' }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
     steps:
       - name: Obter repositório
@@ -43,6 +50,12 @@ jobs:
             echo "::error::OPENAI_API_KEY não está configurada nos GitHub Actions Secrets."
             exit 1
           fi
+          for name in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_D1_DATABASE_ID CLOUDFLARE_API_TOKEN R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET_NAME; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::$name não está configurada nos GitHub Actions Secrets."
+              exit 1
+            fi
+          done
 
       - name: Instalar FFmpeg, Inter e dependências Python
         shell: bash
@@ -51,6 +64,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes ffmpeg fonts-inter
           python -m pip install --requirement scripts/reels/requirements.txt
+
+      - name: Criar identificador único da geração
+        shell: bash
+        run: |
+          set -euo pipefail
+          GENERATION_ID="$(python scripts/reels/publish_review.py --new-generation-id)"
+          echo "GENERATION_ID=$GENERATION_ID" >> "$GITHUB_ENV"
+          echo "Geração: $GENERATION_ID"
 
       - name: Gerar e validar JSON
         run: >-
@@ -82,13 +103,33 @@ jobs:
             [[ "$AUDIO_COUNT" == "0" ]] || { echo "::error::Foi encontrado áudio sem background.mp3."; exit 1; }
           fi
 
+      - name: Guardar em R2 e criar revisão pendente
+        run: >-
+          python scripts/reels/publish_review.py
+          --slug "$REEL_SLUG"
+          --generation-id "$GENERATION_ID"
+          --json "out/reels-json/$REEL_SLUG.json"
+          --video "out/reels-ai/$REEL_SLUG.mp4"
+          --contact "out/reels-ai/$REEL_SLUG-contact.jpg"
+
+      - name: Registar geração falhada
+        if: ${{ failure() && env.GENERATION_ID != '' }}
+        continue-on-error: true
+        run: >-
+          python scripts/reels/publish_review.py
+          --record-failure
+          --slug "$REEL_SLUG"
+          --generation-id "$GENERATION_ID"
+          --error "workflow_failed"
+
       - name: Guardar JSON, Reel e contact sheet
+        if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: reel-ai-${{ env.REEL_SLUG }}
+          name: reel-ai-${{ env.REEL_SLUG }}-${{ env.GENERATION_ID }}
           path: |
             out/reels-json/${{ env.REEL_SLUG }}.json
             out/reels-ai/${{ env.REEL_SLUG }}.mp4
             out/reels-ai/${{ env.REEL_SLUG }}-contact.jpg
-          if-no-files-found: error
+          if-no-files-found: warn
           compression-level: 0
