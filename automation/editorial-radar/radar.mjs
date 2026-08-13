@@ -28,7 +28,19 @@ const id = (prefix, value) => `${prefix}_${sha(value).slice(0,20)}`;
 
 async function openai({model, prompt, web=false, effort='low'}) {
   const body = { model, input: prompt, reasoning: { effort } };
-  if (web) body.tools = [{ type: 'web_search' }];
+  if (web) {
+    body.tools = [{
+      type: 'web_search',
+      search_context_size: 'high',
+      user_location: {
+        type: 'approximate',
+        country: 'PT',
+        city: 'Lisbon',
+        timezone: 'Europe/Lisbon'
+      }
+    }];
+    body.tool_choice = 'required';
+  }
   const res = await fetch('https://api.openai.com/v1/responses', {
     method:'POST',
     headers:{'Authorization':`Bearer ${process.env.OPENAI_API_KEY}`,'Content-Type':'application/json'},
@@ -75,17 +87,48 @@ const sweeps = [
   ['catch_all', `Sem te limitares às categorias habituais, procura acontecimentos publicados nas últimas 36 horas em Portugal que possam alterar materialmente quanto alguém que possui uma casa paga ou recebe, o que tem de fazer ou pode fazer, ou uma decisão importante sobre vender, arrendar, manter, financiar ou gerir um imóvel.`]
 ];
 
-function discoveryPrompt(name, query) {
-  return `És o radar editorial do Guia do Proprietário, portal português para proprietários de imóveis.\n\nMISSÃO DO SWEEP: ${name}\n${query}\n\nDevolve APENAS JSON válido neste formato:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"https://...","source_type":"media|official","is_official":false,"why_material":""}]}\n\nRegras: só acontecimentos reais e recentes; exclui lifestyle, classificados, publicidade, movimentos empresariais e notícias sem utilidade concreta. Não inventes URLs. Prefere fonte original/oficial quando existir. Máximo 8 candidatos realmente fortes.`;
+function lisbonDateTime(date) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Lisbon',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(date).filter(part => part.type !== 'literal').map(part => [part.type, part.value]));
+  return `${parts.day}-${parts.month}-${parts.year} ${parts.hour}:${parts.minute}`;
+}
+
+function discoveryPrompt(name, query, window) {
+  return `És o radar editorial do Guia do Proprietário, portal português para proprietários de imóveis.\n\nMISSÃO DO SWEEP: ${name}\n${query}\n\nJANELA TEMPORAL ABSOLUTA: Agora são ${window.end} em Portugal. Procura acontecimentos publicados entre ${window.start} e ${window.end}, inclusive.\n\nMÉTODO OBRIGATÓRIO:\n1. Faz pesquisa real na web.\n2. Pesquisa primeiro de forma abrangente dentro do tema e da janela indicada.\n3. Só depois aplica o teste de relevância para proprietários de imóveis em Portugal.\n4. Se encontrares resultados potencialmente relevantes, devolve-os como candidatos para o Editor-chefe decidir. Privilegia recall nesta fase; a seleção posterior tratará a precision.\n5. Não exijas nesta descoberta prova completa de toda a materialidade.\n\nDevolve APENAS JSON válido neste formato:\n{"candidates":[{"title":"","summary":"","event_date":"YYYY-MM-DD","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","entities":[""],"key_facts":[""],"source_name":"","article_url":"https://...","source_type":"media|official","is_official":false,"why_material":""}]}\n\nRegras: só acontecimentos reais e recentes; exclui lifestyle, classificados, publicidade e movimentos empresariais sem utilidade concreta. Não inventes URLs. Prefere a fonte original ou oficial quando existir. Máximo 10 candidatos por sweep.`;
 }
 
 async function discover() {
   const selected = CFG.mode === 'morning' ? sweeps : sweeps.filter(([n]) => ['legislacao_fiscalidade','condominio_vizinhos','arrendamento','mercado_credito','fontes_oficiais','catch_all'].includes(n));
+  const currentTime = new Date();
+  const windows = {
+    normal: { start: lisbonDateTime(new Date(currentTime.getTime() - 36 * 60 * 60 * 1000)), end: lisbonDateTime(currentTime) },
+    official: { start: lisbonDateTime(new Date(currentTime.getTime() - 72 * 60 * 60 * 1000)), end: lisbonDateTime(currentTime) }
+  };
   const all=[];
   for (const [name,q] of selected) {
-    const r = await openai({model:CFG.openaiModelSearch,prompt:discoveryPrompt(name,q),web:true,effort:'low'});
+    const window = name === 'fontes_oficiais' ? windows.official : windows.normal;
+    const r = await openai({model:CFG.openaiModelSearch,prompt:discoveryPrompt(name,q,window),web:true,effort:'low'});
     const data=parseJson(r.text);
-    for (const c of data.candidates || []) all.push({...c,sweep:name});
+    const candidates = (Array.isArray(data.candidates) ? data.candidates : []).slice(0,10);
+    const webSearchCalls = (r.raw.output || []).filter(item => item.type === 'web_search_call').length;
+    console.log(JSON.stringify({
+      stage:'discovery',
+      sweep:name,
+      web_search_calls:webSearchCalls,
+      candidate_count:candidates.length,
+      titles:candidates.map(candidate => candidate.title || '')
+    }));
+    if (!candidates.length) {
+      console.log(JSON.stringify({stage:'discovery_warning',sweep:name,reason:'zero_candidates'}));
+    }
+    for (const c of candidates) all.push({...c,sweep:name});
     await sleep(250);
   }
   return all;
@@ -194,7 +237,8 @@ async function sendMake(payload) {
 async function indexContent() {
   const base=path.join(CFG.repoRoot,'src/content/artigos');
   async function walk(dir){let out=[];for(const e of await fs.readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())out=out.concat(await walk(p));else if(/\.mdx?$/.test(e.name))out.push(p);}return out;}
-  let files=[]; try{files=await walk(base);}catch{return;}
+  let files=[]; try{files=await walk(base);}catch{return 0;}
+  let indexed=0;
   for(const file of files){
     const raw=await fs.readFile(file,'utf8');
     const fm=raw.match(/^---\s*\n([\s\S]*?)\n---/);
@@ -206,13 +250,16 @@ async function indexContent() {
     const summary=pick('descricao')||pick('resumo')||'';
     const body=raw.replace(/^---[\s\S]*?---/,'').replace(/\s+/g,' ').slice(0,7000);
     await d1(`INSERT INTO content_index (path,slug,title,pillar,summary,body_excerpt,fingerprint,updated_at) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET title=excluded.title,pillar=excluded.pillar,summary=excluded.summary,body_excerpt=excluded.body_excerpt,fingerprint=excluded.fingerprint,updated_at=excluded.updated_at`,[rel,path.basename(file).replace(/\.mdx?$/,''),title,pillar,summary,body,sha(raw),nowIso()]);
+    indexed++;
   }
+  return indexed;
 }
 
 async function backfillPublishedNews() {
   const base=path.join(CFG.repoRoot,'src/content/notas');
   async function walk(dir){let out=[];for(const e of await fs.readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())out=out.concat(await walk(p));else if(/\.mdx?$/.test(e.name))out.push(p);}return out;}
-  let files=[]; try{files=await walk(base);}catch{return;}
+  let files=[]; try{files=await walk(base);}catch{return 0;}
+  let processed=0;
   for(const file of files){
     const raw=await fs.readFile(file,'utf8'); const front=raw.match(/^---\s*\n([\s\S]*?)\n---/)?.[1]||'';
     const pick=(k)=>front.match(new RegExp(`^${k}:\\s*["']?(.+?)["']?\\s*$`,'m'))?.[1]?.trim()||'';
@@ -221,13 +268,18 @@ async function backfillPublishedNews() {
     const key=`legacy-${slugify(title)}-${date}`; const eventId=id('evt',key); const now=nowIso();
     await d1(`INSERT OR IGNORE INTO events (id,event_key,title,summary,pillar,event_date,legal_stage,entities_json,key_facts_json,news_score,seo_score,lead_score,first_seen_at,last_seen_at,published,published_url,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[eventId,key,title,'Notícia histórica importada do arquivo do Guia.',pillar,date,'na','[]','[]',100,0,0,now,now,1,null,'published']);
     if(url) await d1(`INSERT OR IGNORE INTO event_sources (event_id,source_name,article_url,published_at,source_type,is_primary,is_official) VALUES (?,?,?,?,?,?,?)`,[eventId,source||'Fonte histórica',url,date,'media',1,0]);
+    processed++;
   }
+  return processed;
 }
 
 async function main(){
   await initSchema();
-  await indexContent();
-  if (/^(1|true|yes)$/i.test(process.env.BACKFILL || '')) await backfillPublishedNews();
+  const indexedContent = await indexContent();
+  console.log(JSON.stringify({stage:'content_index',count:indexedContent}));
+  let backfilledNews = 0;
+  if (/^(1|true|yes)$/i.test(process.env.BACKFILL || '')) backfilledNews = await backfillPublishedNews();
+  console.log(JSON.stringify({stage:'news_backfill',count:backfilledNews}));
   const runId=id('run',`${nowIso()}:${CFG.mode}`); await d1(`INSERT INTO radar_runs (id,started_at,mode,status) VALUES (?,?,?,?)`,[runId,nowIso(),CFG.mode,'running']);
   let candidates=[]; let created=0, duplicates=0;
   try{
