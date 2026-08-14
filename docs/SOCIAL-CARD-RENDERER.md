@@ -57,6 +57,10 @@ Content-Type: image/png
 
 O body são os bytes do PNG final. O endpoint rejeita pedidos sem Bearer válido, imagens acima de 15 MiB e formatos não suportados. Não existe fallback que publique sem renderer.
 
+O renderer não recebe nem pesquisa URLs de imagem. O percurso é: `multipart File` → `File.arrayBuffer()` → validação da assinatura PNG/JPEG/WebP → `ArrayBuffer` no `src` da imagem do Satori → SVG → `resvg-wasm` → bytes PNG. O tipo declarado tem de coincidir com a assinatura binária. HTML, SVG e outros uploads arbitrários são rejeitados.
+
+O endpoint aceita exclusivamente `POST` autenticado e exige `multipart/form-data` com boundary. Título, fonte e imagem são obrigatórios. Não existem logs do secret, respostas com stack trace, pedidos a URLs fornecidos pelo cliente ou CORS para browser. Todas as respostas usam `Cache-Control: no-store`.
+
 ## Tipografia e segurança de layout
 
 - o título nunca é truncado nem reescrito;
@@ -76,4 +80,7 @@ Os ficheiros de licença estão junto dos binários em `functions/assets/fonts/`
 
 ## Falhas
 
-Se a OpenAI ou o renderer falhar, o cenário Make deve terminar na rota de erro, guardar a mensagem técnica e manter a linha por publicar. Não deve chamar o Facebook nem alterar o estado para `publicada`.
+- se a OpenAI falhar: não chamar renderer, GitHub ou Facebook e não marcar como publicada;
+- se o renderer falhar: não chamar GitHub ou Facebook e não marcar como publicada;
+- se o GitHub falhar: não chamar Facebook e não marcar como publicada;
+- atualizar estado/publicado apenas depois de renderer, GitHub, deployment e Facebook concluírem com sucesso.

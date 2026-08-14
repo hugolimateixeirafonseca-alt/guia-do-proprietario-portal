@@ -6,6 +6,7 @@ import serifFont from '../assets/fonts/old-standard-bold.bin';
 import sansRegularFont from '../assets/fonts/lato-regular.bin';
 import sansBoldFont from '../assets/fonts/lato-bold.bin';
 import {createSocialCardLayout,SOCIAL_CARD} from '../../src/lib/social-card-layout.mjs';
+import {isMultipartFormData,isSupportedRasterImage} from '../../src/lib/social-card-upload.mjs';
 
 interface Env {
   SOCIAL_CARD_RENDERER_SECRET?: string;
@@ -39,10 +40,13 @@ function requiredText(value:FormDataEntryValue|null,name:string,maxLength:number
   return clean;
 }
 
-export const onRequestPost=async({request,env}:RequestContext)=>{
+async function renderRequest({request,env}:RequestContext) {
   if (!env.SOCIAL_CARD_RENDERER_SECRET) return jsonError('renderer_not_configured',503);
   if (request.headers.get('Authorization')!==`Bearer ${env.SOCIAL_CARD_RENDERER_SECRET}`) {
     return jsonError('unauthorized',401);
+  }
+  if (!isMultipartFormData(request.headers.get('Content-Type'))) {
+    return jsonError('multipart_form_required',415);
   }
 
   let form:FormData;
@@ -62,6 +66,7 @@ export const onRequestPost=async({request,env}:RequestContext)=>{
     if (!['image/png','image/jpeg','image/webp'].includes(image.type)) return jsonError('unsupported_image_type',415);
 
     const imageBytes=await image.arrayBuffer();
+    if (!isSupportedRasterImage(imageBytes,image.type)) return jsonError('invalid_image_data',415);
     await initializeRenderer();
     const {tree}=createSocialCardLayout({title,source,pillar,image:imageBytes});
     const svg=await satori(tree,{
@@ -95,6 +100,9 @@ export const onRequestPost=async({request,env}:RequestContext)=>{
     const expected=/^(title|source)_(required|too_long)$|^title is too long/u.test(code);
     return jsonError(expected?code:'render_failed',expected?400:500);
   }
-};
+}
 
-export const onRequestGet=()=>jsonError('method_not_allowed',405);
+export const onRequest=async(context:RequestContext)=>{
+  if (context.request.method!=='POST') return jsonError('method_not_allowed',405);
+  return renderRequest(context);
+};

@@ -9,6 +9,7 @@ const SAFE_DIRECTIONS={
 };
 
 const SENSITIVE_TERMS=/\b(crime|criminal|polícia|policial|detido|detenção|morte|morto|vítima|agressão|arma|droga|incêndio|explosão)\b/iu;
+const NEWS_DETAIL_TERMS=/(?:https?:\/\/|www\.|\b[\w-]+\.(?:pt|com|org|net)\b|[€$£]|\b(?:euros?|milh(?:ão|ões)|janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|hoje|ontem)\b)/iu;
 
 function normalizeLine(value) {
   return String(value||'').replace(/\s+/gu,' ').trim();
@@ -18,17 +19,25 @@ function comparable(value) {
   return normalizeLine(value).normalize('NFD').replace(/[\u0300-\u036f]/gu,'').toLowerCase();
 }
 
+function values(value) {
+  return Array.isArray(value) ? value : [value];
+}
+
 export function safeIllustrationDirection(value,event={}) {
   const direction=normalizeLine(value);
   if (!direction) throw new Error('Safe illustration direction is required');
   const fallback=SAFE_DIRECTIONS[event.pillar]||SAFE_DIRECTIONS.casa;
   const normalized=comparable(direction);
-  const forbidden=[event.title,event.source_name,...(event.entities||[])]
+  const forbidden=[
+    event.title,event.source_name,event.summary,event.article_url,event.url_original,
+    ...values(event.entities),...values(event.key_facts),...values(event.forbiddenText)
+  ]
     .map(comparable)
     .filter(item=>item.length>=4);
   const unsafe=direction.length>320
     || /\p{N}/u.test(direction)
     || SENSITIVE_TERMS.test(direction)
+    || NEWS_DETAIL_TERMS.test(direction)
     || forbidden.some(item=>normalized.includes(item));
   return unsafe ? fallback : direction;
 }
@@ -77,7 +86,10 @@ REGRAS FINAIS
 export function finalizePublication({publishableNews,event,generated}) {
   if (!publishableNews) return {texto_fb:'',texto_site:'',prompt_imagem:'',prompt_tecnico:''};
   if (!generated?.texto_fb||!generated?.texto_site) throw new Error('Publication generation returned incomplete content');
-  const illustrationDirection=safeIllustrationDirection(generated.orientacao_ilustracao_segura,event);
+  const illustrationDirection=safeIllustrationDirection(generated.orientacao_ilustracao_segura,{
+    ...event,
+    forbiddenText:[generated.texto_fb,generated.texto_site,...values(generated.resumo_factual_curto)]
+  });
   return {
     texto_fb:generated.texto_fb,
     texto_site:generated.texto_site,

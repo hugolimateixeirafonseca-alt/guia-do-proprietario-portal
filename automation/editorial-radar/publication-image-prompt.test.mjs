@@ -6,7 +6,10 @@ const event={
   title:'Condomínios: nova regra mantém 5% de IVA em obras',
   source_name:'Jornal Económico',
   pillar:'condominio',
-  entities:['Associação Nacional de Condomínios']
+  entities:['Associação Nacional de Condomínios'],
+  summary:'A taxa entra em vigor depois da publicação oficial.',
+  key_facts:['O valor verificado é de cinco mil euros.'],
+  article_url:'https://exemplo.pt/noticia-condominios'
 };
 const generated={
   texto_fb:'Texto para Facebook com factos verificados.',
@@ -41,4 +44,24 @@ test('orientação com números ou entidades usa fallback abstrato',()=>{
   assert.equal(publication.prompt_imagem.includes('5%'),false);
   assert.equal(publication.prompt_imagem.includes(event.entities[0]),false);
   assert.match(publication.prompt_imagem,/documentação genérica/iu);
+});
+
+test('orientação com URL, data, valor ou copy nunca chega ao prompt',()=>{
+  for (const unsafeDirection of [
+    event.article_url,
+    'A medida entra em vigor em agosto.',
+    'Documentos com valor de € cinco mil.',
+    generated.texto_site
+  ]) {
+    const publication=finalizePublication({
+      publishableNews:true,
+      event,
+      generated:{...generated,resumo_factual_curto:['Resumo factual reservado.'],orientacao_ilustracao_segura:unsafeDirection}
+    });
+    assert.equal(publication.prompt_imagem.includes(unsafeDirection),false);
+    assert.equal(publication.prompt_imagem.includes(event.article_url),false);
+    assert.equal(publication.prompt_imagem.includes(generated.texto_fb),false);
+    assert.equal(publication.prompt_imagem.includes(generated.texto_site),false);
+    assert.equal(publication.prompt_imagem.includes('Resumo factual reservado.'),false);
+  }
 });

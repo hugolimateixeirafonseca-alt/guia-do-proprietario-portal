@@ -5,6 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {Resvg} from '@resvg/resvg-js';
 import {createSocialCardLayout,SOCIAL_CARD,selectTitleLayout} from '../src/lib/social-card-layout.mjs';
+import {detectRasterImageType,isMultipartFormData,isSupportedRasterImage} from '../src/lib/social-card-upload.mjs';
 import {renderSocialCardNode} from '../automation/social-card-renderer/render-node.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
@@ -39,6 +40,29 @@ test('título com acentos e fonte são preservados exatamente',async()=>{
   assert.equal(layout.metrics.exactSource,source);
   const text=collectText(layout.tree);
   assert.ok(text.includes(`Fonte: ${source}`));
+});
+
+test('título e fonte com caracteres XML permanecem texto literal',async()=>{
+  const specialTitle='Casa <T2> & "Arrendamento": preço sobe 10%';
+  const specialSource=`Fonte <Nacional> & 'Imóveis' €`;
+  const layout=createSocialCardLayout({title:specialTitle,source:specialSource,image:await fixturePng()});
+  assert.equal(layout.metrics.title.title,specialTitle);
+  assert.equal(layout.metrics.title.lines.join(' '),specialTitle);
+  assert.equal(layout.metrics.exactSource,specialSource);
+  assert.ok(collectText(layout.tree).includes(`Fonte: ${specialSource}`));
+  const image=await fixturePng();
+  await assert.doesNotReject(()=>renderSocialCardNode({root,title:specialTitle,source:specialSource,image}));
+});
+
+test('upload exige multipart com boundary e bytes raster coerentes',async()=>{
+  const png=await fixturePng();
+  assert.equal(isMultipartFormData('multipart/form-data; boundary=make-boundary'),true);
+  assert.equal(isMultipartFormData('multipart/form-data'),false);
+  assert.equal(isMultipartFormData('application/json'),false);
+  assert.equal(detectRasterImageType(png),'image/png');
+  assert.equal(isSupportedRasterImage(png,'image/png'),true);
+  assert.equal(isSupportedRasterImage(png,'image/jpeg'),false);
+  assert.equal(isSupportedRasterImage(new TextEncoder().encode('<svg></svg>'),'image/png'),false);
 });
 
 test('título longo permanece na área segura e não colide com a ilustração',()=>{

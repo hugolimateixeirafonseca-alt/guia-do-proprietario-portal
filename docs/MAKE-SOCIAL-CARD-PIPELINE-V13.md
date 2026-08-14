@@ -90,8 +90,11 @@ Usar a propriedade binária efetivamente exposta pelo módulo HTTP depois de exe
 - `share_html` continua a apontar para `https://guiadoproprietario.pt/social/noticias/<slug>.png`;
 - a share page não substitui o PNG;
 - o Facebook recebe a mesma URL final;
-- só marcar a linha como publicada depois de confirmar renderer, GitHub, deployment e Facebook;
-- ligar erros do OpenAI e do HTTP renderer à rota de erro existente;
+- se o OpenAI falhar, não chamar renderer, GitHub ou Facebook e não marcar como publicada;
+- se o renderer falhar, não chamar GitHub ou Facebook e não marcar como publicada;
+- se o GitHub falhar, não chamar Facebook e não marcar como publicada;
+- só atualizar estado/publicado depois de confirmar renderer, GitHub, deployment e Facebook;
+- ligar erros do OpenAI, HTTP renderer e GitHub à rota de erro existente;
 - não criar retry circular ou ilimitado;
 - em falha, guardar a informação técnica, não publicar e não marcar como publicada.
 
