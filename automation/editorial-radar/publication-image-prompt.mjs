@@ -1,98 +1,87 @@
-export const IMAGE_TECHNICAL_PROMPT = 'gpt-image-2 high — cartão completo com texto gerado por IA';
+export const IMAGE_TECHNICAL_PROMPT = 'gpt-image-2 high — base editorial sem texto + composição tipográfica determinística';
+
+const SAFE_DIRECTIONS={
+  vender:'Arquitetura residencial portuguesa e elementos económicos abstratos e discretos.',
+  impostos:'Casa portuguesa elegante, documentos patrimoniais genéricos e elementos discretos ligados a propriedade.',
+  arrendar:'Interior residencial português, chave e documentos genéricos associados a arrendamento.',
+  condominio:'Edifício residencial português contemporâneo, detalhes arquitetónicos e documentação genérica.',
+  casa:'Habitação portuguesa contemporânea com detalhes arquitetónicos e elementos domésticos discretos.'
+};
+
+const SENSITIVE_TERMS=/\b(crime|criminal|polícia|policial|detido|detenção|morte|morto|vítima|agressão|arma|droga|incêndio|explosão)\b/iu;
 
 function normalizeLine(value) {
-  return String(value || '').replace(/\s+/g, ' ').trim();
+  return String(value||'').replace(/\s+/gu,' ').trim();
 }
 
-export function buildPublicationImagePrompt({title, sourceName, factualPoints, illustrationDirection}) {
-  const finalTitle = String(title || '').trim();
-  const finalSource = String(sourceName || '').trim();
-  const points = Array.isArray(factualPoints) ? factualPoints.map(normalizeLine).filter(Boolean).slice(0, 7) : [];
-  const direction = normalizeLine(illustrationDirection);
+function comparable(value) {
+  return normalizeLine(value).normalize('NFD').replace(/[\u0300-\u036f]/gu,'').toLowerCase();
+}
 
-  if (!finalTitle) throw new Error('Image prompt requires the final editorial title');
-  if (!finalSource) throw new Error('Image prompt requires the validated primary source');
-  if (points.length < 4) throw new Error('Image prompt requires 4 to 7 verified factual points');
-  if (!direction) throw new Error('Image prompt requires an illustration direction');
+export function safeIllustrationDirection(value,event={}) {
+  const direction=normalizeLine(value);
+  if (!direction) throw new Error('Safe illustration direction is required');
+  const fallback=SAFE_DIRECTIONS[event.pillar]||SAFE_DIRECTIONS.casa;
+  const normalized=comparable(direction);
+  const forbidden=[event.title,event.source_name,...(event.entities||[])]
+    .map(comparable)
+    .filter(item=>item.length>=4);
+  const unsafe=direction.length>320
+    || /\p{N}/u.test(direction)
+    || SENSITIVE_TERMS.test(direction)
+    || forbidden.some(item=>normalized.includes(item));
+  return unsafe ? fallback : direction;
+}
 
-  return `Cria o CARTÃO SOCIAL COMPLETO desta notícia para o portal português Guia do Proprietário.
+export function buildPublicationImagePrompt({illustrationDirection}) {
+  const direction=normalizeLine(illustrationDirection);
+  if (!direction) throw new Error('Safe illustration direction is required');
 
-A própria IA deve gerar a imagem FINAL COMPLETA, incluindo ilustração, composição e todo o texto visível.
+  return `Cria a base visual de um cartão social editorial premium para um portal português sobre habitação e património.
+
+IMPORTANTE
+- gerar apenas a composição visual
+- não incluir qualquer texto, letras, números, logótipos ou marcas de água
+- não incluir títulos, legendas, cápsulas ou tipografia
+- reservar 56% da metade esquerda como área tipográfica editorial cuidadosamente desenhada, com espaço negativo elegante
+- usar os 44% da metade direita para uma ilustração editorial sofisticada integrada na composição
+- fazer a transição entre as duas áreas de forma orgânica, sem caixa branca sobre fotografia
 
 FORMATO
 - horizontal 1536x1024
-- destinado a Open Graph / Facebook
-- elementos principais dentro de uma zona central segura, deixando margens discretas superior e inferior para tolerar recorte
+- elementos principais dentro de uma zona central segura
 
-ESTILO VISUAL
+ESTILO
 - editorial premium, elegante, adulto e credível
-- fundo creme quente ou marfim com textura muito subtil
-- verde-petróleo ou azul-petróleo escuro como cor dominante
-- pequenos apontamentos dourados ou terracota
-- composição limpa e bastante espaço em branco
-- grande área tipográfica à esquerda
-- ilustração editorial sofisticada à direita
-- título principal em serif elegante, grande e escuro
-- restantes textos em sans-serif limpa
-- estética portuguesa ligada a casa, património e vida do proprietário
-- evitar aspeto infantil, 3D exagerado ou stock genérico
-
-TEXTO OBRIGATÓRIO NA IMAGEM
-
-Cápsula:
-NOTÍCIAS
-
-Título principal:
-${finalTitle}
-
-Rodapé esquerdo:
-Fonte: ${finalSource}
-
-Pode surgir discretamente:
-Guia do Proprietário
-
-CONTEXTO FACTUAL PARA A ILUSTRAÇÃO
-${points.map(point => `- ${point}`).join('\n')}
+- fundo creme ou marfim, aproximadamente #F4EFE5 ou #F7F2E9
+- verde-petróleo escuro dominante, aproximadamente #183A3D ou #1F4E52
+- pequenos acentos dourado ou terracota, aproximadamente #B77B52 ou #C28A62
+- textura muito subtil e composição com bastante espaço negativo
+- estética portuguesa ligada a casa e património
+- evitar stock genérico, 3D exagerado ou aspeto infantil
 
 ORIENTAÇÃO VISUAL
 ${direction}
 
-REGRAS
-- Português de Portugal
-- escrever exatamente o título e a fonte fornecidos
-- preservar acentos, cedilhas, hífenes, números e maiúsculas
-- não resumir nem reescrever o título
-- não acrescentar texto editorial desnecessário
-- não usar logótipos ou marcas da fonte original
-- não usar marcas de água
-- não copiar nem imitar a imagem original da notícia
-- representar o tema sem inventar acontecimentos
-- se for habitação, condomínio, energia ou obras, usar arquitetura plausível em Portugal
-- se for fiscal, jurídico ou patrimonial, usar metáfora editorial ligada a casa, documentos, dinheiro, contratos, propriedade ou património
-- não usar logótipo, ícone, selo ou símbolo gráfico do Guia do Proprietário
-- máxima legibilidade no feed do Facebook
-
-RESULTADO
-Uma única imagem final pronta a publicar no espírito editorial do Guia do Proprietário.`;
+REGRAS FINAIS
+- sem texto visível
+- sem letras ou algarismos
+- sem logótipos, ícones, selos ou símbolos de marca
+- sem marcas de água
+- sem nomes de pessoas ou entidades
+- sem documentos legíveis
+- sem copiar ou imitar imagens de notícias
+- devolver uma única base visual pronta para receber tipografia real no renderer`;
 }
 
-export function finalizePublication({publishableNews, event, generated}) {
-  if (!publishableNews) {
-    return {texto_fb:'', texto_site:'', prompt_imagem:'', prompt_tecnico:''};
-  }
-  if (!generated?.texto_fb || !generated?.texto_site) {
-    throw new Error('Publication generation returned incomplete content');
-  }
-
+export function finalizePublication({publishableNews,event,generated}) {
+  if (!publishableNews) return {texto_fb:'',texto_site:'',prompt_imagem:'',prompt_tecnico:''};
+  if (!generated?.texto_fb||!generated?.texto_site) throw new Error('Publication generation returned incomplete content');
+  const illustrationDirection=safeIllustrationDirection(generated.orientacao_ilustracao_segura,event);
   return {
     texto_fb:generated.texto_fb,
     texto_site:generated.texto_site,
-    prompt_imagem:buildPublicationImagePrompt({
-      title:event.title,
-      sourceName:event.source_name,
-      factualPoints:generated.resumo_factual_curto,
-      illustrationDirection:generated.orientacao_ilustracao
-    }),
+    prompt_imagem:buildPublicationImagePrompt({illustrationDirection}),
     prompt_tecnico:IMAGE_TECHNICAL_PROMPT
   };
 }

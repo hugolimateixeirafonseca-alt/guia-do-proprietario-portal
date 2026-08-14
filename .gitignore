@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .astro/
+.wrangler/
 public/og/
 public/og.png
 public/og-1200x630.png

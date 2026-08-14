@@ -7,6 +7,7 @@ import {prefilterContentImpact} from './content-impact-prefilter.mjs';
 import {getDiscoveryModePlan} from './discovery-mode.mjs';
 import {combinedHistoricalContext,createIsolationController} from './dry-run-isolation.mjs';
 import {finalizePublication} from './publication-image-prompt.mjs';
+import {DEFAULT_MIN_NEWS_SCORE,isPublishableNews} from './publication-eligibility.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -21,7 +22,7 @@ const CFG = {
   makeWebhookSecret: process.env.MAKE_RADAR_WEBHOOK_SECRET || '',
   repoRoot: process.env.GITHUB_WORKSPACE || process.cwd(),
   mode: process.env.RADAR_MODE || 'incremental',
-  minNewsScore: Number(process.env.MIN_NEWS_SCORE || 80),
+  minNewsScore: Number(process.env.MIN_NEWS_SCORE || DEFAULT_MIN_NEWS_SCORE),
   minImpactConfidence: Number(process.env.MIN_IMPACT_CONFIDENCE || 80),
   dryRun: /^(1|true|yes)$/i.test(process.env.RADAR_DRY_RUN || ''),
   maxRunTokens: Math.max(0,Number(process.env.MAX_RUN_TOKENS || 0)||0),
@@ -709,18 +710,19 @@ TEXTO SITE:
 - Não incluir Fonte no fim.
 
 PROMPT DE IMAGEM:
-- Gera resumo_factual_curto com 4 a 7 pontos curtos, usando apenas factos verificados do EVENTO.
-- Não incluas opiniões, interpretações ou dados novos.
-- Gera orientacao_ilustracao com 1 a 3 frases para uma representação editorial adequada ao assunto.
-- Para condomínio, habitação ou obras, privilegia arquitetura residencial portuguesa plausível.
-- Para fiscalidade, direito ou heranças, usa casa, documentos, propriedade, dinheiro ou património.
-- Para arrendamento, usa imóvel, contrato, senhorio ou inquilino de forma editorial.
-- Para energia, usa casa portuguesa, consumo, eficiência, equipamentos ou energia.
-- Para mercado imobiliário, usa edifícios residenciais e elementos económicos discretos.
-- Nunca introduzas factos novos na orientação.
+- Gera apenas orientacao_ilustracao_segura, com 1 a 3 frases curtas e abstratas para representar visualmente o pilar da notícia.
+- Não copies frases do título, resumo, texto de Facebook ou texto do site.
+- Não incluas nomes de pessoas, entidades dispensáveis, idades, datas, valores monetários, percentagens ou outros números.
+- Não uses linguagem policial, criminal, violenta ou potencialmente sensível.
+- Para condomínio, habitação ou obras, usa arquitetura residencial portuguesa plausível e documentação genérica.
+- Para fiscalidade, direito ou heranças, usa casa, documentos genéricos, propriedade ou património.
+- Para arrendamento, usa interior residencial, chave e documentos genéricos.
+- Para energia, usa habitação portuguesa e elementos discretos de eficiência energética.
+- Para mercado imobiliário, usa arquitetura residencial e elementos económicos abstratos.
+- Nunca introduzas factos novos.
 
 Devolve APENAS JSON válido:
-{"texto_fb":"","texto_site":"","resumo_factual_curto":["","","",""],"orientacao_ilustracao":""}`;
+{"texto_fb":"","texto_site":"","orientacao_ilustracao_segura":""}`;
   const out = parseJson((await openai({model:CFG.openaiModelCopy,prompt,purpose:'copy',web:false,effort:'low'})).text);
   return finalizePublication({publishableNews:true,event,generated:out});
 }
@@ -818,7 +820,7 @@ async function main(){
         impacts=await assessContentImpact(event,impactPrefilter.selected);
       }
       for(const imp of impacts) await isolation.saveImpact(eventId,imp);
-      const publishableNews = Number(cls.news_score||0) >= CFG.minNewsScore;
+      const publishableNews = isPublishableNews(cls.news_score,CFG.minNewsScore);
       const qualifyingImpacts = impacts.filter(x => x.impact_type !== 'NONE' && Number(x.confidence||0) >= CFG.minImpactConfidence);
       contentImpactTotals.impacts_found+=qualifyingImpacts.length;
       const impactRank = { NONE:0, ADDENDUM:1, PARTIAL_UPDATE:2, REWRITE:3, URGENT_CORRECTION:4 };

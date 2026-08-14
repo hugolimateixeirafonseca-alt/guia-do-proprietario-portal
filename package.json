@@ -23,17 +23,24 @@
     "validate:dates": "node scripts/preencher-chegada-artigos.mjs",
     "validate:images": "node scripts/validar-imagens-artigos.mjs",
     "test": "npm run test:subscribe",
-    "test:subscribe": "node --test tests/subscribe.test.mjs"
+    "test:subscribe": "node --test tests/subscribe.test.mjs",
+    "test:radar": "node --test automation/editorial-radar/*.test.mjs",
+    "test:renderer": "node --test tests/social-card-renderer.test.mjs",
+    "build:functions": "wrangler pages functions build --outdir .wrangler/functions-build"
   },
   "dependencies": {
     "@astrojs/mdx": "latest",
     "@astrojs/sitemap": "latest",
-    "astro": "^7.1.3"
+    "@resvg/resvg-wasm": "2.6.2",
+    "astro": "^7.1.3",
+    "satori": "0.29.0"
   },
   "devDependencies": {
     "@astrojs/check": "latest",
+    "@resvg/resvg-js": "2.6.2",
     "lighthouse": "^13.4.1",
     "sharp": "^0.35.3",
-    "typescript": "latest"
+    "typescript": "latest",
+    "wrangler": "4.123.0"
   }
 }
