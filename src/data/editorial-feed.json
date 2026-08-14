@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-14T09:33:25.661Z",
+  "generatedAt": "2026-08-14T09:43:50.066Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 92,
     "published": 68,
-    "newsOnline": 13
+    "newsOnline": 14
   },
   "articles": [
     {
@@ -1483,6 +1483,18 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-14-103047215-noticia-46",
+      "title": "Crédito Habitação: Rácio de financiamento médio fica nos 67% e o mercado nunca chegou perto do limite de 90%",
+      "summary": "O rácio de financiamento médio nas operações intermediadas pelo ComparaJá ficou nos 67%, bem abaixo do limite de 90% recomendado pelo Banco de Portugal. A diferença de 23 pontos pe",
+      "pillar": "casa",
+      "publishedAt": "2026-08-14",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-14-103047215-noticia-46/",
+      "source": {
+        "name": "Jornal Económico",
+        "url": "https://jornaleconomico.sapo.pt/noticias/credito-habitacao-racio-de-financiamento-medio-fica-nos-67-e-o-mercado-nunca-chegou-perto-do-limite-de-90/"
+      }
+    },
     {
       "slug": "2026-08-14-000931072-noticia-45",
       "title": "Nova lei dos condomínios é anunciada com reforço da segurança e possível aumento de custos",
