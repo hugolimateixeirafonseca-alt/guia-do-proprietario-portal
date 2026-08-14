@@ -8,7 +8,9 @@ const outputDirectory=path.join(root,'artifacts/social-card-fixtures');
 const masterArgumentIndex=process.argv.indexOf('--master-image');
 const suppliedMaster=masterArgumentIndex>=0 ? process.argv[masterArgumentIndex+1] : '';
 const masterOnly=process.argv.includes('--master-only');
+const variantsOnly=process.argv.includes('--variants-only');
 if (masterArgumentIndex>=0 && !suppliedMaster) throw new Error('--master-image requires a local raster path');
+if (masterOnly && variantsOnly) throw new Error('--master-only and --variants-only cannot be used together');
 
 const images={
   condominio:path.join(root,'public/imagens/pilar-condominio.webp'),
@@ -31,7 +33,8 @@ const fixtures=[
 ];
 
 await fs.mkdir(outputDirectory,{recursive:true});
-for (const fixture of masterOnly ? fixtures.slice(0,1) : fixtures) {
+const selectedFixtures=masterOnly ? fixtures.slice(0,1) : variantsOnly ? fixtures.slice(1) : fixtures;
+for (const fixture of selectedFixtures) {
   let image;
   if (fixture.cropMaster) {
     const input=sharp(path.resolve(fixture.image));
