@@ -6,6 +6,7 @@ import {harvestDirectSources,prefilterHarvestSources} from './source-harvest.mjs
 import {prefilterContentImpact} from './content-impact-prefilter.mjs';
 import {getDiscoveryModePlan} from './discovery-mode.mjs';
 import {combinedHistoricalContext,createIsolationController} from './dry-run-isolation.mjs';
+import {finalizePublication} from './publication-image-prompt.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -707,11 +708,21 @@ TEXTO SITE:
   [Simuladores gratuitos](/simuladores/)
 - Não incluir Fonte no fim.
 
+PROMPT DE IMAGEM:
+- Gera resumo_factual_curto com 4 a 7 pontos curtos, usando apenas factos verificados do EVENTO.
+- Não incluas opiniões, interpretações ou dados novos.
+- Gera orientacao_ilustracao com 1 a 3 frases para uma representação editorial adequada ao assunto.
+- Para condomínio, habitação ou obras, privilegia arquitetura residencial portuguesa plausível.
+- Para fiscalidade, direito ou heranças, usa casa, documentos, propriedade, dinheiro ou património.
+- Para arrendamento, usa imóvel, contrato, senhorio ou inquilino de forma editorial.
+- Para energia, usa casa portuguesa, consumo, eficiência, equipamentos ou energia.
+- Para mercado imobiliário, usa edifícios residenciais e elementos económicos discretos.
+- Nunca introduzas factos novos na orientação.
+
 Devolve APENAS JSON válido:
-{"texto_fb":"","texto_site":""}`;
+{"texto_fb":"","texto_site":"","resumo_factual_curto":["","","",""],"orientacao_ilustracao":""}`;
   const out = parseJson((await openai({model:CFG.openaiModelCopy,prompt,purpose:'copy',web:false,effort:'low'})).text);
-  if (!out.texto_fb || !out.texto_site) throw new Error('Publication generation returned incomplete content');
-  return out;
+  return finalizePublication({publishableNews:true,event,generated:out});
 }
 
 async function sendMake(payload) {
@@ -816,7 +827,7 @@ async function main(){
         return (impactRank[x.impact_type]||0) > (impactRank[best.impact_type]||0) ? x : best;
       }, null);
 
-      let publication = { texto_fb:'', texto_site:'' };
+      let publication = finalizePublication({publishableNews:false,event:{},generated:null});
       if (publishableNews) {
         publication = await generatePublication({
           title: cls.verified_title||c.title,
@@ -844,6 +855,8 @@ async function main(){
         conteudo_verificado:cls.verified_summary||c.summary,
         texto_fb:publication.texto_fb,
         texto_site:publication.texto_site,
+        prompt_imagem:publication.prompt_imagem,
+        prompt_tecnico:publication.prompt_tecnico,
         news_score:cls.news_score||0,
         seo_score:cls.seo_score||0,
         lead_score:cls.lead_score||0,

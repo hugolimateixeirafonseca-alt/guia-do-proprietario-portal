@@ -18,6 +18,8 @@ O radar envia apenas acontecimentos com `news_score` acima do limiar e já produ
 - `conteudo_verificado`
 - `texto_fb`
 - `texto_site`
+- `prompt_imagem`
+- `prompt_tecnico`
 - `news_score`
 - `seo_score`
 - `lead_score`
@@ -36,6 +38,8 @@ Preservar o formato atual do workbook GP Redes Sociais:
 - H link_onde = `corpo`
 - K destino_ok = `Sim`
 - L estado = `por_aprovar`
+- U prompt_imagem = `prompt_imagem`
+- V prompt_tecnico = `prompt_tecnico`
 - W = `conteudo_verificado`
 - X = `texto_site`
 - Y = `fonte_nome`
