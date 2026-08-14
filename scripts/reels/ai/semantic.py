@@ -50,8 +50,6 @@ def _truncation_reason(value: str, limit: int) -> str | None:
         return "contém uma junção anormal de palavras"
     if TRAILING_FRAGMENT_PATTERN.search(value):
         return "termina de forma fragmentada"
-    if len(value) == limit and value[-1:].isalnum():
-        return "atinge exatamente o limite e termina sem fecho natural"
     return None
 
 
