@@ -1,98 +1,106 @@
-export const IMAGE_TECHNICAL_PROMPT = 'gpt-image-2 high — cartão completo com texto gerado por IA';
+export const IMAGE_TECHNICAL_PROMPT = 'gpt-image-2 high — base editorial sem texto + composição tipográfica determinística';
+
+const SAFE_DIRECTIONS={
+  vender:'Arquitetura residencial portuguesa elegante e elementos económicos abstratos e discretos.',
+  impostos:'Casa portuguesa elegante com documentos patrimoniais sem texto legível e elementos financeiros abstratos.',
+  arrendar:'Interior residencial português elegante com chave e elementos genéricos associados a habitação.',
+  condominio:'Prédio residencial português elegante, varandas em ferro, azulejos discretos e vegetação mediterrânica.',
+  casa:'Habitação portuguesa elegante com telha cerâmica, detalhes arquitetónicos tradicionais e vegetação discreta.'
+};
+
+const SENSITIVE_TERMS=/\b(crime|criminal|polícia|policial|detido|detenção|morte|morto|vítima|agressão|arma|droga|incêndio|explosão)\b/iu;
+const NEWS_DETAIL_TERMS=/(?:https?:\/\/|www\.|\b[\w-]+\.(?:pt|com|org|net)\b|[€$£]|\b(?:euros?|milh(?:ão|ões)|janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|hoje|ontem)\b)/iu;
 
 function normalizeLine(value) {
-  return String(value || '').replace(/\s+/g, ' ').trim();
+  return String(value||'').replace(/\s+/gu,' ').trim();
 }
 
-export function buildPublicationImagePrompt({title, sourceName, factualPoints, illustrationDirection}) {
-  const finalTitle = String(title || '').trim();
-  const finalSource = String(sourceName || '').trim();
-  const points = Array.isArray(factualPoints) ? factualPoints.map(normalizeLine).filter(Boolean).slice(0, 7) : [];
-  const direction = normalizeLine(illustrationDirection);
+function comparable(value) {
+  return normalizeLine(value).normalize('NFD').replace(/[\u0300-\u036f]/gu,'').toLowerCase();
+}
 
-  if (!finalTitle) throw new Error('Image prompt requires the final editorial title');
-  if (!finalSource) throw new Error('Image prompt requires the validated primary source');
-  if (points.length < 4) throw new Error('Image prompt requires 4 to 7 verified factual points');
-  if (!direction) throw new Error('Image prompt requires an illustration direction');
+function values(value) {
+  return Array.isArray(value) ? value : [value];
+}
 
-  return `Cria o CARTÃO SOCIAL COMPLETO desta notícia para o portal português Guia do Proprietário.
+export function safeIllustrationDirection(value,event={}) {
+  const direction=normalizeLine(value);
+  if (!direction) throw new Error('Safe illustration direction is required');
+  const fallback=SAFE_DIRECTIONS[event.pillar]||SAFE_DIRECTIONS.casa;
+  const normalized=comparable(direction);
+  const forbidden=[
+    event.title,event.source_name,event.summary,event.article_url,event.url_original,
+    ...values(event.entities),...values(event.key_facts),...values(event.forbiddenText)
+  ]
+    .map(comparable)
+    .filter(item=>item.length>=4);
+  const unsafe=direction.length>320
+    || /\p{N}/u.test(direction)
+    || SENSITIVE_TERMS.test(direction)
+    || NEWS_DETAIL_TERMS.test(direction)
+    || forbidden.some(item=>normalized.includes(item));
+  return unsafe ? fallback : direction;
+}
 
-A própria IA deve gerar a imagem FINAL COMPLETA, incluindo ilustração, composição e todo o texto visível.
+export function buildPublicationImagePrompt({illustrationDirection}) {
+  const direction=normalizeLine(illustrationDirection);
+  if (!direction) throw new Error('Safe illustration direction is required');
 
-FORMATO
-- horizontal 1536x1024
-- destinado a Open Graph / Facebook
-- elementos principais dentro de uma zona central segura, deixando margens discretas superior e inferior para tolerar recorte
+  return `Editorial architectural photograph for a premium Portuguese homeowner publication.
 
-ESTILO VISUAL
-- editorial premium, elegante, adulto e credível
-- fundo creme quente ou marfim com textura muito subtil
-- verde-petróleo ou azul-petróleo escuro como cor dominante
-- pequenos apontamentos dourados ou terracota
-- composição limpa e bastante espaço em branco
-- grande área tipográfica à esquerda
-- ilustração editorial sofisticada à direita
-- título principal em serif elegante, grande e escuro
-- restantes textos em sans-serif limpa
-- estética portuguesa ligada a casa, património e vida do proprietário
-- evitar aspeto infantil, 3D exagerado ou stock genérico
+Create only the photographic visual layer for a professionally designed news card. Do not create the card, layout, badge, typography, cream panel, curved graphics or branding.
 
-TEXTO OBRIGATÓRIO NA IMAGEM
+VISUAL STYLE
+- warm sophisticated Portuguese editorial photography
+- natural warm light with soft, deep shadows
+- subtle cinematic colour grading
+- creamy neutrals, deep petrol green, muted terracotta and natural wood
+- refined magazine aesthetic with realistic depth
+- premium but restrained, never ostentatious
 
-Cápsula:
-NOTÍCIAS
+COMPOSITION
+- horizontal 1536x1024, composed for a predictable cover crop
+- place the main subject predominantly in the centre-right or right side of the frame
+- keep the left and centre-left visually calm because deterministic editorial graphics will cover that area
+- use natural depth and, when appropriate, a tasteful foreground element in the lower-right area
+- keep the main architecture, faces and important objects away from the outer crop edges
+- let the photograph bleed naturally to the top, right and bottom edges
 
-Título principal:
-${finalTitle}
-
-Rodapé esquerdo:
-Fonte: ${finalSource}
-
-Pode surgir discretamente:
-Guia do Proprietário
-
-CONTEXTO FACTUAL PARA A ILUSTRAÇÃO
-${points.map(point => `- ${point}`).join('\n')}
-
-ORIENTAÇÃO VISUAL
+SUBJECT DIRECTION
 ${direction}
 
-REGRAS
-- Português de Portugal
-- escrever exatamente o título e a fonte fornecidos
-- preservar acentos, cedilhas, hífenes, números e maiúsculas
-- não resumir nem reescrever o título
-- não acrescentar texto editorial desnecessário
-- não usar logótipos ou marcas da fonte original
-- não usar marcas de água
-- não copiar nem imitar a imagem original da notícia
-- representar o tema sem inventar acontecimentos
-- se for habitação, condomínio, energia ou obras, usar arquitetura plausível em Portugal
-- se for fiscal, jurídico ou patrimonial, usar metáfora editorial ligada a casa, documentos, dinheiro, contratos, propriedade ou património
-- não usar logótipo, ícone, selo ou símbolo gráfico do Guia do Proprietário
-- máxima legibilidade no feed do Facebook
+PORTUGUESE VISUAL LANGUAGE WHERE RELEVANT
+- authentic residential architecture, ceramic roof tiles, iron balconies and light stucco
+- stone, subtle traditional tile details, Mediterranean vegetation and contemporary Portuguese interiors
+- European doors and windows, natural wood and plausible Portuguese streets or buildings
 
-RESULTADO
-Uma única imagem final pronta a publicar no espírito editorial do Guia do Proprietário.`;
+AVOID
+- generic stock photography or cheap real-estate advertising
+- American suburban architecture, mansions, skyscrapers without context or futuristic buildings
+- hyper-glossy real-estate photography, CGI or 3D render appearance
+- cartoon, flat vector illustration or childish styling
+- any curved template graphics, badge, cream title panel or predesigned news-card composition
+
+ABSOLUTELY NO
+- visible text, letters, numbers, titles, labels or captions
+- logos, watermarks, icons, brand marks or readable signage
+- readable documents, newspapers, contracts, screens, plaques or envelopes
+- copied or imitated imagery from the original news source
+
+Return one photographic visual layer only, ready for deterministic editorial composition by the renderer.`;
 }
 
-export function finalizePublication({publishableNews, event, generated}) {
-  if (!publishableNews) {
-    return {texto_fb:'', texto_site:'', prompt_imagem:'', prompt_tecnico:''};
-  }
-  if (!generated?.texto_fb || !generated?.texto_site) {
-    throw new Error('Publication generation returned incomplete content');
-  }
-
+export function finalizePublication({publishableNews,event,generated}) {
+  if (!publishableNews) return {texto_fb:'',texto_site:'',prompt_imagem:'',prompt_tecnico:''};
+  if (!generated?.texto_fb||!generated?.texto_site) throw new Error('Publication generation returned incomplete content');
+  const illustrationDirection=safeIllustrationDirection(generated.orientacao_ilustracao_segura,{
+    ...event,
+    forbiddenText:[generated.texto_fb,generated.texto_site,...values(generated.resumo_factual_curto)]
+  });
   return {
     texto_fb:generated.texto_fb,
     texto_site:generated.texto_site,
-    prompt_imagem:buildPublicationImagePrompt({
-      title:event.title,
-      sourceName:event.source_name,
-      factualPoints:generated.resumo_factual_curto,
-      illustrationDirection:generated.orientacao_ilustracao
-    }),
+    prompt_imagem:buildPublicationImagePrompt({illustrationDirection}),
     prompt_tecnico:IMAGE_TECHNICAL_PROMPT
   };
 }

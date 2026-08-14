@@ -108,4 +108,4 @@ Before sending to Make, the radar generates the final Facebook copy and Markdown
 
 
 ### Nota v21.2
-Todos os acontecimentos editoriais aceites seguem para `radar_editorial`. Só os que atingem `news_score >= 80` recebem copy de Facebook/site e `type=noticia`.
+Todos os acontecimentos editoriais aceites seguem para `radar_editorial`. Só os que atingem `news_score >= 70` recebem copy de Facebook/site, orientação visual sem texto e `type=noticia`.

@@ -43,7 +43,7 @@ Preservar o formato atual do workbook GP Redes Sociais:
 - W = `conteudo_verificado`
 - X = `texto_site`
 - Y = `fonte_nome`
-- Z = `data_publicacao`
+- Z data_fonte = `data_publicacao`
 - AA = `titulo_noticia`
 
 As restantes colunas ficam vazias. O publicador existente só atua depois de o utilizador mudar L de `por_aprovar` para `pronto`.
@@ -57,6 +57,8 @@ Campos adicionais:
 - `lead_trigger`: `Sim` quando `lead_score >= 80`
 - `impacto_conteudo`: impacto mais forte detetado ou `NONE`
 - `estado`: `novo` ou `novo_marco`
-- `type`: `noticia` apenas quando `news_score >= 80`; caso contrário `radar`
+- `type`: `noticia` apenas quando `news_score >= 70`; caso contrário `radar`
 
 Isto permite registar todas as oportunidades em `radar_editorial` e deixar o Make enviar apenas notícias publicáveis para `publicacoes`.
+
+O `prompt_imagem` é exclusivamente visual e nunca contém título, fonte ou copy jornalística. O Publicador deve enviar esse prompt ao `gpt-image-2`, encaminhar a base visual para o renderer determinístico e guardar apenas o PNG devolvido pelo renderer.
