@@ -68,7 +68,7 @@ test('upload exige multipart com boundary e bytes raster coerentes',async()=>{
 test('título longo permanece na área segura e não colide com a ilustração',()=>{
   const title='Novas regras para obras de conservação em edifícios residenciais ajudam condomínios a planear intervenções, contratos e custos comuns';
   const layout=selectTitleLayout(title);
-  assert.ok(layout.lines.length<=5);
+  assert.ok(layout.lines.length<=layout.maxLines);
   assert.ok(SOCIAL_CARD.title.top+layout.height<SOCIAL_CARD.source.top);
   assert.ok(SOCIAL_CARD.title.left+SOCIAL_CARD.title.width<SOCIAL_CARD.illustrationStart);
   assert.equal(layout.lines.join(' '),title);
@@ -78,8 +78,33 @@ test('título extremamente longo reduz automaticamente o tamanho',()=>{
   const title='Proprietários de apartamentos em condomínios com obras de conservação, eficiência energética e contratos de manutenção passam a dispor de orientações adicionais para organizar decisões e documentação';
   const layout=selectTitleLayout(title);
   assert.ok(layout.fontSize<56);
-  assert.ok(layout.lines.length<=5);
+  assert.ok(layout.lines.length<=6);
   assert.equal(layout.lines.join(' '),title);
+});
+
+test('quatro classes de título respeitam safe area e hierarquia estável',()=>{
+  const cases=[
+    ['short','Condomínios podem instalar painéis solares'],
+    ['medium','Novas regras tornam contratos de arrendamento mais claros'],
+    ['long','Heranças com casas passam a exigir mais atenção aos documentos e às decisões entre familiares'],
+    ['very_long','Apoios à eficiência energética podem ajudar proprietários a renovar janelas, melhorar o isolamento e reduzir o consumo das suas casas']
+  ];
+  let previousSize=Infinity;
+  for (const [category,title] of cases) {
+    const layout=selectTitleLayout(title);
+    assert.equal(layout.category,category);
+    assert.equal(layout.lines.join(' '),title);
+    assert.ok(layout.lines.length>=1 && layout.lines.length<=layout.maxLines);
+    assert.ok(SOCIAL_CARD.title.top+layout.height<SOCIAL_CARD.source.top);
+    assert.ok(layout.fontSize<=previousSize);
+    previousSize=layout.fontSize;
+  }
+});
+
+test('formas editoriais integram a imagem sem cobrir texto',()=>{
+  const textRight=SOCIAL_CARD.title.left+SOCIAL_CARD.title.width;
+  assert.equal(SOCIAL_CARD.editorialShapes.length,3);
+  for (const shape of SOCIAL_CARD.editorialShapes) assert.ok(shape.left>textRight);
 });
 
 test('NOTÍCIAS e branding ocupam posições determinísticas como texto simples',async()=>{
@@ -87,9 +112,9 @@ test('NOTÍCIAS e branding ocupam posições determinísticas como texto simples
   const text=collectText(layout.tree);
   assert.ok(text.includes('NOTÍCIAS'));
   assert.ok(text.includes('Guia do Proprietário'));
-  assert.deepEqual(layout.metrics.label,{left:104,top:88,width:174,height:54});
+  assert.deepEqual(layout.metrics.label,{left:104,top:82,width:174,height:50});
   assert.equal(layout.metrics.brand.left,104);
-  assert.equal(layout.metrics.brand.top,928);
+  assert.equal(layout.metrics.brand.top,924);
   const signature=crypto.createHash('sha256').update(JSON.stringify({
     dimensions:[layout.metrics.width,layout.metrics.height],
     safe:layout.metrics.safe,
@@ -98,5 +123,5 @@ test('NOTÍCIAS e branding ocupam posições determinísticas como texto simples
     source:layout.metrics.source,
     brand:layout.metrics.brand
   })).digest('hex');
-  assert.equal(signature,'cd3802cf2800d59e7aff2dd57e12457f7aa93539dd4e20225f3053560bbe3f98');
+  assert.equal(signature,'2d50e7877263a0281c0bfbde8c64475dd831e8cf4318e8ca5d159d941cb167f7');
 });

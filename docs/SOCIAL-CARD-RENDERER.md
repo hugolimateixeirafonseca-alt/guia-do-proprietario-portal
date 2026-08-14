@@ -16,6 +16,8 @@ Esta opção evita um serviço, deployment e domínio adicionais. A Function usa
 
 O resultado é sempre um PNG de 1536x1024. A área tipográfica ocupa 56% à esquerda e a ilustração 44% à direita. Um gradiente creme e textura subtil integram as duas zonas sem criar uma caixa branca sobre uma fotografia.
 
+O visual lock acrescenta três formas elípticas determinísticas, creme, verde-petróleo e dourado, junto à transição 56/44. Começam depois do limite direito da área de texto, mantêm a mesma linguagem entre publicações e integram a ilustração sem cobrir título, fonte ou marca. A base visual deve seguir uma linguagem desenhada ou pintada digitalmente, com arquitetura e interiores portugueses, telha, azulejos, varandas em ferro e vegetação mediterrânica quando forem adequados ao tema.
+
 ## Autenticação
 
 Criar um único secret:
@@ -66,8 +68,10 @@ O endpoint aceita exclusivamente `POST` autenticado e exige `multipart/form-data
 - o título nunca é truncado nem reescrito;
 - o algoritmo faz wrapping por palavras;
 - tenta no máximo cinco linhas;
-- reduz progressivamente entre 72 px e 24 px;
-- se nem 24 px couber na área segura, o endpoint falha em vez de produzir um cartão defeituoso;
+- reduz progressivamente entre 76 px e 36 px;
+- começa em 76 px para títulos curtos, 66 px para médios, 58 px para longos e 50 px para muito longos;
+- permite até cinco linhas normalmente e uma sexta linha apenas em títulos muito longos;
+- se nem 36 px couber na área segura, o endpoint falha em vez de produzir um cartão defeituoso;
 - `NOTÍCIAS`, `Fonte: ...` e `Guia do Proprietário` têm posições determinísticas;
 - a tipografia suporta os caracteres portugueses e o símbolo `€`.
 
@@ -77,6 +81,10 @@ O endpoint aceita exclusivamente `POST` autenticado e exige `multipart/form-data
 - Lato Regular/Bold, SIL Open Font License 1.1.
 
 Os ficheiros de licença estão junto dos binários em `functions/assets/fonts/`. Os binários foram obtidos do repositório oficial `google/fonts` e são empacotados como módulos binários pela Cloudflare.
+
+## Fixtures visuais
+
+Executar `npm run fixtures:social-card` para gerar quatro cartões locais, curto, médio, longo e muito longo, em `artifacts/social-card-fixtures/`. O diretório é ignorado pelo Git e pelo build do portal, mas os PNGs permanecem disponíveis no worktree para aprovação visual antes do push.
 
 ## Falhas
 

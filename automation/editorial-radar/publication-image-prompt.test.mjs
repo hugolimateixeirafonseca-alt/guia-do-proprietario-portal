@@ -25,6 +25,9 @@ test('prompt visual exclui título, fonte e copy jornalística',()=>{
   assert.equal(publication.prompt_imagem.includes(generated.texto_fb),false);
   assert.equal(publication.prompt_imagem.includes(generated.texto_site),false);
   assert.match(publication.prompt_imagem,/sem texto visível/iu);
+  assert.match(publication.prompt_imagem,/desenhada ou pintada digitalmente/iu);
+  assert.match(publication.prompt_imagem,/arquitetura e interiores claramente portugueses/iu);
+  assert.match(publication.prompt_imagem,/sujeito principal no centro ou à direita/iu);
   assert.equal(publication.prompt_tecnico,IMAGE_TECHNICAL_PROMPT);
 });
 
@@ -43,7 +46,7 @@ test('orientação com números ou entidades usa fallback abstrato',()=>{
   });
   assert.equal(publication.prompt_imagem.includes('5%'),false);
   assert.equal(publication.prompt_imagem.includes(event.entities[0]),false);
-  assert.match(publication.prompt_imagem,/documentação genérica/iu);
+  assert.match(publication.prompt_imagem,/varandas em ferro/iu);
 });
 
 test('orientação com URL, data, valor ou copy nunca chega ao prompt',()=>{

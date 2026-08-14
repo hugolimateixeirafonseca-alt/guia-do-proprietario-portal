@@ -1,11 +1,11 @@
 export const IMAGE_TECHNICAL_PROMPT = 'gpt-image-2 high — base editorial sem texto + composição tipográfica determinística';
 
 const SAFE_DIRECTIONS={
-  vender:'Arquitetura residencial portuguesa e elementos económicos abstratos e discretos.',
-  impostos:'Casa portuguesa elegante, documentos patrimoniais genéricos e elementos discretos ligados a propriedade.',
-  arrendar:'Interior residencial português, chave e documentos genéricos associados a arrendamento.',
-  condominio:'Edifício residencial português contemporâneo, detalhes arquitetónicos e documentação genérica.',
-  casa:'Habitação portuguesa contemporânea com detalhes arquitetónicos e elementos domésticos discretos.'
+  vender:'Arquitetura residencial portuguesa elegante e elementos económicos abstratos e discretos.',
+  impostos:'Casa portuguesa elegante com documentos patrimoniais sem texto legível e elementos financeiros abstratos.',
+  arrendar:'Interior residencial português elegante com chave e elementos genéricos associados a habitação.',
+  condominio:'Prédio residencial português elegante, varandas em ferro, azulejos discretos e vegetação mediterrânica.',
+  casa:'Habitação portuguesa elegante com telha cerâmica, detalhes arquitetónicos tradicionais e vegetação discreta.'
 };
 
 const SENSITIVE_TERMS=/\b(crime|criminal|polícia|policial|detido|detenção|morte|morto|vítima|agressão|arma|droga|incêndio|explosão)\b/iu;
@@ -55,6 +55,8 @@ IMPORTANTE
 - reservar 56% da metade esquerda como área tipográfica editorial cuidadosamente desenhada, com espaço negativo elegante
 - usar os 44% da metade direita para uma ilustração editorial sofisticada integrada na composição
 - fazer a transição entre as duas áreas de forma orgânica, sem caixa branca sobre fotografia
+- colocar o sujeito principal no centro ou à direita, deixando espaço negativo real na zona esquerda
+- manter rostos e objetos importantes afastados das extremidades para tolerar o recorte
 
 FORMATO
 - horizontal 1536x1024
@@ -62,12 +64,15 @@ FORMATO
 
 ESTILO
 - editorial premium, elegante, adulto e credível
+- aparência desenhada ou pintada digitalmente, com sombras suaves e detalhe sofisticado
 - fundo creme ou marfim, aproximadamente #F4EFE5 ou #F7F2E9
 - verde-petróleo escuro dominante, aproximadamente #183A3D ou #1F4E52
 - pequenos acentos dourado ou terracota, aproximadamente #B77B52 ou #C28A62
 - textura muito subtil e composição com bastante espaço negativo
-- estética portuguesa ligada a casa e património
-- evitar stock genérico, 3D exagerado ou aspeto infantil
+- arquitetura e interiores claramente portugueses, usando quando adequado azulejos, telha cerâmica, varandas em ferro, fachadas mediterrânicas e vegetação discreta
+- poucas pessoas, apenas quando indispensáveis, estilizadas, discretas e secundárias
+- evitar fotografia stock, hiper-realismo fotográfico, 3D genérico, cartoon infantil ou estética americana
+- evitar casas suburbanas americanas, arranha-céus e arquitetura genérica quando o tema não os justificar
 
 ORIENTAÇÃO VISUAL
 ${direction}
@@ -78,7 +83,7 @@ REGRAS FINAIS
 - sem logótipos, ícones, selos ou símbolos de marca
 - sem marcas de água
 - sem nomes de pessoas ou entidades
-- sem documentos legíveis
+- documentos, jornais, contratos, ecrãs, placas e envelopes sempre sem texto legível
 - sem copiar ou imitar imagens de notícias
 - devolver uma única base visual pronta para receber tipografia real no renderer`;
 }
