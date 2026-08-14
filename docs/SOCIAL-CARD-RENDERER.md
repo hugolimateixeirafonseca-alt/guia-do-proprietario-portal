@@ -14,9 +14,9 @@ Esta opção evita um serviço, deployment e domínio adicionais. A Function usa
 - Old Standard TT Bold no título e Lato nos restantes textos;
 - fontes incluídas no bundle, sem pedidos a Google Fonts durante o render.
 
-O resultado é sempre um PNG de 1536x1024. A área tipográfica ocupa 56% à esquerda e a ilustração 44% à direita. Um gradiente creme e textura subtil integram as duas zonas sem criar uma caixa branca sobre uma fotografia.
+O resultado é sempre um PNG de 1536x1024. A fotografia ocupa o canvas em full bleed e sangra no topo, direita e fundo. Uma máscara editorial assimétrica em creme recorta organicamente a área de texto, sem fronteira vertical, caixa, margem ou frame na fotografia.
 
-O visual lock acrescenta três formas elípticas determinísticas, creme, verde-petróleo e dourado, junto à transição 56/44. Começam depois do limite direito da área de texto, mantêm a mesma linguagem entre publicações e integram a ilustração sem cobrir título, fonte ou marca. A base visual deve seguir uma linguagem desenhada ou pintada digitalmente, com arquitetura e interiores portugueses, telha, azulejos, varandas em ferro e vegetação mediterrânica quando forem adequados ao tema.
+O visual lock usa paths SVG Bézier fixos para reproduzir o master: superfície creme principal, camada creme secundária, profundidade verde-petróleo, cunha dourada, arco dourado fino e detalhe pontilhado parcialmente fora do canvas. Estes elementos pertencem ao renderer. A base visual da OpenAI é exclusivamente uma fotografia editorial, sem formas, badge, painel creme, tipografia ou branding.
 
 ## Autenticação
 
@@ -68,10 +68,10 @@ O endpoint aceita exclusivamente `POST` autenticado e exige `multipart/form-data
 - o título nunca é truncado nem reescrito;
 - o algoritmo faz wrapping por palavras;
 - tenta no máximo cinco linhas;
-- reduz progressivamente entre 76 px e 36 px;
-- começa em 76 px para títulos curtos, 66 px para médios, 58 px para longos e 50 px para muito longos;
+- reduz progressivamente entre 84 px e 34 px;
+- começa em 84 px para títulos curtos, 72 px para médios, 62 px para longos e 54 px para muito longos;
 - permite até cinco linhas normalmente e uma sexta linha apenas em títulos muito longos;
-- se nem 36 px couber na área segura, o endpoint falha em vez de produzir um cartão defeituoso;
+- se nem 34 px couber na área segura, o endpoint falha em vez de produzir um cartão defeituoso;
 - `NOTÍCIAS`, `Fonte: ...` e `Guia do Proprietário` têm posições determinísticas;
 - a tipografia suporta os caracteres portugueses e o símbolo `€`.
 
@@ -84,7 +84,7 @@ Os ficheiros de licença estão junto dos binários em `functions/assets/fonts/`
 
 ## Fixtures visuais
 
-Executar `npm run fixtures:social-card` para gerar quatro cartões locais, curto, médio, longo e muito longo, em `artifacts/social-card-fixtures/`. O diretório é ignorado pelo Git e pelo build do portal, mas os PNGs permanecem disponíveis no worktree para aprovação visual antes do push.
+Executar `npm run fixtures:social-card -- --master-image "<path-local-do-master>"` para gerar a calibração master e quatro cartões, curto, médio, longo e muito longo, em `artifacts/social-card-fixtures/`. As restantes fixtures usam rasters locais existentes no portal. O diretório é ignorado pelo Git e pelo build, mas os cinco PNGs permanecem disponíveis no worktree para aprovação visual antes do push.
 
 ## Falhas
 

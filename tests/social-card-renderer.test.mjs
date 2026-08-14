@@ -39,7 +39,8 @@ test('título com acentos e fonte são preservados exatamente',async()=>{
   assert.equal(layout.metrics.title.lines.join(' '),accentedTitle);
   assert.equal(layout.metrics.exactSource,source);
   const text=collectText(layout.tree);
-  assert.ok(text.includes(`Fonte: ${source}`));
+  assert.ok(text.includes('Fonte:'));
+  assert.ok(text.includes(source));
 });
 
 test('título e fonte com caracteres XML permanecem texto literal',async()=>{
@@ -49,7 +50,8 @@ test('título e fonte com caracteres XML permanecem texto literal',async()=>{
   assert.equal(layout.metrics.title.title,specialTitle);
   assert.equal(layout.metrics.title.lines.join(' '),specialTitle);
   assert.equal(layout.metrics.exactSource,specialSource);
-  assert.ok(collectText(layout.tree).includes(`Fonte: ${specialSource}`));
+  assert.ok(collectText(layout.tree).includes('Fonte:'));
+  assert.ok(collectText(layout.tree).includes(specialSource));
   const image=await fixturePng();
   await assert.doesNotReject(()=>renderSocialCardNode({root,title:specialTitle,source:specialSource,image}));
 });
@@ -103,8 +105,8 @@ test('quatro classes de título respeitam safe area e hierarquia estável',()=>{
 
 test('formas editoriais integram a imagem sem cobrir texto',()=>{
   const textRight=SOCIAL_CARD.title.left+SOCIAL_CARD.title.width;
-  assert.equal(SOCIAL_CARD.editorialShapes.length,3);
-  for (const shape of SOCIAL_CARD.editorialShapes) assert.ok(shape.left>textRight);
+  assert.ok(SOCIAL_CARD.transitionSafeLeft>textRight);
+  assert.ok(SOCIAL_CARD.illustrationStart>textRight);
 });
 
 test('NOTÍCIAS e branding ocupam posições determinísticas como texto simples',async()=>{
@@ -112,9 +114,9 @@ test('NOTÍCIAS e branding ocupam posições determinísticas como texto simples
   const text=collectText(layout.tree);
   assert.ok(text.includes('NOTÍCIAS'));
   assert.ok(text.includes('Guia do Proprietário'));
-  assert.deepEqual(layout.metrics.label,{left:104,top:82,width:174,height:50});
-  assert.equal(layout.metrics.brand.left,104);
-  assert.equal(layout.metrics.brand.top,924);
+  assert.deepEqual(layout.metrics.label,{left:86,top:182,width:213,height:60});
+  assert.equal(layout.metrics.brand.left,93);
+  assert.equal(layout.metrics.brand.top,922);
   const signature=crypto.createHash('sha256').update(JSON.stringify({
     dimensions:[layout.metrics.width,layout.metrics.height],
     safe:layout.metrics.safe,
@@ -123,5 +125,5 @@ test('NOTÍCIAS e branding ocupam posições determinísticas como texto simples
     source:layout.metrics.source,
     brand:layout.metrics.brand
   })).digest('hex');
-  assert.equal(signature,'2d50e7877263a0281c0bfbde8c64475dd831e8cf4318e8ca5d159d941cb167f7');
+  assert.equal(signature,'3d8372ffca366dba24d91202df2bc884172ad946da5de30077d7e1a37055b05b');
 });

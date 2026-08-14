@@ -24,10 +24,11 @@ test('prompt visual exclui título, fonte e copy jornalística',()=>{
   assert.equal(publication.prompt_imagem.includes(event.source_name),false);
   assert.equal(publication.prompt_imagem.includes(generated.texto_fb),false);
   assert.equal(publication.prompt_imagem.includes(generated.texto_site),false);
-  assert.match(publication.prompt_imagem,/sem texto visível/iu);
-  assert.match(publication.prompt_imagem,/desenhada ou pintada digitalmente/iu);
-  assert.match(publication.prompt_imagem,/arquitetura e interiores claramente portugueses/iu);
-  assert.match(publication.prompt_imagem,/sujeito principal no centro ou à direita/iu);
+  assert.match(publication.prompt_imagem,/absolutely no/iu);
+  assert.match(publication.prompt_imagem,/editorial architectural photograph/iu);
+  assert.match(publication.prompt_imagem,/authentic residential architecture/iu);
+  assert.match(publication.prompt_imagem,/centre-right or right side/iu);
+  assert.match(publication.prompt_imagem,/do not create the card/iu);
   assert.equal(publication.prompt_tecnico,IMAGE_TECHNICAL_PROMPT);
 });
 

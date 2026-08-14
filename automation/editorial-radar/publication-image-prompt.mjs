@@ -46,46 +46,48 @@ export function buildPublicationImagePrompt({illustrationDirection}) {
   const direction=normalizeLine(illustrationDirection);
   if (!direction) throw new Error('Safe illustration direction is required');
 
-  return `Cria a base visual de um cartão social editorial premium para um portal português sobre habitação e património.
+  return `Editorial architectural photograph for a premium Portuguese homeowner publication.
 
-IMPORTANTE
-- gerar apenas a composição visual
-- não incluir qualquer texto, letras, números, logótipos ou marcas de água
-- não incluir títulos, legendas, cápsulas ou tipografia
-- reservar 56% da metade esquerda como área tipográfica editorial cuidadosamente desenhada, com espaço negativo elegante
-- usar os 44% da metade direita para uma ilustração editorial sofisticada integrada na composição
-- fazer a transição entre as duas áreas de forma orgânica, sem caixa branca sobre fotografia
-- colocar o sujeito principal no centro ou à direita, deixando espaço negativo real na zona esquerda
-- manter rostos e objetos importantes afastados das extremidades para tolerar o recorte
+Create only the photographic visual layer for a professionally designed news card. Do not create the card, layout, badge, typography, cream panel, curved graphics or branding.
 
-FORMATO
-- horizontal 1536x1024
-- elementos principais dentro de uma zona central segura
+VISUAL STYLE
+- warm sophisticated Portuguese editorial photography
+- natural warm light with soft, deep shadows
+- subtle cinematic colour grading
+- creamy neutrals, deep petrol green, muted terracotta and natural wood
+- refined magazine aesthetic with realistic depth
+- premium but restrained, never ostentatious
 
-ESTILO
-- editorial premium, elegante, adulto e credível
-- aparência desenhada ou pintada digitalmente, com sombras suaves e detalhe sofisticado
-- fundo creme ou marfim, aproximadamente #F4EFE5 ou #F7F2E9
-- verde-petróleo escuro dominante, aproximadamente #183A3D ou #1F4E52
-- pequenos acentos dourado ou terracota, aproximadamente #B77B52 ou #C28A62
-- textura muito subtil e composição com bastante espaço negativo
-- arquitetura e interiores claramente portugueses, usando quando adequado azulejos, telha cerâmica, varandas em ferro, fachadas mediterrânicas e vegetação discreta
-- poucas pessoas, apenas quando indispensáveis, estilizadas, discretas e secundárias
-- evitar fotografia stock, hiper-realismo fotográfico, 3D genérico, cartoon infantil ou estética americana
-- evitar casas suburbanas americanas, arranha-céus e arquitetura genérica quando o tema não os justificar
+COMPOSITION
+- horizontal 1536x1024, composed for a predictable cover crop
+- place the main subject predominantly in the centre-right or right side of the frame
+- keep the left and centre-left visually calm because deterministic editorial graphics will cover that area
+- use natural depth and, when appropriate, a tasteful foreground element in the lower-right area
+- keep the main architecture, faces and important objects away from the outer crop edges
+- let the photograph bleed naturally to the top, right and bottom edges
 
-ORIENTAÇÃO VISUAL
+SUBJECT DIRECTION
 ${direction}
 
-REGRAS FINAIS
-- sem texto visível
-- sem letras ou algarismos
-- sem logótipos, ícones, selos ou símbolos de marca
-- sem marcas de água
-- sem nomes de pessoas ou entidades
-- documentos, jornais, contratos, ecrãs, placas e envelopes sempre sem texto legível
-- sem copiar ou imitar imagens de notícias
-- devolver uma única base visual pronta para receber tipografia real no renderer`;
+PORTUGUESE VISUAL LANGUAGE WHERE RELEVANT
+- authentic residential architecture, ceramic roof tiles, iron balconies and light stucco
+- stone, subtle traditional tile details, Mediterranean vegetation and contemporary Portuguese interiors
+- European doors and windows, natural wood and plausible Portuguese streets or buildings
+
+AVOID
+- generic stock photography or cheap real-estate advertising
+- American suburban architecture, mansions, skyscrapers without context or futuristic buildings
+- hyper-glossy real-estate photography, CGI or 3D render appearance
+- cartoon, flat vector illustration or childish styling
+- any curved template graphics, badge, cream title panel or predesigned news-card composition
+
+ABSOLUTELY NO
+- visible text, letters, numbers, titles, labels or captions
+- logos, watermarks, icons, brand marks or readable signage
+- readable documents, newspapers, contracts, screens, plaques or envelopes
+- copied or imitated imagery from the original news source
+
+Return one photographic visual layer only, ready for deterministic editorial composition by the renderer.`;
 }
 
 export function finalizePublication({publishableNews,event,generated}) {
