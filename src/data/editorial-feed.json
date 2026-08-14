@@ -6,7 +6,7 @@
     "planned": 84,
     "written": 92,
     "published": 70,
-    "newsOnline": 14
+    "newsOnline": 15
   },
   "articles": [
     {
@@ -1483,6 +1483,18 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-14-121533120-noticia-47",
+      "title": "Apoio ao alojamento para estudantes deslocados poderá dispensar contrato de arrendamento",
+      "summary": "Estudantes deslocados poderão aceder ao apoio ao alojamento sem apresentar contrato de arrendamento, segundo a CNN Portugal. A medida poderá admitir outras formas de comprovação da",
+      "pillar": "arrendar",
+      "publishedAt": "2026-08-14",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-14-121533120-noticia-47/",
+      "source": {
+        "name": "CNN Portugal",
+        "url": "https://cnnportugal.iol.pt/bolsas-de-estudo/alojamento-universitario/estudantes-deslocados-vao-poder-receber-apoio-ao-alojamento-sem-contrato-de-arrendamento/20260813/6a7d60aed34e511da0b330f7"
+      }
+    },
     {
       "slug": "2026-08-14-103047215-noticia-46",
       "title": "Crédito Habitação: Rácio de financiamento médio fica nos 67% e o mercado nunca chegou perto do limite de 90%",
