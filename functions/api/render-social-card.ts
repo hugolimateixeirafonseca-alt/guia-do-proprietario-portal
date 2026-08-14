@@ -2,7 +2,7 @@ import satori, {init as initSatori} from 'satori/standalone';
 import yogaWasm from 'satori/yoga.wasm';
 import {initWasm,Resvg} from '@resvg/resvg-wasm';
 import resvgWasm from '@resvg/resvg-wasm/index_bg.wasm';
-import serifFont from '../assets/fonts/old-standard-bold.bin';
+import serifFont from '../assets/fonts/cormorant-garamond-medium.bin';
 import sansRegularFont from '../assets/fonts/lato-regular.bin';
 import sansBoldFont from '../assets/fonts/lato-bold.bin';
 import {createSocialCardLayout,SOCIAL_CARD} from '../../src/lib/social-card-layout.mjs';
@@ -73,7 +73,7 @@ async function renderRequest({request,env}:RequestContext) {
       width:SOCIAL_CARD.width,
       height:SOCIAL_CARD.height,
       fonts:[
-        {name:'Old Standard TT',data:serifFont,weight:700,style:'normal'},
+        {name:'Cormorant Garamond',data:serifFont,weight:500,style:'normal'},
         {name:'Lato',data:sansRegularFont,weight:400,style:'normal'},
         {name:'Lato',data:sansBoldFont,weight:700,style:'normal'}
       ]

@@ -11,7 +11,7 @@ async function readFont(root,name) {
 
 export async function renderSocialCardNode({root=process.cwd(),title,source,pillar='casa',image}) {
   const [serif,sansRegular,sansBold]=await Promise.all([
-    readFont(root,'old-standard-bold.bin'),
+    readFont(root,'cormorant-garamond-medium.bin'),
     readFont(root,'lato-regular.bin'),
     readFont(root,'lato-bold.bin')
   ]);
@@ -23,7 +23,7 @@ export async function renderSocialCardNode({root=process.cwd(),title,source,pill
     width:SOCIAL_CARD.width,
     height:SOCIAL_CARD.height,
     fonts:[
-      {name:'Old Standard TT',data:serif,weight:700,style:'normal'},
+      {name:'Cormorant Garamond',data:serif,weight:500,style:'normal'},
       {name:'Lato',data:sansRegular,weight:400,style:'normal'},
       {name:'Lato',data:sansBold,weight:700,style:'normal'}
     ]

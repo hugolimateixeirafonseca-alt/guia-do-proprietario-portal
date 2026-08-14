@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import {Resvg} from '@resvg/resvg-js';
 import {createSocialCardLayout,SOCIAL_CARD,selectTitleLayout} from '../src/lib/social-card-layout.mjs';
 import {detectRasterImageType,isMultipartFormData,isSupportedRasterImage} from '../src/lib/social-card-upload.mjs';
@@ -71,7 +70,7 @@ test('título longo permanece na área segura e não colide com a ilustração',
   const title='Novas regras para obras de conservação em edifícios residenciais ajudam condomínios a planear intervenções, contratos e custos comuns';
   const layout=selectTitleLayout(title);
   assert.ok(layout.lines.length<=layout.maxLines);
-  assert.ok(SOCIAL_CARD.title.top+layout.height<SOCIAL_CARD.source.top);
+  assert.ok(layout.height<=SOCIAL_CARD.title.maxHeight);
   assert.ok(SOCIAL_CARD.title.left+SOCIAL_CARD.title.width<SOCIAL_CARD.illustrationStart);
   assert.equal(layout.lines.join(' '),title);
 });
@@ -97,7 +96,7 @@ test('quatro classes de título respeitam safe area e hierarquia estável',()=>{
     assert.equal(layout.category,category);
     assert.equal(layout.lines.join(' '),title);
     assert.ok(layout.lines.length>=1 && layout.lines.length<=layout.maxLines);
-    assert.ok(SOCIAL_CARD.title.top+layout.height<SOCIAL_CARD.source.top);
+    assert.ok(layout.height<=SOCIAL_CARD.title.maxHeight);
     assert.ok(layout.fontSize<=previousSize);
     previousSize=layout.fontSize;
   }
@@ -114,16 +113,11 @@ test('NOTÍCIAS e branding ocupam posições determinísticas como texto simples
   const text=collectText(layout.tree);
   assert.ok(text.includes('NOTÍCIAS'));
   assert.ok(text.includes('Guia do Proprietário'));
-  assert.deepEqual(layout.metrics.label,{left:86,top:182,width:213,height:60});
-  assert.equal(layout.metrics.brand.left,93);
-  assert.equal(layout.metrics.brand.top,922);
-  const signature=crypto.createHash('sha256').update(JSON.stringify({
-    dimensions:[layout.metrics.width,layout.metrics.height],
-    safe:layout.metrics.safe,
-    label:layout.metrics.label,
-    title:[layout.metrics.title.left,layout.metrics.title.top,layout.metrics.title.width],
-    source:layout.metrics.source,
-    brand:layout.metrics.brand
-  })).digest('hex');
-  assert.equal(signature,'3d8372ffca366dba24d91202df2bc884172ad946da5de30077d7e1a37055b05b');
+  assert.deepEqual(layout.metrics.label,{left:90,top:182,width:213,height:60});
+  assert.equal(layout.metrics.source.top,Math.max(
+    SOCIAL_CARD.source.minTop,
+    Math.min(SOCIAL_CARD.source.maxTop,layout.metrics.title.bottom+SOCIAL_CARD.source.gap)
+  ));
+  assert.equal(layout.metrics.brand.left,90);
+  assert.equal(layout.metrics.brand.top,layout.metrics.source.top+SOCIAL_CARD.brand.offsetTop);
 });

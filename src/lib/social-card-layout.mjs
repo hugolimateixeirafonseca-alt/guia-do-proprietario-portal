@@ -13,26 +13,25 @@ export const SOCIAL_CARD_LAYOUT = Object.freeze({
   width:1536,
   height:1024,
   safe:{left:86,right:72,top:64,bottom:62},
-  illustrationStart:746,
-  transitionSafeLeft:724,
-  label:{left:86,top:182,width:213,height:60},
-  topRule:{left:94,top:274,width:110,height:6},
-  title:{left:90,top:348,width:620,maxHeight:390},
-  source:{left:93,top:826,width:610},
-  bottomRule:{left:93,top:888,width:110,height:6},
-  brand:{left:93,top:922,width:610}
+  illustrationStart:760,
+  transitionSafeLeft:748,
+  label:{left:90,top:182,width:213,height:60},
+  title:{left:90,top:342,width:650,maxHeight:410},
+  source:{left:90,width:620,gap:58,minTop:720,maxTop:818},
+  bottomRule:{left:90,width:110,height:6,offsetTop:60},
+  brand:{left:90,width:620,offsetTop:94}
 });
 
 export const SOCIAL_CARD=SOCIAL_CARD_LAYOUT;
 
-const FONT_SIZES=[84,80,76,72,68,64,62,60,58,56,54,52,50,48,46,44,42,40,38,36,34];
+const FONT_SIZES=[96,92,88,84,82,80,78,76,74,72,70,68,66,64,62,60,58,56,54,52,50,48,46,44,42,40,38,36,34];
 
 function characterWidth(character,fontSize) {
-  if (/\s/u.test(character)) return fontSize*0.28;
-  if (/[ilI1.,:;!'|]/u.test(character)) return fontSize*0.3;
-  if (/[mwMW@%&]/u.test(character)) return fontSize*0.88;
-  if (/[A-ZÀ-Þ]/u.test(character)) return fontSize*0.66;
-  return fontSize*0.53;
+  if (/\s/u.test(character)) return fontSize*0.25;
+  if (/[ilI1.,:;!'|]/u.test(character)) return fontSize*0.27;
+  if (/[mwMW@%&]/u.test(character)) return fontSize*0.77;
+  if (/[A-ZÀ-Þ]/u.test(character)) return fontSize*0.58;
+  return fontSize*0.47;
 }
 
 function textWidth(text,fontSize) {
@@ -63,12 +62,12 @@ export function selectTitleLayout(title) {
   if (!exactTitle) throw new Error('title is required');
   const length=[...exactTitle].length;
   const category=length<=45?'short':length<=80?'medium':length<=115?'long':'very_long';
-  const preferredSize={short:84,medium:72,long:62,very_long:54}[category];
+  const preferredSize={short:96,medium:84,long:74,very_long:64}[category];
   const maxLines=category==='very_long'?6:5;
   for (const fontSize of FONT_SIZES.filter(size=>size<=preferredSize)) {
     const lines=wrapTitle(exactTitle,fontSize);
     if (!lines) continue;
-    const lineHeight=Math.round(fontSize*1.03);
+    const lineHeight=Math.round(fontSize*1.01);
     const height=lines.length*lineHeight;
     if (lines.length<=maxLines && height<=SOCIAL_CARD.title.maxHeight) {
       return {title:exactTitle,category,fontSize,lineHeight,lines,height,maxLines};
@@ -96,11 +95,12 @@ function editorialOverlay() {
     display:'flex',position:'absolute',left:0,top:0,
     width:SOCIAL_CARD.width,height:SOCIAL_CARD.height
   },[
-    graphic('path',{d:'M870 0H1004C881 143 807 335 816 524C825 695 752 846 666 1024H570C690 820 760 670 740 520C715 330 760 145 870 0Z',fill:SOCIAL_CARD_THEME.petrol}),
-    graphic('path',{d:'M585 0H889C809 132 765 297 771 468C778 650 701 847 610 1024H500C617 827 691 676 691 512C689 327 642 148 585 0Z',fill:SOCIAL_CARD_THEME.creamSecondary}),
-    graphic('path',{d:'M0 0H500C626 183 703 354 710 515C718 694 621 883 520 1024H0Z',fill:SOCIAL_CARD_THEME.background}),
-    graphic('path',{d:'M815 515C755 602 731 720 739 823C817 812 891 793 950 777C874 699 836 604 815 515Z',fill:SOCIAL_CARD_THEME.gold,opacity:0.96}),
-    graphic('path',{d:'M500 -18C642 187 712 365 710 525C708 702 620 884 520 1042',fill:'none',stroke:SOCIAL_CARD_THEME.gold,strokeWidth:1.6,opacity:0.82}),
+    graphic('path',{d:'M806 0H982C875 137 817 302 815 500C787 557 764 621 748 692C759 607 771 539 766 458C754 282 769 126 806 0Z',fill:SOCIAL_CARD_THEME.petrol}),
+    graphic('path',{d:'M500 0H806C769 140 758 302 772 478C768 626 692 840 604 1024H500Z',fill:SOCIAL_CARD_THEME.creamDepth}),
+    graphic('path',{d:'M500 0H610C656 146 702 323 704 510C704 672 637 824 520 1024H500Z',fill:SOCIAL_CARD_THEME.creamSecondary}),
+    graphic('path',{d:'M0 0H500C617 182 683 351 690 514C697 682 614 865 520 1024H0Z',fill:SOCIAL_CARD_THEME.background}),
+    graphic('path',{d:'M812 510C775 599 747 707 738 823C817 813 892 795 965 773C891 697 840 605 812 510Z',fill:SOCIAL_CARD_THEME.gold,opacity:0.93}),
+    graphic('path',{d:'M500 -18C628 184 692 357 690 521C688 699 615 878 520 1042',fill:'none',stroke:SOCIAL_CARD_THEME.gold,strokeWidth:1.45,opacity:0.78}),
     graphic('path',{d:'M-110 337C-33 350 16 416 16 503C16 586-29 649-98 671',fill:'none',stroke:SOCIAL_CARD_THEME.gold,strokeWidth:1.2,opacity:0.28}),
     ...dots
   ],{viewBox:'0 0 1536 1024',width:1536,height:1024,'aria-hidden':'true'});
@@ -112,6 +112,12 @@ export function createSocialCardLayout({title,source,pillar='casa',image}) {
   if (!image) throw new Error('base image is required');
   const titleLayout=selectTitleLayout(title);
   const titleBottom=SOCIAL_CARD.title.top+titleLayout.height;
+  const sourceTop=Math.min(
+    SOCIAL_CARD.source.maxTop,
+    Math.max(SOCIAL_CARD.source.minTop,titleBottom+SOCIAL_CARD.source.gap)
+  );
+  const bottomRuleTop=sourceTop+SOCIAL_CARD.bottomRule.offsetTop;
+  const brandTop=sourceTop+SOCIAL_CARD.brand.offsetTop;
   const titleNodes=titleLayout.lines.map((line,index)=>element('div',{
     display:'flex',
     width:SOCIAL_CARD.title.width,
@@ -139,18 +145,13 @@ export function createSocialCardLayout({title,source,pillar='casa',image}) {
       fontFamily:'Lato',fontWeight:700,fontSize:27,letterSpacing:4.2
     },'NOTÍCIAS'),
     element('div',{
-      display:'flex',position:'absolute',left:SOCIAL_CARD.topRule.left,top:SOCIAL_CARD.topRule.top,
-      width:SOCIAL_CARD.topRule.width,height:SOCIAL_CARD.topRule.height,
-      backgroundColor:SOCIAL_CARD_THEME.gold
-    },null),
-    element('div',{
       display:'flex',position:'absolute',left:SOCIAL_CARD.title.left,top:SOCIAL_CARD.title.top,
       width:SOCIAL_CARD.title.width,height:titleLayout.height,flexDirection:'column',
-      color:SOCIAL_CARD_THEME.ink,fontFamily:'Old Standard TT',fontWeight:700,
-      fontSize:titleLayout.fontSize,lineHeight:1,letterSpacing:-0.7
+      color:SOCIAL_CARD_THEME.ink,fontFamily:'Cormorant Garamond',fontWeight:500,
+      fontSize:titleLayout.fontSize,lineHeight:1,letterSpacing:-0.35
     },titleNodes),
     element('div',{
-      display:'flex',position:'absolute',left:SOCIAL_CARD.source.left,top:SOCIAL_CARD.source.top,
+      display:'flex',position:'absolute',left:SOCIAL_CARD.source.left,top:sourceTop,
       width:SOCIAL_CARD.source.width,height:38,alignItems:'center',
       color:SOCIAL_CARD_THEME.source,fontFamily:'Lato',fontWeight:400,fontSize:29
     },[
@@ -158,14 +159,14 @@ export function createSocialCardLayout({title,source,pillar='casa',image}) {
       element('span',{display:'flex',marginLeft:9},exactSource)
     ]),
     element('div',{
-      display:'flex',position:'absolute',left:SOCIAL_CARD.bottomRule.left,top:SOCIAL_CARD.bottomRule.top,
+      display:'flex',position:'absolute',left:SOCIAL_CARD.bottomRule.left,top:bottomRuleTop,
       width:SOCIAL_CARD.bottomRule.width,height:SOCIAL_CARD.bottomRule.height,
       backgroundColor:SOCIAL_CARD_THEME.gold
     },null),
     element('div',{
-      display:'flex',position:'absolute',left:SOCIAL_CARD.brand.left,top:SOCIAL_CARD.brand.top,
+      display:'flex',position:'absolute',left:SOCIAL_CARD.brand.left,top:brandTop,
       width:SOCIAL_CARD.brand.width,height:34,alignItems:'center',
-      color:SOCIAL_CARD_THEME.ink,fontFamily:'Old Standard TT',fontWeight:700,fontSize:29,letterSpacing:0
+      color:SOCIAL_CARD_THEME.ink,fontFamily:'Cormorant Garamond',fontWeight:500,fontSize:28,letterSpacing:0
     },'Guia do Proprietário'),
   ],{lang:'pt-PT'});
 
@@ -178,8 +179,8 @@ export function createSocialCardLayout({title,source,pillar='casa',image}) {
       illustrationStart:SOCIAL_CARD.illustrationStart,
       transitionSafeLeft:SOCIAL_CARD.transitionSafeLeft,
       label:SOCIAL_CARD.label,
-      source:SOCIAL_CARD.source,
-      brand:SOCIAL_CARD.brand,
+      source:{...SOCIAL_CARD.source,top:sourceTop},
+      brand:{...SOCIAL_CARD.brand,top:brandTop},
       title:{...SOCIAL_CARD.title,...titleLayout,bottom:titleBottom},
       exactSource
     }

@@ -7,6 +7,7 @@ const root=path.resolve(import.meta.dirname,'../..');
 const outputDirectory=path.join(root,'artifacts/social-card-fixtures');
 const masterArgumentIndex=process.argv.indexOf('--master-image');
 const suppliedMaster=masterArgumentIndex>=0 ? process.argv[masterArgumentIndex+1] : '';
+const masterOnly=process.argv.includes('--master-only');
 if (masterArgumentIndex>=0 && !suppliedMaster) throw new Error('--master-image requires a local raster path');
 
 const images={
@@ -30,17 +31,26 @@ const fixtures=[
 ];
 
 await fs.mkdir(outputDirectory,{recursive:true});
-for (const fixture of fixtures) {
+for (const fixture of masterOnly ? fixtures.slice(0,1) : fixtures) {
   let image;
   if (fixture.cropMaster) {
     const input=sharp(path.resolve(fixture.image));
     const metadata=await input.metadata();
-    const cropLeft=Math.round((metadata.width||1536)*0.625);
+    const cropLeft=Math.round((metadata.width||1536)*0.57);
     const cropWidth=(metadata.width||1536)-cropLeft;
-    image=await input
+    const photo=await input
       .extract({left:cropLeft,top:0,width:cropWidth,height:metadata.height||1024})
-      .resize(736,1024,{fit:'fill'})
-      .extend({left:800,right:0,top:0,bottom:0,background:'#173C3D'})
+      .resize(936,1024,{fit:'fill'})
+      .png()
+      .toBuffer();
+    const underlay=await sharp(path.resolve(fixture.image))
+      .extract({left:cropLeft,top:0,width:cropWidth,height:metadata.height||1024})
+      .resize(1536,1024,{fit:'fill'})
+      .blur(24)
+      .png()
+      .toBuffer();
+    image=await sharp(underlay)
+      .composite([{input:photo,left:600,top:0}])
       .png()
       .toBuffer();
   } else {

@@ -11,7 +11,7 @@ Esta opção evita um serviço, deployment e domínio adicionais. A Function usa
 - Satori para composição editorial e tipografia real;
 - `resvg-wasm` para converter o SVG em PNG dentro do runtime Cloudflare;
 - uma base visual recebida por `multipart/form-data` e integrada no canvas;
-- Old Standard TT Bold no título e Lato nos restantes textos;
+- Cormorant Garamond Medium no título e assinatura, com Lato nos restantes textos;
 - fontes incluídas no bundle, sem pedidos a Google Fonts durante o render.
 
 O resultado é sempre um PNG de 1536x1024. A fotografia ocupa o canvas em full bleed e sangra no topo, direita e fundo. Uma máscara editorial assimétrica em creme recorta organicamente a área de texto, sem fronteira vertical, caixa, margem ou frame na fotografia.
@@ -77,14 +77,14 @@ O endpoint aceita exclusivamente `POST` autenticado e exige `multipart/form-data
 
 ## Fontes e licenças
 
-- Old Standard TT Bold, SIL Open Font License 1.1;
+- Cormorant Garamond Medium, SIL Open Font License 1.1;
 - Lato Regular/Bold, SIL Open Font License 1.1.
 
 Os ficheiros de licença estão junto dos binários em `functions/assets/fonts/`. Os binários foram obtidos do repositório oficial `google/fonts` e são empacotados como módulos binários pela Cloudflare.
 
 ## Fixtures visuais
 
-Executar `npm run fixtures:social-card -- --master-image "<path-local-do-master>"` para gerar a calibração master e quatro cartões, curto, médio, longo e muito longo, em `artifacts/social-card-fixtures/`. As restantes fixtures usam rasters locais existentes no portal. O diretório é ignorado pelo Git e pelo build, mas os cinco PNGs permanecem disponíveis no worktree para aprovação visual antes do push.
+Executar `npm run fixtures:social-card -- --master-image "<path-local-do-master>" --master-only` para gerar apenas `00-master-calibration.png`. Sem `--master-only`, o comando gera também os quatro cartões de comprimentos diferentes. As restantes fixtures usam rasters locais existentes no portal. O diretório `artifacts/social-card-fixtures/` é ignorado pelo Git e pelo build.
 
 ## Falhas
 
