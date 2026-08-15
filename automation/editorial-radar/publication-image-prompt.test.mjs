@@ -119,15 +119,20 @@ test('E) proposta corretamente descrita como proposta é aceite',()=>{
   assert.match(publication.texto_site,/não.*em vigor/iu);
 });
 
-test('prompt visual exclui título, fonte e copy jornalística',()=>{
+test('prompt visual é editorial não fotorealista e exclui título, fonte e copy jornalística',()=>{
   const publication=finalizePublication({publishableNews:true,event,generated});
   assert.equal(publication.prompt_imagem.includes(event.title),false);
   assert.equal(publication.prompt_imagem.includes(event.source_name),false);
   assert.equal(publication.prompt_imagem.includes(generated.texto_fb),false);
   assert.equal(publication.prompt_imagem.includes(generated.texto_site),false);
-  assert.match(publication.prompt_imagem,/concrete subject of the news/iu);
+  assert.match(publication.prompt_imagem,/non-photorealistic editorial illustration/iu);
   assert.match(publication.prompt_imagem,/do not create the card/iu);
+  assert.match(publication.prompt_imagem,/subtle paper, gouache and fine-grain texture/iu);
+  assert.match(publication.prompt_imagem,/avoid[\s\S]*photorealism/iu);
+  assert.doesNotMatch(publication.prompt_imagem,/Create only the photographic visual layer/iu);
+  assert.doesNotMatch(publication.prompt_imagem,/Return one photographic visual layer/iu);
   assert.equal(publication.prompt_tecnico,IMAGE_TECHNICAL_PROMPT);
+  assert.match(publication.prompt_tecnico,/não fotorealista/iu);
 });
 
 test('F) orientação com números ou entidade usa fallback seguro',()=>{
@@ -139,32 +144,34 @@ test('F) orientação com números ou entidade usa fallback seguro',()=>{
   assert.equal(publication.prompt_imagem.includes('25'),false);
   assert.equal(publication.prompt_imagem.includes(event.entities[0]),false);
   assert.match(publication.prompt_imagem,/chave(?: de casa)? em primeiro plano/iu);
+  assert.match(publication.prompt_imagem,/não fotorealista/iu);
 });
 
-test('G) tema conhecido usa direção fotográfica determinística em vez do estilo sugerido pelo modelo',()=>{
-  const direction='Ilustração elegante de uma casa bonita com formas abstratas.';
+test('G) tema conhecido usa direção ilustrada determinística em vez do estilo sugerido pelo modelo',()=>{
+  const direction='Fotografia realista de uma casa bonita com formas abstratas.';
   const resolved=safeIllustrationDirection(direction,event);
-  assert.match(resolved,/Fotografia editorial realista/iu);
+  assert.match(resolved,/Ilustração editorial arquitetónica premium/iu);
+  assert.match(resolved,/não fotorealista/iu);
   assert.match(resolved,/arrendamento/iu);
-  assert.doesNotMatch(resolved,/Ilustração/iu);
+  assert.doesNotMatch(resolved,/Fotografia editorial realista/iu);
 });
 
-test('Euribor usa fotografia específica de crédito à habitação',()=>{
+test('Euribor usa ilustração específica de crédito à habitação',()=>{
   const euribor={
     title:'Euribor desce a três e 12 meses, mas taxa mais usada volta a subir',
     summary:'A Euribor a seis meses é a mais usada no crédito à habitação com taxa variável.',
     pillar:'casa',
     key_facts:['A taxa a seis meses subiu na sessão.']
   };
-  const resolved=safeIllustrationDirection('Ilustração com uma casa, uma calculadora e um gráfico.',euribor);
-  assert.match(resolved,/Fotografia editorial realista/iu);
-  assert.match(resolved,/calculadora/iu);
+  const resolved=safeIllustrationDirection('Fotografia com uma casa, uma calculadora e um gráfico.',euribor);
+  assert.match(resolved,/Ilustração editorial arquitetónica premium/iu);
+  assert.match(resolved,/não fotorealista/iu);
+  assert.match(resolved,/maquete residencial/iu);
   assert.match(resolved,/chave de casa/iu);
   assert.doesNotMatch(resolved,/gráfico de linhas/iu);
-  assert.doesNotMatch(resolved,/Ilustração/iu);
 });
 
-test('PRR usa fotografia específica de construção e entrega de habitação pública',()=>{
+test('PRR usa ilustração específica de construção e entrega de habitação pública',()=>{
   const prr={
     title:'Habitação pública alavancada com 28 mil casas pagas pelo PRR',
     summary:'Novas habitações públicas estão em construção e entrega.',
@@ -172,7 +179,8 @@ test('PRR usa fotografia específica de construção e entrega de habitação p�
     key_facts:['O Governo prevê novas entregas de habitação pública.']
   };
   const resolved=safeIllustrationDirection('Conjunto de edifícios e chaves.',prr);
-  assert.match(resolved,/Fotografia editorial realista/iu);
+  assert.match(resolved,/Ilustração editorial arquitetónica premium/iu);
+  assert.match(resolved,/não fotorealista/iu);
   assert.match(resolved,/habitação pública/iu);
   assert.match(resolved,/grua/iu);
   assert.match(resolved,/chaves/iu);

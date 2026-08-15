@@ -3,11 +3,12 @@ import { getCollection } from "astro:content";
 import precos from "../dados/precos-concelhos.json";
 import imi from "../dados/imi-concelhos.json";
 import { compararPorPublicacao } from "../lib/artigos";
+import { compararNotasRecentes, deduplicarNotas } from "../lib/notas";
 
 export const GET: APIRoute = async ({ site }) => {
   const base = site?.toString() || "https://guiadoproprietario.pt/";
   const artigos = (await getCollection("artigos", ({ data }) => !data.rascunho)).sort(compararPorPublicacao);
-  const notas = await getCollection("notas");
+  const notas = deduplicarNotas((await getCollection("notas")).sort(compararNotasRecentes));
   const og = (route: string) => new URL(`/og${route}index.png`, base).toString();
   const artigoItems = artigos.map((artigo) => {
     const route = `/${artigo.data.pilar}/${artigo.id}/`;
