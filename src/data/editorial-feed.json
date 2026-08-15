@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-14T11:18:28.726Z",
+  "generatedAt": "2026-08-15T21:05:30.066Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 92,
-    "published": 70,
-    "newsOnline": 15
+    "published": 71,
+    "newsOnline": 17
   },
   "articles": [
     {
@@ -1104,14 +1104,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "dedetizacao-controlo-pragas.mdx",
       "arrivedAt": "2026-08-06T15:58:33+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-15T07:01:18Z",
+      "url": "https://guiadoproprietario.pt/casa/dedetizacao-controlo-pragas/"
     },
     {
       "id": "SC20",
@@ -1483,6 +1483,30 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-15-002130214-noticia-49",
+      "title": "Governo propõe flexibilizar regras para o senhorio avançar com ação de despejo",
+      "summary": "O Governo propõe alterar as regras que determinam quando um senhorio pode avançar com uma ação de despejo. A mudança faz parte das propostas para flexibilizar o mercado de arrendam",
+      "pillar": "arrendar",
+      "publishedAt": "2026-08-15",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-15-002130214-noticia-49/",
+      "source": {
+        "name": "ECO",
+        "url": "https://eco.sapo.pt/descodificador/governo-quer-mercado-de-arrendamento-mais-flexivel-conheca-as-propostas/04-ao-fim-de-quanto-tempo-e-que-o-senhorio-pode-avancar-com-acao-de-despejo"
+      }
+    },
+    {
+      "slug": "2026-08-15-213115197-noticia-52",
+      "title": "Habitação pública alavancada com 28 mil casas pagas pelo PRR",
+      "summary": "O Governo anunciou que mais de 28.000 habitações públicas estarão entregues em todo o país até ao fim de agosto, ultrapassando a meta de 26.000 casas definida no âmbito do PRR. Out",
+      "pillar": "casa",
+      "publishedAt": "2026-08-15",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-15-213115197-noticia-52/",
+      "source": {
+        "name": "ECO",
+        "url": "https://eco.sapo.pt/2026/08/15/cerca-de-28-000-casas-de-habitacao-publica-entregues-ate-ao-fim-de-agosto-no-ambito-do-prr"
+      }
+    },
     {
       "slug": "2026-08-14-121533120-noticia-47",
       "title": "Apoio ao alojamento para estudantes deslocados poderá dispensar contrato de arrendamento",
