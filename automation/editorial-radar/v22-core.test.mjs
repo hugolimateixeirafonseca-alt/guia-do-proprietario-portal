@@ -153,14 +153,15 @@ const generated={
   orientacao_ilustracao_segura:'Entrada residencial portuguesa com porta de apartamento, chave em primeiro plano e corredor comum sóbrio associado ao arrendamento.'
 };
 
-test('publicação completa passa e tema conhecido usa direção fotográfica determinística',()=>{
+test('publicação completa passa e tema conhecido usa direção ilustrada determinística',()=>{
   const direction=generated.orientacao_ilustracao_segura;
   const resolved=safeIllustrationDirection(direction,event);
-  assert.match(resolved,/Fotografia editorial realista/iu);
+  assert.match(resolved,/Ilustração editorial arquitetónica premium/iu);
+  assert.match(resolved,/não fotorealista/iu);
   assert.match(resolved,/arrendamento/iu);
   const publication=finalizePublication({publishableNews:true,event,generated});
   assert.match(publication.prompt_imagem,/corredor comum/iu);
-  assert.doesNotMatch(publication.prompt_imagem,/SUBJECT DIRECTION\nIlustração/iu);
+  assert.match(publication.prompt_imagem,/non-photorealistic editorial illustration/iu);
 });
 
 test('direção genérica em PRR é substituída por imagem específica',()=>{
@@ -172,6 +173,7 @@ test('direção genérica em PRR é substituída por imagem específica',()=>{
   };
   const direction=safeIllustrationDirection('Uma casa bonita.',prrEvent);
   assert.match(direction,/fase final de construção/iu);
+  assert.match(direction,/não fotorealista/iu);
 });
 
 test('site pobre com menos de 300 palavras é rejeitado',()=>{
