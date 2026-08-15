@@ -8,6 +8,7 @@ import {getDiscoveryModePlan} from './discovery-mode.mjs';
 import {combinedHistoricalContext,createIsolationController} from './dry-run-isolation.mjs';
 import {finalizePublication,PublicationQualityError} from './publication-image-prompt.mjs';
 import {DEFAULT_MIN_NEWS_SCORE,isPublishableNews} from './publication-eligibility.mjs';
+import {applyDeterministicEditorialScores} from './editorial-scoring.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -437,6 +438,8 @@ async function validateSearchResults(sources, currentTime) {
       const validated={
         ...candidate,
         title:candidate.title || source.verified_title,
+        source_title:source.verified_title || source.title || candidate.title || '',
+        harvest_relevance_score:Number(source.harvest_relevance_score||0),
         event_date:source.verified_published_at.slice(0,10),
         article_url:source.url,
         source_type:official?'official':'media',
@@ -503,6 +506,8 @@ async function validateSearchResults(sources, currentTime) {
       const validated={
         ...candidate,
         title:candidate.title || source.verified_title,
+        source_title:source.verified_title || source.title || candidate.title || '',
+        harvest_relevance_score:Number(source.harvest_relevance_score||0),
         event_date:source.verified_published_at.slice(0,10),
         article_url:source.url,
         source_type:official?'official':'media',
@@ -636,10 +641,42 @@ async function historicalContext(candidate, runAcceptedEvents=[]) {
 }
 
 async function classifyEvent(candidate, history) {
-  const prompt=`És editor-chefe do Guia do Proprietário. Decide se o candidato é um acontecimento NOVO, DUPLICADO de algo já registado/publicado, ou NOVO_MARCO de um processo anterior.\n\nCANDIDATO:\n${JSON.stringify(candidate)}\n\nHISTÓRICO PRÓXIMO:\n${JSON.stringify(history)}\n\nDUPLICADO = mesmo acontecimento central, ainda que fonte/título diferentes. NOVO_MARCO = houve mudança material de estado/facto (ex.: proposta -> aprovação -> publicação -> entrada em vigor), não simples repetição.\n\nAvalia também relevância para o Guia. Devolve apenas JSON:\n{"decision":"NOVO|DUPLICADO|NOVO_MARCO|IGNORAR","duplicate_event_id":"","parent_event_id":"","event_key":"slug-estavel-do-acontecimento","news_score":0,"seo_score":0,"lead_score":0,"reason":"","verified_title":"","verified_summary":"","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao"}`;
-  return parseJson((await openai({model:CFG.openaiModelEditor,prompt,purpose:'editor',web:false,effort:'medium'})).text);
-}
+  const prompt=`És editor-chefe do Guia do Proprietário. Decide se o candidato é um acontecimento NOVO, DUPLICADO de algo já registado/publicado, ou NOVO_MARCO de um processo anterior.
 
+CANDIDATO:
+${JSON.stringify(candidate)}
+
+HISTÓRICO PRÓXIMO:
+${JSON.stringify(history)}
+
+DUPLICADO = mesmo acontecimento central, ainda que fonte/título diferentes.
+NOVO_MARCO = houve mudança material de estado/facto (ex.: proposta -> aprovação -> publicação -> entrada em vigor), não simples repetição.
+
+Nesta chamada NÃO atribuas scores. Os scores editoriais são calculados deterministicamente pelo sistema depois da tua decisão.
+
+Devolve apenas JSON:
+{"decision":"NOVO|DUPLICADO|NOVO_MARCO|IGNORAR","duplicate_event_id":"","parent_event_id":"","event_key":"slug-estavel-do-acontecimento","reason":"","verified_title":"","verified_summary":"","pillar":"vender|impostos|arrendar|condominio|casa","legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao"}`;
+
+  const classification=parseJson((await openai({
+    model:CFG.openaiModelEditor,
+    prompt,
+    purpose:'editor',
+    web:false,
+    effort:'medium'
+  })).text);
+
+  const scored=applyDeterministicEditorialScores(candidate,classification);
+  console.log(JSON.stringify({
+    stage:'editorial_scores',
+    title:candidate.source_title||candidate.title||'',
+    scoring_version:scored.scoring_version,
+    news_score:scored.news_score,
+    seo_score:scored.seo_score,
+    lead_score:scored.lead_score,
+    signals:scored.scoring_signals
+  }));
+  return scored;
+}
 async function upsertEvent(candidate, cls) {
   const eventKey = cls.event_key || slugify(cls.verified_title || candidate.title);
   const eventId = id('evt',eventKey);
