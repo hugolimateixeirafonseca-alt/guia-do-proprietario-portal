@@ -51,6 +51,17 @@ function uniqueFacts(values=[]) {
   return out;
 }
 
+export function normalizeConfidence(value) {
+  let numeric;
+  if (typeof value==='string') {
+    const cleaned=value.trim().replace('%','').replace(',','.');
+    numeric=Number(cleaned);
+  } else numeric=Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  if (numeric>0 && numeric<=1) numeric*=100;
+  return Math.max(0,Math.min(100,Math.round(numeric)));
+}
+
 function evidencePayload(source) {
   return {
     article_url:source.url,
@@ -76,21 +87,23 @@ Para CADA URL:
 - identifica entities apenas quando aparecem na evidência;
 - identifica legal_stage apenas quando suportado;
 - confidence mede apenas a suficiência da evidência factual, não a importância da notícia;
-- se a evidência não permitir pelo menos 3 factos concretos, usa validation_status="insufficient";
+- confidence TEM DE ser um número inteiro entre 0 e 100: por exemplo 92, nunca 0.92;
+- usa validation_status="verified" quando a evidência permite pelo menos 3 factos concretos e um resumo factual consistente;
+- usa validation_status="insufficient" apenas quando a evidência realmente não permite essa extração;
 - NÃO omitas a URL.
 
 INPUT:
 ${JSON.stringify(sources.map(evidencePayload))}
 
 Devolve APENAS JSON:
-{"results":[{"article_url":"","summary":"","entities":[],"key_facts":[],"legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","confidence":0,"validation_status":"verified|insufficient"}]}`;
+{"results":[{"article_url":"","summary":"","entities":[],"key_facts":[],"legal_stage":"na|anuncio|proposta|aprovacao|publicacao|entrada_em_vigor|alteracao|revogacao","confidence":92,"validation_status":"verified|insufficient"}]}`;
 }
 
 export function normalizeFactualCandidate(source,item={}) {
   if (canonical(item.article_url)!==canonical(source.url)) return null;
   const facts=uniqueFacts(item.key_facts);
   const summary=String(item.summary||'').replace(/\s+/g,' ').trim();
-  const confidence=Math.max(0,Math.min(100,Number(item.confidence)||0));
+  const confidence=normalizeConfidence(item.confidence);
   const stage=ALLOWED_STAGES.has(item.legal_stage) ? item.legal_stage : inferDeterministicLegalStage(source);
   const verified=item.validation_status!=='insufficient' && confidence>=75 && summary.length>=80 && facts.length>=3;
   return {
@@ -152,6 +165,21 @@ async function callAndParse(callModel,{model,prompt,purpose,effort}) {
   }
 }
 
+function diagnostic(candidate,item,source,model,log) {
+  log({
+    stage:'validator_candidate_diagnostic',
+    model,
+    article_url:source.url,
+    matched:Boolean(item),
+    model_status:String(item?.validation_status||''),
+    raw_confidence:item?.confidence??null,
+    normalized_confidence:candidate?.validation_confidence??0,
+    summary_chars:String(candidate?.summary||'').length,
+    facts_count:Array.isArray(candidate?.key_facts)?candidate.key_facts.length:0,
+    result:candidate?.validation_status||'no_match'
+  });
+}
+
 export async function extractFactualCandidates(sources,{
   callModel,
   primaryModel,
@@ -179,7 +207,7 @@ export async function extractFactualCandidates(sources,{
         resolved.set(source.url,candidate);
         unresolved.delete(source.url);
         verified++;
-      }
+      } else diagnostic(candidate,item,source,primaryModel,log);
     }
     log({stage:'validator_extract_batch',batch:batchNumber,input:batch.length,verified});
   }
@@ -201,7 +229,7 @@ export async function extractFactualCandidates(sources,{
         resolved.set(source.url,candidate);
         unresolved.delete(source.url);
         verified++;
-      }
+      } else diagnostic(candidate,item,source,fallbackModel,log);
     }
     log({stage:'validator_extract_fallback_batch',batch:batchNumber,input:batch.length,verified});
   }
