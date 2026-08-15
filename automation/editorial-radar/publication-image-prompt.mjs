@@ -1,11 +1,11 @@
 export const IMAGE_TECHNICAL_PROMPT = 'gpt-image-2 high — base editorial sem texto + composição tipográfica determinística';
 
 const SAFE_DIRECTIONS={
-  vender:'Arquitetura residencial portuguesa elegante com porta de entrada, chave e elementos económicos abstratos e discretos.',
-  impostos:'Casa portuguesa elegante com documentação patrimonial sem texto legível e elementos financeiros abstratos.',
+  vender:'Entrada de uma habitação portuguesa com chave em primeiro plano e contexto visual sóbrio de decisão de venda, sem sinalética nem texto.',
+  impostos:'Habitação portuguesa com pasta documental fechada e elementos administrativos discretos, sem texto, números ou documentos legíveis.',
   arrendar:'Entrada de prédio residencial português, porta de apartamento e chave em primeiro plano, numa atmosfera editorial sóbria associada a arrendamento.',
-  condominio:'Prédio residencial português elegante, entrada comum, varandas em ferro, azulejos discretos e vegetação mediterrânica.',
-  casa:'Habitação portuguesa elegante com telha cerâmica, detalhes arquitetónicos tradicionais e vegetação discreta.'
+  condominio:'Entrada comum de prédio residencial português, intercomunicador sem texto, caixas de correio neutras e varandas ao fundo.',
+  casa:'Habitação portuguesa contemporânea com contexto residencial realista e elementos concretos ligados ao tema da notícia.'
 };
 
 const SENSITIVE_TERMS=/\b(crime|criminal|polícia|policial|detido|detenção|morte|morto|vítima|agressão|arma|droga|incêndio|explosão)\b/iu;
@@ -15,19 +15,15 @@ const INTERNAL_LINK_RE=/\]\(\/(?:casa|vender|arrendar|condominio|impostos|calend
 function normalizeLine(value) {
   return String(value||'').replace(/\s+/gu,' ').trim();
 }
-
 function comparable(value) {
   return normalizeLine(value).normalize('NFD').replace(/[\u0300-\u036f]/gu,'').toLowerCase();
 }
-
 function values(value) {
   return Array.isArray(value) ? value : [value];
 }
-
 function wordCount(value) {
   return (String(value||'').match(/[\p{L}\p{M}]+(?:['’][\p{L}\p{M}]+)*/gu)||[]).length;
 }
-
 function section(markdown,heading) {
   const lines=String(markdown||'').split(/\r?\n/gu);
   const target=`## ${heading}`;
@@ -40,7 +36,6 @@ function section(markdown,heading) {
   }
   return out.join('\n').trim();
 }
-
 function hasRepeatedLongBlock(markdown) {
   const blocks=String(markdown||'')
     .split(/\n\s*\n/gu)
@@ -48,7 +43,6 @@ function hasRepeatedLongBlock(markdown) {
     .filter(block=>block && !/^#{1,6}\s+/u.test(block) && !/^(?:[-*+]\s+|\d+[.)]\s+)/u.test(block))
     .map(block=>normalizeLine(block))
     .filter(block=>wordCount(block)>=18);
-
   const seen=new Set();
   for (const block of blocks) {
     const key=comparable(block);
@@ -56,6 +50,35 @@ function hasRepeatedLongBlock(markdown) {
     seen.add(key);
   }
   return false;
+}
+
+function topicDirection(event={}) {
+  const text=comparable([event.title,event.summary,...values(event.key_facts)].join(' '));
+  if (/\bprr\b|habitacao publica|casas entreg|casas concluid|oferta de habitacao|construcao de habitacao/u.test(text)) {
+    return 'Conjunto residencial português contemporâneo em fase final de construção, com vários edifícios de habitação novos, acabamentos recentes e uma chave de casa em primeiro plano, ambiente realista de entrega de novas habitações.';
+  }
+  if (/euribor|credito a habitacao|credito habitacao|prestacao da casa|hipoteca/u.test(text)) {
+    return 'Entrada de apartamento português com chave em primeiro plano e uma pequena maquete residencial sobre uma mesa, com ambiente financeiro sóbrio sugerido apenas por formas e materiais, sem texto nem números.';
+  }
+  if (/despejo|senhorio|arrendamento|inquilino|renda|caucao/u.test(text)) {
+    return 'Entrada de prédio residencial português, porta de apartamento, chave em primeiro plano e corredor comum discreto, numa composição editorial ligada de forma clara ao arrendamento.';
+  }
+  if (/condominio|condomino|fundo comum|administrador/u.test(text)) return SAFE_DIRECTIONS.condominio;
+  if (/\bimi\b|\bimt\b|irs|imposto|fisco|mais valias/u.test(text)) return SAFE_DIRECTIONS.impostos;
+  if (/obras|reabilitacao|eficiencia energetica|isolamento|painel solar|energia/u.test(text)) {
+    return 'Habitação portuguesa em contexto realista de melhoria ou reabilitação, com detalhe de obra limpa e materiais de construção discretos, sem trabalhadores em poses publicitárias nem sinalética.';
+  }
+  if (/preco das casas|mercado imobiliario|valor dos imoveis|vendas de casas/u.test(text)) {
+    return 'Rua residencial portuguesa com edifícios de habitação reais, chave de casa em primeiro plano e profundidade urbana natural, sugerindo mercado imobiliário sem placas, texto ou publicidade.';
+  }
+  return '';
+}
+
+function genericDirection(direction='') {
+  const d=comparable(direction);
+  const words=wordCount(direction);
+  if (words<8) return true;
+  return /\b(?:casa bonita|interior premium|interior elegante|apartamento bonito|fachada bonita|casa elegante|predio elegante)\b/u.test(d);
 }
 
 export class PublicationQualityError extends Error {
@@ -72,23 +95,33 @@ export function validatePublicationContent(generated,event={}) {
   const textoSite=String(generated?.texto_site||'').trim();
   const visual=String(generated?.orientacao_ilustracao_segura||'').trim();
 
+  const fbWords=wordCount(textoFb);
   if (!textoFb) reasons.push('texto_fb_empty');
+  else {
+    if (fbWords<55) reasons.push(`texto_fb_too_short:${fbWords}`);
+    if (fbWords>140) reasons.push(`texto_fb_too_long:${fbWords}`);
+    if (!textoFb.endsWith('Explicamos o essencial no link.')) reasons.push('texto_fb_bad_ending');
+  }
+
   if (!textoSite) reasons.push('texto_site_empty');
   if (!visual) reasons.push('illustration_direction_empty');
 
   if (textoSite) {
     const words=wordCount(textoSite);
-    if (words<250) reasons.push(`texto_site_too_short:${words}`);
-    if (words>800) reasons.push(`texto_site_too_long:${words}`);
+    if (words<300) reasons.push(`texto_site_too_short:${words}`);
+    if (words>700) reasons.push(`texto_site_too_long:${words}`);
     if (!/^##\s+O essencial\s*$/imu.test(textoSite)) reasons.push('missing_o_essencial');
     if (!/^##\s+Também pode interessar\s*$/imu.test(textoSite)) reasons.push('missing_tambem_pode_interessar');
     if (/^#\s+/mu.test(textoSite)) reasons.push('h1_not_allowed');
     if (/<[a-z][^>]*>/iu.test(textoSite)) reasons.push('html_not_allowed');
 
+    const headings=textoSite.match(/^##\s+.+$/gmu)||[];
+    if (headings.length<4) reasons.push(`insufficient_sections:${headings.length}`);
+
     const essential=section(textoSite,'O essencial');
     if (essential) {
       const bullets=essential.split(/\r?\n/gu).filter(line=>/^\s*(?:[-*+]\s+|\d+[.)]\s+)/u.test(line)).length;
-      if (bullets<3) reasons.push(`o_essencial_bullets:${bullets}`);
+      if (bullets<4) reasons.push(`o_essencial_bullets:${bullets}`);
     } else if (/^##\s+O essencial\s*$/imu.test(textoSite)) {
       reasons.push('o_essencial_empty');
     }
@@ -104,25 +137,20 @@ export function validatePublicationContent(generated,event={}) {
     if (hasRepeatedLongBlock(textoSite)) reasons.push('repeated_long_block');
   }
 
-  return {
-    ok:reasons.length===0,
-    reasons,
-    word_count:wordCount(textoSite),
-    legal_stage:event?.legal_stage||'na'
-  };
+  return {ok:reasons.length===0,reasons,word_count:wordCount(textoSite),facebook_word_count:fbWords,legal_stage:event?.legal_stage||'na'};
 }
 
 export function safeIllustrationDirection(value,event={}) {
   const direction=normalizeLine(value);
   if (!direction) throw new Error('Safe illustration direction is required');
-  const fallback=SAFE_DIRECTIONS[event.pillar]||SAFE_DIRECTIONS.casa;
+
+  const deterministic=topicDirection(event);
+  const fallback=deterministic || SAFE_DIRECTIONS[event.pillar] || SAFE_DIRECTIONS.casa;
   const normalized=comparable(direction);
   const forbidden=[
     event.title,event.source_name,event.summary,event.article_url,event.url_original,
     ...values(event.entities),...values(event.key_facts),...values(event.forbiddenText)
-  ]
-    .map(comparable)
-    .filter(item=>item.length>=4);
+  ].map(comparable).filter(item=>item.length>=4);
 
   const unsafe=direction.length>320
     || /\p{N}/u.test(direction)
@@ -130,7 +158,8 @@ export function safeIllustrationDirection(value,event={}) {
     || NEWS_DETAIL_TERMS.test(direction)
     || forbidden.some(item=>normalized.includes(item));
 
-  return unsafe ? fallback : direction;
+  if (unsafe || (deterministic && genericDirection(direction))) return fallback;
+  return direction;
 }
 
 export function buildPublicationImagePrompt({illustrationDirection}) {

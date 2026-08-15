@@ -1,4 +1,4 @@
-name: Editorial Radar v21.2
+name: Editorial Radar v22.0
 
 on:
   schedule:
@@ -47,7 +47,7 @@ jobs:
       OPENAI_VALIDATOR_MODEL: gpt-5.6-luna
       OPENAI_EDITOR_MODEL: gpt-5.6-sol
       OPENAI_IMPACT_MODEL: gpt-5.6-terra
-      OPENAI_COPY_MODEL: gpt-5.6-luna
+      OPENAI_COPY_MODEL: gpt-5.6-sol
       MAX_RUN_TOKENS: '0'
       MIN_NEWS_SCORE: '70'
       MIN_IMPACT_CONFIDENCE: '80'
@@ -69,9 +69,9 @@ jobs:
             echo "RADAR_DRY_RUN=false" >> "$GITHUB_ENV"
             echo "BACKFILL=false" >> "$GITHUB_ENV"
           fi
-      - name: Run editorial radar
+      - name: Run editorial radar v22
         if: ${{ github.event_name == 'schedule' || (inputs.mode != 'maintenance-report' && inputs.mode != 'maintenance-cleanup') }}
-        run: node automation/editorial-radar/radar.mjs
+        run: node automation/editorial-radar/radar-v22.mjs
       - name: Report test events
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'maintenance-report' }}
         run: node automation/editorial-radar/cleanup-test-events.mjs
