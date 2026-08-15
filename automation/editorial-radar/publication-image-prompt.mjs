@@ -1,11 +1,11 @@
 export const IMAGE_TECHNICAL_PROMPT = 'gpt-image-2 high — base editorial sem texto + composição tipográfica determinística';
 
 const SAFE_DIRECTIONS={
-  vender:'Entrada de uma habitação portuguesa com chave em primeiro plano e contexto visual sóbrio de decisão de venda, sem sinalética nem texto.',
-  impostos:'Habitação portuguesa com pasta documental fechada e elementos administrativos discretos, sem texto, números ou documentos legíveis.',
-  arrendar:'Entrada de prédio residencial português, porta de apartamento e chave em primeiro plano, numa atmosfera editorial sóbria associada a arrendamento.',
-  condominio:'Entrada comum de prédio residencial português, intercomunicador sem texto, caixas de correio neutras e varandas ao fundo.',
-  casa:'Habitação portuguesa contemporânea com contexto residencial realista e elementos concretos ligados ao tema da notícia.'
+  vender:'Fotografia editorial realista da entrada de uma habitação portuguesa, com chave de casa em primeiro plano e contexto visual sóbrio de decisão de venda, sem sinalética nem texto.',
+  impostos:'Fotografia editorial realista de uma habitação portuguesa com pasta documental fechada e elementos administrativos discretos, sem texto, números ou documentos legíveis.',
+  arrendar:'Fotografia editorial realista da entrada de um prédio residencial português, com porta de apartamento, chave de casa em primeiro plano e corredor comum discreto associado ao arrendamento.',
+  condominio:'Fotografia editorial realista da entrada comum de um prédio residencial português, com intercomunicador sem texto, caixas de correio neutras e varandas ao fundo.',
+  casa:'Fotografia editorial realista de uma habitação portuguesa contemporânea, com contexto residencial plausível e elementos concretos ligados ao tema da notícia.'
 };
 
 const SENSITIVE_TERMS=/\b(crime|criminal|polícia|policial|detido|detenção|morte|morto|vítima|agressão|arma|droga|incêndio|explosão)\b/iu;
@@ -55,21 +55,21 @@ function hasRepeatedLongBlock(markdown) {
 function topicDirection(event={}) {
   const text=comparable([event.title,event.summary,...values(event.key_facts)].join(' '));
   if (/\bprr\b|habitacao publica|casas entreg|casas concluid|oferta de habitacao|construcao de habitacao/u.test(text)) {
-    return 'Conjunto residencial português contemporâneo em fase final de construção, com vários edifícios de habitação novos, acabamentos recentes e uma chave de casa em primeiro plano, ambiente realista de entrega de novas habitações.';
+    return 'Fotografia editorial realista de um conjunto de habitação pública portuguesa em fase final de construção: vários edifícios residenciais novos, uma grua junto a um bloco ainda em obra e um molho de chaves de casa em primeiro plano, transmitindo conclusão e entrega de novas habitações sem recurso a texto.';
   }
   if (/euribor|credito a habitacao|credito habitacao|prestacao da casa|hipoteca/u.test(text)) {
-    return 'Entrada de apartamento português com chave em primeiro plano e uma pequena maquete residencial sobre uma mesa, com ambiente financeiro sóbrio sugerido apenas por formas e materiais, sem texto nem números.';
+    return 'Fotografia editorial realista numa casa portuguesa: chave de casa e pequena maquete residencial em primeiro plano, acompanhadas por uma calculadora física com visor sem algarismos legíveis; ambiente financeiro sóbrio ligado ao crédito à habitação, sem gráficos artificiais, texto ou números.';
   }
   if (/despejo|senhorio|arrendamento|inquilino|renda|caucao/u.test(text)) {
-    return 'Entrada de prédio residencial português, porta de apartamento, chave em primeiro plano e corredor comum discreto, numa composição editorial ligada de forma clara ao arrendamento.';
+    return 'Fotografia editorial realista da entrada de um prédio residencial português, com porta de apartamento, chave de casa em primeiro plano e corredor comum discreto, numa composição claramente associada ao arrendamento.';
   }
   if (/condominio|condomino|fundo comum|administrador/u.test(text)) return SAFE_DIRECTIONS.condominio;
   if (/\bimi\b|\bimt\b|irs|imposto|fisco|mais valias/u.test(text)) return SAFE_DIRECTIONS.impostos;
   if (/obras|reabilitacao|eficiencia energetica|isolamento|painel solar|energia/u.test(text)) {
-    return 'Habitação portuguesa em contexto realista de melhoria ou reabilitação, com detalhe de obra limpa e materiais de construção discretos, sem trabalhadores em poses publicitárias nem sinalética.';
+    return 'Fotografia editorial realista de uma habitação portuguesa em melhoria ou reabilitação, com detalhe de obra limpa e materiais de construção discretos, sem trabalhadores em poses publicitárias nem sinalética.';
   }
   if (/preco das casas|mercado imobiliario|valor dos imoveis|vendas de casas/u.test(text)) {
-    return 'Rua residencial portuguesa com edifícios de habitação reais, chave de casa em primeiro plano e profundidade urbana natural, sugerindo mercado imobiliário sem placas, texto ou publicidade.';
+    return 'Fotografia editorial realista de uma rua residencial portuguesa com edifícios de habitação reais, chave de casa em primeiro plano e profundidade urbana natural, sugerindo mercado imobiliário sem placas, texto ou publicidade.';
   }
   return '';
 }
@@ -141,11 +141,16 @@ export function validatePublicationContent(generated,event={}) {
 }
 
 export function safeIllustrationDirection(value,event={}) {
-  const direction=normalizeLine(value);
-  if (!direction) throw new Error('Safe illustration direction is required');
+  const rawDirection=normalizeLine(value);
+  if (!rawDirection) throw new Error('Safe illustration direction is required');
 
   const deterministic=topicDirection(event);
-  const fallback=deterministic || SAFE_DIRECTIONS[event.pillar] || SAFE_DIRECTIONS.casa;
+  if (deterministic) return deterministic;
+
+  const direction=rawDirection
+    .replace(/\bilustração\b/giu,'fotografia editorial realista')
+    .replace(/\bilustracao\b/giu,'fotografia editorial realista');
+  const fallback=SAFE_DIRECTIONS[event.pillar] || SAFE_DIRECTIONS.casa;
   const normalized=comparable(direction);
   const forbidden=[
     event.title,event.source_name,event.summary,event.article_url,event.url_original,
@@ -205,7 +210,7 @@ AVOID
 - generic luxury interiors unrelated to the concrete news event
 - American suburban architecture, mansions, skyscrapers without context or futuristic buildings
 - hyper-glossy real-estate photography, CGI or 3D render appearance
-- cartoon, flat vector illustration or childish styling
+- illustration, painted artwork, cartoon, flat vector illustration or childish styling
 - any curved template graphics, badge, cream title panel or predesigned news-card composition
 
 ABSOLUTELY NO
