@@ -45,7 +45,7 @@ jobs:
           printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | npx wrangler pages secret put CLOUDFLARE_ACCOUNT_ID --project-name "$CF_PAGES_PROJECT"
           printf '%s' "$CF_PAGES_PROJECT" | npx wrangler pages secret put CLOUDFLARE_PAGES_PROJECT --project-name "$CF_PAGES_PROJECT"
 
-      - name: Redeploy main and wait for success
+      - name: Ensure main deployment and wait for success
         shell: bash
         run: |
           node <<'NODE'
@@ -54,6 +54,8 @@ jobs:
           const project = process.env.CF_PAGES_PROJECT;
           const commit = process.env.GITHUB_SHA;
           const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`;
+          const deadline = Date.now() + 300_000;
+          const pollMs = 5_000;
 
           async function cf(url, init = {}) {
             const response = await fetch(url, {
@@ -65,32 +67,106 @@ jobs:
               },
             });
             const data = await response.json().catch(() => ({}));
-            if (!response.ok || !data?.success || !data?.result) {
+            if (!response.ok || !data?.success || data?.result === undefined || data?.result === null) {
               const code = data?.errors?.[0]?.code || 'unknown';
               throw new Error(`Cloudflare request failed: HTTP ${response.status}, code ${code}`);
             }
             return data.result;
           }
 
-          const form = new FormData();
-          form.set('branch', 'main');
-          form.set('commit_hash', commit);
-          form.set('commit_dirty', 'false');
-          form.set('commit_message', `Configure deterministic deploy gate ${commit.slice(0, 12)}`);
+          async function create() {
+            const form = new FormData();
+            form.set('branch', 'main');
+            form.set('commit_hash', commit);
+            form.set('commit_dirty', 'false');
+            form.set('commit_message', `Configure deterministic deploy gate ${commit.slice(0, 12)}`);
 
-          let deployment = await cf(`${base}/deployments`, { method: 'POST', body: form });
+            const response = await fetch(`${base}/deployments`, {
+              method: 'POST',
+              body: form,
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+              },
+            });
+
+            if (response.status === 304) return null;
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data?.success || !data?.result) {
+              const code = data?.errors?.[0]?.code || 'unknown';
+              throw new Error(`Cloudflare create failed: HTTP ${response.status}, code ${code}`);
+            }
+            return data.result;
+          }
+
+          function shaOf(deployment) {
+            return deployment?.deployment_trigger?.metadata?.commit_hash || '';
+          }
+
+          function branchOf(deployment) {
+            return deployment?.deployment_trigger?.metadata?.branch || '';
+          }
+
+          function statusOf(deployment) {
+            return deployment?.latest_stage?.status || 'idle';
+          }
+
+          async function findCurrent() {
+            const deployments = await cf(`${base}/deployments?env=production&page=1&per_page=25`);
+            const matches = deployments.filter((deployment) =>
+              shaOf(deployment).toLowerCase() === commit.toLowerCase() &&
+              (!branchOf(deployment) || branchOf(deployment) === 'main')
+            );
+            return (
+              matches.find((deployment) => statusOf(deployment) === 'success') ||
+              matches.find((deployment) => ['active', 'idle'].includes(statusOf(deployment))) ||
+              matches[0] ||
+              null
+            );
+          }
+
+          let deployment = await findCurrent();
+          let reused = Boolean(deployment);
+
+          if (!deployment) {
+            deployment = await create();
+            reused = !deployment;
+          }
+
+          while (!deployment) {
+            if (Date.now() >= deadline) throw new Error('Timed out locating the existing Pages deployment after HTTP 304.');
+            await new Promise((resolve) => setTimeout(resolve, pollMs));
+            deployment = await findCurrent();
+          }
+
           if (!deployment?.id) throw new Error('Cloudflare did not return a deployment id.');
-          const deadline = Date.now() + 300_000;
 
           while (true) {
-            const status = deployment?.latest_stage?.status || 'idle';
+            const status = statusOf(deployment);
+            const deployedCommit = shaOf(deployment);
+            const deployedBranch = branchOf(deployment);
+
+            if (deployedCommit && deployedCommit.toLowerCase() !== commit.toLowerCase()) {
+              throw new Error('Pages deployment commit mismatch.');
+            }
+            if (deployedBranch && deployedBranch !== 'main') {
+              throw new Error('Pages deployment branch mismatch.');
+            }
+
             if (status === 'success') {
-              console.log(JSON.stringify({ ok: true, deployment_id: deployment.id, status, commit }, null, 2));
+              console.log(JSON.stringify({
+                ok: true,
+                deployment_id: deployment.id,
+                status,
+                commit,
+                reused_existing_deployment: reused,
+              }, null, 2));
               break;
             }
             if (status === 'failure' || status === 'canceled') throw new Error(`Pages deployment ${status}.`);
             if (Date.now() >= deadline) throw new Error('Timed out waiting for Pages deployment.');
-            await new Promise((resolve) => setTimeout(resolve, 3000));
+            await new Promise((resolve) => setTimeout(resolve, pollMs));
             deployment = await cf(`${base}/deployments/${deployment.id}`);
           }
           NODE
