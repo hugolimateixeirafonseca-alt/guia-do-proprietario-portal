@@ -7,6 +7,8 @@ import {prefilterContentImpact} from './content-impact-prefilter.mjs';
 import {finalizePublication,PublicationQualityError} from './publication-image-prompt.mjs';
 import {DEFAULT_MIN_NEWS_SCORE,isPublishableNews} from './publication-eligibility.mjs';
 import {applyDeterministicEditorialScores} from './editorial-scoring.mjs';
+import {shouldAssessContentImpact} from './impact-gate.mjs';
+import {shouldUpgradeLegacyPublication} from './legacy-upgrade.mjs';
 import {extractFactualCandidates} from './factual-extraction.mjs';
 import {publicationEvidenceStatus} from './publication-evidence.mjs';
 
@@ -690,10 +692,78 @@ async function main() {
     for (const candidate of candidates) {
       if (!candidate.article_url) continue;
 
-      const existingUrl=await d1(`SELECT e.id,e.event_key,e.published FROM event_sources s JOIN events e ON e.id=s.event_id WHERE s.article_url=? LIMIT 1`,[candidate.article_url]);
+      const existingUrl=await d1(`SELECT e.id,e.event_key,e.published,e.news_score,e.seo_score,e.lead_score FROM event_sources s JOIN events e ON e.id=s.event_id WHERE s.article_url=? LIMIT 1`,[candidate.article_url]);
       if (existingUrl.length) {
         stats.duplicates++;
-        log({stage:'duplicate_url',article_url:candidate.article_url,event_id:existingUrl[0].id});
+        const existing=existingUrl[0];
+        const rescored=applyDeterministicEditorialScores(candidate,{
+          decision:'DUPLICADO',
+          verified_title:candidate.title,
+          verified_summary:candidate.summary,
+          legal_stage:candidate.legal_stage
+        });
+        const legacyUpgrade=shouldUpgradeLegacyPublication(existing,rescored,CFG.minNewsScore);
+
+        if (legacyUpgrade) {
+          const legacyEvent={
+            ...candidate,
+            ...rescored,
+            event_id:existing.id,
+            event_key:existing.event_key,
+            title:candidate.title,
+            summary:candidate.summary,
+            legal_stage:candidate.legal_stage
+          };
+          const evidence=publicationEvidenceStatus(legacyEvent);
+          let publication=null;
+          if (evidence.ready) publication=await generatePublication(legacyEvent);
+
+          if (publication) {
+            const payload={
+              type:'noticia',
+              event_id:existing.id,
+              event_key:existing.event_key,
+              titulo_noticia:candidate.title,
+              pilar:rescored.pillar,
+              legal_stage:candidate.legal_stage||'na',
+              fonte_nome:candidate.source_name||'',
+              url_original:candidate.article_url,
+              data_publicacao:candidate.event_date,
+              conteudo_verificado:candidate.summary,
+              texto_fb:publication.texto_fb,
+              texto_site:publication.texto_site,
+              prompt_imagem:publication.prompt_imagem,
+              prompt_tecnico:publication.prompt_tecnico,
+              news_score:rescored.news_score||0,
+              seo_score:rescored.seo_score||0,
+              lead_score:rescored.lead_score||0,
+              tipo_evento:'NOVO',
+              seo_trigger:Number(rescored.seo_score||0)>=80?'Sim':'Nao',
+              lead_trigger:Number(rescored.lead_score||0)>=80?'Sim':'Nao',
+              impacto_conteudo:'NONE',
+              estado:'novo',
+              content_impacts:[]
+            };
+            if (CFG.dryRun) log({stage:'legacy_upgrade_dry_run',event_id:existing.id,old_news_score:Number(existing.news_score||0),new_news_score:rescored.news_score,texto_site_chars:publication.texto_site.length});
+            const sent=await sendMake(payload);
+            if (CFG.dryRun) {
+              stats.publication_ready++;
+            } else if (sent) {
+              stats.publication_ready++;
+              await d1(`UPDATE events SET title=?,summary=?,pillar=?,event_date=?,legal_stage=?,entities_json=?,key_facts_json=?,news_score=?,seo_score=?,lead_score=?,last_seen_at=?,make_sent_at=?,status='candidate' WHERE id=?`,[
+                candidate.title,candidate.summary,rescored.pillar,candidate.event_date,candidate.legal_stage||'na',
+                JSON.stringify(candidate.entities||[]),JSON.stringify(candidate.key_facts||[]),rescored.news_score,rescored.seo_score,rescored.lead_score,
+                nowIso(),nowIso(),existing.id
+              ]);
+              log({stage:'legacy_upgrade_sent',event_id:existing.id,event_key:existing.event_key,old_news_score:Number(existing.news_score||0),new_news_score:rescored.news_score});
+            }
+          } else {
+            stats.publication_quality_rejected++;
+            log({stage:'legacy_upgrade_blocked',event_id:existing.id,reasons:evidence.ready?['publication_quality_rejected']:evidence.reasons});
+          }
+        } else {
+          log({stage:'duplicate_url',article_url:candidate.article_url,event_id:existing.id,old_news_score:Number(existing.news_score||0),new_news_score:rescored.news_score});
+        }
         continue;
       }
 
@@ -736,18 +806,23 @@ async function main() {
         legal_stage:candidate.legal_stage
       };
 
-      const articles=contentArticles??=await loadContentCandidates();
-      const impactPrefilter=prefilterContentImpact(event,articles);
-      log({
-        stage:'content_impact_prefilter',
-        event_key:eventKey,
-        articles_considered:impactPrefilter.articlesConsidered,
-        matches:impactPrefilter.matches,
-        sent_to_model:impactPrefilter.selected.length,
-        top_scores:impactPrefilter.topScores
-      });
-      const impacts=impactPrefilter.selected.length?await assessContentImpact(event,impactPrefilter.selected):[];
-      for (const impact of impacts) await persistImpact(eventId,impact);
+      let impacts=[];
+      if (shouldAssessContentImpact(classification,{minNewsScore:CFG.minNewsScore,minSeoScore:80,minLeadScore:80})) {
+        const articles=contentArticles??=await loadContentCandidates();
+        const impactPrefilter=prefilterContentImpact(event,articles);
+        log({
+          stage:'content_impact_prefilter',
+          event_key:eventKey,
+          articles_considered:impactPrefilter.articlesConsidered,
+          matches:impactPrefilter.matches,
+          sent_to_model:impactPrefilter.selected.length,
+          top_scores:impactPrefilter.topScores
+        });
+        impacts=impactPrefilter.selected.length?await assessContentImpact(event,impactPrefilter.selected):[];
+        for (const impact of impacts) await persistImpact(eventId,impact);
+      } else {
+        log({stage:'content_impact_skipped',event_key:eventKey,reason:'scores_below_threshold'});
+      }
 
       const qualifyingImpacts=impacts.filter(impact=>impact.impact_type!=='NONE'&&Number(impact.confidence||0)>=CFG.minImpactConfidence);
       const impactRank={NONE:0,ADDENDUM:1,PARTIAL_UPDATE:2,REWRITE:3,URGENT_CORRECTION:4};

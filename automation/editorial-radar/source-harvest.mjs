@@ -6,7 +6,7 @@ const EXCLUDED=/(?:^|\/)(?:login|newsletter|autor(?:es)?|author|tags?|pesquisa|s
 const ARTICLE_TYPES=new Set(['newsarticle','article','reportagenewsarticle','blogposting']);
 const HIGH_RELEVANCE=[
   'condomínio','condomínios','habitação','arrendamento','senhorio','senhorios','inquilino','inquilinos',
-  'renda','rendas','imóvel','imóveis','imobiliário','casa','casas','moradia','moradias','crédito habitação',
+  'renda','rendas','imóvel','imóveis','imobiliário','moradia','moradias','crédito habitação',
   'crédito à habitação','euribor','imi','imt','mais-valias','propriedade','proprietário','proprietários',
   'herança','heranças','despejo','despejos'
 ];
@@ -17,7 +17,8 @@ const MEDIUM_RELEVANCE=[
 const CONTEXT_RELEVANCE=['impostos','juros','banco','financiamento','seguros','calor','eficiência','município','prédio','edifício'];
 const NEGATIVE_TOPICS=[
   'futebol','benfica','sporting','fc porto','voleibol','andebol','atletismo','desporto','trump','ucrânia','rússia',
-  'bolsa internacional','petróleo','automóvel','turismo','aviação','telecomunicações','celebridades'
+  'bolsa internacional','petróleo','automóvel','turismo','aviação','telecomunicações','celebridades',
+  'nuclear','central nuclear'
 ];
 
 function decodeHtml(value='') {
@@ -171,6 +172,11 @@ export function scoreHarvestRelevance(source) {
 
   if (genericPage(source)) reason='non_article';
   const directSource=normalized(source.direct_source||'');
+  const titleNormalized=normalized(title);
+  const hasStrongOwnerSignal=titleHigh.length>0;
+  if (!reason && /(?:^|\/)mundo(?:\/|$)/i.test(pathname)) reason='excluded_section';
+  if (!reason && /(?:^|\/)opiniao(?:\/|$)/i.test(pathname) && !hasStrongOwnerSignal) reason='excluded_section';
+  if (!reason && /\b(?:morto|morte|plagio|policia|pj)\b/i.test(titleNormalized) && !hasStrongOwnerSignal) reason='excluded_section';
   if (!reason && directSource==='rtp economia') {
     if (/\/(?:desporto|benfica|outras-modalidades)(?:\/|$)|\/futebol-[^/]*(?:\/|$)/i.test(pathname)) reason='excluded_section';
     else if (pathname.startsWith('/noticias/economia/')) score+=1;
