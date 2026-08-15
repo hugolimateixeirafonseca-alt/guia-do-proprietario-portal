@@ -198,7 +198,7 @@ async function deployAndWait({ request, env }: RequestContext) {
     // Prefer the deployment already started by the GitHub integration. This
     // avoids duplicate builds and makes the gate deterministic even when the
     // Git-triggered deployment wins the race by milliseconds.
-    let deployment = await findDeployment(base, token, input.commitSha, input.branch);
+    let deployment: PagesDeployment | null = await findDeployment(base, token, input.commitSha, input.branch);
     let reusedExistingDeployment = Boolean(deployment);
 
     if (!deployment) {
@@ -234,36 +234,30 @@ async function deployAndWait({ request, env }: RequestContext) {
       if (branch && branch !== input.branch) {
         return json({ error: 'deployment_branch_mismatch', deployment_id: deploymentId }, 502);
       }
-
       if (status === 'success') {
         return json({
           ok: true,
           deployment_id: deploymentId,
-          status,
+          deployment_url: deployment.url || null,
           commit_sha: input.commitSha,
+          branch: input.branch,
           reused_existing_deployment: reusedExistingDeployment,
-          url: deployment.url || null,
         });
       }
-
       if (status === 'failure' || status === 'canceled') {
-        return json({ error: `deployment_${status}`, deployment_id: deploymentId }, 502);
+        return json({ error: `cloudflare_deployment_${status}`, deployment_id: deploymentId }, 502);
       }
-
       if (Date.now() >= deadline) {
-        return json({ error: 'deployment_timeout', deployment_id: deploymentId }, 504);
+        return json({ error: 'cloudflare_deployment_timeout', deployment_id: deploymentId }, 504);
       }
 
       await new Promise((resolve) => setTimeout(resolve, POLL_MS));
       deployment = await cfRequest<PagesDeployment>(`${base}/deployments/${encodeURIComponent(deploymentId)}`, token);
     }
   } catch (error) {
-    const code = error instanceof Error ? error.message : 'cloudflare_request_failed';
-    return json({ error: code.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120) }, 502);
+    const message = error instanceof Error ? error.message : 'cloudflare_request_failed';
+    return json({ error: message }, 502);
   }
 }
 
-export const onRequest = async (context: RequestContext) => {
-  if (context.request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
-  return deployAndWait(context);
-};
+export const onRequestPost = deployAndWait;
