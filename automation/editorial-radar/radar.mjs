@@ -6,7 +6,7 @@ import {harvestDirectSources,prefilterHarvestSources} from './source-harvest.mjs
 import {prefilterContentImpact} from './content-impact-prefilter.mjs';
 import {getDiscoveryModePlan} from './discovery-mode.mjs';
 import {combinedHistoricalContext,createIsolationController} from './dry-run-isolation.mjs';
-import {finalizePublication} from './publication-image-prompt.mjs';
+import {finalizePublication,PublicationQualityError} from './publication-image-prompt.mjs';
 import {DEFAULT_MIN_NEWS_SCORE,isPublishableNews} from './publication-eligibility.mjs';
 
 const REQUIRED = ['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
@@ -671,17 +671,20 @@ async function saveImpact(eventId, impact) {
 
 
 async function generatePublication(event) {
-  const prompt = `És a Redação do Guia do Proprietário, em Portugal. O acontecimento abaixo já foi selecionado pelo radar. Produz o conteúdo final para a fila de aprovação, sem acrescentar factos que não estejam no EVENTO.
+  const prompt = `És a Redação do Guia do Proprietário, em Portugal. O acontecimento abaixo já foi selecionado e verificado pelo radar. Produz uma notícia editorial curta mas realmente útil para um proprietário. Usa exclusivamente os factos presentes no EVENTO VERIFICADO.
 
 EVENTO VERIFICADO:
 ${JSON.stringify(event)}
 
 REGRAS FACTUAIS:
 - Usa apenas título, resumo, factos, entidades, data, fonte e fase jurídica presentes no EVENTO.
-- Mantém números, percentagens, datas, prazos e condições.
-- Não transformes proposta/anúncio em lei em vigor.
-- Não inventes efeitos, recomendações, direitos ou obrigações.
-- Português de Portugal.
+- Mantém números, percentagens, datas, prazos e condições exatamente quando existirem.
+- Não inventes contexto factual, efeitos, recomendações, direitos, obrigações, datas ou próximos passos.
+- Não uses conhecimento externo nesta fase.
+- Não transformes anúncio, proposta ou aprovação em regra já em vigor.
+- Distingue claramente factos de explicação editorial.
+- Português de Portugal, linguagem jornalística clara e não burocrática.
+- Não repetir a mesma informação em várias secções só para aumentar o texto.
 
 TEXTO FACEBOOK:
 - 4 a 6 frases, aproximadamente 70 a 120 palavras.
@@ -693,13 +696,34 @@ TEXTO FACEBOOK:
 - Sem hashtags, emojis ou URLs.
 
 TEXTO SITE:
-- Markdown, aproximadamente 220 a 380 palavras.
+- Markdown.
+- Normalmente 400 a 650 palavras.
+- Se o EVENTO tiver poucos factos, escreve menos em vez de inventar ou repetir.
 - Não repetir o título no corpo.
-- Parágrafo inicial direto.
-- Secção obrigatória: ## O essencial, com 3 a 5 pontos.
-- Secção: ## O que isto significa para um proprietário (ou público mais específico se apropriado).
-- Secção ## Em que ponto está apenas quando a fase jurídica/administrativa estiver claramente indicada.
-- Secção obrigatória: ## Também pode interessar, com exatamente 3 links internos escolhidos apenas desta lista:
+- Começa com 2 a 3 frases diretas que expliquem o que aconteceu e por que razão merece atenção.
+- Secção obrigatória: ## O essencial, com 3 a 5 bullet points factuais.
+- Depois escolhe apenas as secções que façam sentido para este acontecimento.
+
+SECÇÕES POSSÍVEIS:
+- ## O que está a mudar
+- ## O que isto significa para os proprietários
+- Para arrendamento, quando apropriado: ## O que isto significa para os senhorios
+- Para condomínio, quando apropriado: ## O que isto significa para os condóminos
+- Para fiscalidade, quando apropriado: ## O impacto para quem tem casa
+- Se legal_stage não for "na": ## Em que ponto está
+- Só quando o EVENTO indicar passos futuros concretos: ## O que acontece agora
+
+FASE JURÍDICA:
+- anuncio = foi anunciado; não está automaticamente aprovado nem em vigor.
+- proposta = é uma proposta; não está em vigor.
+- aprovacao = foi aprovada, mas só afirma entrada em vigor se o EVENTO o disser.
+- publicacao = foi publicada oficialmente; distingue publicação de entrada em vigor.
+- entrada_em_vigor = pode ser descrita como aplicável/em vigor.
+- alteracao e revogacao = explica apenas a mudança factual presente no EVENTO.
+
+NO FIM:
+- Secção obrigatória: ## Também pode interessar
+- Inclui exatamente 3 links internos, escolhidos apenas desta lista:
   [Casa e obras](/casa/)
   [Vender casa](/vender/)
   [Arrendamento](/arrendar/)
@@ -709,22 +733,92 @@ TEXTO SITE:
   [Simuladores gratuitos](/simuladores/)
 - Não incluir Fonte no fim.
 
-PROMPT DE IMAGEM:
-- Gera apenas orientacao_ilustracao_segura, com 1 a 3 frases curtas e abstratas para representar visualmente o pilar da notícia.
-- Não copies frases do título, resumo, texto de Facebook ou texto do site.
-- Não incluas nomes de pessoas, entidades dispensáveis, idades, datas, valores monetários, percentagens ou outros números.
-- Não uses linguagem policial, criminal, violenta ou potencialmente sensível.
-- Para condomínio, habitação ou obras, usa arquitetura residencial portuguesa plausível e documentação genérica.
-- Para fiscalidade, direito ou heranças, usa casa, documentos genéricos, propriedade ou património.
-- Para arrendamento, usa interior residencial, chave e documentos genéricos.
-- Para energia, usa habitação portuguesa e elementos discretos de eficiência energética.
-- Para mercado imobiliário, usa arquitetura residencial e elementos económicos abstratos.
+ORIENTAÇÃO VISUAL:
+- Gera orientacao_ilustracao_segura com 1 a 2 frases curtas.
+- A imagem deve representar o assunto concreto da notícia através de 2 ou 3 elementos visuais reconhecíveis e seguros.
+- Não pedir apenas "casa", "prédio" ou "interior premium" de forma genérica se houver objetos/contexto visual que expressem melhor o tema.
+- Exemplo de lógica: arrendamento + procedimento sobre senhorio pode usar entrada de prédio, porta de apartamento e chave em primeiro plano; condomínio pode usar entrada comum, intercomunicador sem texto e varandas; energia pode usar habitação e equipamento relevante sem marcas.
+- Não copies frases do título, resumo, Facebook ou site.
+- Não incluas nomes de pessoas ou entidades, datas, valores, percentagens, números, logos, texto visível ou documentos legíveis.
+- Não uses confronto, dramatização, linguagem policial/criminal/violenta ou elementos sensíveis.
 - Nunca introduzas factos novos.
 
 Devolve APENAS JSON válido:
 {"texto_fb":"","texto_site":"","orientacao_ilustracao_segura":""}`;
-  const out = parseJson((await openai({model:CFG.openaiModelCopy,prompt,purpose:'copy',web:false,effort:'low'})).text);
-  return finalizePublication({publishableNews:true,event,generated:out});
+
+  const firstDraft=parseJson((await openai({
+    model:CFG.openaiModelCopy,
+    prompt,
+    purpose:'copy',
+    web:false,
+    effort:'low'
+  })).text);
+
+  try {
+    return finalizePublication({publishableNews:true,event,generated:firstDraft});
+  } catch (err) {
+    if (!(err instanceof PublicationQualityError)) throw err;
+
+    console.log(JSON.stringify({
+      stage:'publication_quality_repair',
+      title:event.title||'',
+      reasons:err.reasons
+    }));
+
+    const repairPrompt=`És a Redação do Guia do Proprietário. Corrige UMA única vez o draft abaixo porque falhou controlos estruturais de qualidade.
+
+EVENTO VERIFICADO:
+${JSON.stringify(event)}
+
+DRAFT:
+${JSON.stringify(firstDraft)}
+
+FALHAS DETETADAS:
+${JSON.stringify(err.reasons)}
+
+REGRAS:
+- Usa exclusivamente o EVENTO VERIFICADO.
+- Não inventes factos para aumentar o comprimento.
+- Não alteres o sentido factual.
+- Mantém a fase jurídica correta; proposta/anúncio não são lei em vigor.
+- Corrige completude e estrutura.
+- texto_site deve ser Markdown, normalmente 400 a 650 palavras, sem repetição artificial.
+- Deve conter ## O essencial com 3 a 5 bullets.
+- Deve terminar com ## Também pode interessar e exatamente 3 links internos escolhidos de:
+  [Casa e obras](/casa/)
+  [Vender casa](/vender/)
+  [Arrendamento](/arrendar/)
+  [Condomínio](/condominio/)
+  [Impostos](/impostos/)
+  [Calendário do proprietário](/calendario/)
+  [Simuladores gratuitos](/simuladores/)
+- Não uses H1 nem HTML.
+- Mantém texto_fb entre aproximadamente 70 e 120 palavras e termina exatamente: Explicamos o essencial no link.
+- orientacao_ilustracao_segura deve continuar curta, concreta, sem nomes, números, texto visível, logos ou documentos legíveis.
+
+Devolve APENAS JSON válido:
+{"texto_fb":"","texto_site":"","orientacao_ilustracao_segura":""}`;
+
+    const repaired=parseJson((await openai({
+      model:CFG.openaiModelCopy,
+      prompt:repairPrompt,
+      purpose:'copy_quality_repair',
+      web:false,
+      effort:'low'
+    })).text);
+
+    try {
+      return finalizePublication({publishableNews:true,event,generated:repaired});
+    } catch (repairErr) {
+      if (!(repairErr instanceof PublicationQualityError)) throw repairErr;
+      console.log(JSON.stringify({
+        stage:'publication_quality_rejected',
+        title:event.title||'',
+        reasons:repairErr.reasons
+      }));
+      return null;
+    }
+  }
 }
 
 async function sendMake(payload) {
@@ -842,6 +936,17 @@ async function main(){
           key_facts: c.key_facts||[],
           entities: c.entities||[]
         });
+        if (!publication) {
+          console.log(JSON.stringify({
+            stage:'publication_skipped',
+            event_key:eventKey,
+            reason:'quality_rejected'
+          }));
+          if (!CFG.dryRun) {
+            await d1(`UPDATE events SET status=? WHERE id=?`,['publication_quality_rejected',eventId]);
+          }
+          continue;
+        }
       }
 
       const payload={
