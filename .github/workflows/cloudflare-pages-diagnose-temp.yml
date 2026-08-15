@@ -1,0 +1,54 @@
+name: Cloudflare Pages Diagnose Temp
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/cloudflare-pages-diagnose-temp.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_API_TOKEN: ${{ secrets.CF_D1_API_TOKEN }}
+      CF_PAGES_PROJECT: guia-do-proprietario-portal
+    steps:
+      - name: Inspect Pages project safely
+        shell: bash
+        run: |
+          node <<'NODE'
+          const account = process.env.CF_ACCOUNT_ID;
+          const token = process.env.CF_API_TOKEN;
+          const project = process.env.CF_PAGES_PROJECT;
+          if (!account || !token) {
+            console.log(JSON.stringify({account_present:Boolean(account), token_present:Boolean(token)}));
+            process.exit(1);
+          }
+          const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+          });
+          const data = await res.json().catch(() => ({}));
+          const r = data?.result || {};
+          const source = r?.source || {};
+          const out = {
+            http_status: res.status,
+            success: Boolean(data?.success),
+            errors: Array.isArray(data?.errors) ? data.errors.map(e => ({code:e.code,message:e.message})) : [],
+            project_name: r?.name || null,
+            production_branch: r?.production_branch || null,
+            source_type: source?.type || null,
+            source_repo_name: source?.config?.repo_name || null,
+            source_owner: source?.config?.owner || null,
+            source_production_branch: source?.config?.production_branch || null,
+            latest_deployment_id: r?.latest_deployment?.id || null,
+            latest_deployment_branch: r?.latest_deployment?.deployment_trigger?.metadata?.branch || null,
+            latest_deployment_commit: r?.latest_deployment?.deployment_trigger?.metadata?.commit_hash || null,
+            latest_deployment_stage: r?.latest_deployment?.stages?.at(-1)?.status || null
+          };
+          console.log(JSON.stringify(out, null, 2));
+          if (!res.ok || !data?.success) process.exit(2);
+          NODE
