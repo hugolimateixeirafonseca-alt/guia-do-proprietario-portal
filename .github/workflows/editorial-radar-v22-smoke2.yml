@@ -1,0 +1,41 @@
+name: Editorial Radar v22 Smoke 2
+
+on:
+  push:
+    branches:
+      - agent/editorial-radar-v22-smoke2
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_D1_DATABASE_ID: ${{ secrets.CF_D1_DATABASE_ID }}
+      CF_D1_API_TOKEN: ${{ secrets.CF_D1_API_TOKEN }}
+      MAKE_RADAR_WEBHOOK: ${{ secrets.MAKE_RADAR_WEBHOOK }}
+      MAKE_RADAR_WEBHOOK_SECRET: ${{ secrets.MAKE_RADAR_WEBHOOK_SECRET }}
+      OPENAI_SEARCHER_MODEL: gpt-5.6-luna
+      OPENAI_VALIDATOR_MODEL: gpt-5.6-luna
+      OPENAI_EDITOR_MODEL: gpt-5.6-sol
+      OPENAI_IMPACT_MODEL: gpt-5.6-terra
+      OPENAI_COPY_MODEL: gpt-5.6-sol
+      MAX_RUN_TOKENS: '0'
+      MIN_NEWS_SCORE: '70'
+      MIN_IMPACT_CONFIDENCE: '80'
+      RADAR_MODE: morning
+      RADAR_DRY_RUN: 'true'
+      BACKFILL: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check v22
+        run: node --check automation/editorial-radar/radar-v22.mjs
+      - name: Run Editorial Radar v22 smoke test
+        run: node automation/editorial-radar/radar-v22.mjs
