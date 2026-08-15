@@ -3,9 +3,9 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import { formatarData } from "../../config";
-import { compararNotasRecentes } from "../../lib/notas";
+import { compararNotasRecentes, deduplicarNotas } from "../../lib/notas";
 
-const notas = (await getCollection("notas")).sort(compararNotasRecentes);
+const notas = deduplicarNotas((await getCollection("notas")).sort(compararNotasRecentes));
 ---
 <BaseLayout titulo="Novidades" descricao="Notas curtas sobre prazos, impostos e dados relevantes para proprietários em Portugal.">
   <section class="page-hero">
