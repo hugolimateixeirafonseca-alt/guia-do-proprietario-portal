@@ -16,6 +16,7 @@ const custo = z.object({
 const artigos = defineCollection({
   loader: glob({ base: "./src/content/artigos", pattern: "**/*.{md,mdx}" }),
   schema: z.object({
+    id: z.string().regex(/^(?:[A-Z]{1,2}\d+|EXTRA-\d{3})$/, "Use o ID do plano (ex.: V1, CA12) ou EXTRA-001 para conteúdo adicional."),
     titulo: z.string().min(1),
     descricao: z.string().min(80).max(180),
     resposta_rapida: z.string().min(1),
