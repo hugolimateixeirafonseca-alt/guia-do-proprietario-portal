@@ -199,6 +199,7 @@ async function deployAndWait({ request, env }: RequestContext) {
     // avoids duplicate builds and makes the gate deterministic even when the
     // Git-triggered deployment wins the race by milliseconds.
     let deployment = await findDeployment(base, token, input.commitSha, input.branch);
+    let reusedExistingDeployment = Boolean(deployment);
 
     if (!deployment) {
       const form = new FormData();
@@ -208,6 +209,7 @@ async function deployAndWait({ request, env }: RequestContext) {
       form.set('commit_message', `Make deterministic publish ${input.commitSha.slice(0, 12)}`);
 
       deployment = await createDeployment(`${base}/deployments`, token, form);
+      reusedExistingDeployment = !deployment;
     }
 
     // A 304 means an equivalent deployment already exists but can race the
@@ -239,7 +241,7 @@ async function deployAndWait({ request, env }: RequestContext) {
           deployment_id: deploymentId,
           status,
           commit_sha: input.commitSha,
-          reused_existing_deployment: true,
+          reused_existing_deployment: reusedExistingDeployment,
           url: deployment.url || null,
         });
       }
