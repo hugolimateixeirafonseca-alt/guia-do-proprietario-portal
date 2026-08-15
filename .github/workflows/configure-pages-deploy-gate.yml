@@ -1,0 +1,91 @@
+name: Configure Pages Deploy Gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
+      CF_PAGES_PROJECT: guia-do-proprietario-portal
+    steps:
+      - name: Validate required GitHub secrets
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID'; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CF_PAGES_API_TOKEN'; exit 1; }
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Store Pages deployment-gate secrets
+        shell: bash
+        run: |
+          printf '%s' "$CLOUDFLARE_API_TOKEN" | npx wrangler pages secret put CLOUDFLARE_API_TOKEN --project-name "$CF_PAGES_PROJECT"
+          printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | npx wrangler pages secret put CLOUDFLARE_ACCOUNT_ID --project-name "$CF_PAGES_PROJECT"
+          printf '%s' "$CF_PAGES_PROJECT" | npx wrangler pages secret put CLOUDFLARE_PAGES_PROJECT --project-name "$CF_PAGES_PROJECT"
+
+      - name: Redeploy main and wait for success
+        shell: bash
+        run: |
+          node <<'NODE'
+          const account = process.env.CLOUDFLARE_ACCOUNT_ID;
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          const project = process.env.CF_PAGES_PROJECT;
+          const commit = process.env.GITHUB_SHA;
+          const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`;
+
+          async function cf(url, init = {}) {
+            const response = await fetch(url, {
+              ...init,
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+                ...(init.headers || {}),
+              },
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data?.success || !data?.result) {
+              const code = data?.errors?.[0]?.code || 'unknown';
+              throw new Error(`Cloudflare request failed: HTTP ${response.status}, code ${code}`);
+            }
+            return data.result;
+          }
+
+          const form = new FormData();
+          form.set('branch', 'main');
+          form.set('commit_hash', commit);
+          form.set('commit_dirty', 'false');
+          form.set('commit_message', `Configure deterministic deploy gate ${commit.slice(0, 12)}`);
+
+          let deployment = await cf(`${base}/deployments`, { method: 'POST', body: form });
+          if (!deployment?.id) throw new Error('Cloudflare did not return a deployment id.');
+          const deadline = Date.now() + 300_000;
+
+          while (true) {
+            const status = deployment?.latest_stage?.status || 'idle';
+            if (status === 'success') {
+              console.log(JSON.stringify({ ok: true, deployment_id: deployment.id, status, commit }, null, 2));
+              break;
+            }
+            if (status === 'failure' || status === 'canceled') throw new Error(`Pages deployment ${status}.`);
+            if (Date.now() >= deadline) throw new Error('Timed out waiting for Pages deployment.');
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            deployment = await cf(`${base}/deployments/${deployment.id}`);
+          }
+          NODE
