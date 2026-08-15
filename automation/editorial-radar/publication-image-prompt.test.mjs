@@ -138,19 +138,44 @@ test('F) orientação com números ou entidade usa fallback seguro',()=>{
   });
   assert.equal(publication.prompt_imagem.includes('25'),false);
   assert.equal(publication.prompt_imagem.includes(event.entities[0]),false);
-  assert.match(publication.prompt_imagem,/chave em primeiro plano/iu);
+  assert.match(publication.prompt_imagem,/chave(?: de casa)? em primeiro plano/iu);
 });
 
-test('G) orientação segura e específica ao acontecimento é preservada',()=>{
-  const direction='Entrada residencial portuguesa com porta de apartamento, chave em primeiro plano e corredor comum sóbrio associado ao arrendamento.';
-  assert.equal(safeIllustrationDirection(direction,event),direction);
-  const publication=finalizePublication({
-    publishableNews:true,
-    event,
-    generated:{...generated,orientacao_ilustracao_segura:direction}
-  });
-  assert.match(publication.prompt_imagem,/chave em primeiro plano/iu);
-  assert.match(publication.prompt_imagem,/corredor comum/iu);
+test('G) tema conhecido usa direção fotográfica determinística em vez do estilo sugerido pelo modelo',()=>{
+  const direction='Ilustração elegante de uma casa bonita com formas abstratas.';
+  const resolved=safeIllustrationDirection(direction,event);
+  assert.match(resolved,/Fotografia editorial realista/iu);
+  assert.match(resolved,/arrendamento/iu);
+  assert.doesNotMatch(resolved,/Ilustração/iu);
+});
+
+test('Euribor usa fotografia específica de crédito à habitação',()=>{
+  const euribor={
+    title:'Euribor desce a três e 12 meses, mas taxa mais usada volta a subir',
+    summary:'A Euribor a seis meses é a mais usada no crédito à habitação com taxa variável.',
+    pillar:'casa',
+    key_facts:['A taxa a seis meses subiu na sessão.']
+  };
+  const resolved=safeIllustrationDirection('Ilustração com uma casa, uma calculadora e um gráfico.',euribor);
+  assert.match(resolved,/Fotografia editorial realista/iu);
+  assert.match(resolved,/calculadora/iu);
+  assert.match(resolved,/chave de casa/iu);
+  assert.doesNotMatch(resolved,/gráfico de linhas/iu);
+  assert.doesNotMatch(resolved,/Ilustração/iu);
+});
+
+test('PRR usa fotografia específica de construção e entrega de habitação pública',()=>{
+  const prr={
+    title:'Habitação pública alavancada com 28 mil casas pagas pelo PRR',
+    summary:'Novas habitações públicas estão em construção e entrega.',
+    pillar:'casa',
+    key_facts:['O Governo prevê novas entregas de habitação pública.']
+  };
+  const resolved=safeIllustrationDirection('Conjunto de edifícios e chaves.',prr);
+  assert.match(resolved,/Fotografia editorial realista/iu);
+  assert.match(resolved,/habitação pública/iu);
+  assert.match(resolved,/grua/iu);
+  assert.match(resolved,/chaves/iu);
 });
 
 test('orientacao_ilustracao_segura vazia falha a quality gate',()=>{

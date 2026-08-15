@@ -153,11 +153,14 @@ const generated={
   orientacao_ilustracao_segura:'Entrada residencial portuguesa com porta de apartamento, chave em primeiro plano e corredor comum sóbrio associado ao arrendamento.'
 };
 
-test('publicação completa passa e direção específica é preservada',()=>{
+test('publicação completa passa e tema conhecido usa direção fotográfica determinística',()=>{
   const direction=generated.orientacao_ilustracao_segura;
-  assert.equal(safeIllustrationDirection(direction,event),direction);
+  const resolved=safeIllustrationDirection(direction,event);
+  assert.match(resolved,/Fotografia editorial realista/iu);
+  assert.match(resolved,/arrendamento/iu);
   const publication=finalizePublication({publishableNews:true,event,generated});
   assert.match(publication.prompt_imagem,/corredor comum/iu);
+  assert.doesNotMatch(publication.prompt_imagem,/SUBJECT DIRECTION\nIlustração/iu);
 });
 
 test('direção genérica em PRR é substituída por imagem específica',()=>{
