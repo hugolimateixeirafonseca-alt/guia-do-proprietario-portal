@@ -1,0 +1,38 @@
+name: Apply Photo Directions
+
+on:
+  push:
+    branches:
+      - agent/editorial-radar-v22-photo-directions
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ github.event.head_commit.message != 'Enforce photographic news directions' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/editorial-radar-v22-photo-directions
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 automation/editorial-radar/photo-directions-patch.py
+      - name: Validate
+        run: |
+          node --check automation/editorial-radar/publication-image-prompt.mjs
+          node --test automation/editorial-radar/*.test.mjs
+          git diff --check
+      - name: Commit
+        run: |
+          rm .github/workflows/photo-directions-patch.yml
+          rm automation/editorial-radar/photo-directions-patch.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Enforce photographic news directions"
+          git push origin HEAD:agent/editorial-radar-v22-photo-directions
