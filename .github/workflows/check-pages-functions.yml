@@ -1,0 +1,38 @@
+name: Check Pages Functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/**'
+      - 'src/lib/social-card-*.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/check-pages-functions.yml'
+  pull_request:
+    paths:
+      - 'functions/**'
+      - 'src/lib/social-card-*.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+jobs:
+  build-functions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Pages Functions
+        run: npm run build:functions
