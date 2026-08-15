@@ -2,6 +2,11 @@ name: Configure Pages Deploy Gate
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/pages-gate-setup-trigger'
 
 permissions:
   contents: read
