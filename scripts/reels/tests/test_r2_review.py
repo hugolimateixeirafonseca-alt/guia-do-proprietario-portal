@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 
 REELS_DIR = Path(__file__).resolve().parents[1]
@@ -64,9 +65,20 @@ class R2ReviewTests(unittest.TestCase):
             slug="teste", generation_id="g1", reel_json=Path("reel.json"), video=Path("video.mp4"),
             contact=Path("contact.jpg"), validator=lambda *_: {"template": "ordered_steps"},
             uploader=lambda **_: UploadedGeneration("g1", "v", "c", "j"), registrar=registered.append,
+            article_reader=lambda *_: SimpleNamespace(
+                title="Artigo acabado de publicar",
+                canonical_url="https://guiadoproprietario.pt/casa/artigo-acabado-de-publicar/",
+            ),
+            publication_sha="a" * 40,
         )
         self.assertEqual(result["status"], "pending_review")
         self.assertEqual(registered[0].status, "pending_review")
+        self.assertEqual(registered[0].article_title, "Artigo acabado de publicar")
+        self.assertEqual(
+            registered[0].article_url,
+            "https://guiadoproprietario.pt/casa/artigo-acabado-de-publicar/",
+        )
+        self.assertEqual(registered[0].publication_sha, "a" * 40)
 
     def test_falha_no_render_nao_faz_upload(self):
         uploads = []

@@ -41,6 +41,9 @@ class ReelGenerationMetadata:
     video_key: str | None
     contact_key: str | None
     json_key: str | None
+    article_title: str | None
+    article_url: str | None
+    publication_sha: str | None
     created_at: str
     approved_at: str | None = None
     rejected_at: str | None = None
@@ -50,7 +53,15 @@ class ReelGenerationMetadata:
         return asdict(self)
 
 
-def pending_review_metadata(slug: str, template: str, uploaded: UploadedGeneration) -> ReelGenerationMetadata:
+def pending_review_metadata(
+    slug: str,
+    template: str,
+    uploaded: UploadedGeneration,
+    *,
+    article_title: str,
+    article_url: str,
+    publication_sha: str | None,
+) -> ReelGenerationMetadata:
     return ReelGenerationMetadata(
         id=str(uuid.uuid4()),
         slug=slug,
@@ -60,6 +71,9 @@ def pending_review_metadata(slug: str, template: str, uploaded: UploadedGenerati
         video_key=uploaded.video_key,
         contact_key=uploaded.contact_key,
         json_key=uploaded.json_key,
+        article_title=article_title,
+        article_url=article_url,
+        publication_sha=publication_sha,
         created_at=datetime.now(UTC).isoformat(),
     )
 
@@ -74,6 +88,9 @@ def failed_generation_metadata(slug: str, generation_id: str, error: str) -> Ree
         video_key=None,
         contact_key=None,
         json_key=None,
+        article_title=None,
+        article_url=None,
+        publication_sha=None,
         created_at=datetime.now(UTC).isoformat(),
         error=error[:500],
     )
@@ -91,8 +108,8 @@ def register_metadata(metadata: ReelGenerationMetadata, config: D1Config | None 
     payload = json.dumps({
         "sql": """INSERT INTO reel_generations
         (id, slug, template, generation_id, status, video_key, contact_key, json_key,
-         created_at, approved_at, rejected_at, error)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+         article_title, article_url, publication_sha, created_at, approved_at, rejected_at, error)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         "params": list(fields.values()),
     }).encode("utf-8")
     request = urllib.request.Request(

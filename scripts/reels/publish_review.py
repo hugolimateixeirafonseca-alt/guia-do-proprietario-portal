@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Callable
@@ -12,6 +13,7 @@ REPOSITORY_ROOT = SCRIPT_DIR.parents[1]
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from content import load_content
+from ai.article import Article, read_article
 from review_metadata import D1Config, failed_generation_metadata, pending_review_metadata, register_metadata
 from storage import R2Config, UploadedGeneration, generate_generation_id, upload_generation
 from video import probe_video
@@ -38,6 +40,8 @@ def publish_after_validation(
     validator: Callable[..., dict] = validate_assets,
     uploader: Callable[..., UploadedGeneration] = upload_generation,
     registrar: Callable[..., None] = register_metadata,
+    article_reader: Callable[[Path, str], Article] = read_article,
+    publication_sha: str | None = None,
 ) -> dict:
     data = validator(slug, reel_json, video, contact, ffprobe)
     uploaded = uploader(
@@ -47,7 +51,15 @@ def publish_after_validation(
         contact=contact,
         reel_json=reel_json,
     )
-    metadata = pending_review_metadata(slug, data["template"], uploaded)
+    article = article_reader(REPOSITORY_ROOT, slug)
+    metadata = pending_review_metadata(
+        slug,
+        data["template"],
+        uploaded,
+        article_title=article.title,
+        article_url=article.canonical_url,
+        publication_sha=publication_sha,
+    )
     registrar(metadata)
     return metadata.as_dict()
 
@@ -88,6 +100,7 @@ def main() -> int:
         video=args.video.resolve(),
         contact=args.contact.resolve(),
         ffprobe=args.ffprobe,
+        publication_sha=os.environ.get("PUBLICATION_SHA", "").strip() or None,
     )
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
     return 0

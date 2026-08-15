@@ -11,12 +11,16 @@ import yaml
 
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 FRONTMATTER_PATTERN = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+PORTAL_ORIGIN = "https://guiadoproprietario.pt"
 
 
 @dataclass(frozen=True)
 class Article:
     slug: str
     path: Path
+    title: str
+    pillar: str
+    canonical_url: str
     hero_image: str
     hero_path: Path
     category: str
@@ -98,6 +102,12 @@ def read_article(repository_root: Path, slug: str) -> Article:
     pillar = frontmatter.get("pilar")
     if not isinstance(pillar, str) or not pillar.strip():
         raise ValueError("O artigo não tem pilar/categoria válido.")
+    pillar = pillar.strip()
+    if not SLUG_PATTERN.fullmatch(pillar):
+        raise ValueError("O artigo não tem pilar/categoria válido.")
+    title = frontmatter.get("titulo")
+    if not isinstance(title, str) or not title.strip():
+        raise ValueError("O artigo não tem título válido.")
 
     relevant_keys = (
         "titulo",
@@ -116,9 +126,12 @@ def read_article(repository_root: Path, slug: str) -> Article:
     return Article(
         slug=slug,
         path=path,
+        title=title.strip(),
+        pillar=pillar,
+        canonical_url=f"{PORTAL_ORIGIN}/{pillar}/{slug}/",
         hero_image=hero_image,
         hero_path=hero_path,
-        category=_category(pillar.strip()),
+        category=_category(pillar),
         api_payload=api_payload,
         factual_text=factual_text,
     )

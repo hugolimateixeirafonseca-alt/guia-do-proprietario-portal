@@ -94,6 +94,16 @@ class ArticleImageResolutionTests(unittest.TestCase):
         self.assertEqual(article.hero_image, "imagens/artigos/teste.png")
         self.assertEqual(article.hero_path, expected)
 
+    def test_article_exposes_deterministic_social_metadata(self):
+        self.write_article()
+        self.write_image("imagens/artigos/teste.png")
+
+        article = read_article(self.root, "teste")
+
+        self.assertEqual(article.title, "Artigo de teste")
+        self.assertEqual(article.pillar, "manutencao")
+        self.assertEqual(article.canonical_url, "https://guiadoproprietario.pt/manutencao/teste/")
+
     def test_missing_avif_uses_source_jpg(self):
         self.write_article()
         expected = self.write_image("imagens/artigos/teste.jpg")
