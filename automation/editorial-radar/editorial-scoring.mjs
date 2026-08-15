@@ -85,6 +85,7 @@ function stableScoringText(candidate={}) {
 export function scoreEditorialEvent(candidate={},classification={}) {
   const text=stableScoringText(candidate);
   const normalizedText=normalize(text);
+  const normalizedTitle=normalize(candidate.source_title||candidate.title||'');
   const pillar=pillarOf(candidate,classification);
   const legalStage=String(classification?.legal_stage||candidate?.legal_stage||'na').toLowerCase();
 
@@ -97,7 +98,7 @@ export function scoreEditorialEvent(candidate={},classification={}) {
     practical:containsAny(text,PRACTICAL),
     housing_market:containsAny(text,HOUSING_MARKET),
     portugal:containsAny(text,PORTUGAL_SIGNAL),
-    numeric:/\d/u.test(normalizedText),
+    numeric:/\d/u.test(normalizedTitle),
     legal_stage:legalStage!=='na',
     official:Boolean(candidate.is_official),
     lifestyle_negative:containsAny(text,LIFESTYLE_NEGATIVE),
