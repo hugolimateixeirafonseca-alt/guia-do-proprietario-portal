@@ -21,7 +21,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python3 automation/editorial-radar/photo-directions-patch.py
+      - run: |
+          python3 automation/editorial-radar/photo-directions-patch.py
+          python3 automation/editorial-radar/photo-directions-tests-patch.py
       - name: Validate
         run: |
           node --check automation/editorial-radar/publication-image-prompt.mjs
@@ -31,6 +33,7 @@ jobs:
         run: |
           rm .github/workflows/photo-directions-patch.yml
           rm automation/editorial-radar/photo-directions-patch.py
+          rm automation/editorial-radar/photo-directions-tests-patch.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
