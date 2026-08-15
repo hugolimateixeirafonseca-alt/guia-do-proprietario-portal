@@ -4,9 +4,10 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import ArticleCard from "../../components/ArticleCard.astro";
 import { formatarData } from "../../config";
+import { compararNotasRecentes, deduplicarNotas } from "../../lib/notas";
 
 export async function getStaticPaths() {
-  const notas = await getCollection("notas");
+  const notas = deduplicarNotas((await getCollection("notas")).sort(compararNotasRecentes));
   return notas.map((nota) => ({ params: { slug: nota.id }, props: { nota } }));
 }
 
