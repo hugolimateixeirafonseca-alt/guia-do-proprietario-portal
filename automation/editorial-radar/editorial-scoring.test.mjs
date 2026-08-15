@@ -89,3 +89,30 @@ test('todos os scores são inteiros entre 0 e 100',()=>{
     assert.ok(value>=0 && value<=100);
   }
 });
+test('numero apenas no URL nao acrescenta pontos',()=>{
+  const base={
+    source_title:'Conheça as propostas para flexibilizar lei das rendas',
+    article_url:'https://eco.sapo.pt/descodificador/governo-quer-mercado-de-arrendamento-mais-flexivel-conheca-as-propostas',
+    pillar:'arrendar'
+  };
+  const numbered={
+    ...base,
+    article_url:`${base.article_url}/04-ao-fim-de-quanto-tempo-o-senhorio-pode-avancar`
+  };
+  const a=scoreEditorialEvent(base,{pillar:'arrendar',legal_stage:'proposta'});
+  const b=scoreEditorialEvent(numbered,{pillar:'arrendar',legal_stage:'proposta'});
+  assert.equal(a.news_score,b.news_score);
+  assert.equal(a.seo_score,b.seo_score);
+  assert.equal(a.signals.numeric,false);
+  assert.equal(b.signals.numeric,false);
+});
+
+test('numero factual no titulo continua a contar',()=>{
+  const candidate={
+    source_title:'Governo prevê entregar 28 mil casas do PRR até ao final de agosto',
+    article_url:'https://jornaleconomico.sapo.pt/noticias/prr-habitacao',
+    pillar:'casa'
+  };
+  const result=scoreEditorialEvent(candidate,{pillar:'casa',legal_stage:'anuncio'});
+  assert.equal(result.signals.numeric,true);
+});
