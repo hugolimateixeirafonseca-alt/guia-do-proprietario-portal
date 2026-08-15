@@ -19,6 +19,7 @@ type CloudflareEnvelope<T> = {
 type PagesDeployment = {
   id?: string;
   url?: string;
+  environment?: 'production' | 'preview' | string;
   latest_stage?: {
     name?: string;
     status?: 'success' | 'idle' | 'active' | 'failure' | 'canceled' | string;
@@ -31,8 +32,10 @@ type PagesDeployment = {
   };
 };
 
-const MAX_WAIT_MS = 260_000;
-const POLL_MS = 3_000;
+const MAX_WAIT_MS = 250_000;
+// Workers Free allows 50 external subrequests per invocation. At 7s polling,
+// the whole 250s gate remains comfortably below that ceiling.
+const POLL_MS = 7_000;
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const PROJECT_PATTERN = /^[a-z0-9][a-z0-9-]{0,62}$/i;
 
@@ -91,6 +94,34 @@ async function cfRequest<T>(url: string, token: string, init?: RequestInit) {
     throw new Error(`cloudflare_invalid_response_${response.status}`);
   }
 
+  if (!response.ok || payload.success === false || payload.result === undefined || payload.result === null) {
+    throw new Error(`${cloudflareErrorCode(payload)}_${response.status}`);
+  }
+
+  return payload.result;
+}
+
+async function createDeployment(url: string, token: string, form: FormData) {
+  const response = await fetch(url, {
+    method: 'POST',
+    body: form,
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  // Cloudflare can return 304 when the Git integration has already created a
+  // deployment for the exact same commit. That is a race, not a failure.
+  if (response.status === 304) return null;
+
+  let payload: CloudflareEnvelope<PagesDeployment>;
+  try {
+    payload = (await response.json()) as CloudflareEnvelope<PagesDeployment>;
+  } catch {
+    throw new Error(`cloudflare_invalid_response_${response.status}`);
+  }
+
   if (!response.ok || payload.success === false || !payload.result) {
     throw new Error(`${cloudflareErrorCode(payload)}_${response.status}`);
   }
@@ -100,6 +131,41 @@ async function cfRequest<T>(url: string, token: string, init?: RequestInit) {
 
 function deployedCommit(deployment: PagesDeployment) {
   return deployment.deployment_trigger?.metadata?.commit_hash?.trim() || '';
+}
+
+function deployedBranch(deployment: PagesDeployment) {
+  return deployment.deployment_trigger?.metadata?.branch?.trim() || '';
+}
+
+function statusOf(deployment: PagesDeployment) {
+  return deployment.latest_stage?.status || 'idle';
+}
+
+function selectMatchingDeployment(deployments: PagesDeployment[], commitSha: string, branch: string) {
+  const matches = deployments.filter((deployment) => {
+    const commit = deployedCommit(deployment);
+    const deployedOnBranch = deployedBranch(deployment);
+    return (
+      commit.toLowerCase() === commitSha.toLowerCase() &&
+      (!deployedOnBranch || deployedOnBranch === branch) &&
+      (!deployment.environment || deployment.environment === 'production')
+    );
+  });
+
+  return (
+    matches.find((deployment) => statusOf(deployment) === 'success') ||
+    matches.find((deployment) => ['active', 'idle'].includes(statusOf(deployment))) ||
+    matches[0] ||
+    null
+  );
+}
+
+async function findDeployment(base: string, token: string, commitSha: string, branch: string) {
+  const deployments = await cfRequest<PagesDeployment[]>(
+    `${base}/deployments?env=production&page=1&per_page=25`,
+    token,
+  );
+  return selectMatchingDeployment(deployments, commitSha, branch);
 }
 
 async function deployAndWait({ request, env }: RequestContext) {
@@ -126,29 +192,45 @@ async function deployAndWait({ request, env }: RequestContext) {
   if (!SHA_PATTERN.test(input.commitSha)) return json({ error: 'invalid_commit_sha' }, 400);
 
   const base = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/pages/projects/${encodeURIComponent(project)}`;
+  const deadline = Date.now() + MAX_WAIT_MS;
 
   try {
-    const form = new FormData();
-    form.set('branch', input.branch);
-    form.set('commit_hash', input.commitSha);
-    form.set('commit_dirty', 'false');
-    form.set('commit_message', `Make deterministic publish ${input.commitSha.slice(0, 12)}`);
+    // Prefer the deployment already started by the GitHub integration. This
+    // avoids duplicate builds and makes the gate deterministic even when the
+    // Git-triggered deployment wins the race by milliseconds.
+    let deployment = await findDeployment(base, token, input.commitSha, input.branch);
 
-    let deployment = await cfRequest<PagesDeployment>(`${base}/deployments`, token, {
-      method: 'POST',
-      body: form,
-    });
+    if (!deployment) {
+      const form = new FormData();
+      form.set('branch', input.branch);
+      form.set('commit_hash', input.commitSha);
+      form.set('commit_dirty', 'false');
+      form.set('commit_message', `Make deterministic publish ${input.commitSha.slice(0, 12)}`);
+
+      deployment = await createDeployment(`${base}/deployments`, token, form);
+    }
+
+    // A 304 means an equivalent deployment already exists but can race the
+    // deployments-list index. Keep looking for that exact SHA until it appears.
+    while (!deployment) {
+      if (Date.now() >= deadline) return json({ error: 'deployment_not_found_after_304' }, 504);
+      await new Promise((resolve) => setTimeout(resolve, POLL_MS));
+      deployment = await findDeployment(base, token, input.commitSha, input.branch);
+    }
 
     if (!deployment.id) return json({ error: 'cloudflare_missing_deployment_id' }, 502);
     const deploymentId = deployment.id;
-    const deadline = Date.now() + MAX_WAIT_MS;
 
     while (true) {
-      const status = deployment.latest_stage?.status || 'idle';
+      const status = statusOf(deployment);
       const commit = deployedCommit(deployment);
+      const branch = deployedBranch(deployment);
 
       if (commit && commit.toLowerCase() !== input.commitSha.toLowerCase()) {
         return json({ error: 'deployment_commit_mismatch', deployment_id: deploymentId }, 502);
+      }
+      if (branch && branch !== input.branch) {
+        return json({ error: 'deployment_branch_mismatch', deployment_id: deploymentId }, 502);
       }
 
       if (status === 'success') {
@@ -157,6 +239,7 @@ async function deployAndWait({ request, env }: RequestContext) {
           deployment_id: deploymentId,
           status,
           commit_sha: input.commitSha,
+          reused_existing_deployment: true,
           url: deployment.url || null,
         });
       }
