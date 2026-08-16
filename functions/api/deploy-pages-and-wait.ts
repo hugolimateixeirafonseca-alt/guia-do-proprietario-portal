@@ -1,36 +1,11 @@
 interface Env {
   SOCIAL_CARD_RENDERER_SECRET?: string;
-  CLOUDFLARE_API_TOKEN?: string;
-  CLOUDFLARE_ACCOUNT_ID?: string;
-  CLOUDFLARE_PAGES_PROJECT?: string;
 }
 
 interface RequestContext {
   request: Request;
   env: Env;
 }
-
-type CloudflareEnvelope<T> = {
-  success?: boolean;
-  errors?: Array<{ code?: number; message?: string }>;
-  result?: T;
-};
-
-type PagesDeployment = {
-  id?: string;
-  url?: string;
-  environment?: 'production' | 'preview' | string;
-  latest_stage?: {
-    name?: string;
-    status?: 'success' | 'idle' | 'active' | 'failure' | 'canceled' | string;
-  };
-  deployment_trigger?: {
-    metadata?: {
-      branch?: string;
-      commit_hash?: string;
-    };
-  };
-};
 
 type GateInput = {
   branch: string;
@@ -40,14 +15,20 @@ type GateInput = {
   probeUrl: string;
 };
 
-// Keep every public HTTP request safely below Cloudflare's proxy timeout.
-// Make can chain several of these deterministic windows for long builds.
+type PublicProbe = {
+  ready: boolean;
+  pageStatus: number;
+  imageUrl: string;
+  imageStatus: number | null;
+};
+
+// This endpoint is intentionally a PUBLIC-READINESS gate, not a deployment engine.
+// Git/Cloudflare own the deployment. Make only needs to know when Facebook can
+// fetch both the final page and its OG image without receiving a transient 404.
 const WAIT_WINDOW_MS = 80_000;
-const POLL_MS = 5_000;
 const PUBLIC_PROBE_POLL_MS = 2_000;
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEPLOYMENT_ID_PATTERN = /^[0-9a-f-]{20,80}$/i;
-const PROJECT_PATTERN = /^[a-z0-9][a-z0-9-]{0,62}$/i;
 const PUBLIC_ORIGIN = 'https://guiadoproprietario.pt';
 const FACEBOOK_CRAWLER_UA = 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)';
 
@@ -62,12 +43,6 @@ function json(body: Record<string, unknown>, status = 200) {
   });
 }
 
-function cloudflareErrorCode(payload: CloudflareEnvelope<unknown>) {
-  const first = payload.errors?.[0];
-  if (!first) return 'cloudflare_api_error';
-  return first.code ? `cloudflare_api_error_${first.code}` : 'cloudflare_api_error';
-}
-
 function asBoolean(value: unknown) {
   if (typeof value === 'boolean') return value;
   if (typeof value !== 'string') return false;
@@ -76,6 +51,7 @@ function asBoolean(value: unknown) {
 
 async function parseInput(request: Request): Promise<GateInput> {
   const contentType = request.headers.get('Content-Type') || '';
+
   if (contentType.toLowerCase().includes('multipart/form-data')) {
     const form = await request.formData();
     return {
@@ -101,7 +77,7 @@ async function parseInput(request: Request): Promise<GateInput> {
   throw new Error('unsupported_content_type');
 }
 
-function validatedProbeUrl(value: string) {
+function validatedPublicUrl(value: string) {
   if (!value) return '';
   try {
     const url = new URL(value);
@@ -115,186 +91,90 @@ function validatedProbeUrl(value: string) {
   }
 }
 
-async function probePublicUrl(url: string) {
-  const target = new URL(url);
-  target.searchParams.set('__pages_gate', `${Date.now()}`);
+function extractOgImage(html: string, pageUrl: string) {
+  const patterns = [
+    /<meta\s+[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i,
+    /<meta\s+[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["'][^>]*>/i,
+  ];
 
-  try {
-    const response = await fetch(target.toString(), {
-      method: 'GET',
-      redirect: 'follow',
-      headers: {
-        Accept: 'text/html,application/xhtml+xml,image/*;q=0.8,*/*;q=0.5',
-        'Cache-Control': 'no-cache',
-        'User-Agent': FACEBOOK_CRAWLER_UA,
-      },
-    });
-    return response.status;
-  } catch {
-    return 0;
-  }
-}
-
-async function cfRequest<T>(url: string, token: string, init?: RequestInit) {
-  const response = await fetch(url, {
-    ...init,
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...(init?.headers || {}),
-    },
-  });
-
-  let payload: CloudflareEnvelope<T>;
-  try {
-    payload = (await response.json()) as CloudflareEnvelope<T>;
-  } catch {
-    throw new Error(`cloudflare_invalid_response_${response.status}`);
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (!match?.[1]) continue;
+    try {
+      const url = new URL(match[1], pageUrl);
+      if (url.protocol !== 'https:') return '';
+      return url.toString();
+    } catch {
+      return '';
+    }
   }
 
-  if (!response.ok || payload.success === false || payload.result === undefined || payload.result === null) {
-    throw new Error(`${cloudflareErrorCode(payload)}_${response.status}`);
-  }
-
-  return payload.result;
-}
-
-async function createDeployment(url: string, token: string, form: FormData) {
-  const response = await fetch(url, {
-    method: 'POST',
-    body: form,
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  // Git integration may win the race for the same commit.
-  if (response.status === 304) return null;
-
-  let payload: CloudflareEnvelope<PagesDeployment>;
-  try {
-    payload = (await response.json()) as CloudflareEnvelope<PagesDeployment>;
-  } catch {
-    throw new Error(`cloudflare_invalid_response_${response.status}`);
-  }
-
-  if (!response.ok || payload.success === false || !payload.result) {
-    throw new Error(`${cloudflareErrorCode(payload)}_${response.status}`);
-  }
-
-  return payload.result;
-}
-
-function deployedCommit(deployment: PagesDeployment) {
-  return deployment.deployment_trigger?.metadata?.commit_hash?.trim() || '';
-}
-
-function deployedBranch(deployment: PagesDeployment) {
-  return deployment.deployment_trigger?.metadata?.branch?.trim() || '';
-}
-
-function statusOf(deployment: PagesDeployment) {
-  return deployment.latest_stage?.status || 'idle';
-}
-
-function selectMatchingDeployment(deployments: PagesDeployment[], commitSha: string, branch: string) {
-  const matches = deployments.filter((deployment) => {
-    const commit = deployedCommit(deployment);
-    const deployedOnBranch = deployedBranch(deployment);
-    return (
-      commit.toLowerCase() === commitSha.toLowerCase() &&
-      (!deployedOnBranch || deployedOnBranch === branch) &&
-      (!deployment.environment || deployment.environment === 'production')
-    );
-  });
-
-  return (
-    matches.find((deployment) => statusOf(deployment) === 'success') ||
-    matches.find((deployment) => ['active', 'idle'].includes(statusOf(deployment))) ||
-    matches[0] ||
-    null
-  );
-}
-
-async function findDeployment(base: string, token: string, commitSha: string, branch: string) {
-  const deployments = await cfRequest<PagesDeployment[]>(
-    `${base}/deployments?env=production&page=1&per_page=25`,
-    token,
-  );
-  return selectMatchingDeployment(deployments, commitSha, branch);
-}
-
-function validateDeployment(deployment: PagesDeployment, input: GateInput) {
-  const commit = deployedCommit(deployment);
-  const branch = deployedBranch(deployment);
-  if (commit && commit.toLowerCase() !== input.commitSha.toLowerCase()) return 'deployment_commit_mismatch';
-  if (branch && branch !== input.branch) return 'deployment_branch_mismatch';
   return '';
 }
 
-function successResponse(deployment: PagesDeployment, input: GateInput, reused: boolean, probeStatus?: number) {
-  return json({
-    ok: true,
-    pending: false,
-    status: 'success',
-    deployment_id: deployment.id || null,
-    deployment_url: deployment.url || null,
-    commit_sha: input.commitSha,
-    branch: input.branch,
-    reused_existing_deployment: reused,
-    public_url_ready: input.probeUrl ? true : null,
-    probe_status: input.probeUrl ? probeStatus || 200 : null,
+async function fetchAsFacebook(url: string, accept: string) {
+  const target = new URL(url);
+  target.searchParams.set('__pages_gate', `${Date.now()}`);
+
+  return fetch(target.toString(), {
+    method: 'GET',
+    redirect: 'follow',
+    headers: {
+      Accept: accept,
+      'Cache-Control': 'no-cache',
+      'User-Agent': FACEBOOK_CRAWLER_UA,
+    },
   });
 }
 
-function pendingResponse(deployment: PagesDeployment | null, input: GateInput, reused: boolean) {
-  const status = deployment ? statusOf(deployment) : 'locating';
-  const body = {
-    ok: false,
-    pending: true,
-    status,
-    deployment_id: deployment?.id || null,
-    deployment_url: deployment?.url || null,
-    commit_sha: input.commitSha,
-    branch: input.branch,
-    reused_existing_deployment: reused,
-  };
+async function probePublicReadiness(pageUrl: string): Promise<PublicProbe> {
+  try {
+    const page = await fetchAsFacebook(pageUrl, 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5');
+    const pageStatus = page.status;
 
-  if (input.requireSuccess) {
-    return json({ ...body, error: 'cloudflare_deployment_still_pending' }, 504);
+    if (pageStatus < 200 || pageStatus >= 300) {
+      return { ready: false, pageStatus, imageUrl: '', imageStatus: null };
+    }
+
+    const contentType = page.headers.get('content-type') || '';
+    if (!contentType.toLowerCase().includes('text/html')) {
+      return { ready: false, pageStatus, imageUrl: '', imageStatus: null };
+    }
+
+    const html = await page.text();
+    const imageUrl = extractOgImage(html, pageUrl);
+
+    // A page without og:image is still publishable. If an OG image is declared,
+    // however, do not release Facebook until that asset is also fetchable.
+    if (!imageUrl) {
+      return { ready: true, pageStatus, imageUrl: '', imageStatus: null };
+    }
+
+    try {
+      const image = await fetchAsFacebook(imageUrl, 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8');
+      const imageStatus = image.status;
+      const imageType = image.headers.get('content-type') || '';
+      const imageReady = imageStatus >= 200 && imageStatus < 300 && imageType.toLowerCase().startsWith('image/');
+      return { ready: imageReady, pageStatus, imageUrl, imageStatus };
+    } catch {
+      return { ready: false, pageStatus, imageUrl, imageStatus: 0 };
+    }
+  } catch {
+    return { ready: false, pageStatus: 0, imageUrl: '', imageStatus: null };
   }
-  return json(body, 202);
 }
 
-function publicUrlPendingResponse(deployment: PagesDeployment, input: GateInput, reused: boolean, probeStatus: number) {
-  return json(
-    {
-      ok: false,
-      pending: true,
-      status: 'success',
-      deployment_id: deployment.id || null,
-      deployment_url: deployment.url || null,
-      commit_sha: input.commitSha,
-      branch: input.branch,
-      reused_existing_deployment: reused,
-      public_url_ready: false,
-      probe_status: probeStatus || null,
-      error: 'public_url_still_pending',
-    },
-    input.requireSuccess ? 504 : 202,
-  );
-}
+async function waitForPublicReadiness(url: string, deadline: number) {
+  let probe: PublicProbe = { ready: false, pageStatus: 0, imageUrl: '', imageStatus: null };
 
-async function waitForPublicUrl(url: string, deadline: number) {
-  let status = 0;
   while (Date.now() < deadline) {
-    status = await probePublicUrl(url);
-    if (status >= 200 && status < 300) return status;
+    probe = await probePublicReadiness(url);
+    if (probe.ready) return probe;
     if (Date.now() >= deadline) break;
     await new Promise((resolve) => setTimeout(resolve, PUBLIC_PROBE_POLL_MS));
   }
-  return status;
+
+  return probe;
 }
 
 async function deployAndWaitWindow({ request, env }: RequestContext) {
@@ -303,89 +183,63 @@ async function deployAndWaitWindow({ request, env }: RequestContext) {
     return json({ error: 'unauthorized' }, 401);
   }
 
-  const accountId = env.CLOUDFLARE_ACCOUNT_ID?.trim();
-  const token = env.CLOUDFLARE_API_TOKEN?.trim();
-  const project = env.CLOUDFLARE_PAGES_PROJECT?.trim();
-  if (!accountId || !token || !project) return json({ error: 'cloudflare_pages_not_configured' }, 503);
-  if (!PROJECT_PATTERN.test(project)) return json({ error: 'invalid_pages_project' }, 500);
-
   let input: GateInput;
   try {
     input = await parseInput(request);
   } catch (error) {
     const code = error instanceof Error ? error.message : 'invalid_request';
-    return json({ error: code === 'unsupported_content_type' ? code : 'invalid_request' }, code === 'unsupported_content_type' ? 415 : 400);
+    return json(
+      { error: code === 'unsupported_content_type' ? code : 'invalid_request' },
+      code === 'unsupported_content_type' ? 415 : 400,
+    );
   }
 
-  if (input.branch !== 'main') return json({ error: 'branch_must_be_main' }, 400);
-  if (!SHA_PATTERN.test(input.commitSha)) return json({ error: 'invalid_commit_sha' }, 400);
-  if (input.deploymentId && !DEPLOYMENT_ID_PATTERN.test(input.deploymentId)) return json({ error: 'invalid_deployment_id' }, 400);
-  if (input.probeUrl) {
-    const probeUrl = validatedProbeUrl(input.probeUrl);
-    if (!probeUrl) return json({ error: 'invalid_probe_url' }, 400);
-    input.probeUrl = probeUrl;
+  if (input.branch && input.branch !== 'main') return json({ error: 'branch_must_be_main' }, 400);
+  if (input.commitSha && !SHA_PATTERN.test(input.commitSha)) return json({ error: 'invalid_commit_sha' }, 400);
+  if (input.deploymentId && !DEPLOYMENT_ID_PATTERN.test(input.deploymentId)) {
+    return json({ error: 'invalid_deployment_id' }, 400);
   }
 
-  const base = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/pages/projects/${encodeURIComponent(project)}`;
+  const probeUrl = validatedPublicUrl(input.probeUrl);
+  if (!probeUrl) return json({ error: 'invalid_probe_url' }, 400);
+
   const deadline = Date.now() + WAIT_WINDOW_MS;
+  const probe = await waitForPublicReadiness(probeUrl, deadline);
 
-  try {
-    let deployment: PagesDeployment | null = null;
-    let reusedExistingDeployment = false;
-
-    if (input.deploymentId) {
-      deployment = await cfRequest<PagesDeployment>(`${base}/deployments/${encodeURIComponent(input.deploymentId)}`, token);
-      reusedExistingDeployment = true;
-    } else {
-      deployment = await findDeployment(base, token, input.commitSha, input.branch);
-      reusedExistingDeployment = Boolean(deployment);
-
-      if (!deployment) {
-        const form = new FormData();
-        form.set('branch', input.branch);
-        form.set('commit_hash', input.commitSha);
-        form.set('commit_dirty', 'false');
-        form.set('commit_message', `Make deterministic publish ${input.commitSha.slice(0, 12)}`);
-        deployment = await createDeployment(`${base}/deployments`, token, form);
-        reusedExistingDeployment = !deployment;
-      }
-    }
-
-    // A 304 can briefly precede the deployment appearing in the list API.
-    while (!deployment && Date.now() < deadline) {
-      await new Promise((resolve) => setTimeout(resolve, POLL_MS));
-      deployment = await findDeployment(base, token, input.commitSha, input.branch);
-    }
-
-    if (!deployment) return pendingResponse(null, input, true);
-    if (!deployment.id) return json({ error: 'cloudflare_missing_deployment_id' }, 502);
-    const deploymentId = deployment.id;
-
-    while (true) {
-      const mismatch = validateDeployment(deployment, input);
-      if (mismatch) return json({ error: mismatch, deployment_id: deploymentId }, 502);
-
-      const status = statusOf(deployment);
-      if (status === 'success') {
-        if (!input.probeUrl) return successResponse(deployment, input, reusedExistingDeployment);
-        const probeStatus = await waitForPublicUrl(input.probeUrl, deadline);
-        if (probeStatus >= 200 && probeStatus < 300) {
-          return successResponse(deployment, input, reusedExistingDeployment, probeStatus);
-        }
-        return publicUrlPendingResponse(deployment, input, reusedExistingDeployment, probeStatus);
-      }
-      if (status === 'failure' || status === 'canceled') {
-        return json({ error: `cloudflare_deployment_${status}`, deployment_id: deploymentId }, 502);
-      }
-      if (Date.now() >= deadline) return pendingResponse(deployment, input, reusedExistingDeployment);
-
-      await new Promise((resolve) => setTimeout(resolve, POLL_MS));
-      deployment = await cfRequest<PagesDeployment>(`${base}/deployments/${encodeURIComponent(deploymentId)}`, token);
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'cloudflare_request_failed';
-    return json({ error: message.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120) }, 502);
+  if (probe.ready) {
+    return json({
+      ok: true,
+      pending: false,
+      status: 'success',
+      commit_sha: input.commitSha || null,
+      branch: input.branch || 'main',
+      deployment_id: input.deploymentId || null,
+      public_url_ready: true,
+      probe_status: probe.pageStatus,
+      og_image_url: probe.imageUrl || null,
+      og_image_status: probe.imageStatus,
+    });
   }
+
+  const body = {
+    ok: false,
+    pending: true,
+    status: 'waiting_for_public_url',
+    commit_sha: input.commitSha || null,
+    branch: input.branch || 'main',
+    deployment_id: input.deploymentId || null,
+    public_url_ready: false,
+    probe_status: probe.pageStatus || null,
+    og_image_url: probe.imageUrl || null,
+    og_image_status: probe.imageStatus,
+    error: 'public_assets_still_pending',
+  };
+
+  // Make can call the same gate again with the same payload. 202 is deliberate:
+  // it is a successful HTTP transport response while signalling "not ready yet".
+  // require_success is retained for backward compatibility but no longer turns a
+  // transient publishing delay into a hard scenario failure.
+  return json(body, 202);
 }
 
 export const onRequestPost = deployAndWaitWindow;
