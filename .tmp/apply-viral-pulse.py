@@ -233,3 +233,25 @@ s=replace_once(s,
 """,
 'resolve pulse mode')
 p.write_text(s,encoding='utf-8')
+
+# Update the regression test to assert the deliberate full + pulse schedule.
+p=Path('automation/editorial-radar/discovery-mode.test.mjs')
+s=p.read_text(encoding='utf-8')
+s=replace_once(s,
+"""test('workflow mantém um único cron diário e schedule morning',async()=>{
+  const workflow=await fs.readFile(new URL('../../.github/workflows/editorial-radar.yml',import.meta.url),'utf8');
+  assert.deepEqual([...workflow.matchAll(/- cron:\\s*'([^']+)'/g)].map(match=>match[1]),['30 6 * * *']);
+  assert.doesNotMatch(workflow,/^\\s*push:/m);
+  assert.match(workflow,/github\\.event_name \\}\\}" == "schedule"[\\s\\S]*RADAR_MODE=morning[\\s\\S]*RADAR_DRY_RUN=false[\\s\\S]*BACKFILL=false/);
+});""",
+"""test('workflow mantém ronda morning e rondas pulse sem push',async()=>{
+  const workflow=await fs.readFile(new URL('../../.github/workflows/editorial-radar.yml',import.meta.url),'utf8');
+  assert.deepEqual([...workflow.matchAll(/- cron:\\s*'([^']+)'/g)].map(match=>match[1]),['30 6 * * *','30 9,12,15,18 * * *']);
+  assert.doesNotMatch(workflow,/^\\s*push:/m);
+  assert.match(workflow,/RADAR_MODE=morning/);
+  assert.match(workflow,/RADAR_MODE=pulse/);
+  assert.match(workflow,/RADAR_DRY_RUN=false/);
+  assert.match(workflow,/BACKFILL=false/);
+});""",
+'workflow cron test')
+p.write_text(s,encoding='utf-8')
