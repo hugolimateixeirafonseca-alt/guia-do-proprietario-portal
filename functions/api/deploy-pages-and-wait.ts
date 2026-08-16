@@ -15,16 +15,28 @@ type GateInput = {
   probeUrl: string;
 };
 
+type HtmlProbe = {
+  ready: boolean;
+  status: number;
+  imageUrl: string;
+  imageStatus: number | null;
+};
+
 type PublicProbe = {
   ready: boolean;
-  pageStatus: number;
+  siteUrl: string;
+  siteStatus: number | null;
+  shareUrl: string;
+  shareStatus: number | null;
   imageUrl: string;
   imageStatus: number | null;
 };
 
 // This endpoint is intentionally a PUBLIC-READINESS gate, not a deployment engine.
 // Git/Cloudflare own the deployment. Make only needs to know when Facebook can
-// fetch both the final page and its OG image without receiving a transient 404.
+// fetch the final page, the dedicated share page and the OG image without a
+// transient 404. This also keeps publication independent from Cloudflare API
+// deployment IDs/commit matching, which proved unnecessarily brittle.
 const WAIT_WINDOW_MS = 80_000;
 const PUBLIC_PROBE_POLL_MS = 2_000;
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
@@ -91,6 +103,32 @@ function validatedPublicUrl(value: string) {
   }
 }
 
+function derivePublicationUrls(probeUrl: string) {
+  const input = new URL(probeUrl);
+  const cleanPath = input.pathname.replace(/\/+$/, '');
+
+  const newsMatch = cleanPath.match(/^\/novidades\/([^/]+)$/i);
+  if (newsMatch?.[1]) {
+    const slug = encodeURIComponent(decodeURIComponent(newsMatch[1]));
+    return {
+      siteUrl: `${PUBLIC_ORIGIN}/novidades/${slug}/`,
+      shareUrl: `${PUBLIC_ORIGIN}/share/noticias/${slug}/`,
+    };
+  }
+
+  const shareMatch = cleanPath.match(/^\/share\/noticias\/([^/]+)$/i);
+  if (shareMatch?.[1]) {
+    const slug = encodeURIComponent(decodeURIComponent(shareMatch[1]));
+    return {
+      siteUrl: `${PUBLIC_ORIGIN}/novidades/${slug}/`,
+      shareUrl: `${PUBLIC_ORIGIN}/share/noticias/${slug}/`,
+    };
+  }
+
+  // Backward compatibility for any other public URL: probe only the supplied URL.
+  return { siteUrl: input.toString(), shareUrl: '' };
+}
+
 function extractOgImage(html: string, pageUrl: string) {
   const patterns = [
     /<meta\s+[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i,
@@ -127,27 +165,25 @@ async function fetchAsFacebook(url: string, accept: string) {
   });
 }
 
-async function probePublicReadiness(pageUrl: string): Promise<PublicProbe> {
+async function probeHtml(url: string, requireImage: boolean): Promise<HtmlProbe> {
   try {
-    const page = await fetchAsFacebook(pageUrl, 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5');
-    const pageStatus = page.status;
+    const page = await fetchAsFacebook(url, 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5');
+    const status = page.status;
 
-    if (pageStatus < 200 || pageStatus >= 300) {
-      return { ready: false, pageStatus, imageUrl: '', imageStatus: null };
+    if (status < 200 || status >= 300) {
+      return { ready: false, status, imageUrl: '', imageStatus: null };
     }
 
     const contentType = page.headers.get('content-type') || '';
     if (!contentType.toLowerCase().includes('text/html')) {
-      return { ready: false, pageStatus, imageUrl: '', imageStatus: null };
+      return { ready: false, status, imageUrl: '', imageStatus: null };
     }
 
     const html = await page.text();
-    const imageUrl = extractOgImage(html, pageUrl);
+    const imageUrl = extractOgImage(html, url);
 
-    // A page without og:image is still publishable. If an OG image is declared,
-    // however, do not release Facebook until that asset is also fetchable.
-    if (!imageUrl) {
-      return { ready: true, pageStatus, imageUrl: '', imageStatus: null };
+    if (!requireImage || !imageUrl) {
+      return { ready: true, status, imageUrl, imageStatus: null };
     }
 
     try {
@@ -155,17 +191,68 @@ async function probePublicReadiness(pageUrl: string): Promise<PublicProbe> {
       const imageStatus = image.status;
       const imageType = image.headers.get('content-type') || '';
       const imageReady = imageStatus >= 200 && imageStatus < 300 && imageType.toLowerCase().startsWith('image/');
-      return { ready: imageReady, pageStatus, imageUrl, imageStatus };
+      return { ready: imageReady, status, imageUrl, imageStatus };
     } catch {
-      return { ready: false, pageStatus, imageUrl, imageStatus: 0 };
+      return { ready: false, status, imageUrl, imageStatus: 0 };
     }
   } catch {
-    return { ready: false, pageStatus: 0, imageUrl: '', imageStatus: null };
+    return { ready: false, status: 0, imageUrl: '', imageStatus: null };
   }
 }
 
+async function probePublicReadiness(inputUrl: string): Promise<PublicProbe> {
+  const { siteUrl, shareUrl } = derivePublicationUrls(inputUrl);
+
+  // The article URL proves the site deployment is live.
+  const site = await probeHtml(siteUrl, false);
+  if (!site.ready) {
+    return {
+      ready: false,
+      siteUrl,
+      siteStatus: site.status,
+      shareUrl,
+      shareStatus: null,
+      imageUrl: '',
+      imageStatus: null,
+    };
+  }
+
+  // Facebook actually receives the dedicated /share/noticias/... URL in v13.0.
+  // Therefore the gate must validate THAT URL, not only site_url_final.
+  if (shareUrl) {
+    const share = await probeHtml(shareUrl, true);
+    return {
+      ready: share.ready,
+      siteUrl,
+      siteStatus: site.status,
+      shareUrl,
+      shareStatus: share.status,
+      imageUrl: share.imageUrl,
+      imageStatus: share.imageStatus,
+    };
+  }
+
+  return {
+    ready: true,
+    siteUrl,
+    siteStatus: site.status,
+    shareUrl: '',
+    shareStatus: null,
+    imageUrl: site.imageUrl,
+    imageStatus: site.imageStatus,
+  };
+}
+
 async function waitForPublicReadiness(url: string, deadline: number) {
-  let probe: PublicProbe = { ready: false, pageStatus: 0, imageUrl: '', imageStatus: null };
+  let probe: PublicProbe = {
+    ready: false,
+    siteUrl: url,
+    siteStatus: null,
+    shareUrl: '',
+    shareStatus: null,
+    imageUrl: '',
+    imageStatus: null,
+  };
 
   while (Date.now() < deadline) {
     probe = await probePublicReadiness(url);
@@ -215,7 +302,11 @@ async function deployAndWaitWindow({ request, env }: RequestContext) {
       branch: input.branch || 'main',
       deployment_id: input.deploymentId || null,
       public_url_ready: true,
-      probe_status: probe.pageStatus,
+      probe_status: probe.siteStatus,
+      site_url: probe.siteUrl,
+      site_status: probe.siteStatus,
+      share_url: probe.shareUrl || null,
+      share_status: probe.shareStatus,
       og_image_url: probe.imageUrl || null,
       og_image_status: probe.imageStatus,
     });
@@ -224,21 +315,24 @@ async function deployAndWaitWindow({ request, env }: RequestContext) {
   const body = {
     ok: false,
     pending: true,
-    status: 'waiting_for_public_url',
+    status: 'waiting_for_public_assets',
     commit_sha: input.commitSha || null,
     branch: input.branch || 'main',
     deployment_id: input.deploymentId || null,
     public_url_ready: false,
-    probe_status: probe.pageStatus || null,
+    probe_status: probe.siteStatus,
+    site_url: probe.siteUrl,
+    site_status: probe.siteStatus,
+    share_url: probe.shareUrl || null,
+    share_status: probe.shareStatus,
     og_image_url: probe.imageUrl || null,
     og_image_status: probe.imageStatus,
     error: 'public_assets_still_pending',
   };
 
-  // Make can call the same gate again with the same payload. 202 is deliberate:
-  // it is a successful HTTP transport response while signalling "not ready yet".
-  // require_success is retained for backward compatibility but no longer turns a
-  // transient publishing delay into a hard scenario failure.
+  // 202 is deliberate: transport succeeded but the public assets are not ready.
+  // Make can call the same gate again with the same payload. A transient delay no
+  // longer becomes a hard scenario failure merely because require_success=true.
   return json(body, 202);
 }
 
