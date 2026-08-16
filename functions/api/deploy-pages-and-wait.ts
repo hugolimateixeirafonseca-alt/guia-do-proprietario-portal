@@ -282,20 +282,21 @@ async function deployAndWaitWindow({ request, env }: RequestContext) {
 
     if (!deployment) return pendingResponse(null, input, true);
     if (!deployment.id) return json({ error: 'cloudflare_missing_deployment_id' }, 502);
+    const deploymentId = deployment.id;
 
     while (true) {
       const mismatch = validateDeployment(deployment, input);
-      if (mismatch) return json({ error: mismatch, deployment_id: deployment.id }, 502);
+      if (mismatch) return json({ error: mismatch, deployment_id: deploymentId }, 502);
 
       const status = statusOf(deployment);
       if (status === 'success') return successResponse(deployment, input, reusedExistingDeployment);
       if (status === 'failure' || status === 'canceled') {
-        return json({ error: `cloudflare_deployment_${status}`, deployment_id: deployment.id }, 502);
+        return json({ error: `cloudflare_deployment_${status}`, deployment_id: deploymentId }, 502);
       }
       if (Date.now() >= deadline) return pendingResponse(deployment, input, reusedExistingDeployment);
 
       await new Promise((resolve) => setTimeout(resolve, POLL_MS));
-      deployment = await cfRequest<PagesDeployment>(`${base}/deployments/${encodeURIComponent(deployment.id)}`, token);
+      deployment = await cfRequest<PagesDeployment>(`${base}/deployments/${encodeURIComponent(deploymentId)}`, token);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'cloudflare_request_failed';
