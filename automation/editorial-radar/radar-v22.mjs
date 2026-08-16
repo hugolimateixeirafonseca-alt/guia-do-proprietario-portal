@@ -12,6 +12,7 @@ import {shouldUpgradeLegacyPublication} from './legacy-upgrade.mjs';
 import {resolveDuplicateTarget} from './duplicate-target.mjs';
 import {extractFactualCandidates} from './factual-extraction.mjs';
 import {publicationEvidenceStatus} from './publication-evidence.mjs';
+import {evaluateViralPriority} from './viral-priority.mjs';
 
 const REQUIRED=['OPENAI_API_KEY','CF_ACCOUNT_ID','CF_D1_DATABASE_ID','CF_D1_API_TOKEN'];
 for (const key of REQUIRED) if (!process.env[key]) throw new Error(`Missing secret: ${key}`);
@@ -44,7 +45,8 @@ const stats={
   make_sends:0,
   publication_ready:0,
   publication_not_ready:0,
-  publication_quality_rejected:0
+  publication_quality_rejected:0,
+  viral_alerts:0
 };
 
 class BudgetGuardStop extends Error {}
@@ -241,10 +243,14 @@ async function discoverSources() {
   });
 
   const webResults=[];
-  for (const definition of searchSweeps) {
-    const results=await runSearchSweep(definition,currentTime);
-    webResults.push(...results);
-    await sleep(200);
+  if (CFG.mode!=='pulse') {
+    for (const definition of searchSweeps) {
+      const results=await runSearchSweep(definition,currentTime);
+      webResults.push(...results);
+      await sleep(200);
+    }
+  } else {
+    log({stage:'pulse_discovery',web_search_skipped:true,direct_sources:direct.length});
   }
 
   const byUrl=new Map();
@@ -313,9 +319,19 @@ async function enrichFreshSources(sources,currentTime) {
 async function discoverCandidates() {
   const {sources,currentTime}=await discoverSources();
   const enriched=await enrichFreshSources(sources,currentTime);
-  const limit=CFG.mode==='incremental'?24:30;
-  const prefiltered=prefilterHarvestSources(enriched,{limit,dryRun:CFG.dryRun,telemetry:true}).selected;
+  const limit=CFG.mode==='pulse'?8:CFG.mode==='incremental'?24:30;
+  let prefiltered=prefilterHarvestSources(enriched,{limit,dryRun:CFG.dryRun,telemetry:true}).selected;
+  if (CFG.mode==='pulse' && !CFG.dryRun) {
+    const unseen=[];
+    for (const source of prefiltered) {
+      const exists=await d1(`SELECT 1 AS yes FROM event_sources WHERE article_url=? LIMIT 1`,[source.url]);
+      if (!exists.length) unseen.push(source);
+    }
+    log({stage:'pulse_known_url_filter',before:prefiltered.length,after:unseen.length});
+    prefiltered=unseen;
+  }
   stats.prefiltered=prefiltered.length;
+  if (!prefiltered.length) return [];
   const candidates=await extractFactualCandidates(prefiltered,{
     primaryModel:CFG.openaiModelValidator,
     fallbackModel:'gpt-5.6-terra',
@@ -508,7 +524,7 @@ async function persistEvent(candidate,classification) {
     JSON.stringify(candidate.entities||[]),JSON.stringify(candidate.key_facts||[]),classification.news_score||0,classification.seo_score||0,classification.lead_score||0,now,now,'accepted'
   ]);
   await d1(`INSERT OR IGNORE INTO event_sources (event_id,source_name,article_url,published_at,source_type,is_primary,is_official) VALUES (?,?,?,?,?,?,?)`,[
-    eventId,candidate.source_name||'',candidate.article_url,candidate.event_date,candidate.source_type||'media',1,candidate.is_official?1:0
+    eventId,candidate.source_name||'',candidate.article_url,candidate.source_published_at||candidate.event_date,candidate.source_type||'media',1,candidate.is_official?1:0
   ]);
   return {eventId,eventKey};
 }
@@ -678,6 +694,59 @@ async function sendMake(payload) {
   return true;
 }
 
+async function viralStateForEvent(eventId) {
+  const events=await d1(`SELECT id,event_key,title,summary,pillar,news_score,make_sent_at FROM events WHERE id=? LIMIT 1`,[eventId]);
+  if (!events.length) return null;
+  const sources=await d1(`SELECT source_name,article_url,published_at,is_official FROM event_sources WHERE event_id=? ORDER BY published_at ASC`,[eventId]);
+  const viral=evaluateViralPriority(events[0],sources,new Date());
+  return {event:events[0],viral};
+}
+
+async function maybeSendViralPriority(eventId) {
+  if (CFG.dryRun) return false;
+  const state=await viralStateForEvent(eventId);
+  if (!state || state.viral.status!=='viral') return false;
+
+  const prior=await d1(`SELECT event_id,notified_at FROM viral_alerts WHERE event_id=? LIMIT 1`,[eventId]);
+  if (prior[0]?.notified_at) return false;
+
+  const detectedAt=state.viral.detected_at||nowIso();
+  await d1(`INSERT INTO viral_alerts (event_id,viral_score,source_count,span_minutes,detected_at,notified_at)
+    VALUES (?,?,?,?,?,NULL)
+    ON CONFLICT(event_id) DO UPDATE SET viral_score=excluded.viral_score,source_count=excluded.source_count,span_minutes=excluded.span_minutes,detected_at=excluded.detected_at`,[
+    eventId,state.viral.viral_score,state.viral.source_count,state.viral.span_minutes,detectedAt
+  ]);
+
+  const payload={
+    type:'viral_priority',
+    event_id:state.event.id,
+    event_key:state.event.event_key,
+    titulo_noticia:state.event.title,
+    pilar:state.event.pillar,
+    conteudo_verificado:state.event.summary||'',
+    news_score:Number(state.event.news_score||0),
+    viral_status:'viral',
+    viral_score:state.viral.viral_score,
+    viral_source_count:state.viral.source_count,
+    viral_span_minutes:state.viral.span_minutes,
+    viral_detected_at:detectedAt,
+    viral_sources:state.viral.sources,
+    estado:'viral'
+  };
+
+  try {
+    const sent=await sendMake(payload);
+    if (!sent) return false;
+    await d1(`UPDATE viral_alerts SET notified_at=? WHERE event_id=?`,[nowIso(),eventId]);
+    stats.viral_alerts++;
+    log({stage:'viral_priority_sent',event_id:eventId,viral_score:state.viral.viral_score,source_count:state.viral.source_count,span_minutes:state.viral.span_minutes,base_news_sent:Boolean(state.event.make_sent_at)});
+    return true;
+  } catch (error) {
+    log({stage:'viral_priority_send_failed',event_id:eventId,message:String(error?.message||error).slice(0,400)});
+    return false;
+  }
+}
+
 async function main() {
   await initSchema();
   const indexedContent=await indexContent();
@@ -841,7 +910,7 @@ async function main() {
                   nowIso(),nowIso(),target.id
                 ]);
                 await d1(`INSERT OR IGNORE INTO event_sources (event_id,source_name,article_url,published_at,source_type,is_primary,is_official) VALUES (?,?,?,?,?,?,?)`,[
-                  target.id,candidate.source_name||'',candidate.article_url,candidate.event_date,candidate.source_type||'media',0,candidate.is_official?1:0
+                  target.id,candidate.source_name||'',candidate.article_url,candidate.source_published_at||candidate.event_date,candidate.source_type||'media',0,candidate.is_official?1:0
                 ]);
                 log({stage:'semantic_legacy_upgrade_sent',event_id:target.id,event_key:target.event_key,source_url:candidate.article_url,old_news_score:Number(target.news_score||0),new_news_score:rescored.news_score});
               }
@@ -853,11 +922,18 @@ async function main() {
         } else {
           if (!CFG.dryRun) {
             await d1(`INSERT OR IGNORE INTO event_sources (event_id,source_name,article_url,published_at,source_type,is_primary,is_official) VALUES (?,?,?,?,?,?,?)`,[
-              target.id,candidate.source_name||'',candidate.article_url,candidate.event_date,candidate.source_type||'media',0,candidate.is_official?1:0
+              target.id,candidate.source_name||'',candidate.article_url,candidate.source_published_at||candidate.event_date,candidate.source_type||'media',0,candidate.is_official?1:0
             ]);
             await d1(`UPDATE events SET last_seen_at=? WHERE id=?`,[nowIso(),target.id]);
           }
           log({stage:'duplicate_semantic',title:candidate.title,target_event_id:target.id,target_event_key:target.event_key,old_news_score:Number(target.news_score||0),new_news_score:rescored.news_score,reason:duplicateDecision.reason||''});
+        }
+        if (!CFG.dryRun) {
+          await d1(`INSERT OR IGNORE INTO event_sources (event_id,source_name,article_url,published_at,source_type,is_primary,is_official) VALUES (?,?,?,?,?,?,?)`,[
+            target.id,candidate.source_name||'',candidate.article_url,candidate.source_published_at||candidate.event_date,candidate.source_type||'media',0,candidate.is_official?1:0
+          ]);
+          await d1(`UPDATE events SET last_seen_at=?,news_score=max(news_score,?) WHERE id=?`,[nowIso(),Number(rescored.news_score||0),target.id]);
+          await maybeSendViralPriority(target.id);
         }
         continue;
       }

@@ -56,6 +56,18 @@ CREATE TABLE IF NOT EXISTS event_sources (
 CREATE INDEX IF NOT EXISTS idx_event_sources_event ON event_sources(event_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_event_sources_url ON event_sources(article_url);
 
+CREATE TABLE IF NOT EXISTS viral_alerts (
+  event_id TEXT PRIMARY KEY,
+  viral_score INTEGER NOT NULL DEFAULT 0,
+  source_count INTEGER NOT NULL DEFAULT 0,
+  span_minutes INTEGER,
+  detected_at TEXT NOT NULL,
+  notified_at TEXT,
+  FOREIGN KEY(event_id) REFERENCES events(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_viral_alerts_notified ON viral_alerts(notified_at, detected_at DESC);
+
 CREATE TABLE IF NOT EXISTS content_index (
   path TEXT PRIMARY KEY,
   slug TEXT NOT NULL,
