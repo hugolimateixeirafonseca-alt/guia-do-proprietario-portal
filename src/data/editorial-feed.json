@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-15T22:14:16.703Z",
+  "generatedAt": "2026-08-16T08:21:43.678Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 92,
-    "published": 71,
-    "newsOnline": 18
+    "published": 72,
+    "newsOnline": 16
   },
   "articles": [
     {
@@ -1354,7 +1354,7 @@
       "url": null
     },
     {
-      "id": null,
+      "id": "EXTRA-004",
       "title": "Como pedir orçamentos de pintura e escolher um pintor sem enganos",
       "pillar": "casa",
       "priority": null,
@@ -1370,7 +1370,7 @@
       "url": null
     },
     {
-      "id": null,
+      "id": "EXTRA-002",
       "title": "Contas e orçamento do condomínio: como se aprovam e o que verificar",
       "pillar": "condominio",
       "priority": null,
@@ -1386,7 +1386,7 @@
       "url": null
     },
     {
-      "id": null,
+      "id": "EXTRA-003",
       "title": "Fim do arrendamento: vistoria e devolução da caução",
       "pillar": "arrendar",
       "priority": null,
@@ -1402,7 +1402,7 @@
       "url": null
     },
     {
-      "id": null,
+      "id": "EXTRA-006",
       "title": "Regulamento do condomínio: o que pode e não pode ter",
       "pillar": "condominio",
       "priority": null,
@@ -1418,7 +1418,7 @@
       "url": null
     },
     {
-      "id": null,
+      "id": "EXTRA-007",
       "title": "Seguro do condomínio: é obrigatório e o que cobre",
       "pillar": "condominio",
       "priority": null,
@@ -1434,7 +1434,7 @@
       "url": null
     },
     {
-      "id": null,
+      "id": "EXTRA-008",
       "title": "Vender uma casa arrendada: o direito de preferência do inquilino",
       "pillar": "vender",
       "priority": null,
@@ -1450,23 +1450,23 @@
       "url": null
     },
     {
-      "id": null,
+      "id": "EXTRA-005",
       "title": "Quanto cobra um eletricista (e quando é mesmo preciso chamar um)",
       "pillar": "casa",
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "quanto-cobra-eletricista.mdx",
       "arrivedAt": "2026-08-06T15:58:33+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-16T07:01:23Z",
+      "url": "https://guiadoproprietario.pt/casa/quanto-cobra-eletricista/"
     },
     {
-      "id": null,
+      "id": "EXTRA-001",
       "title": "O que fazer quando herdo uma casa?",
       "pillar": "vender",
       "priority": null,
@@ -1484,6 +1484,18 @@
   ],
   "news": [
     {
+      "slug": "2026-08-14-noticia-51",
+      "title": "Euribor desce a três e 12 meses, mas taxa mais usada volta a subir",
+      "summary": "A Euribor desceu a três e 12 meses, mas voltou a subir no prazo de seis meses, o mais usado no crédito à habitação com taxa variável em Portugal. Na sessão de 14 de agosto, as taxa",
+      "pillar": "casa",
+      "publishedAt": "2026-08-16",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-14-noticia-51/",
+      "source": {
+        "name": "CNN Portugal",
+        "url": "https://cnnportugal.iol.pt/credito-a-habitacao/prestacao-da-casa/euribor-desce-a-tres-e-12-meses-mas-taxa-mais-usada-volta-a-subir/20260814/6a7eedf8d34ed0733ba7fd44"
+      }
+    },
+    {
       "slug": "2026-08-15-002130214-noticia-49",
       "title": "Governo propõe flexibilizar regras para o senhorio avançar com ação de despejo",
       "summary": "O Governo propõe alterar as regras que determinam quando um senhorio pode avançar com uma ação de despejo. A mudança faz parte das propostas para flexibilizar o mercado de arrendam",
@@ -1493,30 +1505,6 @@
       "source": {
         "name": "ECO",
         "url": "https://eco.sapo.pt/descodificador/governo-quer-mercado-de-arrendamento-mais-flexivel-conheca-as-propostas/04-ao-fim-de-quanto-tempo-e-que-o-senhorio-pode-avancar-com-acao-de-despejo"
-      }
-    },
-    {
-      "slug": "2026-08-15-213115197-noticia-52",
-      "title": "Habitação pública alavancada com 28 mil casas pagas pelo PRR",
-      "summary": "O Governo anunciou que mais de 28.000 habitações públicas estarão entregues em todo o país até ao fim de agosto, ultrapassando a meta de 26.000 casas definida no âmbito do PRR. Out",
-      "pillar": "casa",
-      "publishedAt": "2026-08-15",
-      "url": "https://guiadoproprietario.pt/novidades/2026-08-15-213115197-noticia-52/",
-      "source": {
-        "name": "ECO",
-        "url": "https://eco.sapo.pt/2026/08/15/cerca-de-28-000-casas-de-habitacao-publica-entregues-ate-ao-fim-de-agosto-no-ambito-do-prr"
-      }
-    },
-    {
-      "slug": "2026-08-15-221919121-noticia-52",
-      "title": "Habitação pública alavancada com 28 mil casas pagas pelo PRR",
-      "summary": "O Governo anunciou que mais de 28.000 habitações públicas estarão entregues em todo o país até ao fim de agosto, ultrapassando a meta de 26.000 casas definida no âmbito do PRR. Out",
-      "pillar": "casa",
-      "publishedAt": "2026-08-15",
-      "url": "https://guiadoproprietario.pt/novidades/2026-08-15-221919121-noticia-52/",
-      "source": {
-        "name": "ECO",
-        "url": "https://eco.sapo.pt/2026/08/15/cerca-de-28-000-casas-de-habitacao-publica-entregues-ate-ao-fim-de-agosto-no-ambito-do-prr"
       }
     },
     {
@@ -1673,18 +1661,6 @@
       "source": {
         "name": "INE",
         "url": "https://www.ine.pt/"
-      }
-    },
-    {
-      "slug": "segunda-prestacao-imi-aproxima-se",
-      "title": "Prazo da segunda prestação do IMI aproxima-se",
-      "summary": "Quem paga o IMI em três prestações tem a segunda até 31 de agosto.",
-      "pillar": "impostos",
-      "publishedAt": "2026-07-24",
-      "url": "https://guiadoproprietario.pt/novidades/segunda-prestacao-imi-aproxima-se/",
-      "source": {
-        "name": "Autoridade Tributária",
-        "url": "https://www.portaldasfinancas.gov.pt/"
       }
     },
     {
