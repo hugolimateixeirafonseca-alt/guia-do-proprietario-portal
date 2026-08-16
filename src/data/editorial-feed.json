@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-16T08:21:43.678Z",
+  "generatedAt": "2026-08-16T17:28:21.565Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 92,
     "published": 72,
-    "newsOnline": 16
+    "newsOnline": 17
   },
   "articles": [
     {
@@ -1493,6 +1493,18 @@
       "source": {
         "name": "CNN Portugal",
         "url": "https://cnnportugal.iol.pt/credito-a-habitacao/prestacao-da-casa/euribor-desce-a-tres-e-12-meses-mas-taxa-mais-usada-volta-a-subir/20260814/6a7eedf8d34ed0733ba7fd44"
+      }
+    },
+    {
+      "slug": "2026-08-14-noticia-53",
+      "title": "Rendas: Governo quer fim dos limites mínimos nas renovações de contrato",
+      "summary": "O Governo propõe mudar uma regra importante nas renovações dos contratos de arrendamento. Nos contratos a termo certo, a renovação automática passaria a ter a mesma duração do cont",
+      "pillar": "arrendar",
+      "publishedAt": "2026-08-16",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-14-noticia-53/",
+      "source": {
+        "name": "Idealista",
+        "url": "https://www.idealista.pt/news/imobiliario/habitacao/2026/08/14/77136-rendas-governo-quer-fim-dos-limites-minimos-nas-renovacoes-de-contrato"
       }
     },
     {
