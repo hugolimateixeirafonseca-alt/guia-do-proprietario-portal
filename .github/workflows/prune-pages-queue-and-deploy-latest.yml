@@ -1,0 +1,142 @@
+name: Prune Pages Queue and Deploy Latest
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/prune-pages-queue-and-deploy-latest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-latest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
+      CF_PAGES_PROJECT: guia-do-proprietario-portal
+    steps:
+      - name: Validate secrets
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID'; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CF_PAGES_API_TOKEN'; exit 1; }
+
+      - name: Cancel obsolete pending builds and deploy current commit
+        shell: bash
+        run: |
+          node <<'NODE'
+          const account = process.env.CLOUDFLARE_ACCOUNT_ID;
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          const project = process.env.CF_PAGES_PROJECT;
+          const commit = process.env.GITHUB_SHA;
+          const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`;
+          const deadline = Date.now() + 13 * 60 * 1000;
+          const pollMs = 10_000;
+
+          function shaOf(d) { return d?.deployment_trigger?.metadata?.commit_hash || ''; }
+          function branchOf(d) { return d?.deployment_trigger?.metadata?.branch || ''; }
+          function statusOf(d) { return d?.latest_stage?.status || 'idle'; }
+
+          async function request(url, init = {}) {
+            const response = await fetch(url, {
+              ...init,
+              headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+                ...(init.headers || {}),
+              },
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || data?.success === false) {
+              const code = data?.errors?.[0]?.code || 'unknown';
+              const message = data?.errors?.[0]?.message || '';
+              throw new Error(`Cloudflare API failed: HTTP ${response.status}, code ${code}, ${message}`);
+            }
+            return data?.result;
+          }
+
+          async function list() {
+            return await request(`${base}/deployments?env=production&page=1&per_page=25`);
+          }
+
+          let deployments = await list();
+          const obsoletePending = deployments.filter((d) => {
+            const status = statusOf(d);
+            const sha = shaOf(d).toLowerCase();
+            return d?.id && sha && sha !== commit.toLowerCase() && ['active', 'idle'].includes(status);
+          });
+
+          console.log(`Obsolete pending deployments found: ${obsoletePending.length}`);
+          for (const d of obsoletePending) {
+            try {
+              await request(`${base}/deployments/${encodeURIComponent(d.id)}?force=true`, { method: 'DELETE' });
+              console.log(`Deleted obsolete deployment ${d.id} (${shaOf(d).slice(0, 8)} / ${statusOf(d)})`);
+            } catch (error) {
+              console.log(`Could not delete ${d.id}: ${error instanceof Error ? error.message : String(error)}`);
+            }
+          }
+
+          deployments = await list();
+          let current = deployments.find((d) =>
+            shaOf(d).toLowerCase() === commit.toLowerCase() &&
+            (!branchOf(d) || branchOf(d) === 'main') &&
+            !['failure', 'canceled'].includes(statusOf(d))
+          ) || null;
+
+          if (!current) {
+            const form = new FormData();
+            form.set('branch', 'main');
+            form.set('commit_hash', commit);
+            form.set('commit_dirty', 'false');
+            form.set('commit_message', `Deploy latest corrected portal ${commit.slice(0, 12)}`);
+            const response = await fetch(`${base}/deployments`, {
+              method: 'POST',
+              body: form,
+              headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+            });
+            if (response.status !== 304) {
+              const data = await response.json().catch(() => ({}));
+              if (!response.ok || data?.success === false || !data?.result) {
+                throw new Error(`Create deployment failed: HTTP ${response.status}`);
+              }
+              current = data.result;
+            }
+          }
+
+          while (!current) {
+            if (Date.now() >= deadline) throw new Error('Timed out locating current deployment.');
+            await new Promise((resolve) => setTimeout(resolve, pollMs));
+            deployments = await list();
+            current = deployments.find((d) =>
+              shaOf(d).toLowerCase() === commit.toLowerCase() &&
+              (!branchOf(d) || branchOf(d) === 'main')
+            ) || null;
+          }
+
+          if (!current?.id) throw new Error('Current deployment id missing.');
+          const deploymentId = current.id;
+          let lastStatus = '';
+
+          while (true) {
+            const status = statusOf(current);
+            if (status !== lastStatus) {
+              console.log(`Current deployment ${deploymentId}: ${status}`);
+              lastStatus = status;
+            }
+            if (status === 'success') {
+              console.log(JSON.stringify({ ok: true, deployment_id: deploymentId, commit, status }, null, 2));
+              break;
+            }
+            if (status === 'failure' || status === 'canceled') {
+              throw new Error(`Current deployment ${status}.`);
+            }
+            if (Date.now() >= deadline) throw new Error('Timed out waiting for current Pages deployment.');
+            await new Promise((resolve) => setTimeout(resolve, pollMs));
+            current = await request(`${base}/deployments/${encodeURIComponent(deploymentId)}`);
+          }
+          NODE
