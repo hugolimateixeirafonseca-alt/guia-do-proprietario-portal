@@ -1,0 +1,29 @@
+name: Test Pages Public URL Probe
+
+on:
+  push:
+    branches:
+      - agent/fix-pages-public-url-probe
+    paths:
+      - 'functions/api/deploy-pages-and-wait.ts'
+      - '.github/workflows/test-pages-public-url-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build Pages Functions
+        run: npm run build:functions
+      - name: Full portal build
+        run: npm run build
