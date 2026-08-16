@@ -37,15 +37,19 @@ type GateInput = {
   commitSha: string;
   deploymentId: string;
   requireSuccess: boolean;
+  probeUrl: string;
 };
 
 // Keep every public HTTP request safely below Cloudflare's proxy timeout.
 // Make can chain several of these deterministic windows for long builds.
 const WAIT_WINDOW_MS = 80_000;
 const POLL_MS = 5_000;
+const PUBLIC_PROBE_POLL_MS = 2_000;
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEPLOYMENT_ID_PATTERN = /^[0-9a-f-]{20,80}$/i;
 const PROJECT_PATTERN = /^[a-z0-9][a-z0-9-]{0,62}$/i;
+const PUBLIC_ORIGIN = 'https://guiadoproprietario.pt';
+const FACEBOOK_CRAWLER_UA = 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)';
 
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -79,6 +83,7 @@ async function parseInput(request: Request): Promise<GateInput> {
       commitSha: typeof form.get('commit_sha') === 'string' ? String(form.get('commit_sha')).trim() : '',
       deploymentId: typeof form.get('deployment_id') === 'string' ? String(form.get('deployment_id')).trim() : '',
       requireSuccess: asBoolean(form.get('require_success')),
+      probeUrl: typeof form.get('probe_url') === 'string' ? String(form.get('probe_url')).trim() : '',
     };
   }
 
@@ -89,10 +94,45 @@ async function parseInput(request: Request): Promise<GateInput> {
       commitSha: typeof data.commit_sha === 'string' ? data.commit_sha.trim() : '',
       deploymentId: typeof data.deployment_id === 'string' ? data.deployment_id.trim() : '',
       requireSuccess: asBoolean(data.require_success),
+      probeUrl: typeof data.probe_url === 'string' ? data.probe_url.trim() : '',
     };
   }
 
   throw new Error('unsupported_content_type');
+}
+
+function validatedProbeUrl(value: string) {
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    if (url.origin !== PUBLIC_ORIGIN) return '';
+    if (url.protocol !== 'https:') return '';
+    if (url.username || url.password) return '';
+    if (url.pathname.startsWith('/api/')) return '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+async function probePublicUrl(url: string) {
+  const target = new URL(url);
+  target.searchParams.set('__pages_gate', `${Date.now()}`);
+
+  try {
+    const response = await fetch(target.toString(), {
+      method: 'GET',
+      redirect: 'follow',
+      headers: {
+        Accept: 'text/html,application/xhtml+xml,image/*;q=0.8,*/*;q=0.5',
+        'Cache-Control': 'no-cache',
+        'User-Agent': FACEBOOK_CRAWLER_UA,
+      },
+    });
+    return response.status;
+  } catch {
+    return 0;
+  }
 }
 
 async function cfRequest<T>(url: string, token: string, init?: RequestInit) {
@@ -193,7 +233,7 @@ function validateDeployment(deployment: PagesDeployment, input: GateInput) {
   return '';
 }
 
-function successResponse(deployment: PagesDeployment, input: GateInput, reused: boolean) {
+function successResponse(deployment: PagesDeployment, input: GateInput, reused: boolean, probeStatus?: number) {
   return json({
     ok: true,
     pending: false,
@@ -203,6 +243,8 @@ function successResponse(deployment: PagesDeployment, input: GateInput, reused: 
     commit_sha: input.commitSha,
     branch: input.branch,
     reused_existing_deployment: reused,
+    public_url_ready: input.probeUrl ? true : null,
+    probe_status: input.probeUrl ? probeStatus || 200 : null,
   });
 }
 
@@ -223,6 +265,36 @@ function pendingResponse(deployment: PagesDeployment | null, input: GateInput, r
     return json({ ...body, error: 'cloudflare_deployment_still_pending' }, 504);
   }
   return json(body, 202);
+}
+
+function publicUrlPendingResponse(deployment: PagesDeployment, input: GateInput, reused: boolean, probeStatus: number) {
+  return json(
+    {
+      ok: false,
+      pending: true,
+      status: 'success',
+      deployment_id: deployment.id || null,
+      deployment_url: deployment.url || null,
+      commit_sha: input.commitSha,
+      branch: input.branch,
+      reused_existing_deployment: reused,
+      public_url_ready: false,
+      probe_status: probeStatus || null,
+      error: 'public_url_still_pending',
+    },
+    input.requireSuccess ? 504 : 202,
+  );
+}
+
+async function waitForPublicUrl(url: string, deadline: number) {
+  let status = 0;
+  while (Date.now() < deadline) {
+    status = await probePublicUrl(url);
+    if (status >= 200 && status < 300) return status;
+    if (Date.now() >= deadline) break;
+    await new Promise((resolve) => setTimeout(resolve, PUBLIC_PROBE_POLL_MS));
+  }
+  return status;
 }
 
 async function deployAndWaitWindow({ request, env }: RequestContext) {
@@ -248,6 +320,11 @@ async function deployAndWaitWindow({ request, env }: RequestContext) {
   if (input.branch !== 'main') return json({ error: 'branch_must_be_main' }, 400);
   if (!SHA_PATTERN.test(input.commitSha)) return json({ error: 'invalid_commit_sha' }, 400);
   if (input.deploymentId && !DEPLOYMENT_ID_PATTERN.test(input.deploymentId)) return json({ error: 'invalid_deployment_id' }, 400);
+  if (input.probeUrl) {
+    const probeUrl = validatedProbeUrl(input.probeUrl);
+    if (!probeUrl) return json({ error: 'invalid_probe_url' }, 400);
+    input.probeUrl = probeUrl;
+  }
 
   const base = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/pages/projects/${encodeURIComponent(project)}`;
   const deadline = Date.now() + WAIT_WINDOW_MS;
@@ -289,7 +366,14 @@ async function deployAndWaitWindow({ request, env }: RequestContext) {
       if (mismatch) return json({ error: mismatch, deployment_id: deploymentId }, 502);
 
       const status = statusOf(deployment);
-      if (status === 'success') return successResponse(deployment, input, reusedExistingDeployment);
+      if (status === 'success') {
+        if (!input.probeUrl) return successResponse(deployment, input, reusedExistingDeployment);
+        const probeStatus = await waitForPublicUrl(input.probeUrl, deadline);
+        if (probeStatus >= 200 && probeStatus < 300) {
+          return successResponse(deployment, input, reusedExistingDeployment, probeStatus);
+        }
+        return publicUrlPendingResponse(deployment, input, reusedExistingDeployment, probeStatus);
+      }
       if (status === 'failure' || status === 'canceled') {
         return json({ error: `cloudflare_deployment_${status}`, deployment_id: deploymentId }, 502);
       }
