@@ -21,7 +21,7 @@ jobs:
       CF_PAGES_PROJECT: guia-do-proprietario-portal
       DEPLOYMENT_ID: fc319b58-f46f-4a3e-9083-3ff97a2836ce
     steps:
-      - name: Fetch failed deployment details
+      - name: Fetch failed deployment build logs
         shell: bash
         run: |
           node <<'NODE'
@@ -29,29 +29,20 @@ jobs:
           const token = process.env.CLOUDFLARE_API_TOKEN;
           const project = process.env.CF_PAGES_PROJECT;
           const id = process.env.DEPLOYMENT_ID;
-          const url = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}/deployments/${id}`;
+          const url = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}/deployments/${id}/history/logs`;
           const response = await fetch(url, {
             headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
           });
           const data = await response.json().catch(() => ({}));
           console.log(`HTTP ${response.status}`);
-          const d = data?.result || {};
-          console.log(JSON.stringify({
-            success: data?.success,
-            errors: data?.errors,
-            deployment: {
-              id: d.id,
-              environment: d.environment,
-              url: d.url,
-              created_on: d.created_on,
-              modified_on: d.modified_on,
-              aliases: d.aliases,
-              latest_stage: d.latest_stage,
-              stages: d.stages,
-              deployment_trigger: d.deployment_trigger,
-              source: d.source,
-              build_config: d.build_config,
-            },
-          }, null, 2));
-          if (!response.ok) process.exit(1);
+          console.log(`success=${String(data?.success)} total=${String(data?.result?.total ?? '')}`);
+          const lines = Array.isArray(data?.result?.data) ? data.result.data : [];
+          for (const entry of lines) {
+            const line = String(entry?.line ?? '');
+            if (line) console.log(line);
+          }
+          if (!response.ok || data?.success === false) {
+            console.log(JSON.stringify({ errors: data?.errors }, null, 2));
+            process.exit(1);
+          }
           NODE
