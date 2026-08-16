@@ -4,6 +4,8 @@ on:
   schedule:
     # GitHub cron usa UTC. Em Lisboa, estes horários deslocam 1h entre verão/inverno.
     - cron: '30 6 * * *'
+    # Rondas curtas durante o dia: só fontes diretas, sem sweeps de web search.
+    - cron: '30 9,12,15,18 * * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -13,6 +15,7 @@ on:
         options:
           - morning
           - incremental
+          - pulse
           - maintenance-report
           - maintenance-cleanup
         default: 'morning'
@@ -65,7 +68,11 @@ jobs:
             echo "RADAR_DRY_RUN=${{ inputs.dry_run }}" >> "$GITHUB_ENV"
             echo "BACKFILL=${{ inputs.backfill }}" >> "$GITHUB_ENV"
           elif [[ "${{ github.event_name }}" == "schedule" ]]; then
-            echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
+            if [[ "${{ github.event.schedule }}" == "30 6 * * *" ]]; then
+              echo "RADAR_MODE=morning" >> "$GITHUB_ENV"
+            else
+              echo "RADAR_MODE=pulse" >> "$GITHUB_ENV"
+            fi
             echo "RADAR_DRY_RUN=false" >> "$GITHUB_ENV"
             echo "BACKFILL=false" >> "$GITHUB_ENV"
           fi
