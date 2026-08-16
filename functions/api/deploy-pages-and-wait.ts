@@ -32,11 +32,19 @@ type PagesDeployment = {
   };
 };
 
-const MAX_WAIT_MS = 250_000;
-// Workers Free allows 50 external subrequests per invocation. At 7s polling,
-// the whole 250s gate remains comfortably below that ceiling.
-const POLL_MS = 7_000;
+type GateInput = {
+  branch: string;
+  commitSha: string;
+  deploymentId: string;
+  requireSuccess: boolean;
+};
+
+// Keep every public HTTP request safely below Cloudflare's proxy timeout.
+// Make can chain several of these deterministic windows for long builds.
+const WAIT_WINDOW_MS = 80_000;
+const POLL_MS = 5_000;
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
+const DEPLOYMENT_ID_PATTERN = /^[0-9a-f-]{20,80}$/i;
 const PROJECT_PATTERN = /^[a-z0-9][a-z0-9-]{0,62}$/i;
 
 function json(body: Record<string, unknown>, status = 200) {
@@ -56,13 +64,21 @@ function cloudflareErrorCode(payload: CloudflareEnvelope<unknown>) {
   return first.code ? `cloudflare_api_error_${first.code}` : 'cloudflare_api_error';
 }
 
-async function parseInput(request: Request) {
+function asBoolean(value: unknown) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value !== 'string') return false;
+  return ['1', 'true', 'yes'].includes(value.trim().toLowerCase());
+}
+
+async function parseInput(request: Request): Promise<GateInput> {
   const contentType = request.headers.get('Content-Type') || '';
   if (contentType.toLowerCase().includes('multipart/form-data')) {
     const form = await request.formData();
     return {
       branch: typeof form.get('branch') === 'string' ? String(form.get('branch')).trim() : '',
       commitSha: typeof form.get('commit_sha') === 'string' ? String(form.get('commit_sha')).trim() : '',
+      deploymentId: typeof form.get('deployment_id') === 'string' ? String(form.get('deployment_id')).trim() : '',
+      requireSuccess: asBoolean(form.get('require_success')),
     };
   }
 
@@ -71,6 +87,8 @@ async function parseInput(request: Request) {
     return {
       branch: typeof data.branch === 'string' ? data.branch.trim() : '',
       commitSha: typeof data.commit_sha === 'string' ? data.commit_sha.trim() : '',
+      deploymentId: typeof data.deployment_id === 'string' ? data.deployment_id.trim() : '',
+      requireSuccess: asBoolean(data.require_success),
     };
   }
 
@@ -111,8 +129,7 @@ async function createDeployment(url: string, token: string, form: FormData) {
     },
   });
 
-  // Cloudflare can return 304 when the Git integration has already created a
-  // deployment for the exact same commit. That is a race, not a failure.
+  // Git integration may win the race for the same commit.
   if (response.status === 304) return null;
 
   let payload: CloudflareEnvelope<PagesDeployment>;
@@ -168,7 +185,47 @@ async function findDeployment(base: string, token: string, commitSha: string, br
   return selectMatchingDeployment(deployments, commitSha, branch);
 }
 
-async function deployAndWait({ request, env }: RequestContext) {
+function validateDeployment(deployment: PagesDeployment, input: GateInput) {
+  const commit = deployedCommit(deployment);
+  const branch = deployedBranch(deployment);
+  if (commit && commit.toLowerCase() !== input.commitSha.toLowerCase()) return 'deployment_commit_mismatch';
+  if (branch && branch !== input.branch) return 'deployment_branch_mismatch';
+  return '';
+}
+
+function successResponse(deployment: PagesDeployment, input: GateInput, reused: boolean) {
+  return json({
+    ok: true,
+    pending: false,
+    status: 'success',
+    deployment_id: deployment.id || null,
+    deployment_url: deployment.url || null,
+    commit_sha: input.commitSha,
+    branch: input.branch,
+    reused_existing_deployment: reused,
+  });
+}
+
+function pendingResponse(deployment: PagesDeployment | null, input: GateInput, reused: boolean) {
+  const status = deployment ? statusOf(deployment) : 'locating';
+  const body = {
+    ok: false,
+    pending: true,
+    status,
+    deployment_id: deployment?.id || null,
+    deployment_url: deployment?.url || null,
+    commit_sha: input.commitSha,
+    branch: input.branch,
+    reused_existing_deployment: reused,
+  };
+
+  if (input.requireSuccess) {
+    return json({ ...body, error: 'cloudflare_deployment_still_pending' }, 504);
+  }
+  return json(body, 202);
+}
+
+async function deployAndWaitWindow({ request, env }: RequestContext) {
   if (!env.SOCIAL_CARD_RENDERER_SECRET) return json({ error: 'bridge_not_configured' }, 503);
   if (request.headers.get('Authorization') !== `Bearer ${env.SOCIAL_CARD_RENDERER_SECRET}`) {
     return json({ error: 'unauthorized' }, 401);
@@ -180,7 +237,7 @@ async function deployAndWait({ request, env }: RequestContext) {
   if (!accountId || !token || !project) return json({ error: 'cloudflare_pages_not_configured' }, 503);
   if (!PROJECT_PATTERN.test(project)) return json({ error: 'invalid_pages_project' }, 500);
 
-  let input: { branch: string; commitSha: string };
+  let input: GateInput;
   try {
     input = await parseInput(request);
   } catch (error) {
@@ -190,74 +247,60 @@ async function deployAndWait({ request, env }: RequestContext) {
 
   if (input.branch !== 'main') return json({ error: 'branch_must_be_main' }, 400);
   if (!SHA_PATTERN.test(input.commitSha)) return json({ error: 'invalid_commit_sha' }, 400);
+  if (input.deploymentId && !DEPLOYMENT_ID_PATTERN.test(input.deploymentId)) return json({ error: 'invalid_deployment_id' }, 400);
 
   const base = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/pages/projects/${encodeURIComponent(project)}`;
-  const deadline = Date.now() + MAX_WAIT_MS;
+  const deadline = Date.now() + WAIT_WINDOW_MS;
 
   try {
-    // Prefer the deployment already started by the GitHub integration. This
-    // avoids duplicate builds and makes the gate deterministic even when the
-    // Git-triggered deployment wins the race by milliseconds.
-    let deployment: PagesDeployment | null = await findDeployment(base, token, input.commitSha, input.branch);
-    let reusedExistingDeployment = Boolean(deployment);
+    let deployment: PagesDeployment | null = null;
+    let reusedExistingDeployment = false;
 
-    if (!deployment) {
-      const form = new FormData();
-      form.set('branch', input.branch);
-      form.set('commit_hash', input.commitSha);
-      form.set('commit_dirty', 'false');
-      form.set('commit_message', `Make deterministic publish ${input.commitSha.slice(0, 12)}`);
+    if (input.deploymentId) {
+      deployment = await cfRequest<PagesDeployment>(`${base}/deployments/${encodeURIComponent(input.deploymentId)}`, token);
+      reusedExistingDeployment = true;
+    } else {
+      deployment = await findDeployment(base, token, input.commitSha, input.branch);
+      reusedExistingDeployment = Boolean(deployment);
 
-      deployment = await createDeployment(`${base}/deployments`, token, form);
-      reusedExistingDeployment = !deployment;
+      if (!deployment) {
+        const form = new FormData();
+        form.set('branch', input.branch);
+        form.set('commit_hash', input.commitSha);
+        form.set('commit_dirty', 'false');
+        form.set('commit_message', `Make deterministic publish ${input.commitSha.slice(0, 12)}`);
+        deployment = await createDeployment(`${base}/deployments`, token, form);
+        reusedExistingDeployment = !deployment;
+      }
     }
 
-    // A 304 means an equivalent deployment already exists but can race the
-    // deployments-list index. Keep looking for that exact SHA until it appears.
-    while (!deployment) {
-      if (Date.now() >= deadline) return json({ error: 'deployment_not_found_after_304' }, 504);
+    // A 304 can briefly precede the deployment appearing in the list API.
+    while (!deployment && Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, POLL_MS));
       deployment = await findDeployment(base, token, input.commitSha, input.branch);
     }
 
+    if (!deployment) return pendingResponse(null, input, true);
     if (!deployment.id) return json({ error: 'cloudflare_missing_deployment_id' }, 502);
-    const deploymentId = deployment.id;
 
     while (true) {
-      const status = statusOf(deployment);
-      const commit = deployedCommit(deployment);
-      const branch = deployedBranch(deployment);
+      const mismatch = validateDeployment(deployment, input);
+      if (mismatch) return json({ error: mismatch, deployment_id: deployment.id }, 502);
 
-      if (commit && commit.toLowerCase() !== input.commitSha.toLowerCase()) {
-        return json({ error: 'deployment_commit_mismatch', deployment_id: deploymentId }, 502);
-      }
-      if (branch && branch !== input.branch) {
-        return json({ error: 'deployment_branch_mismatch', deployment_id: deploymentId }, 502);
-      }
-      if (status === 'success') {
-        return json({
-          ok: true,
-          deployment_id: deploymentId,
-          deployment_url: deployment.url || null,
-          commit_sha: input.commitSha,
-          branch: input.branch,
-          reused_existing_deployment: reusedExistingDeployment,
-        });
-      }
+      const status = statusOf(deployment);
+      if (status === 'success') return successResponse(deployment, input, reusedExistingDeployment);
       if (status === 'failure' || status === 'canceled') {
-        return json({ error: `cloudflare_deployment_${status}`, deployment_id: deploymentId }, 502);
+        return json({ error: `cloudflare_deployment_${status}`, deployment_id: deployment.id }, 502);
       }
-      if (Date.now() >= deadline) {
-        return json({ error: 'cloudflare_deployment_timeout', deployment_id: deploymentId }, 504);
-      }
+      if (Date.now() >= deadline) return pendingResponse(deployment, input, reusedExistingDeployment);
 
       await new Promise((resolve) => setTimeout(resolve, POLL_MS));
-      deployment = await cfRequest<PagesDeployment>(`${base}/deployments/${encodeURIComponent(deploymentId)}`, token);
+      deployment = await cfRequest<PagesDeployment>(`${base}/deployments/${encodeURIComponent(deployment.id)}`, token);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'cloudflare_request_failed';
-    return json({ error: message }, 502);
+    return json({ error: message.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120) }, 502);
   }
 }
 
-export const onRequestPost = deployAndWait;
+export const onRequestPost = deployAndWaitWindow;
