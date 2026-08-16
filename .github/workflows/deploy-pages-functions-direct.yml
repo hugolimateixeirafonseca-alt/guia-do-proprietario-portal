@@ -67,7 +67,7 @@ jobs:
           }
 
           async function findCurrent() {
-            const deployments = await cf(`${base}/deployments?env=production&page=1&per_page=50`);
+            const deployments = await cf(`${base}/deployments?env=production&page=1&per_page=25`);
             const matches = deployments.filter((deployment) =>
               shaOf(deployment).toLowerCase() === commit.toLowerCase() &&
               (!branchOf(deployment) || branchOf(deployment) === 'main')
