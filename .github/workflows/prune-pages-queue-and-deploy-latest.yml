@@ -12,7 +12,7 @@ on:
       - deploy_portal
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   deploy-latest:
@@ -23,6 +23,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
       CF_PAGES_PROJECT: guia-do-proprietario-portal
       TARGET_SHA: ${{ github.event.client_payload.sha || github.sha }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Validate secrets
         shell: bash
@@ -145,3 +146,13 @@ jobs:
             current = await request(`${base}/deployments/${encodeURIComponent(deploymentId)}`);
           }
           NODE
+
+      - name: Emitir candidato a Reel após deploy concluído
+        if: ${{ github.event_name == 'repository_dispatch' && vars.REELS_AUTO_PUBLISH_ENABLED == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
+            -f event_type='reel_publish_candidate' \
+            -f "client_payload[sha]=$TARGET_SHA"
+          echo "Candidato a Reel enviado após confirmação do deploy: $TARGET_SHA."

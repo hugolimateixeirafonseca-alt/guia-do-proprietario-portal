@@ -3,10 +3,6 @@ name: Generate Reel on Production publish
 on:
   repository_dispatch:
     types: [reel_publish_candidate]
-  push:
-    branches: [main]
-    paths:
-      - src/content/artigos/**
 
 permissions:
   contents: read
