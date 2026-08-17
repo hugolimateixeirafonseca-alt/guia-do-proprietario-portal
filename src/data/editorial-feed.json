@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-17T11:23:03.805Z",
+  "generatedAt": "2026-08-17T20:20:01.986Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
-    "written": 92,
+    "written": 93,
     "published": 73,
     "newsOnline": 17
   },
@@ -1350,6 +1350,22 @@
       "published": false,
       "file": "eletrodomesticos-etiqueta-energetica.mdx",
       "arrivedAt": "2026-08-12T16:46:17+01:00",
+      "publishedAt": null,
+      "url": null
+    },
+    {
+      "id": "EXTRA-009",
+      "title": "Reforma do arrendamento: o que muda para senhorios e inquilinos",
+      "pillar": "arrendar",
+      "priority": null,
+      "channel": null,
+      "level": "essencial",
+      "status": "written",
+      "planned": false,
+      "written": true,
+      "published": false,
+      "file": "reforma-arrendamento-o-que-muda.mdx",
+      "arrivedAt": "2026-08-17T14:22:02+01:00",
       "publishedAt": null,
       "url": null
     },
