@@ -19,30 +19,33 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
       CF_PAGES_PROJECT: guia-do-proprietario-portal
-      DEPLOYMENT_ID: fc319b58-f46f-4a3e-9083-3ff97a2836ce
     steps:
-      - name: Fetch failed deployment build logs
+      - name: Listar deployments recentes do Pages
         shell: bash
         run: |
           node <<'NODE'
           const account = process.env.CLOUDFLARE_ACCOUNT_ID;
           const token = process.env.CLOUDFLARE_API_TOKEN;
           const project = process.env.CF_PAGES_PROJECT;
-          const id = process.env.DEPLOYMENT_ID;
-          const url = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}/deployments/${id}/history/logs`;
+          const url = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}/deployments?env=production&page=1&per_page=10`;
           const response = await fetch(url, {
             headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
           });
           const data = await response.json().catch(() => ({}));
-          console.log(`HTTP ${response.status}`);
-          console.log(`success=${String(data?.success)} total=${String(data?.result?.total ?? '')}`);
-          const lines = Array.isArray(data?.result?.data) ? data.result.data : [];
-          for (const entry of lines) {
-            const line = String(entry?.line ?? '');
-            if (line) console.log(line);
-          }
-          if (!response.ok || data?.success === false) {
-            console.log(JSON.stringify({ errors: data?.errors }, null, 2));
+          if (!response.ok || data?.success === false || !Array.isArray(data?.result)) {
+            console.log(JSON.stringify({ status: response.status, errors: data?.errors }, null, 2));
             process.exit(1);
+          }
+          for (const d of data.result) {
+            console.log(JSON.stringify({
+              id: d?.id,
+              status: d?.latest_stage?.status,
+              stage: d?.latest_stage?.name,
+              sha: d?.deployment_trigger?.metadata?.commit_hash,
+              branch: d?.deployment_trigger?.metadata?.branch,
+              created_on: d?.created_on,
+              modified_on: d?.modified_on,
+              url: d?.url,
+            }));
           }
           NODE
