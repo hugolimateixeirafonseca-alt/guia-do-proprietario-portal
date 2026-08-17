@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-17T08:36:19.677Z",
+  "generatedAt": "2026-08-17T11:23:03.805Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 92,
-    "published": 72,
+    "published": 73,
     "newsOnline": 17
   },
   "articles": [
@@ -1376,14 +1376,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "contas-orcamento-condominio.mdx",
       "arrivedAt": "2026-08-11T19:45:03+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-17T10:43:35Z",
+      "url": "https://guiadoproprietario.pt/condominio/contas-orcamento-condominio/"
     },
     {
       "id": "EXTRA-003",
