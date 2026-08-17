@@ -156,3 +156,5 @@ jobs:
             -f event_type='reel_publish_candidate' \
             -f "client_payload[sha]=$TARGET_SHA"
           echo "Candidato a Reel enviado após confirmação do deploy: $TARGET_SHA."
+
+# Manual trigger marker: homepage update 2026-08-18
