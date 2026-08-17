@@ -177,6 +177,14 @@ jobs:
             echo "Origem da seleção: **$SELECTION_SOURCE**"
           } >> "$GITHUB_STEP_SUMMARY"
 
+          if ! gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
+            -f event_type='deploy_portal' \
+            -f "client_payload[sha]=$PUBLISHED_SHA"; then
+            echo "::error::O artigo entrou no main, mas não foi possível solicitar o deploy do portal."
+            exit 1
+          fi
+          echo "Deploy do portal solicitado para $PUBLISHED_SHA."
+
           if [[ "$REELS_AUTO_PUBLISH_ENABLED" == "true" ]]; then
             if ! gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
               -f event_type='reel_publish_candidate' \
