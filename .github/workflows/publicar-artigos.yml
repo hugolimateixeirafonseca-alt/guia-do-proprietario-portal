@@ -1,6 +1,11 @@
 name: Publicar artigos
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publicar-artigos.yml
   workflow_dispatch:
   repository_dispatch:
     types:
