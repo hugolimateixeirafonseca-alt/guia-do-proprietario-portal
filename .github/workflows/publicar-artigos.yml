@@ -44,43 +44,74 @@ jobs:
           DESTINATION="src/content/artigos"
           QUEUE="src/content/fila-publicacao-artigos.txt"
           MAX_ARTICLES=1
+          SELECTION_SOURCE=""
 
           if [[ ! -d "$SOURCE" ]]; then
             echo "::error::A pasta $SOURCE não existe."
             exit 1
           fi
 
-          if [[ ! -f "$QUEUE" ]]; then
-            echo "::error::O ficheiro de prioridade $QUEUE não existe."
-            exit 1
-          fi
-
           mkdir -p "$DESTINATION"
           FILES=()
 
-          while IFS= read -r NAME || [[ -n "$NAME" ]]; do
-            NAME="${NAME%$'\r'}"
-            [[ -z "$NAME" ]] && continue
-            [[ "$NAME" == \#* ]] && continue
+          # A fila é uma prioridade opcional, não a fonte de verdade.
+          # Se existir, usar o primeiro artigo da fila que ainda esteja em por-publicar.
+          if [[ -f "$QUEUE" ]]; then
+            while IFS= read -r NAME || [[ -n "$NAME" ]]; do
+              NAME="${NAME%$'\r'}"
+              [[ -z "$NAME" ]] && continue
+              [[ "$NAME" == \#* ]] && continue
 
-            if [[ "$NAME" == */* ]] || [[ "$NAME" != *.mdx ]]; then
-              echo "::error::Entrada inválida na fila: $NAME"
-              exit 1
-            fi
+              if [[ "$NAME" == */* ]] || [[ "$NAME" != *.mdx ]]; then
+                echo "::error::Entrada inválida na fila: $NAME"
+                exit 1
+              fi
 
-            if [[ -f "$SOURCE/$NAME" ]]; then
-              FILES+=("$SOURCE/$NAME")
-            fi
+              if [[ -f "$SOURCE/$NAME" ]]; then
+                FILES+=("$SOURCE/$NAME")
+                SELECTION_SOURCE="queue"
+              fi
 
-            if [[ "${#FILES[@]}" -ge "$MAX_ARTICLES" ]]; then
-              break
+              if [[ "${#FILES[@]}" -ge "$MAX_ARTICLES" ]]; then
+                break
+              fi
+            done < "$QUEUE"
+          else
+            echo "::warning::O ficheiro de prioridade $QUEUE não existe; será usado o fallback automático."
+          fi
+
+          # Se a fila não tiver nenhum artigo atualmente disponível, escolher
+          # automaticamente o artigo mais antigo que exista em por-publicar.
+          if [[ "${#FILES[@]}" -eq 0 ]]; then
+            OLDEST_NAME=""
+            OLDEST_TS=""
+
+            while IFS= read -r NAME; do
+              [[ -z "$NAME" ]] && continue
+              TS="$(git log --follow --format=%ct --reverse -- "$SOURCE/$NAME" | sed -n '1p')"
+              [[ -n "$TS" ]] || TS="9999999999"
+
+              if [[ -z "$OLDEST_NAME" ]] || (( TS < OLDEST_TS )) || { (( TS == OLDEST_TS )) && [[ "$NAME" < "$OLDEST_NAME" ]]; }; then
+                OLDEST_NAME="$NAME"
+                OLDEST_TS="$TS"
+              fi
+            done < <(find "$SOURCE" -maxdepth 1 -type f -name '*.mdx' -printf '%f\n' | sort)
+
+            if [[ -n "$OLDEST_NAME" ]]; then
+              FILES+=("$SOURCE/$OLDEST_NAME")
+              SELECTION_SOURCE="fallback"
+              echo "::warning::FILA_DESATUALIZADA: nenhum item da fila está disponível; selecionado automaticamente $OLDEST_NAME."
             fi
-          done < "$QUEUE"
+          fi
 
           COUNT="${#FILES[@]}"
 
           if [[ "$COUNT" -eq 0 ]]; then
-            echo "Não existem artigos da fila disponíveis para publicar."
+            echo "SEM_ARTIGOS: não existem artigos em $SOURCE."
+            {
+              echo "### Publicação diária"
+              echo "Nenhum artigo pendente em \`$SOURCE\`."
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -106,7 +137,23 @@ jobs:
               git add -- "imagens/artigos/$SLUG.png"
             fi
 
-            echo "Preparado e movido: $NAME"
+            # Quando a prioridade veio da fila, retirar automaticamente o item
+            # que acabou de ser publicado. A fila passa a conter só prioridades futuras.
+            if [[ "$SELECTION_SOURCE" == "queue" && -f "$QUEUE" ]]; then
+              TMP_QUEUE="$(mktemp)"
+              awk -v target="$NAME" '
+                {
+                  line=$0
+                  sub(/\r$/, "", line)
+                  if (line == target) next
+                  print $0
+                }
+              ' "$QUEUE" > "$TMP_QUEUE"
+              mv "$TMP_QUEUE" "$QUEUE"
+              git add -- "$QUEUE"
+            fi
+
+            echo "Preparado e movido: $NAME (seleção: $SELECTION_SOURCE)"
           done
 
           npm run validate:dates
@@ -124,6 +171,11 @@ jobs:
 
           PUBLISHED_SHA="$(git rev-parse HEAD)"
           echo "Artigo publicado no SHA $PUBLISHED_SHA."
+          {
+            echo "### Publicação diária"
+            echo "**PUBLICADO:** \`$(basename "${FILES[0]}")\`"
+            echo "Origem da seleção: **$SELECTION_SOURCE**"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if [[ "$REELS_AUTO_PUBLISH_ENABLED" == "true" ]]; then
             if ! gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
