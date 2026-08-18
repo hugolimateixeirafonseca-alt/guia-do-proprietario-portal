@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-18T08:28:52.207Z",
+  "generatedAt": "2026-08-18T14:51:26.168Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
-    "written": 93,
-    "published": 74,
+    "written": 94,
+    "published": 75,
     "newsOnline": 17
   },
   "articles": [
@@ -1352,6 +1352,22 @@
       "arrivedAt": "2026-08-12T16:46:17+01:00",
       "publishedAt": null,
       "url": null
+    },
+    {
+      "id": "EXTRA-101",
+      "title": "Equipar um quarto de estudante: o que comprar primeiro",
+      "pillar": "casa",
+      "priority": null,
+      "channel": null,
+      "level": "essencial",
+      "status": "published",
+      "planned": false,
+      "written": true,
+      "published": true,
+      "file": "equipar-quarto-estudante.mdx",
+      "arrivedAt": "2026-08-18T09:58:00+01:00",
+      "publishedAt": "2026-08-18T10:23:00+01:00",
+      "url": "https://guiadoproprietario.pt/casa/equipar-quarto-estudante/"
     },
     {
       "id": "EXTRA-009",
