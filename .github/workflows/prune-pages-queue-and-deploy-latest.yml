@@ -157,4 +157,4 @@ jobs:
             -f "client_payload[sha]=$TARGET_SHA"
           echo "Candidato a Reel enviado após confirmação do deploy: $TARGET_SHA."
 
-# Manual trigger marker: corrected source image 2026-08-18T11:38+01:00
+# Manual trigger marker: article cover high quality 2026-08-18T11:58+01:00
