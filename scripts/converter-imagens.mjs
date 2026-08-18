@@ -66,9 +66,12 @@ for (const fonte of fontes) {
     .rotate()
     .resize(1200, 675, { fit: "cover", position: "centre" });
 
+  const imagemDeArtigo = relativo.split(path.sep)[0] === "artigos";
+  const qualidadeWebp = imagemDeArtigo ? 92 : 78;
+
   const [avifBuffer, webpBuffer] = await Promise.all([
     criarAvifAbaixoDoLimite(imagem, fonte),
-    imagem.clone().webp({ quality: 78, effort: 5 }).toBuffer(),
+    imagem.clone().webp({ quality: qualidadeWebp, effort: 5 }).toBuffer(),
   ]);
 
   await Promise.all([
