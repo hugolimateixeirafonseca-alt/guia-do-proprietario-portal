@@ -37,7 +37,7 @@ jobs:
         run: |
           node <<'NODE'
           const account = process.env.CLOUDFLARE_ACCOUNT_ID;
-          const token = process.env.CF_PAGES_API_TOKEN;
+          const token = process.env.CLOUDFLARE_API_TOKEN;
           const project = process.env.CF_PAGES_PROJECT;
           const commit = process.env.TARGET_SHA;
           const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`;
@@ -157,4 +157,4 @@ jobs:
             -f "client_payload[sha]=$TARGET_SHA"
           echo "Candidato a Reel enviado após confirmação do deploy: $TARGET_SHA."
 
-# Manual trigger marker: corrected article image 2026-08-18T11:36+01:00
+# Manual trigger marker: corrected source image 2026-08-18T11:38+01:00
