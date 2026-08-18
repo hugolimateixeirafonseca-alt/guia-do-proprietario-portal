@@ -157,4 +157,4 @@ jobs:
             -f "client_payload[sha]=$TARGET_SHA"
           echo "Candidato a Reel enviado após confirmação do deploy: $TARGET_SHA."
 
-# Manual trigger marker: article cover true HQ 2026-08-18T13:42+01:00
+# Manual trigger marker: article cover HQ publish 2026-08-18T15:25+01:00
