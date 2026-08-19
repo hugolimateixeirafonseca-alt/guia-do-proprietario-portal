@@ -7,6 +7,8 @@ on:
     paths:
       - 'functions/**'
       - 'src/lib/social-card-*.mjs'
+      - 'automation/social-card-renderer/**'
+      - 'tests/social-card-renderer.test.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/check-pages-functions.yml'
@@ -14,8 +16,11 @@ on:
     paths:
       - 'functions/**'
       - 'src/lib/social-card-*.mjs'
+      - 'automation/social-card-renderer/**'
+      - 'tests/social-card-renderer.test.mjs'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/check-pages-functions.yml'
 
 permissions:
   contents: read
@@ -34,5 +39,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Test social card renderer
+        run: npm run test:renderer
       - name: Build Pages Functions
         run: npm run build:functions

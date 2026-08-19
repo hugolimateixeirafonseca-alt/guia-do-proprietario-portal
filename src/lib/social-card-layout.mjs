@@ -19,7 +19,13 @@ export const SOCIAL_CARD_LAYOUT = Object.freeze({
   title:{left:90,top:342,width:650,maxHeight:410},
   source:{left:90,width:620,gap:58,minTop:720,maxTop:818},
   bottomRule:{left:90,width:110,height:6,offsetTop:60},
-  brand:{left:90,width:620,offsetTop:94}
+  brand:{left:90,width:620,offsetTop:94},
+  social:{
+    label:{left:90,top:166,height:58,minWidth:174,maxWidth:360},
+    title:{left:90,top:318,width:650,maxHeight:430},
+    bottomRule:{left:90,top:838,width:110,height:6},
+    brand:{left:90,top:876,width:620,height:36}
+  }
 });
 
 export const SOCIAL_CARD=SOCIAL_CARD_LAYOUT;
@@ -57,7 +63,7 @@ export function wrapTitle(title,fontSize,maxWidth=SOCIAL_CARD.title.width) {
   return lines;
 }
 
-export function selectTitleLayout(title) {
+export function selectTitleLayout(title,{maxWidth=SOCIAL_CARD.title.width,maxHeight=SOCIAL_CARD.title.maxHeight}={}) {
   const exactTitle=String(title||'').trim();
   if (!exactTitle) throw new Error('title is required');
   const length=[...exactTitle].length;
@@ -65,11 +71,11 @@ export function selectTitleLayout(title) {
   const preferredSize={short:96,medium:84,long:74,very_long:64}[category];
   const maxLines=category==='very_long'?6:5;
   for (const fontSize of FONT_SIZES.filter(size=>size<=preferredSize)) {
-    const lines=wrapTitle(exactTitle,fontSize);
+    const lines=wrapTitle(exactTitle,fontSize,maxWidth);
     if (!lines) continue;
     const lineHeight=Math.round(fontSize*1.01);
     const height=lines.length*lineHeight;
-    if (lines.length<=maxLines && height<=SOCIAL_CARD.title.maxHeight) {
+    if (lines.length<=maxLines && height<=maxHeight) {
       return {title:exactTitle,category,fontSize,lineHeight,lines,height,maxLines};
     }
   }
@@ -106,7 +112,27 @@ function editorialOverlay() {
   ],{viewBox:'0 0 1536 1024',width:1536,height:1024,'aria-hidden':'true'});
 }
 
-export function createSocialCardLayout({title,source,pillar='casa',image}) {
+function socialOverlay() {
+  return element('svg',{
+    display:'flex',position:'absolute',left:0,top:0,
+    width:SOCIAL_CARD.width,height:SOCIAL_CARD.height
+  },[
+    graphic('path',{d:'M0 0H624C694 137 727 300 724 485C721 677 678 858 601 1024H0Z',fill:SOCIAL_CARD_THEME.background,opacity:0.985}),
+    graphic('path',{d:'M600 0H716C760 159 770 323 754 488C739 649 699 813 626 1024H569C654 845 697 675 700 491C703 306 670 144 600 0Z',fill:SOCIAL_CARD_THEME.creamSecondary,opacity:0.96}),
+    graphic('path',{d:'M622 -12C704 172 728 338 713 511C700 685 658 851 587 1037',fill:'none',stroke:SOCIAL_CARD_THEME.gold,strokeWidth:2.2,opacity:0.82}),
+    graphic('circle',{cx:88,cy:770,r:5,fill:SOCIAL_CARD_THEME.gold,opacity:0.55}),
+    graphic('circle',{cx:110,cy:770,r:5,fill:SOCIAL_CARD_THEME.gold,opacity:0.34}),
+    graphic('circle',{cx:132,cy:770,r:5,fill:SOCIAL_CARD_THEME.gold,opacity:0.2})
+  ],{viewBox:'0 0 1536 1024',width:1536,height:1024,'aria-hidden':'true'});
+}
+
+function titleNodes(titleLayout,width) {
+  return titleLayout.lines.map((line,index)=>element('div',{
+    display:'flex',width,height:titleLayout.lineHeight,alignItems:'center'
+  },line,{key:`title-${index}`}));
+}
+
+function createNewsCardLayout({title,source,image}) {
   const exactSource=String(source||'').trim();
   if (!exactSource) throw new Error('source is required');
   if (!image) throw new Error('base image is required');
@@ -118,12 +144,6 @@ export function createSocialCardLayout({title,source,pillar='casa',image}) {
   );
   const bottomRuleTop=sourceTop+SOCIAL_CARD.bottomRule.offsetTop;
   const brandTop=sourceTop+SOCIAL_CARD.brand.offsetTop;
-  const titleNodes=titleLayout.lines.map((line,index)=>element('div',{
-    display:'flex',
-    width:SOCIAL_CARD.title.width,
-    height:titleLayout.lineHeight,
-    alignItems:'center'
-  },line,{key:`title-${index}`}));
   const tree=element('div',{
     display:'flex',position:'relative',width:SOCIAL_CARD.width,height:SOCIAL_CARD.height,
     overflow:'hidden',backgroundColor:SOCIAL_CARD_THEME.background
@@ -149,7 +169,7 @@ export function createSocialCardLayout({title,source,pillar='casa',image}) {
       width:SOCIAL_CARD.title.width,height:titleLayout.height,flexDirection:'column',
       color:SOCIAL_CARD_THEME.ink,fontFamily:'Cormorant Garamond',fontWeight:500,
       fontSize:titleLayout.fontSize,lineHeight:1,letterSpacing:-0.35
-    },titleNodes),
+    },titleNodes(titleLayout,SOCIAL_CARD.title.width)),
     element('div',{
       display:'flex',position:'absolute',left:SOCIAL_CARD.source.left,top:sourceTop,
       width:SOCIAL_CARD.source.width,height:38,alignItems:'center',
@@ -182,7 +202,92 @@ export function createSocialCardLayout({title,source,pillar='casa',image}) {
       source:{...SOCIAL_CARD.source,top:sourceTop},
       brand:{...SOCIAL_CARD.brand,top:brandTop},
       title:{...SOCIAL_CARD.title,...titleLayout,bottom:titleBottom},
-      exactSource
+      exactSource,
+      variant:'news',
+      badge:'NOTÍCIAS'
     }
   };
+}
+
+function normalizeBadge(value) {
+  const badge=String(value||'GUIA').trim().toUpperCase();
+  return badge || 'GUIA';
+}
+
+function socialBadgeWidth(badge) {
+  return Math.max(
+    SOCIAL_CARD.social.label.minWidth,
+    Math.min(SOCIAL_CARD.social.label.maxWidth,100+[...badge].length*15)
+  );
+}
+
+function createSocialVariantLayout({title,badge,image}) {
+  if (!image) throw new Error('base image is required');
+  const exactBadge=normalizeBadge(badge);
+  const socialTitle=SOCIAL_CARD.social.title;
+  const titleLayout=selectTitleLayout(title,{maxWidth:socialTitle.width,maxHeight:socialTitle.maxHeight});
+  const titleBottom=socialTitle.top+titleLayout.height;
+  const badgeWidth=socialBadgeWidth(exactBadge);
+  const tree=element('div',{
+    display:'flex',position:'relative',width:SOCIAL_CARD.width,height:SOCIAL_CARD.height,
+    overflow:'hidden',backgroundColor:SOCIAL_CARD_THEME.background
+  },[
+    element('img',{
+      position:'absolute',left:0,top:0,width:SOCIAL_CARD.width,height:SOCIAL_CARD.height,
+      objectFit:'cover'
+    },null,{src:image,width:SOCIAL_CARD.width,height:SOCIAL_CARD.height}),
+    socialOverlay(),
+    element('div',{
+      display:'flex',position:'absolute',left:0,top:0,width:SOCIAL_CARD.transitionSafeLeft,height:SOCIAL_CARD.height,
+      backgroundImage:`repeating-linear-gradient(0deg, ${SOCIAL_CARD_THEME.paperLine} 0px, ${SOCIAL_CARD_THEME.paperLine} 1px, rgba(244,239,229,0) 1px, rgba(244,239,229,0) 10px)`,
+      opacity:0.38
+    },null),
+    element('div',{
+      display:'flex',position:'absolute',left:SOCIAL_CARD.social.label.left,top:SOCIAL_CARD.social.label.top,
+      width:badgeWidth,height:SOCIAL_CARD.social.label.height,borderRadius:29,
+      alignItems:'center',justifyContent:'center',backgroundColor:SOCIAL_CARD_THEME.petrol,color:'#F7F2E9',
+      fontFamily:'Lato',fontWeight:700,fontSize:25,letterSpacing:exactBadge.length>12?2.1:3.6,
+      paddingLeft:22,paddingRight:22
+    },exactBadge),
+    element('div',{
+      display:'flex',position:'absolute',left:socialTitle.left,top:socialTitle.top,
+      width:socialTitle.width,height:titleLayout.height,flexDirection:'column',
+      color:SOCIAL_CARD_THEME.ink,fontFamily:'Cormorant Garamond',fontWeight:500,
+      fontSize:titleLayout.fontSize,lineHeight:1,letterSpacing:-0.35
+    },titleNodes(titleLayout,socialTitle.width)),
+    element('div',{
+      display:'flex',position:'absolute',left:SOCIAL_CARD.social.bottomRule.left,top:SOCIAL_CARD.social.bottomRule.top,
+      width:SOCIAL_CARD.social.bottomRule.width,height:SOCIAL_CARD.social.bottomRule.height,
+      backgroundColor:SOCIAL_CARD_THEME.gold
+    },null),
+    element('div',{
+      display:'flex',position:'absolute',left:SOCIAL_CARD.social.brand.left,top:SOCIAL_CARD.social.brand.top,
+      width:SOCIAL_CARD.social.brand.width,height:SOCIAL_CARD.social.brand.height,alignItems:'center',
+      color:SOCIAL_CARD_THEME.ink,fontFamily:'Cormorant Garamond',fontWeight:500,fontSize:30,letterSpacing:0
+    },'Guia do Proprietário')
+  ],{lang:'pt-PT'});
+
+  return {
+    tree,
+    metrics:{
+      width:SOCIAL_CARD.width,
+      height:SOCIAL_CARD.height,
+      safe:SOCIAL_CARD.safe,
+      illustrationStart:SOCIAL_CARD.illustrationStart,
+      transitionSafeLeft:SOCIAL_CARD.transitionSafeLeft,
+      label:{...SOCIAL_CARD.social.label,width:badgeWidth},
+      source:null,
+      brand:SOCIAL_CARD.social.brand,
+      title:{...socialTitle,...titleLayout,bottom:titleBottom},
+      exactSource:'',
+      variant:'social',
+      badge:exactBadge
+    }
+  };
+}
+
+export function createSocialCardLayout({title,source,pillar='casa',image,variant='news',badge}) {
+  void pillar;
+  if (variant==='social') return createSocialVariantLayout({title,badge,image});
+  return createNewsCardLayout({title,source,image});
 }
