@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'functions/**'
+      - 'public/social/**'
       - '.github/workflows/deploy-pages-functions-direct.yml'
   workflow_dispatch:
 
@@ -85,7 +86,7 @@ jobs:
             form.set('branch', 'main');
             form.set('commit_hash', commit);
             form.set('commit_dirty', 'false');
-            form.set('commit_message', `Deploy Pages functions ${commit.slice(0, 12)}`);
+            form.set('commit_message', `Deploy Pages functions/social ${commit.slice(0, 12)}`);
 
             const response = await fetch(`${base}/deployments`, {
               method: 'POST',
