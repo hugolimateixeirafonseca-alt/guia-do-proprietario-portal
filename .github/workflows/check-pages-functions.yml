@@ -43,3 +43,11 @@ jobs:
         run: npm run test:renderer
       - name: Build Pages Functions
         run: npm run build:functions
+      - name: Generate temporary social previews
+        run: node automation/social-card-renderer/generate-social-preview-temp.mjs
+      - name: Upload temporary social previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-card-preview-temp
+          path: artifacts/social-card-preview-temp/*.png
+          retention-days: 1
