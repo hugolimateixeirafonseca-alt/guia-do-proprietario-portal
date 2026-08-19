@@ -72,11 +72,24 @@ def claim_initial_trigger(
     claimed_at: str | None = None,
 ) -> bool:
     _validate_identity(slug, publication_sha)
+    now = claimed_at or _timestamp()
     changes = query(
-        """INSERT OR IGNORE INTO reel_initial_triggers
+        """INSERT INTO reel_initial_triggers
         (slug, publication_sha, state, claimed_at)
-        VALUES (?, ?, 'claimed', ?)""",
-        [slug, publication_sha, claimed_at or _timestamp()],
+        VALUES (?, ?, 'claimed', ?)
+        ON CONFLICT(slug, publication_sha) DO UPDATE SET
+            state = 'claimed',
+            claimed_at = excluded.claimed_at,
+            completed_at = NULL,
+            failed_at = NULL,
+            generation_id = NULL,
+            error = NULL
+        WHERE reel_initial_triggers.state = 'failed'
+           OR (
+               reel_initial_triggers.state = 'claimed'
+               AND datetime(reel_initial_triggers.claimed_at) <= datetime(?, '-30 minutes')
+           )""",
+        [slug, publication_sha, now, now],
     )
     return changes == 1
 
