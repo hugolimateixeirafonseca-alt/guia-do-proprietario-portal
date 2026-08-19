@@ -1,0 +1,41 @@
+name: Observe Reel recovery
+
+on:
+  workflow_run:
+    workflows:
+      - Recover missing Reel escolher-pintor-orcamentos
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  record-result:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Obter repositório
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Registar resultado da recuperação
+        shell: bash
+        env:
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p .reel-recovery
+          {
+            echo "conclusion=$CONCLUSION"
+            echo "run_id=$RUN_ID"
+            echo "head_sha=$HEAD_SHA"
+            echo "recorded_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > .reel-recovery/escolher-pintor-orcamentos.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .reel-recovery/escolher-pintor-orcamentos.txt
+          git commit -m "Record Reel recovery result" || exit 0
+          git push origin HEAD:main
