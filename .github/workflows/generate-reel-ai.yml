@@ -8,6 +8,11 @@ on:
         required: true
         default: herdei-uma-casa
         type: string
+      publication_sha:
+        description: SHA da publicação original, quando se está a recuperar um Reel automático
+        required: false
+        default: ""
+        type: string
   workflow_call:
     inputs:
       slug:
@@ -27,7 +32,8 @@ permissions:
 
 jobs:
   generate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     outputs:
       generation_id: ${{ steps.generation.outputs.generation_id }}
     env:
@@ -72,7 +78,7 @@ jobs:
             --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA")"
           echo "claimed=$CLAIMED" >> "$GITHUB_OUTPUT"
           if [[ "$CLAIMED" == "false" ]]; then
-            echo "Já existe uma tentativa automática inicial para $REEL_SLUG. Nada será gerado."
+            echo "Já existe uma tentativa automática inicial ativa ou concluída para $REEL_SLUG. Nada será gerado."
           fi
 
       - name: Validar configuração
@@ -95,14 +101,38 @@ jobs:
             fi
           done
 
-      - name: Instalar FFmpeg, Inter e dependências Python
+      - name: Preparar dependências Python e FFmpeg
         if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install --yes ffmpeg fonts-inter
-          python -m pip install --requirement scripts/reels/requirements.txt
+
+          echo "A instalar dependências Python com limite de 5 minutos..."
+          timeout 300s python -m pip install --requirement scripts/reels/requirements.txt
+
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+            echo "FFmpeg não está pré-instalado. A usar instalação de fallback com timeouts curtos."
+
+            if [[ -f /etc/apt/sources.list.d/ubuntu.sources ]]; then
+              sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+            fi
+            if [[ -f /etc/apt/sources.list ]]; then
+              sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list
+            fi
+
+            timeout 180s sudo apt-get \
+              -o Acquire::Retries=2 \
+              -o Acquire::http::Timeout=15 \
+              -o Acquire::https::Timeout=15 \
+              update
+            timeout 180s sudo apt-get install --yes --no-install-recommends ffmpeg
+          fi
+
+          command -v ffmpeg >/dev/null 2>&1 || { echo "::error::FFmpeg não está disponível."; exit 1; }
+          command -v ffprobe >/dev/null 2>&1 || { echo "::error::ffprobe não está disponível."; exit 1; }
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+          fc-match Inter | head -n 1 || true
 
       - name: Criar identificador único da geração
         id: generation
