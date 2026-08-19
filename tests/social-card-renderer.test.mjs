@@ -121,3 +121,44 @@ test('NOTÍCIAS e branding ocupam posições determinísticas como texto simples
   assert.equal(layout.metrics.brand.left,90);
   assert.equal(layout.metrics.brand.top,layout.metrics.source.top+SOCIAL_CARD.brand.offsetTop);
 });
+
+test('variante default continua NEWS para compatibilidade com cenários existentes',async()=>{
+  const layout=createSocialCardLayout({title:accentedTitle,source,image:await fixturePng()});
+  const text=collectText(layout.tree);
+  assert.equal(layout.metrics.variant,'news');
+  assert.equal(layout.metrics.badge,'NOTÍCIAS');
+  assert.ok(text.includes('NOTÍCIAS'));
+  assert.ok(text.includes('Fonte:'));
+  assert.ok(text.includes(source));
+});
+
+test('variante SOCIAL usa badge dinâmico e nunca apresenta Fonte ou NOTÍCIAS',async()=>{
+  const title='Vai vender casa? Comece pelos documentos';
+  const layout=createSocialCardLayout({title,variant:'social',badge:'GUIA',image:await fixturePng()});
+  const text=collectText(layout.tree);
+  assert.equal(layout.metrics.variant,'social');
+  assert.equal(layout.metrics.badge,'GUIA');
+  assert.equal(layout.metrics.source,null);
+  assert.equal(layout.metrics.exactSource,'');
+  assert.ok(text.includes('GUIA'));
+  assert.ok(text.includes('Guia do Proprietário'));
+  assert.ok(!text.includes('NOTÍCIAS'));
+  assert.ok(!text.includes('Fonte:'));
+  assert.equal(layout.metrics.title.lines.join(' '),title);
+});
+
+test('badge social longo cabe no limite e imagem final continua 1536x1024',async()=>{
+  const rendered=await renderSocialCardNode({
+    root,
+    title:'Mito ou verdade: avaliação bancária é o valor de mercado?',
+    variant:'social',
+    badge:'MITO OU VERDADE',
+    image:await fixturePng()
+  });
+  assert.equal(rendered.metrics.variant,'social');
+  assert.equal(rendered.metrics.badge,'MITO OU VERDADE');
+  assert.ok(rendered.metrics.label.width<=SOCIAL_CARD.social.label.maxWidth);
+  assert.ok(rendered.metrics.label.width>=SOCIAL_CARD.social.label.minWidth);
+  assert.equal(rendered.png.readUInt32BE(16),1536);
+  assert.equal(rendered.png.readUInt32BE(20),1024);
+});
