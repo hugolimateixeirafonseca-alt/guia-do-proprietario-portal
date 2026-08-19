@@ -1,0 +1,19 @@
+name: Recover missing Reel escolher-pintor-orcamentos
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/recover-reel-escolher-pintor.yml
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    uses: ./.github/workflows/generate-reel-ai.yml
+    with:
+      slug: escolher-pintor-orcamentos
+      publication_sha: 98c6e1b89b5fecb494fbcafc6a9c28c0f1a0c713
+    secrets: inherit
