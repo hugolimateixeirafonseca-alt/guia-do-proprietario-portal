@@ -23,6 +23,7 @@ const REPO = 'guia-do-proprietario-portal';
 const API_VERSION = '2022-11-28';
 const ALLOWED_PATHS = [
   /^public\/social\/noticias\/[A-Za-z0-9._-]+\.png$/,
+  /^public\/social\/auto\/[A-Za-z0-9._-]+\.png$/,
   /^src\/content\/notas\/[A-Za-z0-9._-]+\.mdx$/,
   /^public\/share\/noticias\/[A-Za-z0-9._-]+\/index\.html$/,
 ];
@@ -149,7 +150,7 @@ async function upsert({ request, env }: RequestContext) {
   }
 }
 
-export const onRequest = async (context: RequestContext) => {
+export const onRequest = async(context: RequestContext)=>{
   if (context.request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
   return upsert(context);
 };
