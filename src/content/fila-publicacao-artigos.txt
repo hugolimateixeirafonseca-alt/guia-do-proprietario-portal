@@ -1,5 +1,9 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # O workflow publica os primeiros ficheiros disponíveis desta lista.
+saber-quem-e-dono-de-um-imovel.mdx
+procurar-quarto-olx-grupos-facebook.mdx
+estudante-deslocado-irs-renda.mdx
+comprar-casa-para-filho-estudar.mdx
 ar-condicionado-quanto-custa.mdx
 escolher-ar-condicionado.mdx
 cano-entupido-desentupir.mdx
