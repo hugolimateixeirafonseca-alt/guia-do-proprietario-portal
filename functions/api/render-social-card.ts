@@ -40,6 +40,14 @@ function requiredText(value:FormDataEntryValue|null,name:string,maxLength:number
   return clean;
 }
 
+function optionalText(value:FormDataEntryValue|null,name:string,maxLength:number,defaultValue='') {
+  if (value===null) return defaultValue;
+  if (typeof value!=='string') throw new Error(`${name}_invalid`);
+  const clean=value.trim();
+  if (clean.length>maxLength) throw new Error(`${name}_too_long`);
+  return clean || defaultValue;
+}
+
 async function renderRequest({request,env}:RequestContext) {
   if (!env.SOCIAL_CARD_RENDERER_SECRET) return jsonError('renderer_not_configured',503);
   if (request.headers.get('Authorization')!==`Bearer ${env.SOCIAL_CARD_RENDERER_SECRET}`) {
@@ -58,7 +66,13 @@ async function renderRequest({request,env}:RequestContext) {
 
   try {
     const title=requiredText(form.get('title'),'title',600);
-    const source=requiredText(form.get('source'),'source',180);
+    const variant=optionalText(form.get('variant'),'variant',20,'news')==='social' ? 'social' : 'news';
+    const source=variant==='news'
+      ? requiredText(form.get('source'),'source',180)
+      : optionalText(form.get('source'),'source',180,'');
+    const badge=variant==='social'
+      ? optionalText(form.get('badge'),'badge',40,'GUIA')
+      : 'NOTÍCIAS';
     const pillar=typeof form.get('pilar')==='string' ? String(form.get('pilar')).trim().slice(0,40) : 'casa';
     const image=form.get('image');
     if (!(image instanceof File) || !image.size) return jsonError('image_required',400);
@@ -68,7 +82,7 @@ async function renderRequest({request,env}:RequestContext) {
     const imageBytes=await image.arrayBuffer();
     if (!isSupportedRasterImage(imageBytes,image.type)) return jsonError('invalid_image_data',415);
     await initializeRenderer();
-    const {tree}=createSocialCardLayout({title,source,pillar,image:imageBytes});
+    const {tree}=createSocialCardLayout({title,source,pillar,image:imageBytes,variant,badge});
     const svg=await satori(tree,{
       width:SOCIAL_CARD.width,
       height:SOCIAL_CARD.height,
@@ -97,7 +111,7 @@ async function renderRequest({request,env}:RequestContext) {
     });
   } catch (error) {
     const code=error instanceof Error ? error.message : 'render_failed';
-    const expected=/^(title|source)_(required|too_long)$|^title is too long/u.test(code);
+    const expected=/^(title|source)_(required|too_long)$|^(badge|variant)_(invalid|too_long)$|^title is too long/u.test(code);
     return jsonError(expected?code:'render_failed',expected?400:500);
   }
 }
