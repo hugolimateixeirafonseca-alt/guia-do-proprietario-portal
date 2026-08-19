@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-18T20:16:53.681Z",
+  "generatedAt": "2026-08-19T08:29:53.971Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 94,
-    "published": 75,
+    "published": 76,
     "newsOnline": 17
   },
   "articles": [
@@ -1392,14 +1392,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "escolher-pintor-orcamentos.mdx",
       "arrivedAt": "2026-08-11T19:45:03+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-19T07:02:01Z",
+      "url": "https://guiadoproprietario.pt/casa/escolher-pintor-orcamentos/"
     },
     {
       "id": "EXTRA-002",
