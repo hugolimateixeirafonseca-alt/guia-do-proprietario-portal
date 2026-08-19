@@ -9,7 +9,7 @@ async function readFont(root,name) {
   return value.buffer.slice(value.byteOffset,value.byteOffset+value.byteLength);
 }
 
-export async function renderSocialCardNode({root=process.cwd(),title,source,pillar='casa',image}) {
+export async function renderSocialCardNode({root=process.cwd(),title,source,pillar='casa',image,variant='news',badge}) {
   const [serif,sansRegular,sansBold]=await Promise.all([
     readFont(root,'cormorant-garamond-medium.bin'),
     readFont(root,'lato-regular.bin'),
@@ -18,7 +18,7 @@ export async function renderSocialCardNode({root=process.cwd(),title,source,pill
   const imageData=ArrayBuffer.isView(image)
     ? image.buffer.slice(image.byteOffset,image.byteOffset+image.byteLength)
     : image;
-  const {tree,metrics}=createSocialCardLayout({title,source,pillar,image:imageData});
+  const {tree,metrics}=createSocialCardLayout({title,source,pillar,image:imageData,variant,badge});
   const svg=await satori(tree,{
     width:SOCIAL_CARD.width,
     height:SOCIAL_CARD.height,
