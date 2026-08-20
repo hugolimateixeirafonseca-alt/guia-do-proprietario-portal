@@ -24,6 +24,13 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
         <a class="primary-link" href="/">Voltar ao Guia do Proprietário</a>
       </div>
 
+      <div id="no-session-mode" hidden>
+        <p class="eyebrow">Kit Estudante</p>
+        <h1>Obrigado.</h1>
+        <p>Se ainda não pediu os manuais, pode fazê-lo gratuitamente na página do kit.</p>
+        <a class="primary-link" href="/kit-estudante/">Pedir os dois manuais</a>
+      </div>
+
       <div id="landing-mode" hidden>
         <p class="eyebrow">Pedido concluído</p>
         <h1>Está feito. Os dois manuais seguem para o seu email.</h1>
@@ -31,7 +38,7 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
 
         <div class="profile-step" id="city-step">
           <p class="step-count">Pergunta 1 de 2</p>
-          <h2>Onde vai o seu filho estudar?</h2>
+          <h2>ONDE VAI O SEU FILHO ESTUDAR?</h2>
           <p>Ajuda-nos a enviar-lhe apenas informação relevante.</p>
           <div class="choice-grid" data-profile-field="est_cidade">
             <button type="button" data-value="lisboa">Lisboa</button>
@@ -48,7 +55,7 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
 
         <div class="profile-step" id="phase-step" hidden>
           <p class="step-count">Pergunta 2 de 2</p>
-          <h2>E em que ponto está a procura?</h2>
+          <h2>E EM QUE PONTO ESTÁ A PROCURA?</h2>
           <div class="choice-list" data-profile-field="est_fase">
             <button type="button" data-value="procura">Ainda estamos à procura</button>
             <button type="button" data-value="encontrou">Já encontrámos quarto</button>
@@ -57,9 +64,10 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
           <p class="profile-status" aria-live="polite"></p>
         </div>
 
-        <div class="complete-step" id="complete-step" hidden>
+        <div class="complete-step" id="complete-step" tabindex="-1" hidden>
           <h2>Obrigado. Já sabemos o que lhe pode ser mais útil.</h2>
           <p id="complete-copy">Vamos adaptar os próximos conteúdos à fase em que está.</p>
+          <a class="primary-link" id="complete-link" href="/casa/equipar-quarto-estudante/" hidden>Ver o que comprar para o primeiro quarto</a>
         </div>
       </div>
 
@@ -81,12 +89,14 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
 <script>
   const loading = document.getElementById("loading-state")!;
   const emailMode = document.getElementById("email-mode")!;
+  const noSessionMode = document.getElementById("no-session-mode")!;
   const landingMode = document.getElementById("landing-mode")!;
   const sharePanel = document.getElementById("share-panel")!;
   const cityStep = document.getElementById("city-step")!;
   const phaseStep = document.getElementById("phase-step")!;
   const completeStep = document.getElementById("complete-step")!;
   const completeCopy = document.getElementById("complete-copy")!;
+  const completeLink = document.getElementById("complete-link") as HTMLAnchorElement;
   const params = new URLSearchParams(location.search);
   const cities = new Set(["lisboa", "porto", "coimbra", "braga", "aveiro", "evora", "faro", "outra"]);
   const owners = new Set(["arrenda", "tem_nao_arrenda", "nao_tem"]);
@@ -95,6 +105,7 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
   const showEmailMode = () => {
     loading.hidden = true;
     landingMode.hidden = true;
+    noSessionMode.hidden = true;
     emailMode.hidden = false;
     sharePanel.hidden = false;
   };
@@ -102,7 +113,17 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
   const showLandingMode = () => {
     loading.hidden = true;
     emailMode.hidden = true;
+    noSessionMode.hidden = true;
     landingMode.hidden = false;
+    sharePanel.hidden = true;
+    cityStep.querySelector<HTMLButtonElement>("button")?.focus();
+  };
+
+  const showNoSessionMode = () => {
+    loading.hidden = true;
+    emailMode.hidden = true;
+    landingMode.hidden = true;
+    noSessionMode.hidden = false;
     sharePanel.hidden = false;
   };
 
@@ -111,8 +132,8 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
   } else {
     fetch("/api/kit-estudante/session", { headers: { Accept: "application/json" } })
       .then((response) => response.json())
-      .then((result) => result.active ? showLandingMode() : showEmailMode())
-      .catch(showEmailMode);
+      .then((result) => result.active ? showLandingMode() : showNoSessionMode())
+      .catch(showNoSessionMode);
   }
 
   document.querySelectorAll<HTMLElement>("[data-profile-field]").forEach((group) => {
@@ -141,8 +162,10 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
               : phase === "encontrou"
                 ? "Vamos privilegiar os próximos passos para instalar o estudante e organizar as despesas."
                 : "Vamos privilegiar os prazos, apoios e obrigações que ainda merecem acompanhamento.";
+            completeLink.hidden = phase !== "encontrou";
             phaseStep.hidden = true;
             completeStep.hidden = false;
+            sharePanel.hidden = false;
             completeStep.focus();
           }
         } catch {
@@ -170,6 +193,6 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
 </script>
 
 <style>
-  .thanks-shell{min-height:calc(100vh - 150px);padding:64px 20px 80px;background:radial-gradient(circle at 80% 0,rgba(214,169,85,.2),transparent 30%),linear-gradient(135deg,#f6efe0,#edf4f1)}.thanks-card{width:min(820px,100%);margin:auto;padding:clamp(28px,5vw,58px);border:1px solid #c9d7d1;background:#fffefa;box-shadow:0 28px 70px rgba(16,42,49,.13)}.brand-icon{width:54px;height:54px;margin-bottom:22px;display:grid;place-items:center;border-radius:50%;color:white;background:#256b5c;font-size:1.7rem;font-weight:900}.eyebrow{margin:0 0 10px;color:#24594f;font-size:.76rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}h1{max-width:720px;margin:.2rem 0 1rem;color:#102a31;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.5rem,6vw,4.7rem);line-height:1;letter-spacing:-.045em}.thanks-card>div>p:not(.eyebrow),.profile-step>p,.complete-step p,.share-panel p{color:#5f7075}.primary-link,.share-actions a,.share-actions button{min-height:48px;margin-top:18px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:4px;color:white;background:#256b5c;text-decoration:none;font-weight:800;cursor:pointer}.profile-step,.complete-step,.share-panel{margin-top:36px;padding-top:30px;border-top:1px solid #dce4e0}.profile-step h2,.complete-step h2,.share-panel h2{margin:.15rem 0 .7rem;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.08}.step-count{margin:0!important;color:#24594f!important;font-size:.75rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.choice-list{display:grid;gap:10px;margin-top:20px}.choice-grid button,.choice-list button{min-height:50px;padding:10px 13px;border:1px solid #9db4ac;border-radius:4px;color:#174e43;background:#edf4f1;font-weight:800;cursor:pointer}.choice-grid button:hover,.choice-list button:hover,.choice-grid button:focus-visible,.choice-list button:focus-visible{color:white;background:#256b5c;outline:3px solid rgba(37,107,92,.18);outline-offset:2px}.choice-grid button:disabled,.choice-list button:disabled{opacity:.58;cursor:wait}.profile-status,#share-status{min-height:1.4em;color:#9a2f28!important;font-size:.82rem;font-weight:700}.share-actions{display:flex;flex-wrap:wrap;gap:10px}.share-actions a{color:#24594f;background:transparent;border:1px solid #256b5c}.thanks-footer{padding:24px;display:flex;justify-content:center;flex-wrap:wrap;gap:18px;color:#5f7075;background:#fffefa;font-size:.8rem}.thanks-footer a{text-decoration:none}.thanks-footer a:hover{text-decoration:underline}@media(max-width:700px){.thanks-shell{padding:28px 14px 50px}.choice-grid{grid-template-columns:1fr 1fr}.share-actions>*{width:100%}}@media(max-width:400px){.choice-grid{grid-template-columns:1fr}}
+  [hidden]{display:none!important}.thanks-shell{min-height:calc(100vh - 150px);padding:64px 20px 80px;background:radial-gradient(circle at 80% 0,rgba(214,169,85,.2),transparent 30%),linear-gradient(135deg,#f6efe0,#edf4f1)}.thanks-card{width:min(820px,100%);margin:auto;padding:clamp(28px,5vw,58px);border:1px solid #c9d7d1;background:#fffefa;box-shadow:0 28px 70px rgba(16,42,49,.13)}.brand-icon{width:54px;height:54px;margin-bottom:22px;display:grid;place-items:center;border-radius:50%;color:white;background:#256b5c;font-size:1.7rem;font-weight:900}.eyebrow{margin:0 0 10px;color:#24594f;font-size:.76rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}h1{max-width:720px;margin:.2rem 0 1rem;color:#102a31;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.5rem,6vw,4.7rem);line-height:1;letter-spacing:-.045em}.thanks-card>div>p:not(.eyebrow),.profile-step>p,.complete-step p,.share-panel p{color:#5f7075}.primary-link,.share-actions a,.share-actions button{min-height:48px;margin-top:18px;padding:0 20px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:4px;color:white;background:#256b5c;text-decoration:none;font-weight:800;cursor:pointer}.profile-step,.complete-step,.share-panel{margin-top:36px;padding-top:30px;border-top:1px solid #dce4e0}.profile-step h2,.complete-step h2,.share-panel h2{margin:.15rem 0 .7rem;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.08}.step-count{margin:0!important;color:#24594f!important;font-size:.75rem;font-weight:850;letter-spacing:.08em;text-transform:uppercase}.choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.choice-list{display:grid;gap:10px;margin-top:20px}.choice-grid button,.choice-list button{min-height:50px;padding:10px 13px;border:1px solid #9db4ac;border-radius:4px;color:#174e43;background:#edf4f1;font-weight:800;cursor:pointer}.choice-grid button:hover,.choice-list button:hover,.choice-grid button:focus-visible,.choice-list button:focus-visible{color:white;background:#256b5c;outline:3px solid rgba(37,107,92,.18);outline-offset:2px}.choice-grid button:disabled,.choice-list button:disabled{opacity:.58;cursor:wait}.profile-status,#share-status{min-height:1.4em;color:#9a2f28!important;font-size:.82rem;font-weight:700}.share-actions{display:flex;flex-wrap:wrap;gap:10px}.share-actions a{color:#24594f;background:transparent;border:1px solid #256b5c}.thanks-footer{padding:24px;display:flex;justify-content:center;flex-wrap:wrap;gap:18px;color:#5f7075;background:#fffefa;font-size:.8rem}.thanks-footer a{text-decoration:none}.thanks-footer a:hover{text-decoration:underline}@media(max-width:700px){.thanks-shell{padding:28px 14px 50px}.choice-grid{grid-template-columns:1fr 1fr}.share-actions>*{width:100%}}@media(max-width:400px){.choice-grid{grid-template-columns:1fr}}
 </style>
 

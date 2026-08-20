@@ -142,11 +142,11 @@ export function cookieValue(request: Request, name = SESSION_COOKIE) {
 }
 
 export function sessionCookie(token: string) {
-  return `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/kit-estudante; Max-Age=${SESSION_TTL_SECONDS}; HttpOnly; Secure; SameSite=Lax`;
+  return `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${SESSION_TTL_SECONDS}; HttpOnly; Secure; SameSite=Lax`;
 }
 
 export function clearSessionCookie() {
-  return `${SESSION_COOKIE}=; Path=/kit-estudante; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
+  return `${SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
 }
 
 export async function createSession(db: D1Database, leadId: number) {
