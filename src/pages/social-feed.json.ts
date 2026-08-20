@@ -10,8 +10,9 @@ export const GET: APIRoute = async ({ site }) => {
 
   const items = artigos.map((artigo) => {
     const route = `/${artigo.data.pilar}/${artigo.id}/`;
-    const imagem = artigo.data.imagem_capa
-      ? new URL(artigo.data.imagem_capa, base).toString()
+    const imagemCapa = artigo.data.imagem_capa?.replace(/\.avif(?:\?.*)?$/i, ".webp");
+    const imagem = imagemCapa
+      ? new URL(imagemCapa, base).toString()
       : new URL(`/og${route}index.png`, base).toString();
     return {
       titulo: artigo.data.titulo,
