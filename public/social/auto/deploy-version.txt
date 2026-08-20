@@ -1,0 +1,3 @@
+social-auto-images deployment trigger
+source-images-commit: ddf1bdf826b27bc0a7454781d7620aefc3da3533
+verified-requested-at: 2026-08-20T22:31:30Z
