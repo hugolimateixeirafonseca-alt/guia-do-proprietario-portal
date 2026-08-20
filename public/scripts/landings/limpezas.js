@@ -115,6 +115,7 @@
     invalid_email: ["email", "Introduza um endereço de email válido."],
     invalid_postal_code: ["postal_code", "Use um código postal válido no formato 1234-567."],
     postal_not_found: ["postal_code", "Não encontrámos este código postal. Confirme os 7 algarismos."],
+    location_unavailable: ["postal_code", "Não foi possível confirmar o concelho agora. Tente novamente dentro de instantes."],
     invalid_service_type: ["service_type", "Escolha o tipo de limpeza."],
     invalid_space_type: ["space_type", "Escolha o tipo de espaço."],
     invalid_space_size: ["space_size", "Indique a dimensão aproximada."],

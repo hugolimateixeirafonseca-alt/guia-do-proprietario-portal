@@ -15,7 +15,8 @@ const env = {
   SENDER_GROUP_MARKETING: "egK8WG",
   SENDER_GROUP_GUIA_VENDER_CASA: "dJAl59",
   SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l",
-  SENDER_GROUP_LIMPEZA: "bWv1LJ"
+  CLEANING_DASHBOARD_API_URL: "https://guia-do-proprietario-parceiros.pages.dev/api/leads",
+  CLEANING_DASHBOARD_API_TOKEN: "token-dashboard-teste"
 };
 
 const requestFor = (body) => new Request("https://guiadoproprietario.pt/api/subscribe", {
@@ -370,45 +371,61 @@ test("adiciona a lead direta aos grupos de parceiros e marketing quando os dois 
   assert.equal(createBody.fields["{$CONSENT_MARKETING}"], "true");
 });
 
-test("cria um pedido de limpeza no grupo próprio e guarda os detalhes do serviço", async () => {
+test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao Sender", async () => {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
     if (String(url).startsWith("https://json.geoapi.pt/")) {
-      return Response.json({ Localidade: "Lisboa" });
+      return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
     }
-    const status = init.method === "GET" ? 404 : 201;
-    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+    if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-1" }, { status: 201 });
+    throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
   };
 
   const response = await onRequestPost({ request: requestFor(cleaningBody), env });
   assert.equal(response.status, 200);
-  const createBody = JSON.parse(calls[2].init.body);
-  assert.deepEqual(createBody.groups, ["bWv1LJ"]);
-  assert.equal(createBody.firstname, "Marta Silva");
-  assert.equal(createBody.phone, "912 345 678");
-  assert.equal(createBody.fields["{$LEAD_SOURCE}"], "guia_limpeza_preco_disponibilidade");
-  assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "true");
-  assert.equal("{$CONSENT_MARKETING}" in createBody.fields, false);
-  assert.equal(createBody.fields["{$LIMPEZA_SERVICO}"], "Limpeza profunda");
-  assert.equal(createBody.fields["{$LIMPEZA_ESPACO}"], "Apartamento");
-  assert.equal(createBody.fields["{$LIMPEZA_FREQUENCIA}"], "Apenas uma vez");
-  assert.equal(createBody.fields["{$LIMPEZA_PERIODO}"], "Manhã");
-  assert.equal(createBody.fields["{$LIMPEZA_NOTAS}"], "Há um cão em casa.");
+  assert.equal(calls.length, 2);
+  const dashboardCall = calls[1];
+  const dashboardBody = JSON.parse(dashboardCall.init.body);
+  assert.equal(dashboardCall.init.headers.Authorization, "Bearer token-dashboard-teste");
+  assert.equal(dashboardBody.event_id, "limpeza-123");
+  assert.equal(dashboardBody.municipality, "Lisboa");
+  assert.equal(dashboardBody.service_type, "profunda");
+  assert.equal(dashboardBody.name, "Marta Silva");
+  assert.equal(dashboardBody.phone, "912 345 678");
+  assert.equal(dashboardBody.consent_partner_sharing, true);
+  assert.equal(dashboardBody.consent_marketing, false);
+  assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", dashboardStored: true });
 });
 
 test("adiciona o pedido de limpeza à newsletter apenas com autorização opcional", async () => {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
-    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Lisboa" });
+    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
+    if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-1" }, { status: 201 });
     const status = init.method === "GET" ? 404 : 201;
     return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
   };
 
   const response = await onRequestPost({ request: requestFor({ ...cleaningBody, consent2: true }), env });
   assert.equal(response.status, 200);
-  const createBody = JSON.parse(calls[2].init.body);
-  assert.deepEqual(createBody.groups, ["egK8WG", "bWv1LJ"]);
+  const createBody = JSON.parse(calls[3].init.body);
+  assert.deepEqual(createBody.groups, ["egK8WG"]);
   assert.equal(createBody.fields["{$CONSENT_MARKETING}"], "true");
+  assert.equal("phone" in createBody, false);
+  assert.equal("{$LIMPEZA_SERVICO}" in createBody.fields, false);
+  assert.equal("{$CONSENT_PARCEIROS}" in createBody.fields, false);
+});
+
+test("não apresenta sucesso quando o dashboard de limpeza falha", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
+    return new Response("{}", { status: 401, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({ request: requestFor(cleaningBody), env });
+  assert.equal(response.status, 502);
+  assert.deepEqual(await response.json(), { error: "dashboard_error", code: "dashboard_401" });
 });
 
 test("recusa pedidos de limpeza incompletos ou com disponibilidade incompatível", async () => {
