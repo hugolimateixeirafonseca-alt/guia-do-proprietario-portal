@@ -65,8 +65,8 @@ async function renderRequest({request,env}:RequestContext) {
   }
 
   try {
-    const title=requiredText(form.get('title'),'title',600);
     const variant=optionalText(form.get('variant'),'variant',20,'news')==='social' ? 'social' : 'news';
+    const title=requiredText(form.get('title'),'title',variant==='social'?100:600);
     const source=variant==='news'
       ? requiredText(form.get('source'),'source',180)
       : optionalText(form.get('source'),'source',180,'');
