@@ -268,6 +268,56 @@ function senderContactId(payload: unknown) {
   return cleanText(data.id, 80);
 }
 
+type SenderFieldValue = string | number | boolean;
+
+function senderData(payload: unknown) {
+  if (!payload || typeof payload !== "object") return {} as Record<string, unknown>;
+  const record = payload as Record<string, unknown>;
+  return record.data && typeof record.data === "object" && !Array.isArray(record.data)
+    ? record.data as Record<string, unknown>
+    : record;
+}
+
+function senderFieldRows(payload: unknown): Array<Record<string, unknown>> {
+  if (Array.isArray(payload)) return payload.filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === "object");
+  if (!payload || typeof payload !== "object") return [];
+  const record = payload as Record<string, unknown>;
+  if (Array.isArray(record.data)) {
+    return record.data.filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === "object");
+  }
+  if (record.data && typeof record.data === "object") {
+    const nested = record.data as Record<string, unknown>;
+    if (Array.isArray(nested.data)) {
+      return nested.data.filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === "object");
+    }
+    if (nested.field_name) return [nested];
+  }
+  return [];
+}
+
+async function senderExistingFields(env: KitEnv, subscriberPayload: unknown) {
+  const response = await senderRequest(env, "/fields?limit=100", { method: "GET" });
+  if (!response.ok) throw new ProviderError(`sender_fields_${response.status}`);
+  const namesById = new Map(senderFieldRows(await response.json()).map((field) => [
+    cleanText(field.id, 80),
+    cleanText(field.field_name, 128)
+  ]));
+  const columns = senderData(subscriberPayload).columns;
+  if (!Array.isArray(columns)) return {} as Record<string, SenderFieldValue>;
+  const existingFields: Record<string, SenderFieldValue> = {};
+  for (const column of columns) {
+    if (!column || typeof column !== "object") continue;
+    const record = column as Record<string, unknown>;
+    const fieldName = namesById.get(cleanText(record.id, 80)) || "";
+    const value = record.value;
+    if (!fieldName.startsWith("{$") || !fieldName.endsWith("}")) continue;
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      existingFields[fieldName] = value;
+    }
+  }
+  return existingFields;
+}
+
 function senderGroupIds(payload: unknown) {
   if (!payload || typeof payload !== "object") return new Set<string>();
   const record = payload as Record<string, unknown>;
@@ -283,7 +333,7 @@ function senderGroupIds(payload: unknown) {
 export async function createOrUpdateKitSubscriber(
   env: KitEnv,
   email: string,
-  fields: Record<string, string>,
+  fields: Record<string, SenderFieldValue>,
   triggerAutomation: boolean
 ) {
   const identifier = encodeURIComponent(email);
@@ -291,9 +341,10 @@ export async function createOrUpdateKitSubscriber(
   if (existing.ok) {
     const existingPayload = await existing.json().catch(() => ({}));
     const groupId = await getKitGroupId(env);
+    const mergedFields = { ...await senderExistingFields(env, existingPayload), ...fields };
     const updated = await senderRequest(env, `/subscribers/${identifier}`, {
       method: "PATCH",
-      body: JSON.stringify({ fields, trigger_automation: false })
+      body: JSON.stringify({ fields: mergedFields, trigger_automation: false })
     });
     if (!updated.ok) throw new ProviderError(`sender_update_${updated.status}`);
     return {
@@ -312,11 +363,19 @@ export async function createOrUpdateKitSubscriber(
   if (created.ok) return { created: true, contactId: senderContactId(await created.json().catch(() => ({}))), inGroup: true };
 
   if (created.status === 409) {
+    const conflicted = await senderRequest(env, `/subscribers/${identifier}`, { method: "GET" });
+    if (!conflicted.ok) throw new ProviderError(`sender_conflict_lookup_${conflicted.status}`);
+    const conflictedPayload = await conflicted.json().catch(() => ({}));
+    const mergedFields = { ...await senderExistingFields(env, conflictedPayload), ...fields };
     const updated = await senderRequest(env, `/subscribers/${identifier}`, {
       method: "PATCH",
-      body: JSON.stringify({ fields, trigger_automation: false })
+      body: JSON.stringify({ fields: mergedFields, trigger_automation: false })
     });
-    if (updated.ok) return { created: false, contactId: "", inGroup: false };
+    if (updated.ok) return {
+      created: false,
+      contactId: senderContactId(conflictedPayload),
+      inGroup: senderGroupIds(conflictedPayload).has(groupId)
+    };
   }
   throw new ProviderError(`sender_create_${created.status}`);
 }
