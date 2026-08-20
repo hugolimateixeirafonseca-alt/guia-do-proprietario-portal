@@ -99,10 +99,9 @@ test("não marca um contacto existente para reiniciar a automação", async () =
       return Response.json({ data: {
         id: "contacto123",
         subscriber_tags: [{ id: "grupo123" }],
-        columns: [{ id: "origem-id", title: "Origem", type: "text", value: "direto" }]
+        columns: [{ id: "origem-id", title: "est_origem", type: "text", value: "direto" }]
       } });
     }
-    if (String(url).includes("/fields?")) return Response.json({ data: [{ id: "origem-id", field_name: "{$est_origem}" }] });
     if (String(url).endsWith("/subscribers/pessoa%40exemplo.pt") && init.method === "PATCH") {
       return Response.json({ success: true });
     }
@@ -120,32 +119,37 @@ test("não marca um contacto existente para reiniciar a automação", async () =
   const patchPayload = JSON.parse(patchCall.init.body);
   assert.equal(patchPayload.trigger_automation, false);
   assert.deepEqual(patchPayload.fields, { "{$est_origem}": "direto", "{$est_fase}": "tratado" });
+  assert.equal(calls.some((call) => call.url.includes("/fields?")), false);
 });
 
-test("origem, cidade e fase permanecem no mesmo contacto após cada PATCH", async () => {
-  const fieldNames = new Map([
-    ["origem-id", "{$est_origem}"],
-    ["cidade-id", "{$est_cidade}"],
-    ["fase-id", "{$est_fase}"]
+test("um contacto novo mantém origem, Coimbra e tratado após cada PATCH", async () => {
+  const fieldIds = new Map([
+    ["{$est_origem}", "origem-id"],
+    ["{$est_cidade}", "cidade-id"],
+    ["{$est_fase}", "fase-id"]
   ]);
-  const fieldIds = new Map([...fieldNames].map(([id, name]) => [name, id]));
-  let persistedFields = { "{$est_origem}": "direto" };
+  let contactExists = false;
+  let persistedFields = {};
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
-    if (String(url).includes("/fields?")) {
-      return Response.json({ data: [...fieldNames].map(([id, field_name]) => ({ id, field_name })) });
-    }
     if (String(url).endsWith("/subscribers/mesmo-contacto%40exemplo.pt") && init.method === "GET") {
+      if (!contactExists) return new Response(null, { status: 404 });
       return Response.json({ data: {
         id: "contacto123",
         subscriber_tags: [{ id: "grupo123" }],
         columns: Object.entries(persistedFields).map(([fieldName, value]) => ({
           id: fieldIds.get(fieldName),
-          title: fieldName,
+          title: fieldName.slice(2, -1),
           type: "text",
           value
         }))
       } });
+    }
+    if (String(url).endsWith("/subscribers") && init.method === "POST") {
+      const payload = JSON.parse(init.body);
+      contactExists = true;
+      persistedFields = { ...payload.fields };
+      return Response.json({ data: { id: "contacto123" } });
     }
     if (init.method === "PATCH") {
       const payload = JSON.parse(init.body);
@@ -155,39 +159,58 @@ test("origem, cidade e fase permanecem no mesmo contacto após cada PATCH", asyn
     throw new Error(`Pedido inesperado: ${url}`);
   };
 
+  const env = { SENDER_API_TOKEN: "token", SENDER_GROUP_KIT_ESTUDANTE: "grupo123" };
+  const verifyContact = async () => {
+    const response = await globalThis.fetch("https://api.sender.net/v2/subscribers/mesmo-contacto%40exemplo.pt", { method: "GET" });
+    const columns = (await response.json()).data.columns;
+    return Object.fromEntries(columns.map((column) => [`{$${column.title}}`, column.value]));
+  };
+
   await helper.createOrUpdateKitSubscriber(
-    { SENDER_API_TOKEN: "token" },
+    env,
     "mesmo-contacto@exemplo.pt",
-    { "{$est_cidade}": "porto" },
+    { "{$est_origem}": "direto" },
+    true
+  );
+  assert.deepEqual(await verifyContact(), { "{$est_origem}": "direto" });
+
+  await helper.createOrUpdateKitSubscriber(
+    env,
+    "mesmo-contacto@exemplo.pt",
+    { "{$est_cidade}": "coimbra" },
     false
   );
+  assert.deepEqual(await verifyContact(), {
+    "{$est_origem}": "direto",
+    "{$est_cidade}": "coimbra"
+  });
+
   await helper.createOrUpdateKitSubscriber(
-    { SENDER_API_TOKEN: "token" },
+    env,
     "mesmo-contacto@exemplo.pt",
-    { "{$est_fase}": "encontrou" },
+    { "{$est_fase}": "tratado" },
     false
   );
+  assert.deepEqual(await verifyContact(), {
+    "{$est_origem}": "direto",
+    "{$est_cidade}": "coimbra",
+    "{$est_fase}": "tratado"
+  });
 
   const patchCalls = calls.filter((call) => call.init.method === "PATCH");
   assert.equal(patchCalls.length, 2);
   assert.ok(patchCalls.every((call) => call.url.endsWith("/subscribers/mesmo-contacto%40exemplo.pt")));
   assert.deepEqual(JSON.parse(patchCalls[0].init.body).fields, {
     "{$est_origem}": "direto",
-    "{$est_cidade}": "porto"
+    "{$est_cidade}": "coimbra"
   });
   assert.deepEqual(JSON.parse(patchCalls[1].init.body).fields, {
     "{$est_origem}": "direto",
-    "{$est_cidade}": "porto",
-    "{$est_fase}": "encontrou"
+    "{$est_cidade}": "coimbra",
+    "{$est_fase}": "tratado"
   });
   assert.ok(patchCalls.every((call) => JSON.parse(call.init.body).trigger_automation === false));
-  const verification = await globalThis.fetch("https://api.sender.net/v2/subscribers/mesmo-contacto%40exemplo.pt", { method: "GET" });
-  const verifiedColumns = (await verification.json()).data.columns;
-  assert.deepEqual(Object.fromEntries(verifiedColumns.map((column) => [fieldNames.get(column.id), column.value])), {
-    "{$est_origem}": "direto",
-    "{$est_cidade}": "porto",
-    "{$est_fase}": "encontrou"
-  });
+  assert.equal(calls.some((call) => call.url.includes("/fields?")), false);
 });
 
 test("mantém os modos de email e sessão separados e só mostra a partilha no fim", () => {

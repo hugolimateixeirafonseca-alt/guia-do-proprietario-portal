@@ -270,6 +270,13 @@ function senderContactId(payload: unknown) {
 
 type SenderFieldValue = string | number | boolean;
 
+const KIT_SENDER_FIELD_TITLES = new Set([
+  "est_origem",
+  "est_cidade",
+  "est_fase",
+  "est_proprietario"
+]);
+
 function senderData(payload: unknown) {
   if (!payload || typeof payload !== "object") return {} as Record<string, unknown>;
   const record = payload as Record<string, unknown>;
@@ -296,24 +303,35 @@ function senderFieldRows(payload: unknown): Array<Record<string, unknown>> {
 }
 
 async function senderExistingFields(env: KitEnv, subscriberPayload: unknown) {
+  const columns = senderData(subscriberPayload).columns;
+  if (!Array.isArray(columns)) return {} as Record<string, SenderFieldValue>;
+  const existingFields: Record<string, SenderFieldValue> = {};
+  const fallbackColumns: Array<Record<string, unknown>> = [];
+  for (const column of columns) {
+    if (!column || typeof column !== "object") continue;
+    const record = column as Record<string, unknown>;
+    const value = record.value;
+    if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") continue;
+    if (typeof value === "string" && !value.trim()) continue;
+    const title = cleanText(record.title, 128);
+    if (KIT_SENDER_FIELD_TITLES.has(title)) {
+      existingFields[`{$${title}}`] = value;
+      continue;
+    }
+    fallbackColumns.push(record);
+  }
+  if (!fallbackColumns.length) return existingFields;
+
   const response = await senderRequest(env, "/fields?limit=100", { method: "GET" });
   if (!response.ok) throw new ProviderError(`sender_fields_${response.status}`);
   const namesById = new Map(senderFieldRows(await response.json()).map((field) => [
     cleanText(field.id, 80),
     cleanText(field.field_name, 128)
   ]));
-  const columns = senderData(subscriberPayload).columns;
-  if (!Array.isArray(columns)) return {} as Record<string, SenderFieldValue>;
-  const existingFields: Record<string, SenderFieldValue> = {};
-  for (const column of columns) {
-    if (!column || typeof column !== "object") continue;
-    const record = column as Record<string, unknown>;
+  for (const record of fallbackColumns) {
     const fieldName = namesById.get(cleanText(record.id, 80)) || "";
-    const value = record.value;
     if (!fieldName.startsWith("{$") || !fieldName.endsWith("}")) continue;
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      existingFields[fieldName] = value;
-    }
+    existingFields[fieldName] = record.value as SenderFieldValue;
   }
   return existingFields;
 }
