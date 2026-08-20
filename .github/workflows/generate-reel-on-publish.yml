@@ -13,7 +13,9 @@ concurrency:
 
 jobs:
   detect:
-    if: ${{ vars.REELS_AUTO_PUBLISH_ENABLED == 'true' }}
+    # Automação ativa por defeito. Só fica desligada quando a variável é
+    # explicitamente definida como "false".
+    if: ${{ vars.REELS_AUTO_PUBLISH_ENABLED != 'false' }}
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.check.outputs.sha }}
