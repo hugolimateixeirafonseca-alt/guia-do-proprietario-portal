@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "guia-do-proprietario-portal",
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2026-08-20",
+  "d1_databases": [
+    {
+      "binding": "KIT_ESTUDANTE_DB",
+      "database_name": "guia-proprietario-kit-estudante",
+      "database_id": "4a664d7b-760b-443f-8c8a-a40467474bdf"
+    }
+  ]
+}

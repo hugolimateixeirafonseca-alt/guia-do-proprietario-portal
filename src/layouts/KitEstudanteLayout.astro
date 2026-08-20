@@ -1,0 +1,57 @@
+---
+import "../styles/global.css";
+import { site } from "../config";
+import Marca from "../components/Marca.astro";
+import CookieConsent from "../components/CookieConsent.astro";
+
+interface Props {
+  titulo: string;
+  descricao: string;
+  imagemOg: string;
+  robots?: string;
+}
+
+const { titulo, descricao, imagemOg, robots = "index,follow" } = Astro.props;
+const canonical = new URL(Astro.url.pathname, site.dominio).toString();
+const imagemOgAbsoluta = new URL(imagemOg, site.dominio).toString();
+---
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={descricao} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imagemOgAbsoluta} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>{titulo}</title>
+  </head>
+  <body class="kit-body">
+    <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
+    <header class="kit-header">
+      <div class="kit-header-inner">
+        <a class="brand" href="/" aria-label="Guia do Proprietário, página inicial">
+          <Marca /><span>Guia do Proprietário</span>
+        </a>
+        <span>Recurso gratuito</span>
+      </div>
+    </header>
+    <main id="conteudo"><slot /></main>
+    <CookieConsent />
+  </body>
+</html>
+
+<style is:global>
+  .kit-body { --kit-blue:#315f78; --kit-green:#24594f; --kit-sand:#d6a955; --kit-cream:#f6efe0; background:#fffefa; }
+  .kit-header { position:sticky; top:0; z-index:30; border-bottom:1px solid #dce4e0; background:rgba(255,254,250,.94); backdrop-filter:blur(12px); }
+  .kit-header-inner { width:min(1160px, calc(100% - 40px)); min-height:72px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+  .kit-header-inner > span { color:#5f7075; font-size:.85rem; font-weight:700; }
+  @media (max-width:600px) { .kit-header-inner { width:calc(100% - 28px); min-height:64px; } .kit-header-inner > span { display:none; } }
+</style>
+

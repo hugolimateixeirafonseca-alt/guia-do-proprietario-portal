@@ -38,4 +38,5 @@ export function selectTitleLayout(title:string):{
 };
 export function createSocialCardLayout(input:{
   title:string;source:string;pillar?:string;image:ArrayBuffer|Uint8Array|string;
+  variant?:'news'|'social';badge?:string;
 }):{tree:unknown;metrics:SocialCardMetrics};

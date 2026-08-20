@@ -1,0 +1,134 @@
+import {
+  ALLOWED_SOURCES,
+  CONSENT_VERSION,
+  ProviderError,
+  PublicError,
+  addKitGroup,
+  checkRateLimit,
+  cleanText,
+  cleanupExpiredSessions,
+  createOrUpdateKitSubscriber,
+  createSession,
+  isValidEmail,
+  json,
+  logEvent,
+  normalizeEmail,
+  readSmallJson,
+  requestId,
+  requireConfiguration,
+  safeErrorResponse,
+  sessionCookie,
+  upsertLead,
+  type RequestContext
+} from "../../lib/kit-estudante";
+
+export const onRequestPost = async ({ request, env }: RequestContext) => {
+  const reqId = requestId(request);
+  let db: ReturnType<typeof requireConfiguration>["db"] | undefined;
+  let source = "direto";
+  let ipHash = "";
+  let leadId: number | null = null;
+  let eventRef = reqId;
+
+  try {
+    const config = requireConfiguration(env);
+    db = config.db;
+    const body = await readSmallJson(request);
+    eventRef = cleanText(body.eventId, 80) || reqId;
+
+    if (cleanText(body.company, 120)) return json({ ok: true }, 200);
+
+    const email = normalizeEmail(body.email);
+    source = ALLOWED_SOURCES.has(cleanText(body.origem, 24)) ? cleanText(body.origem, 24) : "direto";
+    const consentVersion = cleanText(body.consentVersion, 64);
+    if (!isValidEmail(email)) throw new PublicError(400, "invalid_email");
+    if (body.consent !== true || consentVersion !== CONSENT_VERSION) {
+      throw new PublicError(400, "consent_required");
+    }
+
+    ipHash = await checkRateLimit(request, db, config.sessionSecret, 12);
+    await logEvent(db, {
+      source,
+      event: "landing_subscription_received",
+      status: "received",
+      consentVersion,
+      requestId: eventRef,
+      ipHash
+    });
+
+    const senderResult = await createOrUpdateKitSubscriber(
+      env,
+      email,
+      { "{$est_origem}": source },
+      true
+    );
+
+    if (!senderResult.created && !senderResult.inGroup) {
+      await addKitGroup(env, email, true);
+    }
+
+    leadId = await upsertLead(
+      db,
+      email,
+      config.sessionSecret,
+      source,
+      consentVersion,
+      senderResult.contactId
+    );
+
+    await logEvent(db, {
+      leadId,
+      source,
+      event: senderResult.created ? "sender_contact_created" : "sender_contact_updated",
+      status: "success",
+      consentVersion,
+      requestId: eventRef,
+      ipHash
+    });
+    await logEvent(db, {
+      leadId,
+      source,
+      event: "sender_group_assigned",
+      status: "success",
+      consentVersion,
+      requestId: eventRef,
+      ipHash
+    });
+
+    const session = await createSession(db, leadId);
+    await logEvent(db, {
+      leadId,
+      source,
+      event: "token_created",
+      status: "success",
+      consentVersion,
+      sessionHash: session.tokenHash,
+      requestId: eventRef,
+      ipHash
+    });
+
+    await cleanupExpiredSessions(db);
+    return json({ ok: true, redirect: "/kit-estudante/obrigado/" }, 200, {
+      "Set-Cookie": sessionCookie(session.token)
+    });
+  } catch (error) {
+    if (db) {
+      const errorCode = error instanceof PublicError || error instanceof ProviderError ? error.message : "unknown";
+      try {
+        await logEvent(db, {
+          leadId,
+          source,
+          event: error instanceof PublicError ? "invalid_payload" : "sender_error",
+          status: "error",
+          error: errorCode,
+          consentVersion: CONSENT_VERSION,
+          requestId: eventRef,
+          ipHash
+        });
+      } catch {
+        // A resposta ao utilizador não depende do registo de diagnóstico.
+      }
+    }
+    return safeErrorResponse(error);
+  }
+};

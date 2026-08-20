@@ -9,7 +9,8 @@ export default defineConfig({
   integrations: [mdx(), sitemap({
     filter: (page) => ![
       "https://guiadoproprietario.pt/quanto-me-sobra-se-vender/",
-      "https://guiadoproprietario.pt/servicos-limpeza/"
+      "https://guiadoproprietario.pt/servicos-limpeza/",
+      "https://guiadoproprietario.pt/kit-estudante/obrigado/"
     ].includes(page)
   })],
   markdown: { shikiConfig: { theme: "github-light" } }
