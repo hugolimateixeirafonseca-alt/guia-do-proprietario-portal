@@ -148,13 +148,21 @@ jobs:
           NODE
 
       - name: Emitir candidato a Reel após deploy concluído
-        if: ${{ github.event_name == 'repository_dispatch' && vars.REELS_AUTO_PUBLISH_ENABLED == 'true' }}
+        if: ${{ github.event_name == 'repository_dispatch' && vars.REELS_AUTO_PUBLISH_ENABLED != 'false' }}
         shell: bash
         run: |
           set -euo pipefail
-          gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
-            -f event_type='reel_publish_candidate' \
-            -f "client_payload[sha]=$TARGET_SHA"
-          echo "Candidato a Reel enviado após confirmação do deploy: $TARGET_SHA."
+          for attempt in 1 2 3; do
+            if gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
+              -f event_type='reel_publish_candidate' \
+              -f "client_payload[sha]=$TARGET_SHA"; then
+              echo "Candidato a Reel enviado após confirmação do deploy: $TARGET_SHA (tentativa $attempt)."
+              exit 0
+            fi
+            echo "::warning::Falhou o dispatch do Reel na tentativa $attempt."
+            sleep $((attempt * 5))
+          done
+          echo "::error::Não foi possível emitir o candidato a Reel após 3 tentativas."
+          exit 1
 
 # Manual trigger marker: article cover HQ publish 2026-08-18T15:25+01:00
