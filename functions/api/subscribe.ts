@@ -5,7 +5,8 @@ interface Env {
   SENDER_GROUP_MARKETING?: string;
   SENDER_GROUP_GUIA_VENDER_CASA?: string;
   SENDER_GROUP_GUIA_PARCEIROS?: string;
-  SENDER_GROUP_LIMPEZA?: string;
+  CLEANING_DASHBOARD_API_URL?: string;
+  CLEANING_DASHBOARD_API_TOKEN?: string;
 }
 
 interface SubscribeBody {
@@ -41,8 +42,7 @@ const GEO_API = "https://json.geoapi.pt/codigo_postal";
 const DEFAULT_GROUPS = {
   newsletter: "egK8WG",
   guiaVenderCasa: "dJAl59",
-  guiaParceiros: "aKBm4l",
-  limpeza: "bWv1LJ"
+  guiaParceiros: "aKBm4l"
 } as const;
 
 const CLEANING_LABELS = {
@@ -95,9 +95,9 @@ const normalizePostalCode = (value: unknown) => {
 };
 
 type PostalLookup =
-  | { status: "found"; locality: string }
-  | { status: "not_found"; locality: "" }
-  | { status: "unavailable"; locality: "Por confirmar" };
+  | { status: "found"; locality: string; municipality: string }
+  | { status: "not_found"; locality: ""; municipality: "" }
+  | { status: "unavailable"; locality: "Por confirmar"; municipality: "" };
 
 async function lookupPostalCode(postalCode: string): Promise<PostalLookup> {
   try {
@@ -105,16 +105,63 @@ async function lookupPostalCode(postalCode: string): Promise<PostalLookup> {
       headers: { Accept: "application/json" },
       signal: AbortSignal.timeout(4000)
     });
-    if (response.status === 404) return { status: "not_found", locality: "" };
-    if (!response.ok) return { status: "unavailable", locality: "Por confirmar" };
+    if (response.status === 404) return { status: "not_found", locality: "", municipality: "" };
+    if (!response.ok) return { status: "unavailable", locality: "Por confirmar", municipality: "" };
 
     const data = await response.json() as { Localidade?: unknown; Concelho?: unknown };
     const locality = cleanText(data.Localidade || data.Concelho, 120);
-    return locality
-      ? { status: "found", locality }
-      : { status: "unavailable", locality: "Por confirmar" };
+    const municipality = cleanText(data.Concelho, 120);
+    return locality && municipality
+      ? { status: "found", locality, municipality }
+      : { status: "unavailable", locality: "Por confirmar", municipality: "" };
   } catch {
-    return { status: "unavailable", locality: "Por confirmar" };
+    return { status: "unavailable", locality: "Por confirmar", municipality: "" };
+  }
+}
+
+async function sendCleaningLead(
+  env: Env,
+  body: SubscribeBody,
+  postalCode: string,
+  municipality: string,
+  consentText: { readonly c1: string; readonly c2: string }
+) {
+  if (!env.CLEANING_DASHBOARD_API_TOKEN) return { ok: false, status: 503, code: "not_configured" };
+  const endpoint = env.CLEANING_DASHBOARD_API_URL || "https://guia-do-proprietario-parceiros.pages.dev/api/leads";
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.CLEANING_DASHBOARD_API_TOKEN}`,
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        event_id: cleanText(body.eventId, 128),
+        service_type: cleanText(body.serviceType, 32),
+        space_type: cleanText(body.spaceType, 32),
+        space_size: cleanText(body.spaceSize, 32),
+        postal_code: postalCode,
+        municipality,
+        service_frequency: cleanText(body.serviceFrequency, 32),
+        one_time_timing: cleanText(body.oneTimeTiming, 32),
+        preferred_date: cleanText(body.preferredDate, 10),
+        preferred_weekday: cleanText(body.preferredWeekday, 32),
+        preferred_time_period: cleanText(body.preferredTimePeriod, 32),
+        name: cleanText(body.name, 80),
+        phone: cleanText(body.phone, 32),
+        email: cleanText(body.email, 254).toLowerCase(),
+        additional_notes: cleanText(body.additionalNotes, 500),
+        consent_partner_sharing: true,
+        consent_partner_sharing_text: consentText.c1,
+        consent_marketing: body.consent2 === true,
+        consent_marketing_text: body.consent2 === true ? consentText.c2 : "",
+        origem: "landing-servicos-limpeza"
+      })
+    });
+    return { ok: response.ok, status: response.status, code: response.ok ? "" : `dashboard_${response.status}` };
+  } catch {
+    return { ok: false, status: 502, code: "dashboard_unavailable" };
   }
 }
 
@@ -303,22 +350,33 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     if (["weekly", "fortnightly", "monthly"].includes(frequencyCode) && !preferredWeekday) {
       return json({ error: "invalid_preferred_weekday" }, 400);
     }
-  }
-
-  if (!env.SENDER_API_TOKEN) {
-    return json({ error: "not_configured" }, 503);
+    if (cleanText(body.eventId, 128).length < 8) return json({ error: "invalid_event_id" }, 400);
   }
 
   const groups = {
     newsletter: env.SENDER_GROUP_MARKETING || DEFAULT_GROUPS.newsletter,
     guiaVenderCasa: env.SENDER_GROUP_GUIA_VENDER_CASA || DEFAULT_GROUPS.guiaVenderCasa,
-    guiaParceiros: env.SENDER_GROUP_GUIA_PARCEIROS || DEFAULT_GROUPS.guiaParceiros,
-    limpeza: env.SENDER_GROUP_LIMPEZA || DEFAULT_GROUPS.limpeza
+    guiaParceiros: env.SENDER_GROUP_GUIA_PARCEIROS || DEFAULT_GROUPS.guiaParceiros
   };
 
   const postalLookup = isQualifiedLead ? await lookupPostalCode(postalCode) : null;
   if (postalLookup?.status === "not_found") {
     return json({ error: "postal_not_found" }, 400);
+  }
+
+  if (isCleaningLead) {
+    if (postalLookup?.status !== "found") return json({ error: "location_unavailable" }, 503);
+    const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup.municipality, consentText);
+    if (!dashboardResult.ok) {
+      return json({ error: "dashboard_error", code: dashboardResult.code }, dashboardResult.status === 503 ? 503 : 502);
+    }
+    if (!marketingConsent) {
+      return json({ ok: true, locality: postalLookup.locality, dashboardStored: true }, 200);
+    }
+  }
+
+  if (!env.SENDER_API_TOKEN) {
+    return json({ error: "not_configured" }, 503);
   }
 
   const consentDate = new Date().toISOString();
@@ -327,26 +385,14 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     "{$CONSENT_IP}": cleanText(request.headers.get("CF-Connecting-IP"), 64),
     "{$CONSENT_VERSAO}": consentVersion,
     ...(!isDirectValueLead && !isCleaningLead || marketingConsent ? { "{$CONSENT_MARKETING}": marketingConsent ? "true" : "false" } : {}),
-    "{$CONSENT_PARCEIROS}": partnerConsent ? "true" : "false",
+    ...(!isCleaningLead ? { "{$CONSENT_PARCEIROS}": partnerConsent ? "true" : "false" } : {}),
     "{$ORIGEM}": cleanText(body.pageUrl, 2048),
     "{$LEAD_SOURCE}": source,
     "{$EVENT_ID}": cleanText(body.eventId, 128),
-    ...(isQualifiedLead ? {
+    ...(isQualifiedLead && !isCleaningLead ? {
       "{$CODIGO_POSTAL}": postalCode,
       "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar",
-      ...(!isCleaningLead ? { "{$PRAZO_VENDA}": saleTimeline } : {}),
-      ...(isCleaningLead ? {
-        "{$LIMPEZA_SERVICO}": serviceType,
-        "{$LIMPEZA_ESPACO}": spaceType,
-        "{$LIMPEZA_DIMENSAO}": spaceSize,
-        "{$LIMPEZA_FREQUENCIA}": serviceFrequency,
-        "{$LIMPEZA_QUANDO}": oneTimeTiming,
-        "{$LIMPEZA_DATA}": preferredDate,
-        "{$LIMPEZA_DIA}": preferredWeekday,
-        "{$LIMPEZA_PERIODO}": preferredTimePeriod,
-        "{$LIMPEZA_NOTAS}": additionalNotes,
-        "{$PEDIDO_RESUMO}": [serviceType, spaceType, spaceSize, serviceFrequency, oneTimeTiming || preferredWeekday, preferredTimePeriod].filter(Boolean).join(" | ")
-      } : {})
+      "{$PRAZO_VENDA}": saleTimeline
     } : {})
   };
 
@@ -354,7 +400,6 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     const subscriberGroups = [
       ...(!isDirectValueLead && !isCleaningLead || marketingConsent ? [groups.newsletter] : []),
       ...(partnerConsent && !isCleaningLead ? [groups.guiaParceiros] : []),
-      ...(partnerConsent && isCleaningLead ? [groups.limpeza] : []),
       ...(source === "ebook-vender-casa" ? [groups.guiaVenderCasa] : [])
     ];
     const subscriberResult = await createOrUpdateSubscriber(
@@ -363,14 +408,15 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       fields,
       subscriberGroups,
       source === "ebook-vender-casa",
-      phone,
+      isCleaningLead ? "" : phone,
       firstname
     );
 
     if (subscriberResult.created) {
       return json({
         ok: true,
-        ...(isQualifiedLead ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {})
+        ...(isQualifiedLead ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {}),
+        ...(isCleaningLead ? { dashboardStored: true } : {})
       }, 200);
     }
 
@@ -382,17 +428,14 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       await addSubscriberToGroup(env, groups.guiaParceiros, email, false);
     }
 
-    if (partnerConsent && isCleaningLead) {
-      await addSubscriberToGroup(env, groups.limpeza, email, false);
-    }
-
     if (source === "ebook-vender-casa") {
       await addSubscriberToGroup(env, groups.guiaVenderCasa, email, true);
     }
 
     return json({
       ok: true,
-      ...(isQualifiedLead ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {})
+      ...(isQualifiedLead ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {}),
+      ...(isCleaningLead ? { dashboardStored: true } : {})
     }, 200);
   } catch (error) {
     const code = error instanceof SenderError ? error.code : "unknown";
