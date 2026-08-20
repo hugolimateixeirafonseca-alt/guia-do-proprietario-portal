@@ -7,6 +7,7 @@ on:
     paths:
       - 'functions/**'
       - 'public/social/**'
+      - 'src/pages/social-feed.json.ts'
       - '.github/workflows/deploy-pages-functions-direct.yml'
   workflow_dispatch:
 
