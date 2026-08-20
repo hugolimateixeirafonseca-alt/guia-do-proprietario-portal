@@ -10,6 +10,10 @@ export const GET: APIRoute = async ({ site }) => {
 
   const items = artigos.map((artigo) => {
     const route = `/${artigo.data.pilar}/${artigo.id}/`;
+    const imagemCapa = artigo.data.imagem_capa?.replace(/\.avif(?:\?.*)?$/i, ".webp");
+    const imagem = imagemCapa
+      ? new URL(imagemCapa, base).toString()
+      : new URL(`/og${route}index.png`, base).toString();
     return {
       titulo: artigo.data.titulo,
       url: new URL(route, base).toString(),
@@ -19,7 +23,7 @@ export const GET: APIRoute = async ({ site }) => {
       publicado: artigo.data.publicado_em.toISOString(),
       revisto: artigo.data.revisto.toISOString(),
       aviso: artigo.data.aviso,
-      imagem: artigo.data.imagem_capa || new URL(`/og${route}index.png`, base).toString(),
+      imagem,
     };
   });
 
