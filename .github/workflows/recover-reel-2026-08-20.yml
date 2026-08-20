@@ -1,0 +1,18 @@
+name: Recover Reel 2026-08-20
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/recover-reel-2026-08-20.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    uses: ./.github/workflows/generate-reel-ai.yml
+    with:
+      slug: saber-quem-e-dono-de-um-imovel
+      publication_sha: aa0dcad6155a13859862645f30be4f8a124dfc29
+    secrets: inherit
