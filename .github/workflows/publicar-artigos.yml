@@ -21,6 +21,7 @@ jobs:
       OPENAI_TEXT_MODEL: gpt-4.1-mini
       OPENAI_IMAGE_MODEL: gpt-image-2
       GH_TOKEN: ${{ github.token }}
+      OPS_DASHBOARD_TOKEN: ${{ secrets.OPS_DASHBOARD_TOKEN }}
 
     steps:
       - name: Obter repositório
@@ -53,8 +54,6 @@ jobs:
           mkdir -p "$DESTINATION"
           FILES=()
 
-          # A fila é uma prioridade opcional, não a fonte de verdade.
-          # Se existir, usar o primeiro artigo da fila que ainda esteja em por-publicar.
           if [[ -f "$QUEUE" ]]; then
             while IFS= read -r NAME || [[ -n "$NAME" ]]; do
               NAME="${NAME%$'\r'}"
@@ -79,8 +78,6 @@ jobs:
             echo "::warning::O ficheiro de prioridade $QUEUE não existe; será usado o fallback automático."
           fi
 
-          # Se a fila não tiver nenhum artigo atualmente disponível, escolher
-          # automaticamente o artigo mais antigo que exista em por-publicar.
           if [[ "${#FILES[@]}" -eq 0 ]]; then
             OLDEST_NAME=""
             OLDEST_TS=""
@@ -136,8 +133,6 @@ jobs:
               git add -- "imagens/artigos/$SLUG.png"
             fi
 
-            # Quando a prioridade veio da fila, retirar automaticamente o item
-            # que acabou de ser publicado. A fila passa a conter só prioridades futuras.
             if [[ "$SELECTION_SOURCE" == "queue" && -f "$QUEUE" ]]; then
               TMP_QUEUE="$(mktemp)"
               awk -v target="$NAME" '
@@ -176,6 +171,30 @@ jobs:
             echo "Origem da seleção: **$SELECTION_SOURCE**"
             echo "Deploy do portal: **solicitado**"
           } >> "$GITHUB_STEP_SUMMARY"
+
+          # Um push feito pelo GITHUB_TOKEN não dispara de forma fiável outro
+          # workflow baseado em push. Avisar o dashboard explicitamente aqui.
+          if [[ -n "${OPS_DASHBOARD_TOKEN:-}" ]]; then
+            for attempt in 1 2 3; do
+              if curl --fail-with-body --silent --show-error \
+                --request POST \
+                --header "Accept: application/vnd.github+json" \
+                --header "Authorization: Bearer $OPS_DASHBOARD_TOKEN" \
+                --header "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/hugolimateixeirafonseca-alt/guia-do-proprietario-ops/dispatches \
+                --data '{"event_type":"portal_content_changed"}'; then
+                echo "Dashboard operacional avisado (tentativa $attempt)."
+                break
+              fi
+              if [[ "$attempt" == "3" ]]; then
+                echo "::warning::Não foi possível avisar imediatamente o dashboard após 3 tentativas; ficará disponível a sincronização periódica."
+              else
+                sleep $((attempt * 5))
+              fi
+            done
+          else
+            echo "::warning::OPS_DASHBOARD_TOKEN não está configurado; o dashboard usará a sincronização periódica."
+          fi
 
           if ! gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
             -f event_type='deploy_portal' \
