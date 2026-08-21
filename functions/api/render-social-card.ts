@@ -57,7 +57,8 @@ async function renderRequest({request,env}:RequestContext){
     const image=form.get('image');
     if(!(image instanceof File)||!image.size) return jsonError('image_required',400);
     if(image.size>MAX_IMAGE_BYTES) return jsonError('image_too_large',413);
-    if(!['image/png','image/jpeg','image/webp'].includes(image.type)) return jsonError('unsupported_image_type',415);
+    const allowedTypes=variant==='social'?['image/png','image/jpeg']:['image/png','image/jpeg','image/webp'];
+    if(!allowedTypes.includes(image.type)) return jsonError(variant==='social'?'unsupported_social_image_type':'unsupported_image_type',415);
 
     const imageBytes=await image.arrayBuffer();
     if(!isSupportedRasterImage(imageBytes,image.type)) return jsonError('invalid_image_data',415);
