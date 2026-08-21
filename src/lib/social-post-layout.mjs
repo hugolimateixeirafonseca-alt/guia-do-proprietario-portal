@@ -196,6 +196,10 @@ export function createSocialPostLayout({title,badge='GUIA',image,pillar='casa'})
       width:SOCIAL_POST_CARD.image.width,height:SOCIAL_POST_CARD.image.height,
       objectFit:'cover',objectPosition:'center center'
     },null,{src:image,width:SOCIAL_POST_CARD.image.width,height:SOCIAL_POST_CARD.image.height}),
+    element('div',{
+      display:'flex',position:'absolute',left:0,top:0,width:700,height:SOCIAL_POST_CARD.height,
+      backgroundColor:SOCIAL_POST_THEME.background
+    },null),
     createCurveLayer(),
     createWatermark(exactPillar),
     element('div',{
