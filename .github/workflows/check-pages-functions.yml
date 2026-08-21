@@ -7,8 +7,10 @@ on:
     paths:
       - 'functions/**'
       - 'src/lib/social-card-*.mjs'
+      - 'src/lib/social-post-*.mjs'
       - 'automation/social-card-renderer/**'
       - 'tests/social-card-renderer.test.mjs'
+      - 'tests/social-post-layout.test.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/check-pages-functions.yml'
@@ -16,8 +18,10 @@ on:
     paths:
       - 'functions/**'
       - 'src/lib/social-card-*.mjs'
+      - 'src/lib/social-post-*.mjs'
       - 'automation/social-card-renderer/**'
       - 'tests/social-card-renderer.test.mjs'
+      - 'tests/social-post-layout.test.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/check-pages-functions.yml'
@@ -41,5 +45,12 @@ jobs:
         run: npm ci
       - name: Test social card renderer
         run: npm run test:renderer
+      - name: Render social preview
+        run: node scripts/tmp-render-social-preview.mjs
+      - name: Upload social preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-preview
+          path: tmp-preview/social-preview.png
       - name: Build Pages Functions
         run: npm run build:functions
