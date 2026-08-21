@@ -65,7 +65,7 @@ async function renderRequest({request,env}:RequestContext){
     await initializeRenderer();
 
     const layout=variant==='social'
-      ? createSocialPostLayout({title,badge,image:imageBytes})
+      ? createSocialPostLayout({title,badge,pillar,image:imageBytes})
       : createSocialCardLayout({title,source,pillar,image:imageBytes,variant:'news',badge:'NOTÍCIAS'});
 
     const svg=await satori(layout.tree,{
@@ -77,14 +77,14 @@ async function renderRequest({request,env}:RequestContext){
         {name:'Lato',data:sansBoldFont,weight:700,style:'normal'}
       ]
     });
-    const renderer=new Resvg(svg,{fitTo:{mode:'original'},background:'#F4EFE5',imageRendering:0,textRendering:2});
+    const renderer=new Resvg(svg,{fitTo:{mode:'original'},background:'#F6F0E6',imageRendering:0,textRendering:2});
     const rendered=renderer.render();
     const png=rendered.asPng();
     const body=new ArrayBuffer(png.byteLength);
     new Uint8Array(body).set(png);
     const contentLength=png.byteLength;
     rendered.free(); renderer.free();
-    return new Response(body,{status:200,headers:{'Content-Type':'image/png','Content-Length':String(contentLength),'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+    return new Response(body,{status:200,headers:{'Content-Type':'image/png','Content-Length':String(contentLength),'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Social-Design':variant==='social'?'premium-editorial-v2':'news'}});
   }catch(error){
     const code=error instanceof Error?error.message:'render_failed';
     const expected=/^(title|source)_(required|too_long)$|^(badge|variant)_(invalid|too_long)$|^title is too long/u.test(code);
