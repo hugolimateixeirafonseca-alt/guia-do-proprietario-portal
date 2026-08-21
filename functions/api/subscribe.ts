@@ -97,26 +97,28 @@ const normalizePostalCode = (value: unknown) => {
 type PostalLookup =
   | { status: "found"; locality: string; municipality: string }
   | { status: "not_found"; locality: ""; municipality: "" }
-  | { status: "unavailable"; locality: "Por confirmar"; municipality: "" };
+  | { status: "unavailable"; locality: "Por confirmar"; municipality: "Por confirmar" };
 
 async function lookupPostalCode(postalCode: string): Promise<PostalLookup> {
-  try {
-    const response = await fetch(`${GEO_API}/${encodeURIComponent(postalCode)}`, {
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(4000)
-    });
-    if (response.status === 404) return { status: "not_found", locality: "", municipality: "" };
-    if (!response.ok) return { status: "unavailable", locality: "Por confirmar", municipality: "" };
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(`${GEO_API}/${encodeURIComponent(postalCode)}`, {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(6500)
+      });
+      if (response.status === 404) return { status: "not_found", locality: "", municipality: "" };
+      if (!response.ok) continue;
 
-    const data = await response.json() as { Localidade?: unknown; Concelho?: unknown };
-    const locality = cleanText(data.Localidade || data.Concelho, 120);
-    const municipality = cleanText(data.Concelho, 120);
-    return locality && municipality
-      ? { status: "found", locality, municipality }
-      : { status: "unavailable", locality: "Por confirmar", municipality: "" };
-  } catch {
-    return { status: "unavailable", locality: "Por confirmar", municipality: "" };
+      const data = await response.json() as { Localidade?: unknown; Concelho?: unknown };
+      const locality = cleanText(data.Localidade || data.Concelho, 120);
+      const municipality = cleanText(data.Concelho, 120);
+      if (locality && municipality) return { status: "found", locality, municipality };
+      return { status: "unavailable", locality: "Por confirmar", municipality: "Por confirmar" };
+    } catch {
+      // Uma falha transitória não deve fazer perder um pedido válido.
+    }
   }
+  return { status: "unavailable", locality: "Por confirmar", municipality: "Por confirmar" };
 }
 
 async function sendCleaningLead(
@@ -365,13 +367,17 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   }
 
   if (isCleaningLead) {
-    if (postalLookup?.status !== "found") return json({ error: "location_unavailable" }, 503);
-    const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup.municipality, consentText);
+    const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup?.municipality || "Por confirmar", consentText);
     if (!dashboardResult.ok) {
       return json({ error: "dashboard_error", code: dashboardResult.code }, dashboardResult.status === 503 ? 503 : 502);
     }
     if (!marketingConsent) {
-      return json({ ok: true, locality: postalLookup.locality, dashboardStored: true }, 200);
+      return json({
+        ok: true,
+        locality: postalLookup?.locality || "Por confirmar",
+        dashboardStored: true,
+        ...(postalLookup?.status === "unavailable" ? { locationPending: true } : {})
+      }, 200);
     }
   }
 
