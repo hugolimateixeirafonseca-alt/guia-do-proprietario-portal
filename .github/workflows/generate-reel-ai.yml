@@ -143,27 +143,35 @@ jobs:
           GENERATION_ID="$(python scripts/reels/publish_review.py --new-generation-id)"
           echo "GENERATION_ID=$GENERATION_ID" >> "$GITHUB_ENV"
           echo "generation_id=$GENERATION_ID" >> "$GITHUB_OUTPUT"
+          echo "REEL_REVIEW_SAVED=false" >> "$GITHUB_ENV"
           echo "Geração: $GENERATION_ID"
 
       - name: Gerar e validar JSON
         if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
-        run: >-
-          python scripts/reels/generate_json.py
-          --slug "$REEL_SLUG"
-          --output "out/reels-json/$REEL_SLUG.json"
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "REEL_FAILURE_STAGE=generate_json_failed" >> "$GITHUB_ENV"
+          python scripts/reels/generate_json.py \
+            --slug "$REEL_SLUG" \
+            --output "out/reels-json/$REEL_SLUG.json"
 
       - name: Renderizar Reel
         if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
-        run: >-
-          python scripts/reels/render.py
-          --input "out/reels-json/$REEL_SLUG.json"
-          --output "out/reels-ai/$REEL_SLUG.mp4"
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "REEL_FAILURE_STAGE=render_failed" >> "$GITHUB_ENV"
+          python scripts/reels/render.py \
+            --input "out/reels-json/$REEL_SLUG.json" \
+            --output "out/reels-ai/$REEL_SLUG.mp4"
 
       - name: Confirmar metadados
         if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
+          echo "REEL_FAILURE_STAGE=video_validation_failed" >> "$GITHUB_ENV"
           FILE="out/reels-ai/$REEL_SLUG.mp4"
           ffprobe -v error \
             -show_entries stream=codec_name,codec_type,width,height,avg_frame_rate,pix_fmt,duration \
@@ -180,39 +188,59 @@ jobs:
 
       - name: Guardar em R2 e criar revisão pendente
         if: ${{ env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true' }}
-        run: >-
-          python scripts/reels/publish_review.py
-          --slug "$REEL_SLUG"
-          --generation-id "$GENERATION_ID"
-          --json "out/reels-json/$REEL_SLUG.json"
-          --video "out/reels-ai/$REEL_SLUG.mp4"
-          --contact "out/reels-ai/$REEL_SLUG-contact.jpg"
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "REEL_FAILURE_STAGE=review_publish_failed" >> "$GITHUB_ENV"
+          python scripts/reels/publish_review.py \
+            --slug "$REEL_SLUG" \
+            --generation-id "$GENERATION_ID" \
+            --json "out/reels-json/$REEL_SLUG.json" \
+            --video "out/reels-ai/$REEL_SLUG.mp4" \
+            --contact "out/reels-ai/$REEL_SLUG-contact.jpg"
+          echo "REEL_REVIEW_SAVED=true" >> "$GITHUB_ENV"
 
       - name: Concluir tentativa automática inicial
         if: ${{ env.PUBLICATION_SHA != '' && steps.claim.outputs.claimed == 'true' }}
-        run: >-
-          python scripts/reels/automatic_trigger.py complete
-          --slug "$REEL_SLUG"
-          --publication-sha "$PUBLICATION_SHA"
-          --generation-id "$GENERATION_ID"
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "REEL_FAILURE_STAGE=trigger_complete_failed" >> "$GITHUB_ENV"
+          for attempt in 1 2 3; do
+            if python scripts/reels/automatic_trigger.py complete \
+              --slug "$REEL_SLUG" \
+              --publication-sha "$PUBLICATION_SHA" \
+              --generation-id "$GENERATION_ID"; then
+              exit 0
+            fi
+            echo "::warning::Falhou a conclusão do trigger automático na tentativa $attempt."
+            sleep $((attempt * 3))
+          done
+          echo "::error::Não foi possível concluir o trigger automático após 3 tentativas."
+          exit 1
 
       - name: Registar geração falhada
-        if: ${{ failure() && env.GENERATION_ID != '' && (env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true') }}
-        continue-on-error: true
-        run: >-
-          python scripts/reels/publish_review.py
-          --record-failure
-          --slug "$REEL_SLUG"
-          --generation-id "$GENERATION_ID"
-          --error "workflow_failed"
-
-      - name: Marcar tentativa automática como falhada
-        if: ${{ failure() && env.PUBLICATION_SHA != '' && steps.claim.outputs.claimed == 'true' }}
+        if: ${{ failure() && env.GENERATION_ID != '' && env.REEL_REVIEW_SAVED != 'true' && (env.PUBLICATION_SHA == '' || steps.claim.outputs.claimed == 'true') }}
         continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
-          ARGS=(fail --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA" --error "workflow_failed")
+          ERROR_CODE="${REEL_FAILURE_STAGE:-workflow_failed}"
+          echo "A registar falha da geração: $ERROR_CODE"
+          python scripts/reels/publish_review.py \
+            --record-failure \
+            --slug "$REEL_SLUG" \
+            --generation-id "$GENERATION_ID" \
+            --error "$ERROR_CODE"
+
+      - name: Marcar tentativa automática como falhada
+        if: ${{ failure() && env.REEL_REVIEW_SAVED != 'true' && env.PUBLICATION_SHA != '' && steps.claim.outputs.claimed == 'true' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          ERROR_CODE="${REEL_FAILURE_STAGE:-workflow_failed}"
+          ARGS=(fail --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA" --error "$ERROR_CODE")
           if [[ -n "${GENERATION_ID:-}" ]]; then
             ARGS+=(--generation-id "$GENERATION_ID")
           fi
