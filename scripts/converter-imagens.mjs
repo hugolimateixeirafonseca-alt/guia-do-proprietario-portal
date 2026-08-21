@@ -84,4 +84,23 @@ for (const fonte of fontes) {
   convertidas += 1;
 }
 
-console.log(`Imagens encontradas: ${fontes.length}. Convertidas: ${convertidas}.`);
+// Algumas capas antigas já só existem em public/imagens/artigos como WebP.
+// Gera a variante JPEG social-safe também para esse legado, para o social-feed
+// nunca devolver um URL .social.jpg inexistente.
+const artigosPublicos = path.join(destino, "artigos");
+let sociaisBackfill = 0;
+try {
+  const entradas = await fs.readdir(artigosPublicos, { withFileTypes: true });
+  for (const entrada of entradas) {
+    if (!entrada.isFile() || !entrada.name.toLowerCase().endsWith(".webp")) continue;
+    const webp = path.join(artigosPublicos, entrada.name);
+    const socialJpeg = path.join(artigosPublicos, entrada.name.replace(/\.webp$/i, ".social.jpg"));
+    if (!(await precisaDeConversao(webp, [socialJpeg]))) continue;
+    await sharp(webp).rotate().jpeg({ quality: 90, mozjpeg: true }).toFile(socialJpeg);
+    sociaisBackfill += 1;
+  }
+} catch (error) {
+  if (error?.code !== "ENOENT") throw error;
+}
+
+console.log(`Imagens encontradas: ${fontes.length}. Convertidas: ${convertidas}. JPEG sociais legado: ${sociaisBackfill}.`);
