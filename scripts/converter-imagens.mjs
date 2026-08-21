@@ -57,8 +57,11 @@ for (const fonte of fontes) {
   const nome = path.basename(relativo, path.extname(relativo));
   const avif = path.join(pastaAlvo, `${nome}.avif`);
   const webp = path.join(pastaAlvo, `${nome}.webp`);
+  const imagemDeArtigo = relativo.split(path.sep)[0] === "artigos";
+  const socialJpeg = imagemDeArtigo ? path.join(pastaAlvo, `${nome}.social.jpg`) : null;
+  const alvos = socialJpeg ? [avif, webp, socialJpeg] : [avif, webp];
 
-  if (!(await precisaDeConversao(fonte, [avif, webp]))) continue;
+  if (!(await precisaDeConversao(fonte, alvos))) continue;
 
   await fs.mkdir(pastaAlvo, { recursive: true });
 
@@ -66,18 +69,17 @@ for (const fonte of fontes) {
     .rotate()
     .resize(1200, 675, { fit: "cover", position: "centre" });
 
-  const imagemDeArtigo = relativo.split(path.sep)[0] === "artigos";
   const qualidadeWebp = imagemDeArtigo ? 92 : 78;
-
-  const [avifBuffer, webpBuffer] = await Promise.all([
+  const trabalhos = [
     criarAvifAbaixoDoLimite(imagem, fonte),
     imagem.clone().webp({ quality: qualidadeWebp, effort: 5 }).toBuffer(),
-  ]);
+  ];
+  if (socialJpeg) trabalhos.push(imagem.clone().jpeg({ quality: 90, mozjpeg: true }).toBuffer());
 
-  await Promise.all([
-    fs.writeFile(avif, avifBuffer),
-    fs.writeFile(webp, webpBuffer),
-  ]);
+  const [avifBuffer, webpBuffer, socialJpegBuffer] = await Promise.all(trabalhos);
+  const escritas = [fs.writeFile(avif, avifBuffer), fs.writeFile(webp, webpBuffer)];
+  if (socialJpeg && socialJpegBuffer) escritas.push(fs.writeFile(socialJpeg, socialJpegBuffer));
+  await Promise.all(escritas);
 
   convertidas += 1;
 }
