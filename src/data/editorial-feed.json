@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-21T11:27:35.583Z",
+  "generatedAt": "2026-08-21T11:53:49.865Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
     "published": 78,
-    "newsOnline": 17
+    "newsOnline": 18
   },
   "articles": [
     {
@@ -1579,6 +1579,18 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-20-noticia-72",
+      "title": "Promotores saúdam reforma do arrendamento e pedem aprovação dos partidos",
+      "summary": "A Associação Portuguesa de Promotores e Investidores Imobiliários saudou a proposta do Governo para rever o regime do arrendamento urbano e apelou aos partidos para avaliarem os se",
+      "pillar": "arrendar",
+      "publishedAt": "2026-08-21",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-20-noticia-72/",
+      "source": {
+        "name": "Jornal Económico",
+        "url": "https://jornaleconomico.sapo.pt/noticias/promotores-saudam-reforma-do-arrendamento-e-pedem-aprovacao-dos-partidos"
+      }
+    },
     {
       "slug": "2026-08-14-noticia-51",
       "title": "Euribor desce a três e 12 meses, mas taxa mais usada volta a subir",
