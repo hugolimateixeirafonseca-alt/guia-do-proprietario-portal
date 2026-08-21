@@ -18,7 +18,7 @@ export async function renderSocialCardNode({root=process.cwd(),title,source,pill
   ]);
   const imageData=ArrayBuffer.isView(image)?image.buffer.slice(image.byteOffset,image.byteOffset+image.byteLength):image;
   const layout=variant==='social'
-    ? createSocialPostLayout({title,badge,image:imageData})
+    ? createSocialPostLayout({title,badge,pillar,image:imageData})
     : createSocialCardLayout({title,source,pillar,image:imageData,variant:'news'});
   const svg=await satori(layout.tree,{
     width:SOCIAL_CARD.width,
@@ -29,7 +29,7 @@ export async function renderSocialCardNode({root=process.cwd(),title,source,pill
       {name:'Lato',data:sansBold,weight:700,style:'normal'}
     ]
   });
-  const renderer=new Resvg(svg,{fitTo:{mode:'original'},background:'#F4EFE5',imageRendering:0,textRendering:2});
+  const renderer=new Resvg(svg,{fitTo:{mode:'original'},background:'#F6F0E6',imageRendering:0,textRendering:2});
   const rendered=renderer.render();
   return {png:rendered.asPng(),svg,metrics:layout.metrics};
 }
