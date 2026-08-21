@@ -397,6 +397,34 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
   assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", dashboardStored: true });
 });
 
+test("não perde a lead de limpeza quando a confirmação do concelho está temporariamente indisponível", async () => {
+  let geoAttempts = 0;
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) {
+      geoAttempts += 1;
+      throw new Error("serviço temporariamente indisponível");
+    }
+    if (String(url) === env.CLEANING_DASHBOARD_API_URL) {
+      return Response.json({ ok: true, lead_id: "lead-pendente" }, { status: 201 });
+    }
+    throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
+  };
+
+  const response = await onRequestPost({ request: requestFor(cleaningBody), env });
+  assert.equal(response.status, 200);
+  assert.equal(geoAttempts, 2);
+  const dashboardBody = JSON.parse(calls.at(-1).init.body);
+  assert.equal(dashboardBody.postal_code, "1000-001");
+  assert.equal(dashboardBody.municipality, "Por confirmar");
+  assert.deepEqual(await response.json(), {
+    ok: true,
+    locality: "Por confirmar",
+    dashboardStored: true,
+    locationPending: true
+  });
+});
+
 test("adiciona o pedido de limpeza à newsletter apenas com autorização opcional", async () => {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
