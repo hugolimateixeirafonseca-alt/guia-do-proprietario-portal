@@ -45,12 +45,5 @@ jobs:
         run: npm ci
       - name: Test social card renderer
         run: npm run test:renderer
-      - name: Render social preview
-        run: node scripts/tmp-render-social-preview.mjs
-      - name: Upload social preview
-        uses: actions/upload-artifact@v4
-        with:
-          name: social-preview
-          path: tmp-preview/social-preview.png
       - name: Build Pages Functions
         run: npm run build:functions
