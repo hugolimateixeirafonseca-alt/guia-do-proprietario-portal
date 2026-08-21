@@ -1,0 +1,39 @@
+name: Check Social Images
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/converter-imagens.mjs'
+      - 'scripts/validate-social-jpegs.mjs'
+      - 'src/pages/social-feed.json.ts'
+      - '.github/workflows/check-social-images.yml'
+  pull_request:
+    paths:
+      - 'scripts/converter-imagens.mjs'
+      - 'scripts/validate-social-jpegs.mjs'
+      - 'src/pages/social-feed.json.ts'
+      - '.github/workflows/check-social-images.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-social-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate image variants
+        run: npm run images:convert
+      - name: Validate social JPEG coverage
+        run: node scripts/validate-social-jpegs.mjs
