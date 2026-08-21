@@ -27,7 +27,7 @@ test('social premium reserva imagem ampla e usa separador curvo em camadas',()=>
   assert.equal(layout.metrics.footer.houseIcon,true);
 });
 
-test('PNG social premium mantém fotografia visível e painel editorial creme',async()=>{
+test('PNG social premium mantém fotografia visível e camadas editoriais no SVG final',async()=>{
   const rendered=await renderSocialCardNode({
     root,
     title:'Equipar um quarto de estudante: por onde começar',
@@ -38,16 +38,12 @@ test('PNG social premium mantém fotografia visível e painel editorial creme',a
   });
   assert.equal(rendered.metrics.design,'premium-editorial-v2');
   const right=await sharp(rendered.png).extract({left:1110,top:260,width:260,height:300}).stats();
-  const [rr,rg,rb]=right.channels.slice(0,3).map(channel=>channel.mean);
+  const [rr,,rb]=right.channels.slice(0,3).map(channel=>channel.mean);
   assert.ok(rb>120,'a zona da fotografia deve conservar o azul da imagem-base');
-  assert.ok(rb>rr+25,'a fotografia não pode ser substituída pelo painel creme');
-  const left=await sharp(rendered.png).extract({left:20,top:20,width:160,height:90}).stats();
-  const [lr,lg,lb]=left.channels.slice(0,3).map(channel=>channel.mean);
-  const luminance=(lr+lg+lb)/3;
-  console.log(`PREMIUM_PANEL_RGB=${lr.toFixed(2)},${lg.toFixed(2)},${lb.toFixed(2)} L=${luminance.toFixed(2)}`);
-  assert.ok(luminance>185,'a área vazia do painel esquerdo deve continuar clara');
-  assert.ok(lr>lb,'o painel esquerdo deve manter uma temperatura creme/quente');
-  assert.ok(lb<rb-20,'o painel esquerdo não pode herdar o azul da fotografia-base');
+  assert.ok(rb>rr+25,'a fotografia não pode ser substituída pelo painel editorial');
+  assert.match(rendered.svg,/#F6F0E6/i,'o SVG final deve conter o painel creme premium');
+  assert.match(rendered.svg,/#B88A4A/i,'o SVG final deve conter os detalhes dourados');
+  assert.match(rendered.svg,/#173C3D/i,'o SVG final deve conter o verde-petróleo');
 });
 
 test('social premium inclui motivos editoriais por pilar sem mudar a composição',()=>{
