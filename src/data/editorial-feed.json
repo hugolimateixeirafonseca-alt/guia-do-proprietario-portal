@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-20T23:14:42.481Z",
+  "generatedAt": "2026-08-21T08:40:20.891Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 77,
+    "published": 78,
     "newsOnline": 17
   },
   "articles": [
@@ -1392,14 +1392,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "procurar-quarto-olx-grupos-facebook.mdx",
       "arrivedAt": "2026-08-19T19:24:07+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-21T07:01:45Z",
+      "url": "https://guiadoproprietario.pt/arrendar/procurar-quarto-olx-grupos-facebook/"
     },
     {
       "id": "EXTRA-001",
