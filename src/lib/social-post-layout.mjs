@@ -76,12 +76,8 @@ function element(type,style,children,extra={}){
   return {type,props:{...extra,style,children}};
 }
 
-function svgShape(type,props,children=null){
+function graphic(type,props,children=null){
   return {type,props:{...props,children}};
-}
-
-function svgLayer(style,children,viewBox='0 0 1536 1024'){
-  return {type:'svg',props:{viewBox,width:1536,height:1024,style,children}};
 }
 
 function normalizeBadge(value){
@@ -106,79 +102,83 @@ function watermarkForPillar(pillar){
   const common={fill:'none',stroke,strokeWidth:5,strokeLinecap:'round',strokeLinejoin:'round'};
   if (pillar==='impostos'){
     return [
-      svgShape('path',{...common,d:'M52 28 H154 L188 62 V194 H52 Z'}),
-      svgShape('path',{...common,d:'M154 28 V64 H188'}),
-      svgShape('path',{...common,d:'M78 94 H160 M78 120 H148 M78 146 H136'}),
-      svgShape('circle',{...common,cx:84,cy:178,r:30}),
-      svgShape('path',{...common,d:'M96 164 C88 155 70 157 68 173 C66 190 88 199 99 186 M64 176 H91 M64 184 H88'})
+      graphic('path',{...common,d:'M52 28 H154 L188 62 V194 H52 Z'}),
+      graphic('path',{...common,d:'M154 28 V64 H188'}),
+      graphic('path',{...common,d:'M78 94 H160 M78 120 H148 M78 146 H136'}),
+      graphic('circle',{...common,cx:84,cy:178,r:30}),
+      graphic('path',{...common,d:'M96 164 C88 155 70 157 68 173 C66 190 88 199 99 186 M64 176 H91 M64 184 H88'})
     ];
   }
   if (pillar==='arrendamento'||pillar==='arrendar'){
     return [
-      svgShape('path',{...common,d:'M34 108 L110 42 L186 108 V194 H34 Z'}),
-      svgShape('path',{...common,d:'M86 194 V132 H134 V194'}),
-      svgShape('circle',{...common,cx:145,cy:72,r:25}),
-      svgShape('path',{...common,d:'M123 86 L79 130 M79 130 L64 116 M79 130 L64 145'})
+      graphic('path',{...common,d:'M34 108 L110 42 L186 108 V194 H34 Z'}),
+      graphic('path',{...common,d:'M86 194 V132 H134 V194'}),
+      graphic('circle',{...common,cx:145,cy:72,r:25}),
+      graphic('path',{...common,d:'M123 86 L79 130 M79 130 L64 116 M79 130 L64 145'})
     ];
   }
   if (pillar==='condominio'){
     return [
-      svgShape('path',{...common,d:'M48 194 V56 H172 V194 Z'}),
-      svgShape('path',{...common,d:'M74 82 H96 V104 H74 Z M124 82 H146 V104 H124 Z M74 124 H96 V146 H74 Z M124 124 H146 V146 H124 Z'}),
-      svgShape('path',{...common,d:'M94 194 V160 H126 V194'})
+      graphic('path',{...common,d:'M48 194 V56 H172 V194 Z'}),
+      graphic('path',{...common,d:'M74 82 H96 V104 H74 Z M124 82 H146 V104 H124 Z M74 124 H96 V146 H74 Z M124 124 H146 V146 H124 Z'}),
+      graphic('path',{...common,d:'M94 194 V160 H126 V194'})
     ];
   }
   if (pillar==='vender'){
     return [
-      svgShape('path',{...common,d:'M30 108 L104 44 L178 108 V194 H30 Z'}),
-      svgShape('circle',{...common,cx:162,cy:72,r:26}),
-      svgShape('path',{...common,d:'M140 88 L103 125 M103 125 L88 112 M103 125 L90 140'})
+      graphic('path',{...common,d:'M30 108 L104 44 L178 108 V194 H30 Z'}),
+      graphic('circle',{...common,cx:162,cy:72,r:26}),
+      graphic('path',{...common,d:'M140 88 L103 125 M103 125 L88 112 M103 125 L90 140'})
     ];
   }
   return [
-    svgShape('path',{...common,d:'M30 108 L110 40 L190 108 V194 H30 Z'}),
-    svgShape('path',{...common,d:'M82 194 V126 H138 V194'}),
-    svgShape('path',{...common,d:'M54 94 V58 H78 V74'})
+    graphic('path',{...common,d:'M30 108 L110 40 L190 108 V194 H30 Z'}),
+    graphic('path',{...common,d:'M82 194 V126 H138 V194'}),
+    graphic('path',{...common,d:'M54 94 V58 H78 V74'})
   ];
 }
 
 function createWatermark(pillar){
-  const shapes=watermarkForPillar(pillar);
-  return {type:'svg',props:{
-    viewBox:'0 0 220 220',width:SOCIAL_POST_CARD.watermark.width,height:SOCIAL_POST_CARD.watermark.height,
-    style:{display:'flex',position:'absolute',left:SOCIAL_POST_CARD.watermark.left,top:SOCIAL_POST_CARD.watermark.top,width:SOCIAL_POST_CARD.watermark.width,height:SOCIAL_POST_CARD.watermark.height,opacity:0.075},
-    children:shapes
-  }};
+  return element('svg',{
+    display:'flex',position:'absolute',left:SOCIAL_POST_CARD.watermark.left,top:SOCIAL_POST_CARD.watermark.top,
+    width:SOCIAL_POST_CARD.watermark.width,height:SOCIAL_POST_CARD.watermark.height,opacity:0.075
+  },watermarkForPillar(pillar),{viewBox:'0 0 220 220',width:220,height:220,'aria-hidden':'true'});
 }
 
 function createHouseFooterIcon(){
-  return {type:'svg',props:{
-    viewBox:'0 0 42 42',width:42,height:42,
-    style:{display:'flex',position:'absolute',left:76,top:823,width:42,height:42},
-    children:[
-      svgShape('path',{d:'M4 20 L21 5 L38 20 M8 18 V36 H34 V18 M17 36 V24 H25 V36',fill:'none',stroke:SOCIAL_POST_THEME.gold,strokeWidth:2.5,strokeLinecap:'round',strokeLinejoin:'round'})
-    ]
-  }};
+  return element('svg',{
+    display:'flex',position:'absolute',left:76,top:823,width:42,height:42
+  },[
+    graphic('path',{d:'M4 20 L21 5 L38 20 M8 18 V36 H34 V18 M17 36 V24 H25 V36',fill:'none',stroke:SOCIAL_POST_THEME.gold,strokeWidth:2.5,strokeLinecap:'round',strokeLinejoin:'round'})
+  ],{viewBox:'0 0 42 42',width:42,height:42,'aria-hidden':'true'});
 }
 
-function createCurveLayer(){
-  const creamPath='M0 0 H820 C720 126 687 310 735 493 C790 699 758 884 650 1024 H0 Z';
-  const goldPath='M820 0 C720 126 687 310 735 493 C790 699 758 884 650 1024';
-  const outerPath='M941 0 C821 150 780 330 817 506 C854 681 836 865 744 1024';
-  return svgLayer({display:'flex',position:'absolute',left:0,top:0,width:1536,height:1024},[
-    svgShape('path',{d:creamPath,fill:SOCIAL_POST_THEME.background}),
-    svgShape('path',{d:outerPath,fill:'none',stroke:SOCIAL_POST_THEME.goldLight,strokeWidth:3,opacity:0.95}),
-    svgShape('path',{d:outerPath,fill:'none',stroke:SOCIAL_POST_THEME.petrol,strokeWidth:11,opacity:0.96,transform:'translate(12 0)'}),
-    svgShape('path',{d:goldPath,fill:'none',stroke:SOCIAL_POST_THEME.gold,strokeWidth:2.2,opacity:0.98})
-  ]);
+function createPremiumOverlay(){
+  const dots=[];
+  for(let i=0;i<3;i+=1){
+    dots.push(graphic('circle',{cx:88+i*22,cy:780,r:5,fill:SOCIAL_POST_THEME.gold,opacity:[0.62,0.38,0.2][i]}));
+  }
+  return element('svg',{
+    display:'flex',position:'absolute',left:0,top:0,width:SOCIAL_POST_CARD.width,height:SOCIAL_POST_CARD.height
+  },[
+    graphic('path',{d:'M0 0H660C747 148 778 318 764 500C750 679 703 852 628 1024H0Z',fill:SOCIAL_POST_THEME.background,opacity:0.997}),
+    graphic('path',{d:'M616 0H764C804 166 812 330 790 501C771 661 724 824 650 1024H594C675 847 718 674 721 500C724 315 690 151 616 0Z',fill:SOCIAL_POST_THEME.creamSecondary,opacity:0.975}),
+    graphic('path',{d:'M663 -16C746 174 770 343 754 516C740 690 696 855 621 1040',fill:'none',stroke:SOCIAL_POST_THEME.gold,strokeWidth:2.4,opacity:0.96}),
+    graphic('path',{d:'M785 -18C867 164 891 330 872 501C855 670 812 837 739 1042',fill:'none',stroke:SOCIAL_POST_THEME.petrol,strokeWidth:11,opacity:0.97}),
+    graphic('path',{d:'M807 -18C887 166 912 333 894 506C876 677 835 842 764 1042',fill:'none',stroke:SOCIAL_POST_THEME.goldLight,strokeWidth:2.2,opacity:0.92}),
+    graphic('path',{d:'M828 570C790 657 766 754 758 854C818 839 876 818 930 793C883 731 849 655 828 570Z',fill:SOCIAL_POST_THEME.gold,opacity:0.82}),
+    graphic('path',{d:'M-84 350C-20 365 20 420 20 494C20 570-22 630-82 649',fill:'none',stroke:SOCIAL_POST_THEME.gold,strokeWidth:1.25,opacity:0.24}),
+    ...dots
+  ],{viewBox:'0 0 1536 1024',width:1536,height:1024,'aria-hidden':'true'});
 }
 
 function createOrnamentLine(){
-  return svgLayer({display:'flex',position:'absolute',left:0,top:0,width:1536,height:1024},[
-    svgShape('polygon',{points:'389,180 397,188 389,196 381,188',fill:SOCIAL_POST_THEME.gold}),
-    svgShape('polygon',{points:'389,170 393,184 407,188 393,192 389,206 385,192 371,188 385,184',fill:SOCIAL_POST_THEME.gold,opacity:0.82}),
-    svgShape('line',{x1:425,y1:188,x2:654,y2:188,stroke:SOCIAL_POST_THEME.gold,strokeWidth:2,opacity:0.88})
-  ]);
+  return element('svg',{
+    display:'flex',position:'absolute',left:0,top:0,width:1536,height:1024
+  },[
+    graphic('polygon',{points:'389,170 393,184 407,188 393,192 389,206 385,192 371,188 385,184',fill:SOCIAL_POST_THEME.gold,opacity:0.88}),
+    graphic('line',{x1:425,y1:188,x2:654,y2:188,stroke:SOCIAL_POST_THEME.gold,strokeWidth:2,opacity:0.88})
+  ],{viewBox:'0 0 1536 1024',width:1536,height:1024,'aria-hidden':'true'});
 }
 
 export function createSocialPostLayout({title,badge='GUIA',image,pillar='casa'}){
@@ -192,15 +192,10 @@ export function createSocialPostLayout({title,badge='GUIA',image,pillar='casa'})
     overflow:'hidden',backgroundColor:SOCIAL_POST_THEME.background
   },[
     element('img',{
-      position:'absolute',left:SOCIAL_POST_CARD.image.left,top:0,
-      width:SOCIAL_POST_CARD.image.width,height:SOCIAL_POST_CARD.image.height,
+      position:'absolute',left:0,top:0,width:SOCIAL_POST_CARD.width,height:SOCIAL_POST_CARD.height,
       objectFit:'cover',objectPosition:'center center'
-    },null,{src:image,width:SOCIAL_POST_CARD.image.width,height:SOCIAL_POST_CARD.image.height}),
-    element('div',{
-      display:'flex',position:'absolute',left:0,top:0,width:700,height:SOCIAL_POST_CARD.height,
-      backgroundColor:SOCIAL_POST_THEME.background
-    },null),
-    createCurveLayer(),
+    },null,{src:image,width:SOCIAL_POST_CARD.width,height:SOCIAL_POST_CARD.height}),
+    createPremiumOverlay(),
     createWatermark(exactPillar),
     element('div',{
       display:'flex',position:'absolute',left:SOCIAL_POST_CARD.label.left,top:SOCIAL_POST_CARD.label.top,
