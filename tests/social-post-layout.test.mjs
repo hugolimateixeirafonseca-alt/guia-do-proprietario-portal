@@ -13,36 +13,53 @@ function solidImagePng(fill='#1267A5'){
   return new Resvg(svg).render().asPng();
 }
 
-test('social reserva quase metade do cartão para fotografia sem overlay creme',()=>{
-  const layout=createSocialPostLayout({title:'Equipar um quarto de estudante: por onde começar',badge:'GUIA',image:solidImagePng()});
-  assert.equal(layout.metrics.image.left,800);
-  assert.equal(layout.metrics.image.width,736);
-  assert.ok(layout.metrics.image.width/SOCIAL_POST_CARD.width>0.47);
-  assert.ok(layout.metrics.title.left+layout.metrics.title.width<=layout.metrics.image.left-80);
-  assert.equal(layout.metrics.panelWidth,layout.metrics.image.left);
+test('social premium reserva imagem ampla e usa separador curvo em camadas',()=>{
+  const layout=createSocialPostLayout({title:'Equipar um quarto de estudante: por onde começar',badge:'GUIA',pillar:'casa',image:solidImagePng()});
+  assert.equal(layout.metrics.design,'premium-editorial-v2');
+  assert.equal(layout.metrics.image.left,620);
+  assert.equal(layout.metrics.image.width,916);
+  assert.ok(layout.metrics.image.width/SOCIAL_POST_CARD.width>0.59);
+  assert.ok(layout.metrics.title.left+layout.metrics.title.width<=layout.metrics.textSafeRight);
+  assert.equal(layout.metrics.curve.layered,true);
+  assert.equal(layout.metrics.curve.gold,true);
+  assert.equal(layout.metrics.curve.petrol,true);
+  assert.equal(layout.metrics.label.border,true);
+  assert.equal(layout.metrics.footer.houseIcon,true);
 });
 
-test('PNG social mantém a fotografia visível na metade direita',async()=>{
+test('PNG social premium mantém fotografia visível e camadas editoriais no SVG final',async()=>{
   const rendered=await renderSocialCardNode({
     root,
     title:'Equipar um quarto de estudante: por onde começar',
     variant:'social',
     badge:'GUIA',
+    pillar:'casa',
     image:solidImagePng('#1267A5')
   });
-  const stats=await sharp(rendered.png).extract({left:1000,top:250,width:300,height:300}).stats();
-  const [r,g,b]=stats.channels.slice(0,3).map(channel=>channel.mean);
-  assert.ok(b>120,'a zona da fotografia deve conservar o azul da imagem-base');
-  assert.ok(b>r+25,'a zona da fotografia não pode ser substituída pelo painel creme');
-  assert.equal(rendered.metrics.image.left,800);
-  assert.equal(rendered.metrics.image.width,736);
+  assert.equal(rendered.metrics.design,'premium-editorial-v2');
+  const right=await sharp(rendered.png).extract({left:1110,top:260,width:260,height:300}).stats();
+  const [rr,,rb]=right.channels.slice(0,3).map(channel=>channel.mean);
+  assert.ok(rb>120,'a zona da fotografia deve conservar o azul da imagem-base');
+  assert.ok(rb>rr+25,'a fotografia não pode ser substituída pelo painel editorial');
+  assert.match(rendered.svg,/#F6F0E6/i,'o SVG final deve conter o painel creme premium');
+  assert.match(rendered.svg,/#B88A4A/i,'o SVG final deve conter os detalhes dourados');
+  assert.match(rendered.svg,/#173C3D/i,'o SVG final deve conter o verde-petróleo');
+});
+
+test('social premium inclui motivos editoriais por pilar sem mudar a composição',()=>{
+  const impostos=createSocialPostLayout({title:'O seu IMI subiu ou desceu este ano?',badge:'PERGUNTA',pillar:'impostos',image:solidImagePng()});
+  const condominio=createSocialPostLayout({title:'As contas do condomínio estão claras?',badge:'PERGUNTA',pillar:'condominio',image:solidImagePng()});
+  assert.equal(impostos.metrics.watermark.pillar,'impostos');
+  assert.equal(condominio.metrics.watermark.pillar,'condominio');
+  assert.deepEqual(impostos.metrics.image,condominio.metrics.image);
+  assert.equal(impostos.metrics.label.goldText,true);
 });
 
 test('título social nunca é truncado nem reduzido abaixo do mínimo legível',()=>{
   const title='Caução no fim do contrato: o que pode ser descontado?';
   const selected=selectSocialPostTitleLayout(title);
   assert.equal(selected.lines.join(' '),title);
-  assert.ok(selected.fontSize>=58);
+  assert.ok(selected.fontSize>=62);
   assert.ok(selected.lines.length<=5);
   assert.throws(()=>selectSocialPostTitleLayout('Este título social é deliberadamente demasiado comprido para caber no cartão sem encolher a tipografia até ficar ilegível e por isso deve falhar de forma explícita'),/too long/u);
 });
