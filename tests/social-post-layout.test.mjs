@@ -44,6 +44,7 @@ test('PNG social premium mantém fotografia visível e painel editorial creme',a
   const left=await sharp(rendered.png).extract({left:20,top:20,width:160,height:90}).stats();
   const [lr,lg,lb]=left.channels.slice(0,3).map(channel=>channel.mean);
   const luminance=(lr+lg+lb)/3;
+  console.log(`PREMIUM_PANEL_RGB=${lr.toFixed(2)},${lg.toFixed(2)},${lb.toFixed(2)} L=${luminance.toFixed(2)}`);
   assert.ok(luminance>185,'a área vazia do painel esquerdo deve continuar clara');
   assert.ok(lr>lb,'o painel esquerdo deve manter uma temperatura creme/quente');
   assert.ok(lb<rb-20,'o painel esquerdo não pode herdar o azul da fotografia-base');
