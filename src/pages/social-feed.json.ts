@@ -10,10 +10,14 @@ export const GET: APIRoute = async ({ site }) => {
 
   const items = artigos.map((artigo) => {
     const route = `/${artigo.data.pilar}/${artigo.id}/`;
-    const imagemCapa = artigo.data.imagem_capa?.replace(/\.avif(?:\?.*)?$/i, ".webp");
-    const imagem = imagemCapa
-      ? new URL(imagemCapa, base).toString()
+    const imagemCapa = artigo.data.imagem_capa || "";
+    const imagemWeb = imagemCapa
+      ? new URL(imagemCapa.replace(/\.avif(?:\?.*)?$/i, ".webp"), base).toString()
       : new URL(`/og${route}index.png`, base).toString();
+    const imagemSocial = imagemCapa
+      ? new URL(imagemCapa.replace(/\.(?:avif|webp|png|jpe?g)(?:\?.*)?$/i, ".social.jpg"), base).toString()
+      : new URL(`/og${route}index.png`, base).toString();
+
     return {
       titulo: artigo.data.titulo,
       url: new URL(route, base).toString(),
@@ -23,12 +27,14 @@ export const GET: APIRoute = async ({ site }) => {
       publicado: artigo.data.publicado_em.toISOString(),
       revisto: artigo.data.revisto.toISOString(),
       aviso: artigo.data.aviso,
-      imagem,
+      imagem: imagemSocial,
+      imagem_social: imagemSocial,
+      imagem_web: imagemWeb,
     };
   });
 
   return new Response(
-    JSON.stringify({ version: 1, generatedAt: new Date().toISOString(), count: items.length, items }),
+    JSON.stringify({ version: 2, generatedAt: new Date().toISOString(), count: items.length, items }),
     { headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=300" } },
   );
 };
