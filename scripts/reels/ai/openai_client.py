@@ -71,7 +71,10 @@ def create_openai_client(
         from openai import OpenAI
 
         client_factory = OpenAI
-    return client_factory(api_key=key, max_retries=1)
+    # Duas tentativas adicionais apenas para falhas transitórias tratadas pelo SDK
+    # (timeouts, 408/409/429 e 5xx). Não repete validações editoriais nem uma
+    # geração que já tenha devolvido resposta válida.
+    return client_factory(api_key=key, max_retries=2)
 
 
 def _parse_response(
