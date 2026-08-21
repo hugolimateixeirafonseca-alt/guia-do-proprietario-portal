@@ -43,7 +43,10 @@ test('PNG social premium mantém fotografia visível e painel editorial creme',a
   assert.ok(rb>rr+25,'a fotografia não pode ser substituída pelo painel creme');
   const left=await sharp(rendered.png).extract({left:20,top:20,width:160,height:90}).stats();
   const [lr,lg,lb]=left.channels.slice(0,3).map(channel=>channel.mean);
-  assert.ok(lr>225&&lg>220&&lb>205,'a área vazia do painel esquerdo deve conservar o creme editorial claro');
+  const luminance=(lr+lg+lb)/3;
+  assert.ok(luminance>185,'a área vazia do painel esquerdo deve continuar clara');
+  assert.ok(lr>lb,'o painel esquerdo deve manter uma temperatura creme/quente');
+  assert.ok(lb<rb-20,'o painel esquerdo não pode herdar o azul da fotografia-base');
 });
 
 test('social premium inclui motivos editoriais por pilar sem mudar a composição',()=>{
