@@ -8,6 +8,9 @@ on:
       - 'functions/**'
       - 'public/social/**'
       - 'src/pages/social-feed.json.ts'
+      - 'scripts/converter-imagens.mjs'
+      - 'scripts/check-social-images.mjs'
+      - '.github/workflows/check-social-images.yml'
       - '.github/workflows/deploy-pages-functions-direct.yml'
   workflow_dispatch:
 
