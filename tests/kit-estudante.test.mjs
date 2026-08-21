@@ -235,6 +235,9 @@ test("mantém o Meta Pixel na landing e nos builds diretos", () => {
   assert.match(landingSource, /measurementAllowed\(\)/);
   assert.match(landingSource, /fbq\("track", "Lead", \{ content_name: "kit_estudante_2026" \}, \{ eventID: eventId \}\)/);
   assert.match(directDeployWorkflowSource, /deployment_configs\?\.production\?\.env_vars\?\.PUBLIC_META_PIXEL_ID\?\.value/);
+  assert.match(directDeployWorkflowSource, /method: 'PATCH'/);
+  assert.match(directDeployWorkflowSource, /PUBLIC_META_PIXEL_ID: \{ type: 'plain_text', value: fallbackPixelId \}/);
+  assert.match(directDeployWorkflowSource, /PUBLIC_META_PIXEL_ID was not persisted in Pages production/);
   assert.match(directDeployWorkflowSource, /PUBLIC_META_PIXEL_ID is missing or invalid in Pages production/);
   assert.match(directDeployWorkflowSource, /test -n "\$PUBLIC_META_PIXEL_ID"/);
 });
