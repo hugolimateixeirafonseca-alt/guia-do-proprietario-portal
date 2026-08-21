@@ -45,11 +45,32 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID'; exit 1; }
           test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CF_PAGES_API_TOKEN'; exit 1; }
 
+      - name: Load public build variables from Pages
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFile } from 'node:fs/promises';
+
+          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${process.env.CF_PAGES_PROJECT}`;
+          const response = await fetch(endpoint, {
+            headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}` }
+          });
+          const payload = await response.json();
+          if (!response.ok || !payload.success) throw new Error(`Pages project lookup failed with ${response.status}`);
+
+          const pixelId = payload.result?.deployment_configs?.production?.env_vars?.PUBLIC_META_PIXEL_ID?.value || '';
+          if (!/^\d{10,30}$/.test(pixelId)) throw new Error('PUBLIC_META_PIXEL_ID is missing or invalid in Pages production');
+          await appendFile(process.env.GITHUB_ENV, `PUBLIC_META_PIXEL_ID=${pixelId}\n`, 'utf8');
+          NODE
+
       - name: Install dependencies
         run: npm ci
 
       - name: Build production site
-        run: npm run build
+        shell: bash
+        run: |
+          test -n "$PUBLIC_META_PIXEL_ID" || { echo 'Missing PUBLIC_META_PIXEL_ID'; exit 1; }
+          npm run build
 
       - name: Deploy actual build to Cloudflare Pages
         shell: bash

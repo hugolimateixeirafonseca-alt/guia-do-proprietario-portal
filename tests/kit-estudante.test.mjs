@@ -10,6 +10,9 @@ let buildDirectory;
 let calls;
 let thankYouSource;
 let profileSource;
+let landingSource;
+let kitLayoutSource;
+let directDeployWorkflowSource;
 const originalFetch = globalThis.fetch;
 
 before(async () => {
@@ -23,6 +26,9 @@ before(async () => {
   helper = await import(`${pathToFileURL(outfile).href}?v=${Date.now()}`);
   thankYouSource = await readFile(path.resolve("src/pages/kit-estudante/obrigado.astro"), "utf8");
   profileSource = await readFile(path.resolve("functions/api/kit-estudante/perfil.ts"), "utf8");
+  landingSource = await readFile(path.resolve("src/pages/kit-estudante/index.astro"), "utf8");
+  kitLayoutSource = await readFile(path.resolve("src/layouts/KitEstudanteLayout.astro"), "utf8");
+  directDeployWorkflowSource = await readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8");
 });
 
 beforeEach(() => { calls = []; });
@@ -221,6 +227,16 @@ test("mantém os modos de email e sessão separados e só mostra a partilha no f
   assert.match(thankYouSource, /completeStep\.hidden = false;[\s\S]*?sharePanel\.hidden = false/);
   assert.match(thankYouSource, /completeLink\.hidden = phase !== "encontrou"/);
   assert.doesNotMatch(thankYouSource, /procurar-quarto-olx-grupos-facebook/);
+});
+
+test("mantém o Meta Pixel na landing e nos builds diretos", () => {
+  assert.match(kitLayoutSource, /import CookieConsent/);
+  assert.match(kitLayoutSource, /<CookieConsent \/>/);
+  assert.match(landingSource, /measurementAllowed\(\)/);
+  assert.match(landingSource, /fbq\("track", "Lead", \{ content_name: "kit_estudante_2026" \}, \{ eventID: eventId \}\)/);
+  assert.match(directDeployWorkflowSource, /deployment_configs\?\.production\?\.env_vars\?\.PUBLIC_META_PIXEL_ID\?\.value/);
+  assert.match(directDeployWorkflowSource, /PUBLIC_META_PIXEL_ID is missing or invalid in Pages production/);
+  assert.match(directDeployWorkflowSource, /test -n "\$PUBLIC_META_PIXEL_ID"/);
 });
 
 test("o endpoint de perfil aceita apenas cidade e fase através da sessão", () => {
