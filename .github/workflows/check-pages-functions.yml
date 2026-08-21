@@ -7,8 +7,10 @@ on:
     paths:
       - 'functions/**'
       - 'src/lib/social-card-*.mjs'
+      - 'src/lib/social-post-*.mjs'
       - 'automation/social-card-renderer/**'
       - 'tests/social-card-renderer.test.mjs'
+      - 'tests/social-post-layout.test.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/check-pages-functions.yml'
@@ -16,8 +18,10 @@ on:
     paths:
       - 'functions/**'
       - 'src/lib/social-card-*.mjs'
+      - 'src/lib/social-post-*.mjs'
       - 'automation/social-card-renderer/**'
       - 'tests/social-card-renderer.test.mjs'
+      - 'tests/social-post-layout.test.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/check-pages-functions.yml'
