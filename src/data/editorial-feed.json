@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-21T22:09:21.235Z",
+  "generatedAt": "2026-08-22T08:30:26.661Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 78,
+    "published": 79,
     "newsOnline": 18
   },
   "articles": [
@@ -1376,14 +1376,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "estudante-deslocado-irs-renda.mdx",
       "arrivedAt": "2026-08-19T19:24:32+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-22T07:01:11Z",
+      "url": "https://guiadoproprietario.pt/impostos/estudante-deslocado-irs-renda/"
     },
     {
       "id": "EXTRA-002",
