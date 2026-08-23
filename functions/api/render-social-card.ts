@@ -84,7 +84,7 @@ async function renderRequest({request,env}:RequestContext){
     new Uint8Array(body).set(png);
     const contentLength=png.byteLength;
     rendered.free(); renderer.free();
-    return new Response(body,{status:200,headers:{'Content-Type':'image/png','Content-Length':String(contentLength),'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Social-Design':variant==='social'?'premium-editorial-v2':'news'}});
+    return new Response(body,{status:200,headers:{'Content-Type':'image/png','Content-Length':String(contentLength),'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Social-Design':variant==='social'?'premium-editorial-v3':'news'}});
   }catch(error){
     const code=error instanceof Error?error.message:'render_failed';
     const expected=/^(title|source)_(required|too_long)$|^(badge|variant)_(invalid|too_long)$|^title is too long/u.test(code);
