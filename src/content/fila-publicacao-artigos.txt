@@ -1,6 +1,5 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # O workflow publica os primeiros ficheiros disponíveis desta lista.
-comprar-casa-para-filho-estudar.mdx
 ar-condicionado-quanto-custa.mdx
 escolher-ar-condicionado.mdx
 cano-entupido-desentupir.mdx
