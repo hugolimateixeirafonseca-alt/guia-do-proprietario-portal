@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - '.github/workflows/create-meta-kit-form.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/create-meta-kit-form.yml'
   workflow_dispatch:
 
 permissions:
