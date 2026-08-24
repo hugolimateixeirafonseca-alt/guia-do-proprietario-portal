@@ -1,3 +1,4 @@
+// Deployment binding refresh: Meta Kit Leads 2026-08-24
 import {
   ALLOWED_CITIES,
   ALLOWED_PHASES,
