@@ -156,6 +156,7 @@ jobs:
 
       - name: Create or reuse Meta Instant Form
         id: create_meta_form
+        continue-on-error: true
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -175,14 +176,25 @@ jobs:
               let payload = {};
               try { payload = JSON.parse(lastBody); } catch {}
               if (!response.ok || !payload.ok || !payload.id) {
-                throw new Error(`Meta form creator failed: HTTP ${response.status} ${lastBody.slice(0, 500)}`);
+                const diagnostic = `HTTP ${response.status} ${lastBody.slice(0, 500)}`;
+                await import('node:fs/promises').then(({ appendFile }) =>
+                  appendFile(process.env.GITHUB_OUTPUT, `diagnostic_b64=${Buffer.from(diagnostic).toString('base64')}\n`, 'utf8')
+                );
+                throw new Error(`Meta form creator failed: ${diagnostic}`);
               }
               console.log(`${payload.created ? 'Created' : 'Reused'} Meta Instant Form ID ${payload.id}`);
+              await import('node:fs/promises').then(({ appendFile }) =>
+                appendFile(process.env.GITHUB_OUTPUT, `form_id=${payload.id}\ncreated=${payload.created}\n`, 'utf8')
+              );
               process.exit(0);
             }
             await new Promise((resolve) => setTimeout(resolve, 5000));
           }
-          throw new Error(`Meta form endpoint did not become available: HTTP ${lastStatus} ${lastBody.slice(0, 300)}`);
+          const diagnostic = `endpoint unavailable: HTTP ${lastStatus} ${lastBody.slice(0, 300)}`;
+          await import('node:fs/promises').then(({ appendFile }) =>
+            appendFile(process.env.GITHUB_OUTPUT, `diagnostic_b64=${Buffer.from(diagnostic).toString('base64')}\n`, 'utf8')
+          );
+          throw new Error(diagnostic);
           NODE
 
       - name: Disable one-time Meta form creator in Cloudflare
@@ -213,6 +225,29 @@ jobs:
           }
           NODE
 
+      - name: Write temporary Meta form diagnostic
+        if: always()
+        shell: bash
+        env:
+          CREATE_OUTCOME: ${{ steps.create_meta_form.outcome }}
+          FORM_ID: ${{ steps.create_meta_form.outputs.form_id }}
+          FORM_CREATED: ${{ steps.create_meta_form.outputs.created }}
+          FORM_DIAGNOSTIC_B64: ${{ steps.create_meta_form.outputs.diagnostic_b64 }}
+        run: |
+          mkdir -p dist/.well-known
+          node --input-type=module <<'NODE'
+          import { writeFile } from 'node:fs/promises';
+          const result = {
+            generated_at: new Date().toISOString(),
+            commit: process.env.GITHUB_SHA,
+            outcome: process.env.CREATE_OUTCOME || "not_run",
+            form_id: process.env.FORM_ID || "",
+            created: process.env.FORM_CREATED || "",
+            diagnostic_b64: process.env.FORM_DIAGNOSTIC_B64 || ""
+          };
+          await writeFile("dist/.well-known/meta-form-result.json", JSON.stringify(result, null, 2) + "\n", "utf8");
+          NODE
+
       - name: Redeploy clean build after Meta form creation
         if: always()
         shell: bash
@@ -223,3 +258,10 @@ jobs:
             --commit-hash="$GITHUB_SHA" \
             --commit-dirty=false \
             --commit-message="Deploy clean social/functions ${GITHUB_SHA:0:12}"
+
+      - name: Fail if Meta form creation failed
+        if: always() && steps.create_meta_form.outcome != 'success'
+        shell: bash
+        run: |
+          echo "Meta form creation failed; see /.well-known/meta-form-result.json"
+          exit 1
