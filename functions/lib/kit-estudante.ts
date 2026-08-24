@@ -29,6 +29,7 @@ export interface KitEnv {
   META_VERIFY_TOKEN?: string;
   META_GRAPH_VERSION?: string;
   META_FORM_ADMIN_SECRET?: string;
+  MAKE_META_LEADS_SECRET?: string;
 }
 
 export interface RequestContext {
@@ -287,7 +288,8 @@ const KIT_SENDER_FIELD_TITLES = new Set([
   "est_origem",
   "est_cidade",
   "est_fase",
-  "est_proprietario"
+  "est_proprietario",
+  "est_relacao"
 ]);
 
 function senderData(payload: unknown) {
