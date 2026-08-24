@@ -14,6 +14,7 @@ let landingSource;
 let kitLayoutSource;
 let directDeployWorkflowSource;
 let metaWebhookSource;
+let metaFormCreatorSource;
 const originalFetch = globalThis.fetch;
 
 before(async () => {
@@ -30,7 +31,7 @@ before(async () => {
   landingSource = await readFile(path.resolve("src/pages/kit-estudante/index.astro"), "utf8");
   kitLayoutSource = await readFile(path.resolve("src/layouts/KitEstudanteLayout.astro"), "utf8");
   directDeployWorkflowSource = await readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8");
-  metaWebhookSource = await readFile(path.resolve("functions/api/meta/webhook.ts"), "utf8");
+  metaWebhookSource = await readFile(path.resolve("functions/api/meta/webhook.ts"), "utf8");\n  metaFormCreatorSource = await readFile(path.resolve("functions/api/meta/create-kit-form.ts"), "utf8");
 });
 
 beforeEach(() => { calls = []; });
@@ -271,3 +272,24 @@ test("o endpoint de perfil aceita apenas cidade e fase através da sessão", () 
   assert.match(profileSource, /profile_phase_updated/);
 });
 
+
+
+test("o criador Meta fica inerte sem segredo temporário e é idempotente", () => {
+  assert.match(metaFormCreatorSource, /META_FORM_ADMIN_SECRET/);
+  assert.match(metaFormCreatorSource, /return new Response\("Not Found"/);
+  assert.match(metaFormCreatorSource, /listForms\(token, version\)/);
+  assert.match(metaFormCreatorSource, /created: false/);
+  assert.match(metaFormCreatorSource, /block_display_for_non_targeted_viewer: "true"/);
+  assert.match(metaFormCreatorSource, /allow_organic_lead_retrieval: "false"/);
+});
+
+test("o formulário Meta usa as perguntas e o consentimento aprovados", () => {
+  assert.match(metaFormCreatorSource, /relacao_estudante/);
+  assert.match(metaFormCreatorSource, /Sou pai, mãe ou encarregado de educação de um estudante do ensino superior/);
+  assert.match(metaFormCreatorSource, /Sou estudante/);
+  assert.match(metaFormCreatorSource, /Em que cidade vai estudar o seu filho\/a\?/);
+  assert.match(metaFormCreatorSource, /Em que fase está a procura de alojamento\?/);
+  assert.match(metaFormCreatorSource, /Consentimento para comunicações por email/);
+  assert.match(metaFormCreatorSource, /is_required: true/);
+  assert.match(metaFormCreatorSource, /https:\/\/guiadoproprietario\.pt\/privacidade\//);
+});
