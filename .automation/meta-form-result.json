@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-08-24T12:52:58.160Z",
+  "commit": "af415c649e1dab916411a2dffdf5100c0c487cc7",
+  "steps": {
+    "validate_secrets": "success",
+    "load_pages_vars": "success",
+    "install_dependencies": "success",
+    "build_site": "cancelled",
+    "enable_cloudflare": "skipped",
+    "deploy_with_secret": "skipped",
+    "create_form": "skipped",
+    "disable_cloudflare": "success"
+  },
+  "form_id": "",
+  "created": "",
+  "diagnostics": {
+    "enable_cloudflare_b64": "",
+    "deploy_with_secret_b64": "",
+    "create_form_b64": ""
+  }
+}
