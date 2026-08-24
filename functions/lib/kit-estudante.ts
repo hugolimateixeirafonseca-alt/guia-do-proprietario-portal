@@ -4,6 +4,7 @@ const SESSION_COOKIE = "gp_kit_session";
 const SESSION_TTL_SECONDS = 24 * 60 * 60;
 
 export const CONSENT_VERSION = "kit-estudante-2026-v1";
+export const DEFAULT_META_GRAPH_VERSION = "v25.0";
 export const ALLOWED_SOURCES = new Set(["meta", "artigo", "grupo", "pdf", "direto"]);
 export const ALLOWED_CITIES = new Set(["lisboa", "porto", "coimbra", "braga", "aveiro", "evora", "faro", "outra"]);
 export const ALLOWED_PHASES = new Set(["procura", "encontrou", "tratado"]);

@@ -2,6 +2,7 @@ import {
   ALLOWED_CITIES,
   ALLOWED_PHASES,
   CONSENT_VERSION,
+  DEFAULT_META_GRAPH_VERSION,
   ProviderError,
   addKitGroup,
   cleanText,
@@ -136,9 +137,10 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const reqId = requestId(request);
   try {
     const config = requireConfiguration(env);
-    if (!env.META_APP_SECRET || !env.META_PAGE_ACCESS_TOKEN || !env.META_VERIFY_TOKEN || !env.META_GRAPH_VERSION) {
+    if (!env.META_APP_SECRET || !env.META_PAGE_ACCESS_TOKEN || !env.META_VERIFY_TOKEN) {
       throw new ProviderError("meta_configuration_missing");
     }
+    const metaGraphVersion = env.META_GRAPH_VERSION || DEFAULT_META_GRAPH_VERSION;
     const raw = await request.text();
     if (encoder.encode(raw).byteLength > 65_536) return json({ error: "payload_too_large" }, 413);
     if (!await validSignature(raw, request.headers.get("X-Hub-Signature-256") || "", env.META_APP_SECRET)) {
@@ -154,7 +156,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       ).bind(metaLeadId).first();
       if (duplicate) continue;
 
-      const lead = await fetchMetaLead(metaLeadId, env.META_PAGE_ACCESS_TOKEN, env.META_GRAPH_VERSION);
+      const lead = await fetchMetaLead(metaLeadId, env.META_PAGE_ACCESS_TOKEN, metaGraphVersion);
       const fields = fieldMap(lead);
       const relation = relationValue(fields);
       if (!isQualifiedParentRelation(relation)) {

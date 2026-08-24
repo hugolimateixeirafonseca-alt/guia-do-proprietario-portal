@@ -1,4 +1,4 @@
-import { cleanText, json, type RequestContext } from "../../lib/kit-estudante";
+import { DEFAULT_META_GRAPH_VERSION, cleanText, json, type RequestContext } from "../../lib/kit-estudante";
 
 const PAGE_ID = "1258051167387333";
 const FORM_NAME = "Pais | Kit Estudante 2026 | Instant Form";
@@ -150,8 +150,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   }
 
   const token = env.META_PAGE_ACCESS_TOKEN || "";
-  const version = env.META_GRAPH_VERSION || "";
-  if (!token || !version) return json({ error: "meta_configuration_missing" }, 503);
+  const version = env.META_GRAPH_VERSION || DEFAULT_META_GRAPH_VERSION;
+  if (!token) return json({ error: "meta_page_access_token_missing" }, 503);
 
   try {
     const existing = (await listForms(token, version)).find(
