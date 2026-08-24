@@ -11,6 +11,7 @@ let calls;
 let thankYouSource;
 let profileSource;
 let landingSource;
+let landingLeadSource;
 let kitLayoutSource;
 let directDeployWorkflowSource;
 let metaWebhookSource;
@@ -30,6 +31,7 @@ before(async () => {
   thankYouSource = await readFile(path.resolve("src/pages/kit-estudante/obrigado.astro"), "utf8");
   profileSource = await readFile(path.resolve("functions/api/kit-estudante/perfil.ts"), "utf8");
   landingSource = await readFile(path.resolve("src/pages/kit-estudante/index.astro"), "utf8");
+  landingLeadSource = await readFile(path.resolve("functions/api/kit-estudante/lead.ts"), "utf8");
   kitLayoutSource = await readFile(path.resolve("src/layouts/KitEstudanteLayout.astro"), "utf8");
   directDeployWorkflowSource = await readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8");
   metaWebhookSource = await readFile(path.resolve("functions/api/meta/webhook.ts"), "utf8");
@@ -316,4 +318,36 @@ test("o endpoint Make deduplica por leadgen_id e grava campos do Kit", () => {
   assert.match(makeMetaLeadSource, /\{\$est_cidade\}/);
   assert.match(makeMetaLeadSource, /\{\$est_fase\}/);
   assert.match(makeMetaLeadSource, /consent_required/);
+});
+
+
+test("a landing qualifica pais antes de pedir o email", () => {
+  assert.match(landingSource, /name="relacao" value="pai_mae_encarregado"/);
+  assert.match(landingSource, /name="relacao" value="estudante"/);
+  assert.match(landingSource, /data-parent-fields hidden/);
+  assert.match(landingSource, /name="cidade"/);
+  assert.match(landingSource, /name="fase"/);
+  assert.match(landingSource, /new Set\(\["meta", "artigo", "grupo", "pdf", "direto"\]\)/);
+  assert.match(landingSource, /relacao: relation/);
+  assert.match(landingSource, /cidade: city\.value/);
+  assert.match(landingSource, /fase: phase\.value/);
+  assert.ok(
+    landingSource.indexOf('relation !== "pai_mae_encarregado"')
+      < landingSource.indexOf('fetch("/api/kit-estudante/lead"')
+  );
+});
+
+test("o endpoint da landing bloqueia não-pais antes do Sender e guarda a qualificação", () => {
+  assert.match(landingLeadSource, /isQualifiedParentRelation\(relation\)/);
+  assert.match(landingLeadSource, /landing_subscription_disqualified/);
+  assert.match(landingLeadSource, /qualified: false/);
+  assert.match(landingLeadSource, /ALLOWED_CITIES\.has\(city\)/);
+  assert.match(landingLeadSource, /ALLOWED_PHASES\.has\(phase\)/);
+  assert.match(landingLeadSource, /"\{\$est_relacao\}": "pai_mae_encarregado"/);
+  assert.match(landingLeadSource, /"\{\$est_cidade\}": city/);
+  assert.match(landingLeadSource, /"\{\$est_fase\}": phase/);
+  assert.ok(
+    landingLeadSource.indexOf("isQualifiedParentRelation(relation)")
+      < landingLeadSource.indexOf("createOrUpdateKitSubscriber")
+  );
 });
