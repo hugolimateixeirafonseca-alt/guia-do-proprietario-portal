@@ -31,6 +31,7 @@ export interface KitEnv {
   META_GRAPH_VERSION?: string;
   META_FORM_ADMIN_SECRET?: string;
   MAKE_META_LEADS_SECRET?: string;
+  CLOUDFLARE_API_TOKEN?: string;
 }
 
 export interface RequestContext {
