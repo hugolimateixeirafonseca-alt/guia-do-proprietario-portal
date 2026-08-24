@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-23T08:30:06.111Z",
+  "generatedAt": "2026-08-24T08:48:24.737Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 80,
-    "newsOnline": 18
+    "published": 81,
+    "newsOnline": 19
   },
   "articles": [
     {
@@ -1504,14 +1504,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "regulamento-condominio.mdx",
       "arrivedAt": "2026-08-11T19:45:03+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-24T07:01:43Z",
+      "url": "https://guiadoproprietario.pt/condominio/regulamento-condominio/"
     },
     {
       "id": "EXTRA-007",
@@ -1579,6 +1579,18 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-20-noticia-74",
+      "title": "Habitação: Notícias, Mercado Imobiliário e Políticas | DN",
+      "summary": "Uma página temática do Dinheiro Vivo acompanha a atualidade da habitação em Portugal, reunindo informação sobre diferentes áreas do setor. A cobertura inclui mercado imobiliário, c",
+      "pillar": "casa",
+      "publishedAt": "2026-08-24",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-20-noticia-74/",
+      "source": {
+        "name": "Dinheiro Vivo",
+        "url": "https://dinheirovivo.dn.pt/topic/habita%C3%A7%C3%A3o"
+      }
+    },
     {
       "slug": "2026-08-20-noticia-72",
       "title": "Promotores saúdam reforma do arrendamento e pedem aprovação dos partidos",
