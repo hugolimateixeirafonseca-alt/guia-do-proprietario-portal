@@ -1,4 +1,6 @@
 import {
+  ALLOWED_CITIES,
+  ALLOWED_PHASES,
   ALLOWED_SOURCES,
   CONSENT_VERSION,
   ProviderError,
@@ -9,6 +11,7 @@ import {
   cleanupExpiredSessions,
   createOrUpdateKitSubscriber,
   createSession,
+  isQualifiedParentRelation,
   isValidEmail,
   json,
   logEvent,
@@ -38,9 +41,27 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     if (cleanText(body.company, 120)) return json({ ok: true }, 200);
 
-    const email = normalizeEmail(body.email);
     source = ALLOWED_SOURCES.has(cleanText(body.origem, 24)) ? cleanText(body.origem, 24) : "direto";
+    const relation = cleanText(body.relacao, 254);
+    if (!isQualifiedParentRelation(relation)) {
+      ipHash = await checkRateLimit(request, db, config.sessionSecret, 12);
+      await logEvent(db, {
+        source,
+        event: "landing_subscription_disqualified",
+        status: "ignored",
+        error: relation ? "not_parent" : "missing_relation",
+        requestId: eventRef,
+        ipHash
+      });
+      return json({ ok: true, qualified: false }, 200);
+    }
+
+    const city = cleanText(body.cidade, 24);
+    const phase = cleanText(body.fase, 24);
+    const email = normalizeEmail(body.email);
     const consentVersion = cleanText(body.consentVersion, 64);
+    if (!ALLOWED_CITIES.has(city)) throw new PublicError(400, "invalid_city");
+    if (!ALLOWED_PHASES.has(phase)) throw new PublicError(400, "invalid_phase");
     if (!isValidEmail(email)) throw new PublicError(400, "invalid_email");
     if (body.consent !== true || consentVersion !== CONSENT_VERSION) {
       throw new PublicError(400, "consent_required");
@@ -59,7 +80,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     const senderResult = await createOrUpdateKitSubscriber(
       env,
       email,
-      { "{$est_origem}": source },
+      {
+        "{$est_origem}": source,
+        "{$est_relacao}": "pai_mae_encarregado",
+        "{$est_cidade}": city,
+        "{$est_fase}": phase
+      },
       true
     );
 
@@ -108,7 +134,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     });
 
     await cleanupExpiredSessions(db);
-    return json({ ok: true, redirect: "/kit-estudante/obrigado/" }, 200, {
+    return json({ ok: true, qualified: true, redirect: "/kit-estudante/obrigado/" }, 200, {
       "Set-Cookie": sessionCookie(session.token)
     });
   } catch (error) {
