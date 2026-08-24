@@ -247,3 +247,32 @@ jobs:
           git add .automation/meta-kit-form-result.json
           git commit -m "Record Meta form automation result" || true
           git push --force origin automation/meta-form-result
+
+
+      - name: Report workflow result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          FORM_ID: ${{ steps.create_form.outputs.form_id }}
+          FORM_CREATED: ${{ steps.create_form.outputs.created }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          title="Meta Instant Form automation status"
+          body="$(cat <<EOF
+          <!-- meta-kit-form-status -->
+          **Status:** $JOB_STATUS
+          **Form ID:** ${FORM_ID:-not-created}
+          **Created in this run:** ${FORM_CREATED:-unknown}
+          **Run:** $RUN_URL
+          **Commit:** ${GITHUB_SHA}
+          EOF
+          )"
+
+          issue_number="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json number,title --jq '.[] | select(.title=="Meta Instant Form automation status") | .number' | head -n 1)"
+          if [ -n "$issue_number" ]; then
+            gh issue edit "$issue_number" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi
