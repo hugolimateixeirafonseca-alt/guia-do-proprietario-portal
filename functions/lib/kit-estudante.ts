@@ -65,6 +65,17 @@ export const normalizeEmail = (value: unknown) => cleanText(value, 254).toLowerC
 export const isValidEmail = (email: string) =>
   email.length >= 6 && email.length <= 254 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
 
+export const isQualifiedParentRelation = (value: unknown) => {
+  const normalized = cleanText(value, 254)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  return normalized === "pai mae encarregado"
+    || /^(sou )?pai mae ou encarregado de educacao( de um estudante do ensino superior)?$/.test(normalized);
+};
+
 export const requestId = (request: Request) =>
   cleanText(request.headers.get("CF-Ray"), 80) || crypto.randomUUID();
 
