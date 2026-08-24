@@ -46,5 +46,4 @@ jobs:
       - name: Test social card renderer
         run: npm run test:renderer
       - name: Build Pages Functions
-        if: always()
         run: npm run build:functions
