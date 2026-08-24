@@ -35,6 +35,9 @@ jobs:
         with:
           node-version-file: .node-version
 
+      - name: Instalar dependências
+        run: npm ci
+
       - name: Selecionar, preparar imagem e mover 1 artigo
         shell: bash
         run: |
@@ -150,7 +153,23 @@ jobs:
             echo "Preparado e movido: $NAME (seleção: $SELECTION_SOURCE)"
           done
 
+          npm run images:convert
+
+          for FILE in "${FILES[@]}"; do
+            NAME="$(basename "$FILE")"
+            SLUG="${NAME%.mdx}"
+            for EXTENSION in avif webp; do
+              PUBLIC_IMAGE="public/imagens/artigos/$SLUG.$EXTENSION"
+              if [[ ! -f "$PUBLIC_IMAGE" ]]; then
+                echo "::error::Falta a imagem pública $PUBLIC_IMAGE."
+                exit 1
+              fi
+              git add -- "$PUBLIC_IMAGE"
+            done
+          done
+
           npm run validate:dates
+          npm run validate:images
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
