@@ -63,7 +63,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     const derivedSecret = env.CLOUDFLARE_API_TOKEN
       ? await sha256(`meta-kit:${env.CLOUDFLARE_API_TOKEN}`)
       : "";
-    const secret = derivedSecret || env.MAKE_META_LEADS_SECRET || "";
+    const secret = env.MAKE_META_LEADS_SECRET || derivedSecret || "";
     if (!secret || !authorized(request, secret)) {
       return new Response("Not Found", { status: 404, headers: { "Cache-Control": "no-store" } });
     }
