@@ -14,6 +14,43 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
         <h1>Estudar fora custa <em>5.500 €</em> por ano. Ou 2.600 €, se souber o que pedir.</h1>
         <p class="intro">Dois manuais para quem vai pagar o quarto do filho este ano. Um ajuda a evitar burlas e pagamentos errados. O outro mostra o custo real, os apoios disponíveis e os prazos que decidem tudo.</p>
         <form class="lead-form" novalidate data-consent-version={KIT_ESTUDANTE_CONSENT_VERSION}>
+        <fieldset class="qualifier" data-relation-group>
+          <legend>Qual destas opções descreve melhor a sua relação com o estudante?</legend>
+          <label class="qualifier-option"><input type="radio" name="relacao" value="pai_mae_encarregado" required /><span>Sou pai, mãe ou encarregado de educação de um estudante do ensino superior</span></label>
+          <label class="qualifier-option"><input type="radio" name="relacao" value="estudante" required /><span>Sou estudante</span></label>
+          <label class="qualifier-option"><input type="radio" name="relacao" value="outro" required /><span>Outro</span></label>
+        </fieldset>
+        <p class="field-error" data-relation-error hidden>Escolha uma opção para continuar.</p>
+        <div class="non-parent-note" data-non-parent hidden>
+          Este kit foi criado especificamente para pais, mães e encarregados de educação de estudantes do ensino superior.
+        </div>
+
+        <div data-parent-fields hidden>
+          <div class="qualifier-grid">
+            <label class="field-label" for="hero-cidade">Em que cidade vai estudar o seu filho/a?
+              <select id="hero-cidade" name="cidade" required>
+                <option value="">Escolha uma opção</option>
+                <option value="lisboa">Lisboa</option>
+                <option value="porto">Porto</option>
+                <option value="coimbra">Coimbra</option>
+                <option value="braga">Braga</option>
+                <option value="aveiro">Aveiro</option>
+                <option value="evora">Évora</option>
+                <option value="faro">Faro</option>
+                <option value="outra">Outra</option>
+              </select>
+            </label>
+            <label class="field-label" for="hero-fase">Em que fase está a procura de alojamento?
+              <select id="hero-fase" name="fase" required>
+                <option value="">Escolha uma opção</option>
+                <option value="procura">Ainda estamos à procura</option>
+                <option value="encontrou">Já encontrámos alojamento</option>
+                <option value="tratado">Já está tudo tratado</option>
+              </select>
+            </label>
+          </div>
+          <p class="field-error" data-profile-error hidden>Indique a cidade e a fase da procura.</p>
+
           <label class="field-label" for="hero-email">O seu email</label>
           <div class="form-row">
             <input id="hero-email" type="email" name="email" placeholder="nome@exemplo.pt" required autocomplete="email" inputmode="email" />
@@ -28,7 +65,8 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
           <p class="field-error" data-consent-error hidden>Aceite esta opção para receber os manuais.</p>
           <p class="form-note">Envio imediato. Sem custo. Pode cancelar quando quiser.</p>
           <p class="form-status" aria-live="polite"></p>
-        </form>
+        </div>
+      </form>
       </div>
       <div class="covers" aria-label="Capas dos dois manuais incluídos no kit">
         <img class="cover cover-one" src="/kit-estudante/checklist-dos-pais-2026.webp" width="720" height="1018" alt="Capa do manual Checklist dos Pais" />
@@ -121,16 +159,58 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
       <p class="eyebrow">Receba agora</p>
       <h2>Leve os dois manuais consigo antes de pagar.</h2>
       <form class="lead-form" novalidate data-consent-version={KIT_ESTUDANTE_CONSENT_VERSION}>
-        <label class="field-label" for="final-email">O seu email</label>
-        <div class="form-row">
-          <input id="final-email" type="email" name="email" placeholder="nome@exemplo.pt" required autocomplete="email" inputmode="email" />
-          <button type="submit">Receber os dois manuais</button>
+        <fieldset class="qualifier" data-relation-group>
+          <legend>Qual destas opções descreve melhor a sua relação com o estudante?</legend>
+          <label class="qualifier-option"><input type="radio" name="relacao" value="pai_mae_encarregado" required /><span>Sou pai, mãe ou encarregado de educação de um estudante do ensino superior</span></label>
+          <label class="qualifier-option"><input type="radio" name="relacao" value="estudante" required /><span>Sou estudante</span></label>
+          <label class="qualifier-option"><input type="radio" name="relacao" value="outro" required /><span>Outro</span></label>
+        </fieldset>
+        <p class="field-error" data-relation-error hidden>Escolha uma opção para continuar.</p>
+        <div class="non-parent-note" data-non-parent hidden>
+          Este kit foi criado especificamente para pais, mães e encarregados de educação de estudantes do ensino superior.
         </div>
-        <p class="field-error" data-email-error hidden>Introduza um endereço de email válido.</p>
-        <label class="honeypot" aria-hidden="true">Empresa<input name="company" tabindex="-1" autocomplete="off" /></label>
-        <label class="consent"><input type="checkbox" name="consent" required /><span>{KIT_ESTUDANTE_CONSENT_TEXT} Consulte a <a href="/privacidade/">Política de Privacidade</a>.</span></label>
-        <p class="field-error" data-consent-error hidden>Aceite esta opção para receber os manuais.</p>
-        <p class="form-status" aria-live="polite"></p>
+
+        <div data-parent-fields hidden>
+          <div class="qualifier-grid">
+            <label class="field-label" for="final-cidade">Em que cidade vai estudar o seu filho/a?
+              <select id="final-cidade" name="cidade" required>
+                <option value="">Escolha uma opção</option>
+                <option value="lisboa">Lisboa</option>
+                <option value="porto">Porto</option>
+                <option value="coimbra">Coimbra</option>
+                <option value="braga">Braga</option>
+                <option value="aveiro">Aveiro</option>
+                <option value="evora">Évora</option>
+                <option value="faro">Faro</option>
+                <option value="outra">Outra</option>
+              </select>
+            </label>
+            <label class="field-label" for="final-fase">Em que fase está a procura de alojamento?
+              <select id="final-fase" name="fase" required>
+                <option value="">Escolha uma opção</option>
+                <option value="procura">Ainda estamos à procura</option>
+                <option value="encontrou">Já encontrámos alojamento</option>
+                <option value="tratado">Já está tudo tratado</option>
+              </select>
+            </label>
+          </div>
+          <p class="field-error" data-profile-error hidden>Indique a cidade e a fase da procura.</p>
+
+          <label class="field-label" for="final-email">O seu email</label>
+          <div class="form-row">
+            <input id="final-email" type="email" name="email" placeholder="nome@exemplo.pt" required autocomplete="email" inputmode="email" />
+            <button type="submit">Receber os dois manuais</button>
+          </div>
+          <p class="field-error" data-email-error hidden>Introduza um endereço de email válido.</p>
+          <label class="honeypot" aria-hidden="true">Empresa<input name="company" tabindex="-1" autocomplete="off" /></label>
+          <label class="consent">
+            <input type="checkbox" name="consent" required />
+            <span>{KIT_ESTUDANTE_CONSENT_TEXT} Consulte a <a href="/privacidade/">Política de Privacidade</a>.</span>
+          </label>
+          <p class="field-error" data-consent-error hidden>Aceite esta opção para receber os manuais.</p>
+          
+          <p class="form-status" aria-live="polite"></p>
+        </div>
       </form>
     </div>
   </section>
@@ -139,7 +219,7 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
 </KitEstudanteLayout>
 
 <script>
-  const sources = new Set(["artigo", "grupo", "pdf", "direto"]);
+  const sources = new Set(["meta", "artigo", "grupo", "pdf", "direto"]);
   const params = new URLSearchParams(location.search);
   const source = sources.has(params.get("src") || "") ? params.get("src") : "direto";
 
@@ -150,6 +230,13 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
   };
 
   document.querySelectorAll<HTMLFormElement>(".lead-form").forEach((form) => {
+    const relationInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="relacao"]'));
+    const parentFields = form.querySelector<HTMLElement>("[data-parent-fields]")!;
+    const nonParent = form.querySelector<HTMLElement>("[data-non-parent]")!;
+    const relationError = form.querySelector<HTMLElement>("[data-relation-error]")!;
+    const profileError = form.querySelector<HTMLElement>("[data-profile-error]")!;
+    const city = form.elements.namedItem("cidade") as HTMLSelectElement;
+    const phase = form.elements.namedItem("fase") as HTMLSelectElement;
     const email = form.elements.namedItem("email") as HTMLInputElement;
     const consent = form.elements.namedItem("consent") as HTMLInputElement;
     const company = form.elements.namedItem("company") as HTMLInputElement;
@@ -158,15 +245,52 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
     const emailError = form.querySelector<HTMLElement>("[data-email-error]")!;
     const consentError = form.querySelector<HTMLElement>("[data-consent-error]")!;
 
+    const selectedRelation = () => relationInputs.find((input) => input.checked)?.value || "";
+    const setParentState = () => {
+      const relation = selectedRelation();
+      const qualified = relation === "pai_mae_encarregado";
+      const answeredNonParent = Boolean(relation) && !qualified;
+      parentFields.hidden = !qualified;
+      nonParent.hidden = !answeredNonParent;
+      relationError.hidden = Boolean(relation);
+      for (const control of [city, phase, email, consent, company]) control.disabled = !qualified;
+      if (!qualified) status.textContent = "";
+    };
+
+    for (const input of relationInputs) input.addEventListener("change", setParentState);
+    city.addEventListener("change", () => { profileError.hidden = true; city.removeAttribute("aria-invalid"); });
+    phase.addEventListener("change", () => { profileError.hidden = true; phase.removeAttribute("aria-invalid"); });
     email.addEventListener("input", () => { emailError.hidden = true; email.removeAttribute("aria-invalid"); });
     consent.addEventListener("change", () => { consentError.hidden = true; consent.removeAttribute("aria-invalid"); });
+    setParentState();
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+
+      const relation = selectedRelation();
+      if (!relation) {
+        relationError.hidden = false;
+        relationInputs[0]?.focus();
+        return;
+      }
+      if (relation !== "pai_mae_encarregado") {
+        nonParent.hidden = false;
+        return;
+      }
+
+      const profileValid = Boolean(city.value) && Boolean(phase.value);
+      profileError.hidden = profileValid;
+      city.toggleAttribute("aria-invalid", !city.value);
+      phase.toggleAttribute("aria-invalid", !phase.value);
       emailError.hidden = email.validity.valid;
       consentError.hidden = consent.checked;
       email.toggleAttribute("aria-invalid", !email.validity.valid);
       consent.toggleAttribute("aria-invalid", !consent.checked);
+
+      if (!profileValid) {
+        (!city.value ? city : phase).focus();
+        return;
+      }
       if (!email.validity.valid) { email.focus(); return; }
       if (!consent.checked) { consent.focus(); return; }
 
@@ -174,6 +298,7 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
       button.textContent = "A enviar…";
       status.textContent = "";
       const eventId = crypto.randomUUID();
+
       try {
         const response = await fetch("/api/kit-estudante/lead", {
           method: "POST",
@@ -183,15 +308,29 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
             consent: true,
             consentVersion: form.dataset.consentVersion,
             origem: source,
+            relacao: relation,
+            cidade: city.value,
+            fase: phase.value,
             company: company.value,
             eventId
           })
         });
         const result = await response.json();
         if (!response.ok || !result.ok) throw new Error(result.error || "submit_failed");
+        if (result.qualified === false) {
+          parentFields.hidden = true;
+          nonParent.hidden = false;
+          return;
+        }
+
         const fbq = (window as Window & { fbq?: (...args: unknown[]) => void }).fbq;
         if (measurementAllowed() && typeof fbq === "function") {
-          fbq("track", "Lead", { content_name: "kit_estudante_2026" }, { eventID: eventId });
+          fbq("track", "Lead", {
+            content_name: "kit_estudante_2026",
+            lead_type: "pai_mae_encarregado",
+            cidade: city.value,
+            fase: phase.value
+          }, { eventID: eventId });
         }
         location.assign(result.redirect || "/kit-estudante/obrigado/");
       } catch {
@@ -204,5 +343,5 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
 </script>
 
 <style>
-  .wrap{width:min(1160px,calc(100% - 40px));margin:auto}.hero{padding:72px 0 92px;background:radial-gradient(circle at 84% 18%,rgba(214,169,85,.2),transparent 28%),linear-gradient(135deg,#f6efe0,#edf4f1)}.hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:68px;align-items:center}.eyebrow{margin:0 0 12px;color:#24594f;font-size:.78rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}.hero h1,.section h2{margin:.2rem 0 1rem;line-height:1;letter-spacing:-.045em}.hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(3rem,5.5vw,5.35rem);color:#102a31}.hero h1 em{color:#315f78;font-style:normal}.intro{max-width:680px;color:#41545a;font-size:1.13rem;line-height:1.68}.lead-form{margin-top:28px;padding:20px;background:rgba(255,255,255,.86);border:1px solid #c9d7d1;box-shadow:0 16px 48px rgba(16,42,49,.1)}.field-label{display:block;margin-bottom:7px;color:#102a31;font-size:.82rem;font-weight:800}.form-row{display:grid;grid-template-columns:1fr auto;gap:10px}.form-row input{min-width:0;padding:15px 16px;border:1px solid #aebfba;border-radius:4px;background:white}.form-row input:focus{outline:3px solid rgba(37,107,92,.18);border-color:#256b5c}.form-row button{min-height:52px;padding:0 22px;border:0;border-radius:4px;color:white;background:#256b5c;font-weight:850;cursor:pointer}.form-row button:hover{background:#174e43}.form-row button:disabled{opacity:.65;cursor:wait}.consent{margin-top:14px;display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;color:#41545a;font-size:.78rem;line-height:1.48}.consent input{width:17px;height:17px;margin-top:2px;accent-color:#256b5c}.consent a{color:#24594f;font-weight:750}.form-note,.form-status,.field-error{margin:9px 0 0;font-size:.8rem}.form-note{color:#5f7075}.form-status,.field-error{color:#9a2f28;font-weight:700}.honeypot{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.covers{position:relative;min-height:590px}.cover{position:absolute;width:57%;border-radius:10px;filter:drop-shadow(0 24px 34px rgba(16,42,49,.18))}.cover-one{left:2%;top:12%;transform:rotate(-6deg)}.cover-two{right:1%;top:1%;transform:rotate(6deg)}.cover-badge{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);padding:11px 17px;border-radius:999px;color:white;background:#315f78;font-size:.84rem;font-weight:850;white-space:nowrap}.proof{background:white}.stats{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid #dce4e0}.stats div{padding:34px;text-align:center}.stats div+div{border-left:1px solid #dce4e0}.stats strong{display:block;color:#315f78;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.5rem,4vw,4.4rem);line-height:1}.stats span{display:block;margin-top:10px;color:#5f7075;font-size:.92rem}.section{padding:86px 0}.section.soft{background:#f6efe0}.section.dark{color:white;background:#102a31}.section-heading{max-width:790px;margin-bottom:40px}.section h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.2rem,4vw,4.1rem)}.manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}.manual-card{padding:25px;display:grid;grid-template-columns:155px 1fr;gap:24px;align-items:start;border:1px solid #dce4e0;background:#fffefa;box-shadow:0 16px 42px rgba(16,42,49,.06)}.manual-card img{border-radius:4px;box-shadow:0 10px 28px rgba(16,42,49,.16)}.manual-card h3{margin:.35rem 0 .6rem;font-family:Georgia,"Times New Roman",serif;font-size:1.85rem}.manual-card p{color:#41545a}.manual-card .meta{margin:0;color:#24594f;font-size:.75rem;font-weight:850;letter-spacing:.06em;text-transform:uppercase}.inside-grid{display:grid;grid-template-columns:1fr 1fr;gap:58px}.inside-grid h3{font-family:Georgia,"Times New Roman",serif;font-size:2rem}.inside-grid ul{list-style:none;padding:0}.inside-grid li{position:relative;padding:14px 0 14px 34px;border-bottom:1px solid #d8d0c0}.inside-grid li:before{content:"✓";position:absolute;left:0;color:#24594f;font-weight:900}.credibility{padding:48px;border:1px solid rgba(214,169,85,.55);background:linear-gradient(135deg,#315f78,#102a31)}.credibility .eyebrow{color:#f0d399}.credibility h2{max-width:880px}.credibility>p:not(.eyebrow){max-width:800px;color:#e4edeb}.chips{margin-top:25px;display:flex;flex-wrap:wrap;gap:10px}.chips span{padding:8px 13px;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:.82rem}.calendar{color:white;background:#102a31;padding-top:0}.calendar .eyebrow{color:#f0d399}.timeline{display:grid;grid-template-columns:repeat(4,1fr)}.timeline div{position:relative;padding:30px 24px;border-top:2px solid #d6a955}.timeline div:before{content:"";position:absolute;top:-7px;left:24px;width:12px;height:12px;border-radius:50%;background:#d6a955}.timeline strong,.timeline span{display:block}.timeline strong{font-family:Georgia,"Times New Roman",serif;font-size:1.28rem}.timeline span{margin-top:7px;color:#d8e2df}.faq{max-width:900px}.faq details{border-bottom:1px solid #d8d0c0}.faq summary{padding:20px 4px;color:#102a31;font-weight:850;cursor:pointer}.faq details p{margin:0 4px 20px;color:#5f7075}.final-cta{text-align:center;background:linear-gradient(180deg,#edf4f1,#fffefa)}.final-inner{max-width:760px}.final-inner .lead-form{text-align:left}.kit-footer{padding:28px 0;border-top:1px solid #dce4e0;background:#fffefa;color:#5f7075;font-size:.82rem}.kit-footer .wrap{display:flex;justify-content:space-between;gap:20px}.kit-footer nav{display:flex;flex-wrap:wrap;gap:16px}.kit-footer a{text-decoration:none}.kit-footer a:hover{text-decoration:underline}@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:30px}.covers{min-height:520px;max-width:650px;width:100%;margin:auto}.manual-grid{grid-template-columns:1fr}.timeline{grid-template-columns:1fr 1fr}}@media(max-width:720px){.wrap{width:calc(100% - 28px)}.hero{padding:52px 0 72px}.hero h1{font-size:clamp(2.65rem,13vw,4.15rem)}.form-row{grid-template-columns:1fr}.covers{min-height:410px}.cover-badge{bottom:2%;font-size:.75rem}.section{padding:64px 0}.stats{grid-template-columns:1fr}.stats div+div{border-left:0;border-top:1px solid #dce4e0}.manual-card{grid-template-columns:105px 1fr;padding:18px;gap:17px}.manual-card h3{font-size:1.45rem}.inside-grid{grid-template-columns:1fr;gap:32px}.credibility{padding:30px 22px}.timeline{grid-template-columns:1fr}.kit-footer .wrap{flex-direction:column}}@media(max-width:460px){.covers{min-height:340px}.manual-card{grid-template-columns:1fr}.manual-card img{width:145px}}
+  .wrap{width:min(1160px,calc(100% - 40px));margin:auto}.hero{padding:72px 0 92px;background:radial-gradient(circle at 84% 18%,rgba(214,169,85,.2),transparent 28%),linear-gradient(135deg,#f6efe0,#edf4f1)}.hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:68px;align-items:center}.eyebrow{margin:0 0 12px;color:#24594f;font-size:.78rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}.hero h1,.section h2{margin:.2rem 0 1rem;line-height:1;letter-spacing:-.045em}.hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(3rem,5.5vw,5.35rem);color:#102a31}.hero h1 em{color:#315f78;font-style:normal}.intro{max-width:680px;color:#41545a;font-size:1.13rem;line-height:1.68}.lead-form{margin-top:28px;padding:20px;background:rgba(255,255,255,.86);border:1px solid #c9d7d1;box-shadow:0 16px 48px rgba(16,42,49,.1)}.field-label{display:block;margin-bottom:7px;color:#102a31;font-size:.82rem;font-weight:800}.qualifier{margin:0 0 18px;padding:0;border:0}.qualifier legend{margin-bottom:10px;color:#102a31;font-size:.9rem;font-weight:850}.qualifier-option{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;margin:7px 0;border:1px solid #d7e0dc;border-radius:4px;background:#fff;cursor:pointer;color:#33484e;font-size:.84rem;line-height:1.35}.qualifier-option:has(input:checked){border-color:#256b5c;background:#edf6f2}.qualifier-option input{margin-top:2px;accent-color:#256b5c}.qualifier-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 16px}.qualifier-grid .field-label{margin:0}.qualifier-grid select{display:block;width:100%;margin-top:7px;padding:13px 12px;border:1px solid #aebfba;border-radius:4px;background:white;color:#102a31}.qualifier-grid select:focus{outline:3px solid rgba(37,107,92,.18);border-color:#256b5c}.non-parent-note{margin:12px 0 0;padding:14px 15px;border-left:4px solid #315f78;background:#edf4f1;color:#31464d;font-size:.88rem;line-height:1.5}.form-row{display:grid;grid-template-columns:1fr auto;gap:10px}.form-row input{min-width:0;padding:15px 16px;border:1px solid #aebfba;border-radius:4px;background:white}.form-row input:focus{outline:3px solid rgba(37,107,92,.18);border-color:#256b5c}.form-row button{min-height:52px;padding:0 22px;border:0;border-radius:4px;color:white;background:#256b5c;font-weight:850;cursor:pointer}.form-row button:hover{background:#174e43}.form-row button:disabled{opacity:.65;cursor:wait}.consent{margin-top:14px;display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;color:#41545a;font-size:.78rem;line-height:1.48}.consent input{width:17px;height:17px;margin-top:2px;accent-color:#256b5c}.consent a{color:#24594f;font-weight:750}.form-note,.form-status,.field-error{margin:9px 0 0;font-size:.8rem}.form-note{color:#5f7075}.form-status,.field-error{color:#9a2f28;font-weight:700}.honeypot{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.covers{position:relative;min-height:590px}.cover{position:absolute;width:57%;border-radius:10px;filter:drop-shadow(0 24px 34px rgba(16,42,49,.18))}.cover-one{left:2%;top:12%;transform:rotate(-6deg)}.cover-two{right:1%;top:1%;transform:rotate(6deg)}.cover-badge{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);padding:11px 17px;border-radius:999px;color:white;background:#315f78;font-size:.84rem;font-weight:850;white-space:nowrap}.proof{background:white}.stats{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid #dce4e0}.stats div{padding:34px;text-align:center}.stats div+div{border-left:1px solid #dce4e0}.stats strong{display:block;color:#315f78;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.5rem,4vw,4.4rem);line-height:1}.stats span{display:block;margin-top:10px;color:#5f7075;font-size:.92rem}.section{padding:86px 0}.section.soft{background:#f6efe0}.section.dark{color:white;background:#102a31}.section-heading{max-width:790px;margin-bottom:40px}.section h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.2rem,4vw,4.1rem)}.manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}.manual-card{padding:25px;display:grid;grid-template-columns:155px 1fr;gap:24px;align-items:start;border:1px solid #dce4e0;background:#fffefa;box-shadow:0 16px 42px rgba(16,42,49,.06)}.manual-card img{border-radius:4px;box-shadow:0 10px 28px rgba(16,42,49,.16)}.manual-card h3{margin:.35rem 0 .6rem;font-family:Georgia,"Times New Roman",serif;font-size:1.85rem}.manual-card p{color:#41545a}.manual-card .meta{margin:0;color:#24594f;font-size:.75rem;font-weight:850;letter-spacing:.06em;text-transform:uppercase}.inside-grid{display:grid;grid-template-columns:1fr 1fr;gap:58px}.inside-grid h3{font-family:Georgia,"Times New Roman",serif;font-size:2rem}.inside-grid ul{list-style:none;padding:0}.inside-grid li{position:relative;padding:14px 0 14px 34px;border-bottom:1px solid #d8d0c0}.inside-grid li:before{content:"✓";position:absolute;left:0;color:#24594f;font-weight:900}.credibility{padding:48px;border:1px solid rgba(214,169,85,.55);background:linear-gradient(135deg,#315f78,#102a31)}.credibility .eyebrow{color:#f0d399}.credibility h2{max-width:880px}.credibility>p:not(.eyebrow){max-width:800px;color:#e4edeb}.chips{margin-top:25px;display:flex;flex-wrap:wrap;gap:10px}.chips span{padding:8px 13px;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:.82rem}.calendar{color:white;background:#102a31;padding-top:0}.calendar .eyebrow{color:#f0d399}.timeline{display:grid;grid-template-columns:repeat(4,1fr)}.timeline div{position:relative;padding:30px 24px;border-top:2px solid #d6a955}.timeline div:before{content:"";position:absolute;top:-7px;left:24px;width:12px;height:12px;border-radius:50%;background:#d6a955}.timeline strong,.timeline span{display:block}.timeline strong{font-family:Georgia,"Times New Roman",serif;font-size:1.28rem}.timeline span{margin-top:7px;color:#d8e2df}.faq{max-width:900px}.faq details{border-bottom:1px solid #d8d0c0}.faq summary{padding:20px 4px;color:#102a31;font-weight:850;cursor:pointer}.faq details p{margin:0 4px 20px;color:#5f7075}.final-cta{text-align:center;background:linear-gradient(180deg,#edf4f1,#fffefa)}.final-inner{max-width:760px}.final-inner .lead-form{text-align:left}.kit-footer{padding:28px 0;border-top:1px solid #dce4e0;background:#fffefa;color:#5f7075;font-size:.82rem}.kit-footer .wrap{display:flex;justify-content:space-between;gap:20px}.kit-footer nav{display:flex;flex-wrap:wrap;gap:16px}.kit-footer a{text-decoration:none}.kit-footer a:hover{text-decoration:underline}@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:30px}.covers{min-height:520px;max-width:650px;width:100%;margin:auto}.manual-grid{grid-template-columns:1fr}.timeline{grid-template-columns:1fr 1fr}}@media(max-width:720px){.qualifier-grid{grid-template-columns:1fr}.wrap{width:calc(100% - 28px)}.hero{padding:52px 0 72px}.hero h1{font-size:clamp(2.65rem,13vw,4.15rem)}.form-row{grid-template-columns:1fr}.covers{min-height:410px}.cover-badge{bottom:2%;font-size:.75rem}.section{padding:64px 0}.stats{grid-template-columns:1fr}.stats div+div{border-left:0;border-top:1px solid #dce4e0}.manual-card{grid-template-columns:105px 1fr;padding:18px;gap:17px}.manual-card h3{font-size:1.45rem}.inside-grid{grid-template-columns:1fr;gap:32px}.credibility{padding:30px 22px}.timeline{grid-template-columns:1fr}.kit-footer .wrap{flex-direction:column}}@media(max-width:460px){.covers{min-height:340px}.manual-card{grid-template-columns:1fr}.manual-card img{width:145px}}
 </style>
