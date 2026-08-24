@@ -15,7 +15,7 @@ function solidImagePng(fill='#1267A5'){
 
 test('social premium reserva imagem ampla e usa separador curvo em camadas',()=>{
   const layout=createSocialPostLayout({title:'Equipar um quarto de estudante: por onde começar',badge:'GUIA',pillar:'casa',image:solidImagePng()});
-  assert.equal(layout.metrics.design,'premium-editorial-v2');
+  assert.equal(layout.metrics.design,'premium-editorial-v3');
   assert.equal(layout.metrics.image.left,620);
   assert.equal(layout.metrics.image.width,916);
   assert.ok(layout.metrics.image.width/SOCIAL_POST_CARD.width>0.59);
@@ -36,7 +36,7 @@ test('PNG social premium mantém fotografia visível e camadas editoriais no SVG
     pillar:'casa',
     image:solidImagePng('#1267A5')
   });
-  assert.equal(rendered.metrics.design,'premium-editorial-v2');
+  assert.equal(rendered.metrics.design,'premium-editorial-v3');
   const right=await sharp(rendered.png).extract({left:1110,top:260,width:260,height:300}).stats();
   const [rr,,rb]=right.channels.slice(0,3).map(channel=>channel.mean);
   assert.ok(rb>120,'a zona da fotografia deve conservar o azul da imagem-base');
