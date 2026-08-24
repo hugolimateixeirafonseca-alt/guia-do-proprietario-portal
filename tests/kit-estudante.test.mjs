@@ -31,7 +31,8 @@ before(async () => {
   landingSource = await readFile(path.resolve("src/pages/kit-estudante/index.astro"), "utf8");
   kitLayoutSource = await readFile(path.resolve("src/layouts/KitEstudanteLayout.astro"), "utf8");
   directDeployWorkflowSource = await readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8");
-  metaWebhookSource = await readFile(path.resolve("functions/api/meta/webhook.ts"), "utf8");\n  metaFormCreatorSource = await readFile(path.resolve("functions/api/meta/create-kit-form.ts"), "utf8");
+  metaWebhookSource = await readFile(path.resolve("functions/api/meta/webhook.ts"), "utf8");
+  metaFormCreatorSource = await readFile(path.resolve("functions/api/meta/create-kit-form.ts"), "utf8");
 });
 
 beforeEach(() => { calls = []; });
