@@ -17,7 +17,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
       </a>
       <div class="header-trust">
         <div class="header-proof"><span class="proof-icon">✓</span><span><strong>Pedido gratuito</strong><small>Em todo o país</small></span></div>
-        <a class="header-cta" href="#pedido">Pedir preço</a>
+        <a class="header-cta" href="#pedido">Verificar disponibilidade</a>
       </div>
     </div>
   </header>
@@ -33,7 +33,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
           <ul class="hero-bullets">
             <li>Limpeza regular, profunda e pós-obra</li>
             <li>Casas, apartamentos, escritórios e lojas</li>
-            <li>Escolha o dia e se prefere manhã ou tarde</li>
+            <li>Escolha os dias e períodos em que tem disponibilidade</li>
           </ul>
         </div>
 
@@ -151,28 +151,30 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
 
                 <div id="recurringFields" class="conditional is-hidden">
                   <div class="field-block">
-                    <span class="field-label">Que dia prefere?</span>
+                    <span class="field-label">Que dias prefere?</span>
+                    <p class="question-help compact-help">Pode selecionar vários dias.</p>
                     <div class="weekday-grid">
-                      <label><input type="radio" name="preferred_weekday" value="monday"><span>Seg</span></label>
-                      <label><input type="radio" name="preferred_weekday" value="tuesday"><span>Ter</span></label>
-                      <label><input type="radio" name="preferred_weekday" value="wednesday"><span>Qua</span></label>
-                      <label><input type="radio" name="preferred_weekday" value="thursday"><span>Qui</span></label>
-                      <label><input type="radio" name="preferred_weekday" value="friday"><span>Sex</span></label>
-                      <label><input type="radio" name="preferred_weekday" value="saturday"><span>Sáb</span></label>
-                      <label class="wide"><input type="radio" name="preferred_weekday" value="flexible"><span>Sou flexível</span></label>
+                      <label><input type="checkbox" name="preferred_weekdays" value="monday"><span>Seg</span></label>
+                      <label><input type="checkbox" name="preferred_weekdays" value="tuesday"><span>Ter</span></label>
+                      <label><input type="checkbox" name="preferred_weekdays" value="wednesday"><span>Qua</span></label>
+                      <label><input type="checkbox" name="preferred_weekdays" value="thursday"><span>Qui</span></label>
+                      <label><input type="checkbox" name="preferred_weekdays" value="friday"><span>Sex</span></label>
+                      <label><input type="checkbox" name="preferred_weekdays" value="saturday"><span>Sáb</span></label>
+                      <label class="wide"><input type="checkbox" name="preferred_weekdays" value="flexible"><span>Sou flexível</span></label>
                     </div>
-                    <p class="field-error" data-error-for="preferred_weekday"></p>
+                    <p class="field-error" data-error-for="preferred_weekdays"></p>
                   </div>
                 </div>
 
                 <div class="field-block">
-                  <span class="field-label">Prefere manhã ou tarde?</span>
+                  <span class="field-label">Que períodos prefere?</span>
+                  <p class="question-help compact-help">Pode selecionar manhã e tarde.</p>
                   <div class="option-grid option-grid-3 compact-options">
-                    <label class="option-card"><input type="radio" name="preferred_time_period" value="morning" required><b>Manhã</b></label>
-                    <label class="option-card"><input type="radio" name="preferred_time_period" value="afternoon"><b>Tarde</b></label>
-                    <label class="option-card"><input type="radio" name="preferred_time_period" value="flexible"><b>Indiferente</b></label>
+                    <label class="option-card"><input type="checkbox" name="preferred_time_periods" value="morning"><b>Manhã</b></label>
+                    <label class="option-card"><input type="checkbox" name="preferred_time_periods" value="afternoon"><b>Tarde</b></label>
+                    <label class="option-card"><input type="checkbox" name="preferred_time_periods" value="flexible"><b>Indiferente</b></label>
                   </div>
-                  <p class="field-error" data-error-for="preferred_time_period"></p>
+                  <p class="field-error" data-error-for="preferred_time_periods"></p>
                 </div>
               </fieldset>
               <div class="form-actions"><button class="btn btn-light prev-step" type="button">Voltar</button><button class="btn btn-primary next-step" type="button">Continuar →</button></div>
@@ -247,7 +249,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
           <article><h3>Pós-obra</h3><img src="/imagens/landings/limpezas/before-after-postwork-clean.jpg" alt="Antes e depois ilustrativo de uma limpeza pós-obra"></article>
           <article><h3>Janelas e vidros</h3><img src="/imagens/landings/limpezas/before-after-windows-clean.jpg" alt="Antes e depois ilustrativo de janelas e vidros"></article>
         </div>
-        <div class="center-cta"><a href="#pedido" class="btn btn-outline">Quero pedir preço para a minha limpeza →</a></div>
+        <div class="center-cta"><a href="#pedido" class="btn btn-outline">Quero pedir preço e disponibilidade para a minha limpeza →</a></div>
       </div>
     </section>
 

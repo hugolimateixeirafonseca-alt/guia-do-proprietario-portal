@@ -49,8 +49,8 @@ const cleaningBody = {
   serviceFrequency: "one_time",
   oneTimeTiming: "this_week",
   preferredDate: "",
-  preferredWeekday: "",
-  preferredTimePeriod: "morning",
+  preferredWeekdays: [],
+  preferredTimePeriods: ["morning"],
   additionalNotes: "Há um cão em casa.",
   consent1: true,
   consent2: false,
@@ -392,6 +392,8 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
   assert.equal(dashboardBody.service_type, "profunda");
   assert.equal(dashboardBody.name, "Marta Silva");
   assert.equal(dashboardBody.phone, "912 345 678");
+  assert.deepEqual(dashboardBody.preferred_weekdays, []);
+  assert.deepEqual(dashboardBody.preferred_time_periods, ["morning"]);
   assert.equal(dashboardBody.consent_partner_sharing, true);
   assert.equal(dashboardBody.consent_marketing, false);
   assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", dashboardStored: true });
@@ -462,12 +464,37 @@ test("recusa pedidos de limpeza incompletos ou com disponibilidade incompatível
   const missingTiming = await onRequestPost({ request: requestFor({ ...cleaningBody, oneTimeTiming: "" }), env });
   const missingDate = await onRequestPost({ request: requestFor({ ...cleaningBody, oneTimeTiming: "specific_date", preferredDate: "" }), env });
   const missingWeekday = await onRequestPost({
-    request: requestFor({ ...cleaningBody, serviceFrequency: "weekly", oneTimeTiming: "", preferredWeekday: "" }), env
+    request: requestFor({ ...cleaningBody, serviceFrequency: "weekly", oneTimeTiming: "", preferredWeekdays: [] }), env
   });
   assert.deepEqual(await missingService.json(), { error: "invalid_service_type" });
   assert.deepEqual(await missingTiming.json(), { error: "invalid_one_time_timing" });
   assert.deepEqual(await missingDate.json(), { error: "invalid_preferred_date" });
   assert.deepEqual(await missingWeekday.json(), { error: "invalid_preferred_weekday" });
+});
+
+test("envia vários dias e períodos para o matching", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
+    if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-multi" }, { status: 201 });
+    throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      ...cleaningBody,
+      serviceFrequency: "weekly",
+      oneTimeTiming: "",
+      preferredWeekdays: ["monday", "wednesday", "friday"],
+      preferredTimePeriods: ["morning", "afternoon"]
+    }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  const dashboardBody = JSON.parse(calls.at(-1).init.body);
+  assert.deepEqual(dashboardBody.preferred_weekdays, ["monday", "wednesday", "friday"]);
+  assert.deepEqual(dashboardBody.preferred_time_periods, ["morning", "afternoon"]);
 });
 
 test("não perde a lead se os campos de localização ainda não existirem no Sender", async () => {
