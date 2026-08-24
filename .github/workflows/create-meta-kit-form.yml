@@ -1,0 +1,188 @@
+name: Create Meta Kit Student Form
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/create-meta-kit-form.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-social-functions-production
+  cancel-in-progress: false
+
+jobs:
+  create-form:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
+      CF_PAGES_PROJECT: guia-do-proprietario-portal
+      META_FORM_ENDPOINT: https://guiadoproprietario.pt/api/meta/create-kit-form
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.19.0'
+          cache: npm
+
+      - name: Validate required Cloudflare secrets
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID'; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CF_PAGES_API_TOKEN'; exit 1; }
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Load public build variables
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFile } from 'node:fs/promises';
+
+          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${process.env.CF_PAGES_PROJECT}`;
+          const response = await fetch(endpoint, {
+            headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}` }
+          });
+          const payload = await response.json();
+          if (!response.ok || !payload.success) throw new Error(`Pages project lookup failed with ${response.status}`);
+          const pixelId = payload.result?.deployment_configs?.production?.env_vars?.PUBLIC_META_PIXEL_ID?.value || '';
+          if (!/^\d{10,30}$/.test(pixelId)) throw new Error('PUBLIC_META_PIXEL_ID is missing or invalid in Pages production');
+          await appendFile(process.env.GITHUB_ENV, `PUBLIC_META_PIXEL_ID=${pixelId}\n`, 'utf8');
+          NODE
+
+      - name: Build production site before touching secrets
+        run: npm run build
+
+      - name: Generate one-time form admin secret
+        shell: bash
+        run: |
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          echo "META_FORM_ADMIN_SECRET=$secret" >> "$GITHUB_ENV"
+
+      - name: Enable one-time form creator in Cloudflare
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${process.env.CF_PAGES_PROJECT}`;
+          const response = await fetch(endpoint, {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              deployment_configs: {
+                production: {
+                  env_vars: {
+                    META_FORM_ADMIN_SECRET: {
+                      type: 'secret_text',
+                      value: process.env.META_FORM_ADMIN_SECRET
+                    }
+                  }
+                }
+              }
+            })
+          });
+          const payload = await response.json();
+          if (!response.ok || !payload.success) throw new Error(`Could not enable temporary form creator (${response.status})`);
+          NODE
+
+      - name: Deploy endpoint with one-time authorization
+        shell: bash
+        run: |
+          npx wrangler pages deploy dist \
+            --project-name="$CF_PAGES_PROJECT" \
+            --branch=main \
+            --commit-hash="$GITHUB_SHA" \
+            --commit-dirty=false \
+            --commit-message="Enable one-time Meta form creator"
+
+      - name: Create or reuse Meta Instant Form
+        id: create_form
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFile } from 'node:fs/promises';
+
+          let lastStatus = 0;
+          let lastBody = '';
+          for (let attempt = 1; attempt <= 8; attempt += 1) {
+            const response = await fetch(process.env.META_FORM_ENDPOINT, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${process.env.META_FORM_ADMIN_SECRET}`,
+                Accept: 'application/json'
+              }
+            });
+            lastStatus = response.status;
+            lastBody = await response.text();
+            if (response.status !== 404) {
+              let payload = {};
+              try { payload = JSON.parse(lastBody); } catch {}
+              if (!response.ok || !payload.ok || !payload.id) {
+                throw new Error(`Meta form creator failed: HTTP ${response.status} ${lastBody.slice(0, 500)}`);
+              }
+              console.log(`${payload.created ? 'Created' : 'Reused'} Meta Instant Form ID ${payload.id}`);
+              await appendFile(process.env.GITHUB_OUTPUT, `form_id=${payload.id}\ncreated=${payload.created}\n`, 'utf8');
+              process.exit(0);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+          }
+          throw new Error(`Meta form endpoint did not become available: HTTP ${lastStatus} ${lastBody.slice(0, 300)}`);
+          NODE
+
+      - name: Disable one-time form creator in Cloudflare
+        if: always()
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${process.env.CF_PAGES_PROJECT}`;
+          const response = await fetch(endpoint, {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              deployment_configs: {
+                production: {
+                  env_vars: {
+                    META_FORM_ADMIN_SECRET: null
+                  }
+                }
+              }
+            })
+          });
+          const payload = await response.json();
+          if (!response.ok || !payload.success) throw new Error(`Could not remove temporary form creator secret (${response.status})`);
+          NODE
+
+      - name: Redeploy without one-time authorization
+        if: always()
+        shell: bash
+        run: |
+          if [ -d dist ]; then
+            npx wrangler pages deploy dist \
+              --project-name="$CF_PAGES_PROJECT" \
+              --branch=main \
+              --commit-hash="$GITHUB_SHA" \
+              --commit-dirty=false \
+              --commit-message="Disable one-time Meta form creator"
+          fi
+
+      - name: Summary
+        if: success()
+        shell: bash
+        run: |
+          echo "Meta Instant Form ready: ${{ steps.create_form.outputs.form_id }}"
