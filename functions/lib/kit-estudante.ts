@@ -27,6 +27,7 @@ export interface KitEnv {
   META_PAGE_ACCESS_TOKEN?: string;
   META_VERIFY_TOKEN?: string;
   META_GRAPH_VERSION?: string;
+  META_FORM_ADMIN_SECRET?: string;
 }
 
 export interface RequestContext {
