@@ -24,6 +24,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
       CF_PAGES_PROJECT: guia-do-proprietario-portal
       META_FORM_ENDPOINT: https://guiadoproprietario.pt/api/meta/create-kit-form
+      PUBLIC_META_PIXEL_ID_FALLBACK: '1394294186173855'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,8 +59,13 @@ jobs:
           });
           const payload = await response.json();
           if (!response.ok || !payload.success) throw new Error(`Pages project lookup failed with ${response.status}`);
-          const pixelId = payload.result?.deployment_configs?.production?.env_vars?.PUBLIC_META_PIXEL_ID?.value || '';
-          if (!/^\d{10,30}$/.test(pixelId)) throw new Error('PUBLIC_META_PIXEL_ID is missing or invalid in Pages production');
+          const configuredPixelId = payload.result?.deployment_configs?.production?.env_vars?.PUBLIC_META_PIXEL_ID?.value || '';
+          const fallbackPixelId = process.env.PUBLIC_META_PIXEL_ID_FALLBACK || '';
+          const pixelId = /^\d{10,30}$/.test(configuredPixelId) ? configuredPixelId : fallbackPixelId;
+          if (!/^\d{10,30}$/.test(pixelId)) throw new Error('PUBLIC_META_PIXEL_ID and fallback are missing or invalid');
+          if (pixelId === fallbackPixelId && pixelId !== configuredPixelId) {
+            console.log('Using verified fallback PUBLIC_META_PIXEL_ID for this build.');
+          }
           await appendFile(process.env.GITHUB_ENV, `PUBLIC_META_PIXEL_ID=${pixelId}\n`, 'utf8');
           NODE
 
