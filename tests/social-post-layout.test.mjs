@@ -15,9 +15,9 @@ function solidImagePng(fill='#1267A5'){
 
 test('social premium reserva imagem ampla e usa separador curvo em camadas',()=>{
   const layout=createSocialPostLayout({title:'Equipar um quarto de estudante: por onde começar',badge:'GUIA',pillar:'casa',image:solidImagePng()});
-  assert.equal(layout.metrics.design,'premium-editorial-v2');
-  assert.equal(layout.metrics.image.left,620);
-  assert.equal(layout.metrics.image.width,916);
+  assert.equal(layout.metrics.design,'premium-editorial-v3');
+  assert.equal(layout.metrics.image.left,560);
+  assert.equal(layout.metrics.image.width,976);
   assert.ok(layout.metrics.image.width/SOCIAL_POST_CARD.width>0.59);
   assert.ok(layout.metrics.title.left+layout.metrics.title.width<=layout.metrics.textSafeRight);
   assert.equal(layout.metrics.curve.layered,true);
@@ -36,14 +36,14 @@ test('PNG social premium mantém fotografia visível e camadas editoriais no SVG
     pillar:'casa',
     image:solidImagePng('#1267A5')
   });
-  assert.equal(rendered.metrics.design,'premium-editorial-v2');
+  assert.equal(rendered.metrics.design,'premium-editorial-v3');
   const right=await sharp(rendered.png).extract({left:1110,top:260,width:260,height:300}).stats();
   const [rr,,rb]=right.channels.slice(0,3).map(channel=>channel.mean);
   assert.ok(rb>120,'a zona da fotografia deve conservar o azul da imagem-base');
   assert.ok(rb>rr+25,'a fotografia não pode ser substituída pelo painel editorial');
   assert.match(rendered.svg,/#F6F0E6/i,'o SVG final deve conter o painel creme premium');
-  assert.match(rendered.svg,/#B88A4A/i,'o SVG final deve conter os detalhes dourados');
-  assert.match(rendered.svg,/#173C3D/i,'o SVG final deve conter o verde-petróleo');
+  assert.match(rendered.svg,/#B78943/i,'o SVG final deve conter os detalhes dourados');
+  assert.match(rendered.svg,/#153C38/i,'o SVG final deve conter o verde-petróleo');
 });
 
 test('social premium inclui motivos editoriais por pilar sem mudar a composição',()=>{
