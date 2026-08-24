@@ -28,6 +28,8 @@
     return element ? String(element.value || "").trim() : "";
   };
 
+  const getValues = (name) => [...form.querySelectorAll(`[name="${name}"]:checked`)].map(input => input.value);
+
   const setError = (name, text = "") => {
     const error = document.querySelector(`[data-error-for="${name}"]`);
     const field = form.elements[name];
@@ -75,8 +77,8 @@
         if (!getValue("one_time_timing")) fail("one_time_timing", "Escolha quando precisa da limpeza.");
         if (getValue("one_time_timing") === "specific_date" && !getValue("preferred_date")) fail("preferred_date", "Escolha uma data.");
       }
-      if (["weekly", "fortnightly", "monthly"].includes(frequency) && !getValue("preferred_weekday")) fail("preferred_weekday", "Escolha o dia preferido.");
-      if (!getValue("preferred_time_period")) fail("preferred_time_period", "Escolha manhã, tarde ou indiferente.");
+      if (["weekly", "fortnightly", "monthly"].includes(frequency) && !getValues("preferred_weekdays").length) fail("preferred_weekdays", "Escolha pelo menos um dia preferido.");
+      if (!getValues("preferred_time_periods").length) fail("preferred_time_periods", "Escolha pelo menos um período.");
     }
     if (number === 5) {
       const name = getValue("name").replace(/\s+/g, " ");
@@ -102,8 +104,8 @@
   const updateSummary = () => {
     const service = labels.service_type[getValue("service_type")] || "";
     const frequency = labels.service_frequency[getValue("service_frequency")] || "";
-    const day = labels.preferred_weekday[getValue("preferred_weekday")] || "";
-    const period = labels.preferred_time_period[getValue("preferred_time_period")] || "";
+    const day = getValues("preferred_weekdays").map(value => labels.preferred_weekday[value]).filter(Boolean).join(", ");
+    const period = getValues("preferred_time_periods").map(value => labels.preferred_time_period[value]).filter(Boolean).join(", ");
     summary.textContent = `Resumo: ${[service, frequency, day, period, getValue("postal_code")].filter(Boolean).join(" · ")}`;
   };
 
@@ -122,8 +124,8 @@
     invalid_service_frequency: ["service_frequency", "Escolha a frequência pretendida."],
     invalid_one_time_timing: ["one_time_timing", "Escolha quando precisa da limpeza."],
     invalid_preferred_date: ["preferred_date", "Escolha uma data válida."],
-    invalid_preferred_weekday: ["preferred_weekday", "Escolha o dia preferido."],
-    invalid_preferred_time_period: ["preferred_time_period", "Escolha manhã, tarde ou indiferente."],
+    invalid_preferred_weekday: ["preferred_weekdays", "Escolha pelo menos um dia preferido."],
+    invalid_preferred_time_period: ["preferred_time_periods", "Escolha pelo menos um período."],
     invalid_consent: ["consent_partner_sharing", "Aceite o consentimento de partilha para enviar o pedido"]
   };
 
@@ -136,6 +138,15 @@
   form.addEventListener("change", (event) => {
     if (event.target.name === "service_frequency") updateConditional();
     if (event.target.name === "one_time_timing") updateDate();
+    if (["preferred_weekdays", "preferred_time_periods"].includes(event.target.name)) {
+      const inputs = [...form.querySelectorAll(`[name="${event.target.name}"]`)];
+      const flexible = inputs.find(input => input.value === "flexible");
+      if (event.target.value === "flexible" && event.target.checked) {
+        inputs.forEach(input => { if (input !== event.target) input.checked = false; });
+      } else if (event.target.checked && flexible) {
+        flexible.checked = false;
+      }
+    }
     setError(event.target.name, "");
   });
 
@@ -163,8 +174,8 @@
       serviceFrequency: getValue("service_frequency"),
       oneTimeTiming: getValue("one_time_timing"),
       preferredDate: getValue("preferred_date"),
-      preferredWeekday: getValue("preferred_weekday"),
-      preferredTimePeriod: getValue("preferred_time_period"),
+      preferredWeekdays: getValues("preferred_weekdays"),
+      preferredTimePeriods: getValues("preferred_time_periods"),
       name: getValue("name"),
       phone: getValue("phone"),
       email: getValue("email"),

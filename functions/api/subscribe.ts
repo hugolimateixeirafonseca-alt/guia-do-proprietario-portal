@@ -29,6 +29,8 @@ interface SubscribeBody {
   preferredDate?: unknown;
   preferredWeekday?: unknown;
   preferredTimePeriod?: unknown;
+  preferredWeekdays?: unknown;
+  preferredTimePeriods?: unknown;
   additionalNotes?: unknown;
 }
 
@@ -89,6 +91,11 @@ const json = (body: object, status: number) => new Response(JSON.stringify(body)
 const cleanText = (value: unknown, maxLength: number) =>
   typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 
+const cleanChoiceList = (value: unknown, maxItems = 7, maxLength = 32) => {
+  const source = Array.isArray(value) ? value : value === undefined || value === null || value === "" ? [] : [value];
+  return [...new Set(source.map(item => cleanText(item, maxLength)).filter(Boolean))].slice(0, maxItems);
+};
+
 const normalizePostalCode = (value: unknown) => {
   const digits = cleanText(value, 16).replace(/\D/g, "").slice(0, 7);
   return digits.length === 7 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : "";
@@ -148,8 +155,8 @@ async function sendCleaningLead(
         service_frequency: cleanText(body.serviceFrequency, 32),
         one_time_timing: cleanText(body.oneTimeTiming, 32),
         preferred_date: cleanText(body.preferredDate, 10),
-        preferred_weekday: cleanText(body.preferredWeekday, 32),
-        preferred_time_period: cleanText(body.preferredTimePeriod, 32),
+        preferred_weekdays: cleanChoiceList(body.preferredWeekdays ?? body.preferredWeekday),
+        preferred_time_periods: cleanChoiceList(body.preferredTimePeriods ?? body.preferredTimePeriod, 3),
         name: cleanText(body.name, 80),
         phone: cleanText(body.phone, 32),
         email: cleanText(body.email, 254).toLowerCase(),
@@ -313,15 +320,15 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const spaceSizeCode = cleanText(body.spaceSize, 32) as keyof typeof CLEANING_LABELS.spaceSize;
   const frequencyCode = cleanText(body.serviceFrequency, 32) as keyof typeof CLEANING_LABELS.frequency;
   const timingCode = cleanText(body.oneTimeTiming, 32) as keyof typeof CLEANING_LABELS.timing;
-  const weekdayCode = cleanText(body.preferredWeekday, 32) as keyof typeof CLEANING_LABELS.weekday;
-  const periodCode = cleanText(body.preferredTimePeriod, 32) as keyof typeof CLEANING_LABELS.period;
+  const weekdayCodes = cleanChoiceList(body.preferredWeekdays ?? body.preferredWeekday) as Array<keyof typeof CLEANING_LABELS.weekday>;
+  const periodCodes = cleanChoiceList(body.preferredTimePeriods ?? body.preferredTimePeriod, 3) as Array<keyof typeof CLEANING_LABELS.period>;
   const serviceType = CLEANING_LABELS.serviceType[serviceTypeCode] || "";
   const spaceType = CLEANING_LABELS.spaceType[spaceTypeCode] || "";
   const spaceSize = CLEANING_LABELS.spaceSize[spaceSizeCode] || "";
   const serviceFrequency = CLEANING_LABELS.frequency[frequencyCode] || "";
   const oneTimeTiming = CLEANING_LABELS.timing[timingCode] || "";
-  const preferredWeekday = CLEANING_LABELS.weekday[weekdayCode] || "";
-  const preferredTimePeriod = CLEANING_LABELS.period[periodCode] || "";
+  const preferredWeekdays = weekdayCodes.map(code => CLEANING_LABELS.weekday[code]).filter(Boolean);
+  const preferredTimePeriods = periodCodes.map(code => CLEANING_LABELS.period[code]).filter(Boolean);
   const preferredDate = cleanText(body.preferredDate, 10);
   const additionalNotes = cleanText(body.additionalNotes, 500);
 
@@ -344,12 +351,14 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     if (!spaceType) return json({ error: "invalid_space_type" }, 400);
     if (!spaceSize) return json({ error: "invalid_space_size" }, 400);
     if (!serviceFrequency) return json({ error: "invalid_service_frequency" }, 400);
-    if (!preferredTimePeriod) return json({ error: "invalid_preferred_time_period" }, 400);
+    if (!preferredTimePeriods.length || preferredTimePeriods.length !== periodCodes.length || (periodCodes.includes("flexible") && periodCodes.length > 1)) {
+      return json({ error: "invalid_preferred_time_period" }, 400);
+    }
     if (frequencyCode === "one_time" && !oneTimeTiming) return json({ error: "invalid_one_time_timing" }, 400);
     if (frequencyCode === "one_time" && timingCode === "specific_date" && !/^\d{4}-\d{2}-\d{2}$/.test(preferredDate)) {
       return json({ error: "invalid_preferred_date" }, 400);
     }
-    if (["weekly", "fortnightly", "monthly"].includes(frequencyCode) && !preferredWeekday) {
+    if (["weekly", "fortnightly", "monthly"].includes(frequencyCode) && (!preferredWeekdays.length || preferredWeekdays.length !== weekdayCodes.length || (weekdayCodes.includes("flexible") && weekdayCodes.length > 1))) {
       return json({ error: "invalid_preferred_weekday" }, 400);
     }
     if (cleanText(body.eventId, 128).length < 8) return json({ error: "invalid_event_id" }, 400);
