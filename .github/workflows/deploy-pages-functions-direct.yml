@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: pages-social-functions-production
@@ -30,7 +30,6 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
       CF_PAGES_PROJECT: guia-do-proprietario-portal
       PUBLIC_META_PIXEL_ID_FALLBACK: '1394294186173855'
-      META_FORM_ENDPOINT: https://guiadoproprietario.pt/api/meta/create-kit-form
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +41,6 @@ jobs:
           cache: npm
 
       - name: Validate required secrets
-        id: validate_secrets
         shell: bash
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID'; exit 1; }
@@ -50,7 +48,6 @@ jobs:
           [[ "$PUBLIC_META_PIXEL_ID_FALLBACK" =~ ^[0-9]{10,30}$ ]] || { echo 'Invalid PUBLIC_META_PIXEL_ID_FALLBACK'; exit 1; }
 
       - name: Persist and load public build variables from Pages
-        id: load_pages_vars
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -93,238 +90,25 @@ jobs:
             console.log('Persisted verified official PUBLIC_META_PIXEL_ID in Pages production.');
           }
 
-          const pixelId = configuredPixelId;
-          if (!/^\d{10,30}$/.test(pixelId)) throw new Error('PUBLIC_META_PIXEL_ID is missing or invalid in Pages production');
-          await appendFile(process.env.GITHUB_ENV, `PUBLIC_META_PIXEL_ID=${pixelId}\n`, 'utf8');
+          if (!/^\d{10,30}$/.test(configuredPixelId)) {
+            throw new Error('PUBLIC_META_PIXEL_ID is missing or invalid in Pages production');
+          }
+          await appendFile(process.env.GITHUB_ENV, `PUBLIC_META_PIXEL_ID=${configuredPixelId}\n`, 'utf8');
           NODE
 
       - name: Install dependencies
-        id: install_dependencies
         run: npm ci
 
       - name: Build production site
-        id: build_site
-        shell: bash
         run: |
           test -n "$PUBLIC_META_PIXEL_ID" || { echo 'Missing PUBLIC_META_PIXEL_ID'; exit 1; }
           npm run build
 
-      - name: Generate one-time Meta form admin secret
-        shell: bash
-        run: |
-          secret="$(openssl rand -hex 32)"
-          echo "::add-mask::$secret"
-          echo "META_FORM_ADMIN_SECRET=$secret" >> "$GITHUB_ENV"
-
-      - name: Enable one-time Meta form creator in Cloudflare
-        id: enable_meta_form
-        continue-on-error: true
-        shell: bash
-        run: |
-          node --input-type=module <<'NODE'
-          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${process.env.CF_PAGES_PROJECT}`;
-          const response = await fetch(endpoint, {
-            method: 'PATCH',
-            headers: {
-              Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              deployment_configs: {
-                production: {
-                  env_vars: {
-                    META_FORM_ADMIN_SECRET: {
-                      type: 'secret_text',
-                      value: process.env.META_FORM_ADMIN_SECRET
-                    }
-                  }
-                }
-              }
-            })
-          });
-          const payload = await response.json();
-          if (!response.ok || !payload.success) {
-            const diagnostic = JSON.stringify({
-              stage: "enable_cloudflare",
-              http_status: response.status,
-              errors: payload.errors || [],
-              messages: payload.messages || []
-            }).slice(0, 1500);
-            await import('node:fs/promises').then(({ appendFile }) =>
-              appendFile(process.env.GITHUB_OUTPUT, `diagnostic_b64=${Buffer.from(diagnostic).toString('base64')}\n`, 'utf8')
-            );
-            throw new Error(`Could not enable temporary Meta form creator (${response.status})`);
-          }
-          NODE
-
-      - name: Deploy build with one-time Meta form authorization
-        id: deploy_with_meta_form_secret
-        if: steps.enable_meta_form.outcome == 'success'
-        continue-on-error: true
-        shell: bash
-        run: |
-          set +e
-          output="$(npx wrangler pages deploy dist \
-            --project-name="$CF_PAGES_PROJECT" \
-            --branch=main \
-            --commit-hash="$GITHUB_SHA" \
-            --commit-dirty=false \
-            --commit-message="Deploy Meta form creator ${GITHUB_SHA:0:12}" 2>&1)"
-          status=$?
-          printf '%s\n' "$output"
-          if [ "$status" -ne 0 ]; then
-            diagnostic="$(printf '%s' "$output" | tail -c 1500 | base64 -w0)"
-            echo "diagnostic_b64=$diagnostic" >> "$GITHUB_OUTPUT"
-            exit "$status"
-          fi
-
-      - name: Create or reuse Meta Instant Form
-        id: create_meta_form
-        if: steps.enable_meta_form.outcome == 'success' && steps.deploy_with_meta_form_secret.outcome == 'success'
-        continue-on-error: true
-        shell: bash
-        run: |
-          node --input-type=module <<'NODE'
-          let lastStatus = 0;
-          let lastBody = '';
-          for (let attempt = 1; attempt <= 8; attempt += 1) {
-            const response = await fetch(process.env.META_FORM_ENDPOINT, {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${process.env.META_FORM_ADMIN_SECRET}`,
-                Accept: 'application/json'
-              }
-            });
-            lastStatus = response.status;
-            lastBody = await response.text();
-            if (response.status !== 404) {
-              let payload = {};
-              try { payload = JSON.parse(lastBody); } catch {}
-              if (!response.ok || !payload.ok || !payload.id) {
-                const diagnostic = `HTTP ${response.status} ${lastBody.slice(0, 500)}`;
-                await import('node:fs/promises').then(({ appendFile }) =>
-                  appendFile(process.env.GITHUB_OUTPUT, `diagnostic_b64=${Buffer.from(diagnostic).toString('base64')}\n`, 'utf8')
-                );
-                throw new Error(`Meta form creator failed: ${diagnostic}`);
-              }
-              console.log(`${payload.created ? 'Created' : 'Reused'} Meta Instant Form ID ${payload.id}`);
-              await import('node:fs/promises').then(({ appendFile }) =>
-                appendFile(process.env.GITHUB_OUTPUT, `form_id=${payload.id}\ncreated=${payload.created}\n`, 'utf8')
-              );
-              process.exit(0);
-            }
-            await new Promise((resolve) => setTimeout(resolve, 5000));
-          }
-          const diagnostic = `endpoint unavailable: HTTP ${lastStatus} ${lastBody.slice(0, 300)}`;
-          await import('node:fs/promises').then(({ appendFile }) =>
-            appendFile(process.env.GITHUB_OUTPUT, `diagnostic_b64=${Buffer.from(diagnostic).toString('base64')}\n`, 'utf8')
-          );
-          throw new Error(diagnostic);
-          NODE
-
-      - name: Disable one-time Meta form creator in Cloudflare
-        id: disable_meta_form
-        if: always()
-        shell: bash
-        run: |
-          node --input-type=module <<'NODE'
-          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${process.env.CF_PAGES_PROJECT}`;
-          const response = await fetch(endpoint, {
-            method: 'PATCH',
-            headers: {
-              Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              deployment_configs: {
-                production: {
-                  env_vars: {
-                    META_FORM_ADMIN_SECRET: null
-                  }
-                }
-              }
-            })
-          });
-          const payload = await response.json();
-          if (!response.ok || !payload.success) {
-            throw new Error(`Could not remove temporary Meta form creator secret (${response.status})`);
-          }
-          NODE
-
-      - name: Write temporary Meta form diagnostic
-        if: always()
-        shell: bash
-        env:
-          VALIDATE_SECRETS_OUTCOME: ${{ steps.validate_secrets.outcome }}
-          LOAD_PAGES_VARS_OUTCOME: ${{ steps.load_pages_vars.outcome }}
-          INSTALL_DEPENDENCIES_OUTCOME: ${{ steps.install_dependencies.outcome }}
-          BUILD_SITE_OUTCOME: ${{ steps.build_site.outcome }}
-          ENABLE_OUTCOME: ${{ steps.enable_meta_form.outcome }}
-          ENABLE_DIAGNOSTIC_B64: ${{ steps.enable_meta_form.outputs.diagnostic_b64 }}
-          DEPLOY_ENABLE_OUTCOME: ${{ steps.deploy_with_meta_form_secret.outcome }}
-          DEPLOY_ENABLE_DIAGNOSTIC_B64: ${{ steps.deploy_with_meta_form_secret.outputs.diagnostic_b64 }}
-          CREATE_OUTCOME: ${{ steps.create_meta_form.outcome }}
-          FORM_ID: ${{ steps.create_meta_form.outputs.form_id }}
-          FORM_CREATED: ${{ steps.create_meta_form.outputs.created }}
-          FORM_DIAGNOSTIC_B64: ${{ steps.create_meta_form.outputs.diagnostic_b64 }}
-          DISABLE_OUTCOME: ${{ steps.disable_meta_form.outcome }}
-        run: |
-          mkdir -p dist/.well-known
-          node --input-type=module <<'NODE'
-          import { writeFile } from 'node:fs/promises';
-          const result = {
-            generated_at: new Date().toISOString(),
-            commit: process.env.GITHUB_SHA,
-            steps: {
-              validate_secrets: process.env.VALIDATE_SECRETS_OUTCOME || "not_run",
-              load_pages_vars: process.env.LOAD_PAGES_VARS_OUTCOME || "not_run",
-              install_dependencies: process.env.INSTALL_DEPENDENCIES_OUTCOME || "not_run",
-              build_site: process.env.BUILD_SITE_OUTCOME || "not_run",
-              enable_cloudflare: process.env.ENABLE_OUTCOME || "not_run",
-              deploy_with_secret: process.env.DEPLOY_ENABLE_OUTCOME || "not_run",
-              create_form: process.env.CREATE_OUTCOME || "not_run",
-              disable_cloudflare: process.env.DISABLE_OUTCOME || "not_run"
-            },
-            form_id: process.env.FORM_ID || "",
-            created: process.env.FORM_CREATED || "",
-            diagnostics: {
-              enable_cloudflare_b64: process.env.ENABLE_DIAGNOSTIC_B64 || "",
-              deploy_with_secret_b64: process.env.DEPLOY_ENABLE_DIAGNOSTIC_B64 || "",
-              create_form_b64: process.env.FORM_DIAGNOSTIC_B64 || ""
-            }
-          };
-          await writeFile("dist/.well-known/meta-form-result.json", JSON.stringify(result, null, 2) + "\n", "utf8");
-          NODE
-
-      - name: Redeploy clean build after Meta form creation
-        id: redeploy_clean
-        if: always()
-        shell: bash
+      - name: Deploy actual build to Cloudflare Pages
         run: |
           npx wrangler pages deploy dist \
             --project-name="$CF_PAGES_PROJECT" \
             --branch=main \
             --commit-hash="$GITHUB_SHA" \
             --commit-dirty=false \
-            --commit-message="Deploy clean social/functions ${GITHUB_SHA:0:12}"
-
-      - name: Publish Meta form diagnostic branch
-        if: always()
-        shell: bash
-        run: |
-          cp dist/.well-known/meta-form-result.json /tmp/meta-form-result.json
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B automation/meta-form-result
-          mkdir -p .automation
-          cp /tmp/meta-form-result.json .automation/meta-form-result.json
-          git add -f .automation/meta-form-result.json
-          git commit -m "Record Meta form automation result" || true
-          git push --force origin automation/meta-form-result
-
-      - name: Fail if Meta form creation failed
-        if: always() && steps.create_meta_form.outcome != 'success'
-        shell: bash
-        run: |
-          echo "Meta form creation failed; see /.well-known/meta-form-result.json"
-          exit 1
+            --commit-message="Deploy social/functions ${GITHUB_SHA:0:12}"
