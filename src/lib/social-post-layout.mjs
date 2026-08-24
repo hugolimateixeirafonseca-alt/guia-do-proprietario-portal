@@ -26,7 +26,7 @@ export const SOCIAL_POST_THEME=Object.freeze({
   white:'#FFFDF8'
 });
 
-const FONT_SIZES=[104,100,96,92,88,84,80,76,72,68,64,62];
+const FONT_SIZES=[112,108,104,100,96,92,88,84,80,76,72,68];
 
 function characterWidth(character,fontSize){
   if (/\s/u.test(character)) return fontSize*0.25;
@@ -66,7 +66,7 @@ export function selectSocialPostTitleLayout(title){
   for (const fontSize of FONT_SIZES){
     const lines=wrapTitle(exactTitle,fontSize,SOCIAL_POST_CARD.title.width);
     if (!lines) continue;
-    const lineHeight=Math.round(fontSize*1.01);
+    const lineHeight=Math.round(fontSize*0.97);
     const height=lines.length*lineHeight;
     if (lines.length<=5&&height<=SOCIAL_POST_CARD.title.maxHeight){
       return {title:exactTitle,fontSize,lineHeight,lines,height,maxLines:5};
@@ -264,9 +264,9 @@ export function createSocialPostLayout({title,badge='GUIA',image,pillar='casa'})
       display:'flex',position:'absolute',left:SOCIAL_POST_CARD.label.left,top:SOCIAL_POST_CARD.label.top,
       width:labelWidth,height:SOCIAL_POST_CARD.label.height,borderRadius:34,
       alignItems:'center',justifyContent:'center',backgroundColor:SOCIAL_POST_THEME.petrol,
-      color:SOCIAL_POST_THEME.goldLight,border:`2px solid ${SOCIAL_POST_THEME.gold}`,
-      fontFamily:'Lato',fontWeight:700,fontSize:26,letterSpacing:exactBadge.length>12?2.2:4.4,
-      paddingLeft:24,paddingRight:24
+      color:'#F5EFE2',border:`2.5px solid ${SOCIAL_POST_THEME.gold}`,
+      fontFamily:'Lato',fontWeight:700,fontSize:30,letterSpacing:exactBadge.length>12?2.4:4.8,
+      paddingLeft:26,paddingRight:26
     },exactBadge),
     element('div',{
       display:'flex',position:'absolute',
@@ -278,10 +278,11 @@ export function createSocialPostLayout({title,badge='GUIA',image,pillar='casa'})
     element('div',{
       display:'flex',position:'absolute',left:SOCIAL_POST_CARD.title.left,top:SOCIAL_POST_CARD.title.top,
       width:SOCIAL_POST_CARD.title.width,height:titleLayout.height,flexDirection:'column',
-      color:SOCIAL_POST_THEME.ink,fontFamily:'Cormorant Garamond',fontWeight:500,
-      fontSize:titleLayout.fontSize,lineHeight:1,letterSpacing:-0.7
+      color:'#0F2E2B',fontFamily:'Cormorant Garamond',fontWeight:700,
+      fontSize:titleLayout.fontSize,lineHeight:0.96,letterSpacing:-1.1,
+      textShadow:'1px 1px 0 rgba(0,0,0,0.06)'
     },titleLayout.lines.map((line,index)=>element('div',{
-      display:'flex',width:SOCIAL_POST_CARD.title.width,height:titleLayout.lineHeight,alignItems:'center'
+      display:'flex',width:SOCIAL_POST_CARD.title.width,height:Math.round(titleLayout.lineHeight*0.94),alignItems:'center'
     },line,{key:`social-title-${index}`}))),
     element('div',{
       display:'flex',position:'absolute',left:76,top:773,width:208,height:2,
@@ -295,8 +296,8 @@ export function createSocialPostLayout({title,badge='GUIA',image,pillar='casa'})
     element('div',{
       display:'flex',position:'absolute',left:SOCIAL_POST_CARD.brand.left,top:SOCIAL_POST_CARD.brand.top,
       width:SOCIAL_POST_CARD.brand.width,height:SOCIAL_POST_CARD.brand.height,alignItems:'center',
-      color:SOCIAL_POST_THEME.ink,fontFamily:'Cormorant Garamond',fontWeight:500,fontSize:34,
-      letterSpacing:0.25
+      color:'#173734',fontFamily:'Cormorant Garamond',fontWeight:600,fontSize:40,
+      letterSpacing:0.15
     },'Guia do Proprietário'),
     element('div',{
       display:'flex',position:'absolute',left:76,top:954,width:152,height:1,
