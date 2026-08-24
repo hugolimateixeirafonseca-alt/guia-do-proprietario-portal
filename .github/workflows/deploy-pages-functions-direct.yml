@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: pages-social-functions-production
@@ -258,6 +258,20 @@ jobs:
             --commit-hash="$GITHUB_SHA" \
             --commit-dirty=false \
             --commit-message="Deploy clean social/functions ${GITHUB_SHA:0:12}"
+
+      - name: Publish Meta form diagnostic branch
+        if: always()
+        shell: bash
+        run: |
+          cp dist/.well-known/meta-form-result.json /tmp/meta-form-result.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B automation/meta-form-result
+          mkdir -p .automation
+          cp /tmp/meta-form-result.json .automation/meta-form-result.json
+          git add -f .automation/meta-form-result.json
+          git commit -m "Record Meta form automation result" || true
+          git push --force origin automation/meta-form-result
 
       - name: Fail if Meta form creation failed
         if: always() && steps.create_meta_form.outcome != 'success'
