@@ -15,6 +15,7 @@ let kitLayoutSource;
 let directDeployWorkflowSource;
 let metaWebhookSource;
 let metaFormCreatorSource;
+let makeMetaLeadSource;
 const originalFetch = globalThis.fetch;
 
 before(async () => {
@@ -33,6 +34,7 @@ before(async () => {
   directDeployWorkflowSource = await readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8");
   metaWebhookSource = await readFile(path.resolve("functions/api/meta/webhook.ts"), "utf8");
   metaFormCreatorSource = await readFile(path.resolve("functions/api/meta/create-kit-form.ts"), "utf8");
+  makeMetaLeadSource = await readFile(path.resolve("functions/api/make/meta-kit-lead.ts"), "utf8");
 });
 
 beforeEach(() => { calls = []; });
@@ -293,4 +295,25 @@ test("o formulário Meta usa as perguntas e o consentimento aprovados", () => {
   assert.match(metaFormCreatorSource, /Consentimento para comunicações por email/);
   assert.match(metaFormCreatorSource, /is_required: true/);
   assert.match(metaFormCreatorSource, /https:\/\/guiadoproprietario\.pt\/privacidade\//);
+});
+
+
+test("o endpoint Make bloqueia não-pais antes do Sender", () => {
+  assert.match(makeMetaLeadSource, /MAKE_META_LEADS_SECRET/);
+  assert.match(makeMetaLeadSource, /isQualifiedParentRelation\(relation\)/);
+  assert.match(makeMetaLeadSource, /make_meta_lead_disqualified/);
+  assert.ok(
+    makeMetaLeadSource.indexOf("isQualifiedParentRelation(relation)")
+      < makeMetaLeadSource.indexOf("createOrUpdateKitSubscriber(env, email")
+  );
+});
+
+test("o endpoint Make deduplica por leadgen_id e grava campos do Kit", () => {
+  assert.match(makeMetaLeadSource, /missing_leadgen_id/);
+  assert.match(makeMetaLeadSource, /make_meta_lead_fetched/);
+  assert.match(makeMetaLeadSource, /\{\$est_origem\}: "meta"/);
+  assert.match(makeMetaLeadSource, /\{\$est_relacao\}: "pai_mae_encarregado"/);
+  assert.match(makeMetaLeadSource, /\{\$est_cidade\}/);
+  assert.match(makeMetaLeadSource, /\{\$est_fase\}/);
+  assert.match(makeMetaLeadSource, /consent_required/);
 });
