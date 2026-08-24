@@ -1,0 +1,46 @@
+name: Meta Config Presence Diagnostic
+
+on:
+  pull_request:
+    paths:
+      - '.automation/trigger-meta-config/**'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
+      CF_PAGES_PROJECT: guia-do-proprietario-portal
+    steps:
+      - name: Validate Cloudflare access
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID'; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CF_PAGES_API_TOKEN'; exit 1; }
+
+      - name: Inspect Meta configuration presence
+        run: |
+          node --input-type=module <<'NODE'
+          const endpoint = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/pages/projects/${process.env.CF_PAGES_PROJECT}`;
+          const response = await fetch(endpoint, {
+            headers: { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}` }
+          });
+          const payload = await response.json();
+          if (!response.ok || !payload.success) {
+            console.log(JSON.stringify({status: response.status, success: false, errors: payload.errors || []}));
+            process.exit(1);
+          }
+          const vars = payload.result?.deployment_configs?.production?.env_vars || {};
+          console.log(JSON.stringify({
+            has_META_PAGE_ACCESS_TOKEN: Boolean(vars.META_PAGE_ACCESS_TOKEN?.value),
+            type_META_PAGE_ACCESS_TOKEN: vars.META_PAGE_ACCESS_TOKEN?.type || null,
+            has_META_GRAPH_VERSION: Boolean(vars.META_GRAPH_VERSION?.value),
+            type_META_GRAPH_VERSION: vars.META_GRAPH_VERSION?.type || null,
+            has_META_APP_SECRET: Boolean(vars.META_APP_SECRET?.value),
+            has_META_VERIFY_TOKEN: Boolean(vars.META_VERIFY_TOKEN?.value)
+          }));
+          NODE
