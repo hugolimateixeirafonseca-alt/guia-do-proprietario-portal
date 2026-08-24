@@ -6,6 +6,7 @@ import {
   addKitGroup,
   cleanText,
   createOrUpdateKitSubscriber,
+  isQualifiedParentRelation,
   isValidEmail,
   json,
   logEvent,
@@ -78,6 +79,23 @@ function fieldMap(payload: unknown) {
   return result;
 }
 
+function relationValue(fields: Map<string, string>) {
+  const keys = [
+    "relacao_estudante",
+    "relacao",
+    "relationship",
+    "qual_destas_opcoes_descreve_melhor_a_sua_relacao_com_o_estudante"
+  ];
+  for (const key of keys) {
+    const value = fields.get(key);
+    if (value) return value;
+  }
+  for (const [key, value] of fields) {
+    if ((key.includes("relac") || key.includes("relationship")) && key.includes("estud")) return value;
+  }
+  return "";
+}
+
 function normalizeCity(value: string) {
   const normalized = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const aliases: Record<string, string> = {
@@ -132,12 +150,21 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     for (const metaLeadId of ids) {
       const duplicate = await config.db.prepare(
-        "SELECT id FROM kit_events WHERE meta_lead_id = ? AND event = 'meta_lead_fetched' LIMIT 1"
+        "SELECT id FROM kit_events WHERE meta_lead_id = ? AND event IN ('meta_lead_fetched', 'meta_lead_disqualified') LIMIT 1"
       ).bind(metaLeadId).first();
       if (duplicate) continue;
 
       const lead = await fetchMetaLead(metaLeadId, env.META_PAGE_ACCESS_TOKEN, env.META_GRAPH_VERSION);
       const fields = fieldMap(lead);
+      const relation = relationValue(fields);
+      if (!isQualifiedParentRelation(relation)) {
+        await logEvent(config.db, {
+          source: "meta", event: "meta_lead_disqualified", status: "ignored",
+          error: relation ? "not_parent" : "missing_relation", metaLeadId, requestId: reqId
+        });
+        continue;
+      }
+
       const email = normalizeEmail(fields.get("email") || fields.get("email_address") || fields.get("e-mail"));
       if (!isValidEmail(email)) {
         await logEvent(config.db, {
