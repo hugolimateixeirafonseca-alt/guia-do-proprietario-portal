@@ -114,6 +114,7 @@ jobs:
 
       - name: Enable one-time Meta form creator in Cloudflare
         id: enable_meta_form
+        continue-on-error: true
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -139,23 +140,43 @@ jobs:
           });
           const payload = await response.json();
           if (!response.ok || !payload.success) {
+            const diagnostic = JSON.stringify({
+              stage: "enable_cloudflare",
+              http_status: response.status,
+              errors: payload.errors || [],
+              messages: payload.messages || []
+            }).slice(0, 1500);
+            await import('node:fs/promises').then(({ appendFile }) =>
+              appendFile(process.env.GITHUB_OUTPUT, `diagnostic_b64=${Buffer.from(diagnostic).toString('base64')}\n`, 'utf8')
+            );
             throw new Error(`Could not enable temporary Meta form creator (${response.status})`);
           }
           NODE
 
       - name: Deploy build with one-time Meta form authorization
         id: deploy_with_meta_form_secret
+        if: steps.enable_meta_form.outcome == 'success'
+        continue-on-error: true
         shell: bash
         run: |
-          npx wrangler pages deploy dist \
+          set +e
+          output="$(npx wrangler pages deploy dist \
             --project-name="$CF_PAGES_PROJECT" \
             --branch=main \
             --commit-hash="$GITHUB_SHA" \
             --commit-dirty=false \
-            --commit-message="Deploy Meta form creator ${GITHUB_SHA:0:12}"
+            --commit-message="Deploy Meta form creator ${GITHUB_SHA:0:12}" 2>&1)"
+          status=$?
+          printf '%s\n' "$output"
+          if [ "$status" -ne 0 ]; then
+            diagnostic="$(printf '%s' "$output" | tail -c 1500 | base64 -w0)"
+            echo "diagnostic_b64=$diagnostic" >> "$GITHUB_OUTPUT"
+            exit "$status"
+          fi
 
       - name: Create or reuse Meta Instant Form
         id: create_meta_form
+        if: steps.enable_meta_form.outcome == 'success' && steps.deploy_with_meta_form_secret.outcome == 'success'
         continue-on-error: true
         shell: bash
         run: |
@@ -198,6 +219,7 @@ jobs:
           NODE
 
       - name: Disable one-time Meta form creator in Cloudflare
+        id: disable_meta_form
         if: always()
         shell: bash
         run: |
@@ -229,10 +251,15 @@ jobs:
         if: always()
         shell: bash
         env:
+          ENABLE_OUTCOME: ${{ steps.enable_meta_form.outcome }}
+          ENABLE_DIAGNOSTIC_B64: ${{ steps.enable_meta_form.outputs.diagnostic_b64 }}
+          DEPLOY_ENABLE_OUTCOME: ${{ steps.deploy_with_meta_form_secret.outcome }}
+          DEPLOY_ENABLE_DIAGNOSTIC_B64: ${{ steps.deploy_with_meta_form_secret.outputs.diagnostic_b64 }}
           CREATE_OUTCOME: ${{ steps.create_meta_form.outcome }}
           FORM_ID: ${{ steps.create_meta_form.outputs.form_id }}
           FORM_CREATED: ${{ steps.create_meta_form.outputs.created }}
           FORM_DIAGNOSTIC_B64: ${{ steps.create_meta_form.outputs.diagnostic_b64 }}
+          DISABLE_OUTCOME: ${{ steps.disable_meta_form.outcome }}
         run: |
           mkdir -p dist/.well-known
           node --input-type=module <<'NODE'
@@ -240,15 +267,25 @@ jobs:
           const result = {
             generated_at: new Date().toISOString(),
             commit: process.env.GITHUB_SHA,
-            outcome: process.env.CREATE_OUTCOME || "not_run",
+            steps: {
+              enable_cloudflare: process.env.ENABLE_OUTCOME || "not_run",
+              deploy_with_secret: process.env.DEPLOY_ENABLE_OUTCOME || "not_run",
+              create_form: process.env.CREATE_OUTCOME || "not_run",
+              disable_cloudflare: process.env.DISABLE_OUTCOME || "not_run"
+            },
             form_id: process.env.FORM_ID || "",
             created: process.env.FORM_CREATED || "",
-            diagnostic_b64: process.env.FORM_DIAGNOSTIC_B64 || ""
+            diagnostics: {
+              enable_cloudflare_b64: process.env.ENABLE_DIAGNOSTIC_B64 || "",
+              deploy_with_secret_b64: process.env.DEPLOY_ENABLE_DIAGNOSTIC_B64 || "",
+              create_form_b64: process.env.FORM_DIAGNOSTIC_B64 || ""
+            }
           };
           await writeFile("dist/.well-known/meta-form-result.json", JSON.stringify(result, null, 2) + "\n", "utf8");
           NODE
 
       - name: Redeploy clean build after Meta form creation
+        id: redeploy_clean
         if: always()
         shell: bash
         run: |
