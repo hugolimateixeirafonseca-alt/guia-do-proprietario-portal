@@ -22,6 +22,8 @@ import {
   type RequestContext
 } from "../../lib/kit-estudante";
 
+const STUDENT_SENDER_GROUP_ID = "b4wZA2";
+
 function secureEqual(left: string, right: string) {
   if (!left || !right || left.length !== right.length) return false;
   let diff = 0;
@@ -57,6 +59,18 @@ function normalizePhase(value: unknown) {
   if (normalized.includes("encontr") || normalized === "encontrou") return "encontrou";
   if (normalized.includes("tratado") || normalized === "tratado") return "tratado";
   return "";
+}
+
+function isStudentRelation(value: unknown) {
+  const normalized = cleanText(value, 254)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  return normalized === "estudante"
+    || normalized === "estudante do ensino superior"
+    || normalized === "sou estudante do ensino superior";
 }
 
 export const onRequestPost = async ({ request, env }: RequestContext) => {
@@ -101,10 +115,13 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     ).bind(metaLeadId).first();
     if (duplicate) return json({ ok: true, duplicate: true });
 
-    if (!isQualifiedParentRelation(relation)) {
+    const isParent = isQualifiedParentRelation(relation);
+    const isStudent = isStudentRelation(relation);
+
+    if (!isParent && !isStudent) {
       await logEvent(db, {
         source: "meta", event: "make_meta_lead_disqualified", status: "ignored",
-        error: relation ? "not_parent" : "missing_relation",
+        error: relation ? "unsupported_relation" : "missing_relation",
         metaLeadId, requestId: reqId
       });
       return json({ ok: true, qualified: false });
@@ -113,15 +130,19 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     if (!isValidEmail(email)) throw new PublicError(400, "invalid_email");
     if (!consent) throw new PublicError(400, "consent_required");
 
+    const relationValue = isStudent ? "estudante" : "pai_mae_encarregado";
     const fields: Record<string, string> = {
       "{$est_origem}": "meta",
-      "{$est_relacao}": "pai_mae_encarregado"
+      "{$est_relacao}": relationValue
     };
-    if (ALLOWED_CITIES.has(city)) fields["{$est_cidade}"] = city;
-    if (ALLOWED_PHASES.has(phase)) fields["{$est_fase}"] = phase;
+    if (isParent && ALLOWED_CITIES.has(city)) fields["{$est_cidade}"] = city;
+    if (isParent && ALLOWED_PHASES.has(phase)) fields["{$est_fase}"] = phase;
 
-    const sender = await createOrUpdateKitSubscriber(env, email, fields, true);
-    if (!sender.created && !sender.inGroup) await addKitGroup(env, email, true);
+    const senderEnv = isStudent
+      ? { ...env, SENDER_GROUP_KIT_ESTUDANTE: STUDENT_SENDER_GROUP_ID }
+      : env;
+    const sender = await createOrUpdateKitSubscriber(senderEnv, email, fields, true);
+    if (!sender.created && !sender.inGroup) await addKitGroup(senderEnv, email, true);
 
     const leadId = await upsertLead(
       db, email, config.sessionSecret, "meta", CONSENT_VERSION, sender.contactId
@@ -129,11 +150,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     await logEvent(db, {
       leadId, source: "meta", event: "make_meta_lead_fetched", status: "success",
+      field: "est_relacao", value: relationValue,
       consentVersion: CONSENT_VERSION, metaLeadId, requestId: reqId,
       ipHash: await sha256(`${config.sessionSecret}:make-meta`)
     });
 
-    return json({ ok: true, qualified: true });
+    return json({ ok: true, qualified: true, segment: isStudent ? "student" : "parent" });
   } catch (error) {
     if (db) {
       try {
