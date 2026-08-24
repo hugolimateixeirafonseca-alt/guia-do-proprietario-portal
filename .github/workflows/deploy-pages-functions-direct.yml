@@ -42,6 +42,7 @@ jobs:
           cache: npm
 
       - name: Validate required secrets
+        id: validate_secrets
         shell: bash
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID'; exit 1; }
@@ -49,6 +50,7 @@ jobs:
           [[ "$PUBLIC_META_PIXEL_ID_FALLBACK" =~ ^[0-9]{10,30}$ ]] || { echo 'Invalid PUBLIC_META_PIXEL_ID_FALLBACK'; exit 1; }
 
       - name: Persist and load public build variables from Pages
+        id: load_pages_vars
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -97,9 +99,11 @@ jobs:
           NODE
 
       - name: Install dependencies
+        id: install_dependencies
         run: npm ci
 
       - name: Build production site
+        id: build_site
         shell: bash
         run: |
           test -n "$PUBLIC_META_PIXEL_ID" || { echo 'Missing PUBLIC_META_PIXEL_ID'; exit 1; }
@@ -251,6 +255,10 @@ jobs:
         if: always()
         shell: bash
         env:
+          VALIDATE_SECRETS_OUTCOME: ${{ steps.validate_secrets.outcome }}
+          LOAD_PAGES_VARS_OUTCOME: ${{ steps.load_pages_vars.outcome }}
+          INSTALL_DEPENDENCIES_OUTCOME: ${{ steps.install_dependencies.outcome }}
+          BUILD_SITE_OUTCOME: ${{ steps.build_site.outcome }}
           ENABLE_OUTCOME: ${{ steps.enable_meta_form.outcome }}
           ENABLE_DIAGNOSTIC_B64: ${{ steps.enable_meta_form.outputs.diagnostic_b64 }}
           DEPLOY_ENABLE_OUTCOME: ${{ steps.deploy_with_meta_form_secret.outcome }}
@@ -268,6 +276,10 @@ jobs:
             generated_at: new Date().toISOString(),
             commit: process.env.GITHUB_SHA,
             steps: {
+              validate_secrets: process.env.VALIDATE_SECRETS_OUTCOME || "not_run",
+              load_pages_vars: process.env.LOAD_PAGES_VARS_OUTCOME || "not_run",
+              install_dependencies: process.env.INSTALL_DEPENDENCIES_OUTCOME || "not_run",
+              build_site: process.env.BUILD_SITE_OUTCOME || "not_run",
               enable_cloudflare: process.env.ENABLE_OUTCOME || "not_run",
               deploy_with_secret: process.env.DEPLOY_ENABLE_OUTCOME || "not_run",
               create_form: process.env.CREATE_OUTCOME || "not_run",
