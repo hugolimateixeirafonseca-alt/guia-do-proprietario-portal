@@ -13,6 +13,7 @@ let profileSource;
 let landingSource;
 let kitLayoutSource;
 let directDeployWorkflowSource;
+let metaWebhookSource;
 const originalFetch = globalThis.fetch;
 
 before(async () => {
@@ -29,6 +30,7 @@ before(async () => {
   landingSource = await readFile(path.resolve("src/pages/kit-estudante/index.astro"), "utf8");
   kitLayoutSource = await readFile(path.resolve("src/layouts/KitEstudanteLayout.astro"), "utf8");
   directDeployWorkflowSource = await readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8");
+  metaWebhookSource = await readFile(path.resolve("functions/api/meta/webhook.ts"), "utf8");
 });
 
 beforeEach(() => { calls = []; });
@@ -49,6 +51,24 @@ test("mantém allow-lists fechadas para cidade, fase e origem", () => {
   assert.equal(helper.ALLOWED_CITIES.has("Évora"), false);
   assert.equal(helper.ALLOWED_PHASES.has("encontrou"), true);
   assert.equal(helper.ALLOWED_SOURCES.has("anuncio-inventado"), false);
+});
+
+test("reconhece apenas a resposta parental como lead qualificada", () => {
+  assert.equal(helper.isQualifiedParentRelation("Sou pai, mãe ou encarregado de educação de um estudante do ensino superior"), true);
+  assert.equal(helper.isQualifiedParentRelation("pai_mae_encarregado"), true);
+  assert.equal(helper.isQualifiedParentRelation("Sou estudante"), false);
+  assert.equal(helper.isQualifiedParentRelation("Outro"), false);
+  assert.equal(helper.isQualifiedParentRelation(""), false);
+});
+
+test("o webhook Meta bloqueia não-pais antes de enviar para o Sender", () => {
+  assert.match(metaWebhookSource, /isQualifiedParentRelation\(relation\)/);
+  assert.match(metaWebhookSource, /meta_lead_disqualified/);
+  assert.match(metaWebhookSource, /missing_relation/);
+  assert.ok(
+    metaWebhookSource.indexOf("isQualifiedParentRelation(relation)")
+      < metaWebhookSource.indexOf("createOrUpdateKitSubscriber(env, email")
+  );
 });
 
 test("cifra e recupera o email da sessão", async () => {
