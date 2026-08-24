@@ -34,6 +34,11 @@ function authorized(request: Request, secret: string) {
   return secureEqual(header, `Bearer ${secret}`);
 }
 
+function bearerSecret(request: Request) {
+  const header = request.headers.get("Authorization") || "";
+  return header.startsWith("Bearer ") ? header.slice(7) : "";
+}
+
 function normalizeCity(value: unknown) {
   const normalized = cleanText(value, 80)
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -64,9 +69,16 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     const derivedSecret = env.CLOUDFLARE_API_TOKEN
       ? await sha256(`meta-kit:${env.CLOUDFLARE_API_TOKEN}`)
       : "";
+    const expectedSecretHash = (env as typeof env & { MAKE_META_LEADS_SECRET_SHA256?: string })
+      .MAKE_META_LEADS_SECRET_SHA256 || "";
+    const suppliedSecret = bearerSecret(request);
+    const hashAuthorized = expectedSecretHash && suppliedSecret
+      ? secureEqual(await sha256(suppliedSecret), expectedSecretHash)
+      : false;
     const isAuthorized =
       (dedicatedSecret ? authorized(request, dedicatedSecret) : false)
-      || (derivedSecret ? authorized(request, derivedSecret) : false);
+      || (derivedSecret ? authorized(request, derivedSecret) : false)
+      || hashAuthorized;
     if (!isAuthorized) {
       return new Response("Not Found", { status: 404, headers: { "Cache-Control": "no-store" } });
     }
