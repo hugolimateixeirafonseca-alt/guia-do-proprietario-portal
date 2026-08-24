@@ -21,6 +21,7 @@ export interface D1Database {
 
 export interface KitEnv {
   KIT_ESTUDANTE_DB?: D1Database;
+  DB?: D1Database;
   SENDER_API_TOKEN?: string;
   SENDER_GROUP_KIT_ESTUDANTE?: string;
   SESSION_SECRET?: string;
@@ -122,11 +123,12 @@ export async function decryptEmail(payload: string, secret: string) {
 }
 
 export function requireConfiguration(env: KitEnv) {
-  if (!env.KIT_ESTUDANTE_DB || !env.SENDER_API_TOKEN || !env.SESSION_SECRET) {
+  const db = env.KIT_ESTUDANTE_DB || env.DB;
+  if (!db || !env.SENDER_API_TOKEN || !env.SESSION_SECRET) {
     throw new ProviderError("configuration_missing");
   }
   return {
-    db: env.KIT_ESTUDANTE_DB,
+    db,
     senderToken: env.SENDER_API_TOKEN,
     sessionSecret: env.SESSION_SECRET
   };
