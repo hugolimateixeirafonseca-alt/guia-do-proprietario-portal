@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: pages-social-functions-production
@@ -35,15 +35,18 @@ jobs:
           cache: npm
 
       - name: Validate required Cloudflare secrets
+        id: validate
         shell: bash
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo 'Missing CF_ACCOUNT_ID'; exit 1; }
           test -n "$CLOUDFLARE_API_TOKEN" || { echo 'Missing CF_PAGES_API_TOKEN'; exit 1; }
 
       - name: Install dependencies
+        id: install
         run: npm ci
 
       - name: Load public build variables
+        id: load_vars
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -61,6 +64,7 @@ jobs:
           NODE
 
       - name: Build production site before touching secrets
+        id: build
         run: npm run build
 
       - name: Generate one-time form admin secret
@@ -71,6 +75,7 @@ jobs:
           echo "META_FORM_ADMIN_SECRET=$secret" >> "$GITHUB_ENV"
 
       - name: Enable one-time form creator in Cloudflare
+        id: enable
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -99,6 +104,7 @@ jobs:
           NODE
 
       - name: Deploy endpoint with one-time authorization
+        id: deploy_enable
         shell: bash
         run: |
           npx wrangler pages deploy dist \
@@ -131,7 +137,9 @@ jobs:
               let payload = {};
               try { payload = JSON.parse(lastBody); } catch {}
               if (!response.ok || !payload.ok || !payload.id) {
-                throw new Error(`Meta form creator failed: HTTP ${response.status} ${lastBody.slice(0, 500)}`);
+                const diagnostic = `HTTP ${response.status} ${lastBody.slice(0, 500)}`;
+                await appendFile(process.env.GITHUB_OUTPUT, `diagnostic_b64=${Buffer.from(diagnostic).toString("base64")}\n`, 'utf8');
+                throw new Error(`Meta form creator failed: ${diagnostic}`);
               }
               console.log(`${payload.created ? 'Created' : 'Reused'} Meta Instant Form ID ${payload.id}`);
               await appendFile(process.env.GITHUB_OUTPUT, `form_id=${payload.id}\ncreated=${payload.created}\n`, 'utf8');
@@ -139,10 +147,13 @@ jobs:
             }
             await new Promise((resolve) => setTimeout(resolve, 5000));
           }
+          const diagnostic = `endpoint unavailable: HTTP ${lastStatus} ${lastBody.slice(0, 300)}`;
+          await appendFile(process.env.GITHUB_OUTPUT, `diagnostic_b64=${Buffer.from(diagnostic).toString("base64")}\n`, 'utf8');
           throw new Error(`Meta form endpoint did not become available: HTTP ${lastStatus} ${lastBody.slice(0, 300)}`);
           NODE
 
       - name: Disable one-time form creator in Cloudflare
+        id: disable
         if: always()
         shell: bash
         run: |
@@ -169,6 +180,7 @@ jobs:
           NODE
 
       - name: Redeploy without one-time authorization
+        id: deploy_disable
         if: always()
         shell: bash
         run: |
@@ -186,3 +198,52 @@ jobs:
         shell: bash
         run: |
           echo "Meta Instant Form ready: ${{ steps.create_form.outputs.form_id }}"
+
+      - name: Publish diagnostic snapshot
+        if: always()
+        shell: bash
+        env:
+          VALIDATE_OUTCOME: ${{ steps.validate.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          LOAD_VARS_OUTCOME: ${{ steps.load_vars.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          ENABLE_OUTCOME: ${{ steps.enable.outcome }}
+          DEPLOY_ENABLE_OUTCOME: ${{ steps.deploy_enable.outcome }}
+          CREATE_OUTCOME: ${{ steps.create_form.outcome }}
+          FORM_ID: ${{ steps.create_form.outputs.form_id }}
+          FORM_CREATED: ${{ steps.create_form.outputs.created }}
+          FORM_DIAGNOSTIC_B64: ${{ steps.create_form.outputs.diagnostic_b64 }}
+          DISABLE_OUTCOME: ${{ steps.disable.outcome }}
+          DEPLOY_DISABLE_OUTCOME: ${{ steps.deploy_disable.outcome }}
+        run: |
+          mkdir -p .automation
+          node --input-type=module <<'NODE'
+          import { writeFile } from 'node:fs/promises';
+
+          const result = {
+            generated_at: new Date().toISOString(),
+            commit: process.env.GITHUB_SHA,
+            steps: {
+              validate: process.env.VALIDATE_OUTCOME || "not_run",
+              install: process.env.INSTALL_OUTCOME || "not_run",
+              load_vars: process.env.LOAD_VARS_OUTCOME || "not_run",
+              build: process.env.BUILD_OUTCOME || "not_run",
+              enable: process.env.ENABLE_OUTCOME || "not_run",
+              deploy_enable: process.env.DEPLOY_ENABLE_OUTCOME || "not_run",
+              create_form: process.env.CREATE_OUTCOME || "not_run",
+              disable: process.env.DISABLE_OUTCOME || "not_run",
+              deploy_disable: process.env.DEPLOY_DISABLE_OUTCOME || "not_run"
+            },
+            form_id: process.env.FORM_ID || "",
+            created: process.env.FORM_CREATED || "",
+            diagnostic_b64: process.env.FORM_DIAGNOSTIC_B64 || ""
+          };
+          await writeFile(".automation/meta-kit-form-result.json", JSON.stringify(result, null, 2) + "\n", "utf8");
+          NODE
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B automation/meta-form-result
+          git add .automation/meta-kit-form-result.json
+          git commit -m "Record Meta form automation result" || true
+          git push --force origin automation/meta-form-result
