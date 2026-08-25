@@ -194,9 +194,16 @@ async function sendCleaningLead(
         origem: cleanText(body.source, 64) === "guia_limpeza_alojamento_local" ? "landing-alojamento-local" : "landing-servicos-limpeza"
       })
     });
-    return { ok: response.ok, status: response.status, code: response.ok ? "" : `dashboard_${response.status}` };
+    if (!response.ok) return { ok: false, status: response.status, code: `dashboard_${response.status}`, municipality: "" };
+    const data = await response.json().catch(() => ({})) as { municipality?: unknown };
+    return {
+      ok: true,
+      status: response.status,
+      code: "",
+      municipality: cleanText(data.municipality, 120)
+    };
   } catch {
-    return { ok: false, status: 502, code: "dashboard_unavailable" };
+    return { ok: false, status: 502, code: "dashboard_unavailable", municipality: "" };
   }
 }
 
@@ -414,6 +421,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   };
 
   const postalLookup = isQualifiedLead ? await lookupPostalCode(postalCode) : null;
+  let resolvedPostalLookup: PostalLookup | null = postalLookup;
   if (postalLookup?.status === "not_found") {
     return json({ error: "postal_not_found" }, 400);
   }
@@ -423,12 +431,19 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     if (!dashboardResult.ok) {
       return json({ error: "dashboard_error", code: dashboardResult.code }, dashboardResult.status === 503 ? 503 : 502);
     }
+    if (dashboardResult.municipality && postalLookup?.status !== "found") {
+      resolvedPostalLookup = {
+        status: "found",
+        locality: dashboardResult.municipality,
+        municipality: dashboardResult.municipality
+      };
+    }
     if (!marketingConsent) {
       return json({
         ok: true,
-        locality: postalLookup?.locality || "Por confirmar",
+        locality: resolvedPostalLookup?.locality || "Por confirmar",
         dashboardStored: true,
-        ...(postalLookup?.status === "unavailable" ? { locationPending: true } : {})
+        ...(resolvedPostalLookup?.status === "unavailable" ? { locationPending: true } : {})
       }, 200);
     }
   }
@@ -449,12 +464,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     "{$EVENT_ID}": cleanText(body.eventId, 128),
     ...(isQualifiedLead && !isCleaningLead ? {
       "{$CODIGO_POSTAL}": postalCode,
-      "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar",
+      "{$LOCALIDADE}": resolvedPostalLookup?.locality || "Por confirmar",
       "{$PRAZO_VENDA}": saleTimeline
     } : {}),
     ...(isCleaningAlLead && marketingConsent ? {
       "{$CODIGO_POSTAL}": postalCode,
-      "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar",
+      "{$LOCALIDADE}": resolvedPostalLookup?.locality || "Por confirmar",
       "{$AL_UNIDADES}": alUnits,
       "{$AL_SERVICOS}": alServices.join(", "),
       "{$AL_JANELA}": alTurnaround,
@@ -482,7 +497,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     if (subscriberResult.created) {
       return json({
         ok: true,
-        ...(isQualifiedLead ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {}),
+        ...(isQualifiedLead ? { locality: resolvedPostalLookup?.locality, locationStored: subscriberResult.locationStored } : {}),
         ...(isCleaningLead ? { dashboardStored: true } : {})
       }, 200);
     }
@@ -501,7 +516,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     return json({
       ok: true,
-      ...(isQualifiedLead ? { locality: postalLookup?.locality, locationStored: subscriberResult.locationStored } : {}),
+      ...(isQualifiedLead ? { locality: resolvedPostalLookup?.locality, locationStored: subscriberResult.locationStored } : {}),
       ...(isCleaningLead ? { dashboardStored: true } : {})
     }, 200);
   } catch (error) {
