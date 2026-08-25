@@ -24,6 +24,9 @@ import {
   type RequestContext
 } from "../../lib/kit-estudante";
 
+const STUDENT_SENDER_GROUP_ID = "b4wZA2";
+const OTHER_SENDER_GROUP_ID = "egK8WG";
+
 export const onRequestPost = async ({ request, env }: RequestContext) => {
   const reqId = requestId(request);
   let db: ReturnType<typeof requireConfiguration>["db"] | undefined;
@@ -76,15 +79,21 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       senderFields["{$est_fase}"] = phase;
     }
 
+    const senderEnv = relation === "estudante"
+      ? { ...env, SENDER_GROUP_KIT_ESTUDANTE: STUDENT_SENDER_GROUP_ID }
+      : relation === "outro"
+        ? { ...env, SENDER_GROUP_KIT_ESTUDANTE: OTHER_SENDER_GROUP_ID }
+        : env;
+
     const senderResult = await createOrUpdateKitSubscriber(
-      env,
+      senderEnv,
       email,
       senderFields,
       true
     );
 
     if (!senderResult.created && !senderResult.inGroup) {
-      await addKitGroup(env, email, true);
+      await addKitGroup(senderEnv, email, true);
     }
 
     leadId = await upsertLead(
