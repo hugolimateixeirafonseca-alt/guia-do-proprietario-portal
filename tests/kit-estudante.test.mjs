@@ -351,5 +351,11 @@ test("o endpoint aceita os três percursos e só exige perfil a pais e estudante
   assert.match(landingLeadSource, /if \(requiresProfile\) \{/);
   assert.match(landingLeadSource, /senderFields\["\{\$est_cidade\}"\] = city/);
   assert.match(landingLeadSource, /senderFields\["\{\$est_fase\}"\] = phase/);
+  assert.match(landingLeadSource, /const STUDENT_SENDER_GROUP_ID = "b4wZA2"/);
+  assert.match(landingLeadSource, /const OTHER_SENDER_GROUP_ID = "egK8WG"/);
+  assert.match(landingLeadSource, /relation === "estudante"[\s\S]*SENDER_GROUP_KIT_ESTUDANTE: STUDENT_SENDER_GROUP_ID/);
+  assert.match(landingLeadSource, /relation === "outro"[\s\S]*SENDER_GROUP_KIT_ESTUDANTE: OTHER_SENDER_GROUP_ID/);
+  assert.match(landingLeadSource, /createOrUpdateKitSubscriber\([\s\S]*?senderEnv,/);
+  assert.match(landingLeadSource, /addKitGroup\(senderEnv, email, true\)/);
   assert.doesNotMatch(landingLeadSource, /qualified: false/);
 });
