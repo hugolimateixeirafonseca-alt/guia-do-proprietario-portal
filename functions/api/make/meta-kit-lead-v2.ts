@@ -2,7 +2,6 @@ import {
   ALLOWED_CITIES,
   ALLOWED_PHASES,
   CONSENT_VERSION,
-  ProviderError,
   PublicError,
   addKitGroup,
   cleanText,
@@ -98,34 +97,38 @@ type MetaField = { name: string; values: string[] };
 
 async function fetchMetaLeadFields(metaLeadId: string, env: RequestContext["env"]): Promise<MetaField[]> {
   const token = cleanText(env.META_PAGE_ACCESS_TOKEN, 4096);
-  if (!token) throw new ProviderError("meta_page_token_missing");
+  if (!token) return [];
 
-  const version = cleanText(env.META_GRAPH_VERSION, 20) || "v25.0";
-  const url = new URL(`https://graph.facebook.com/${version}/${encodeURIComponent(metaLeadId)}`);
-  url.searchParams.set("fields", "field_data");
-  url.searchParams.set("access_token", token);
+  try {
+    const version = cleanText(env.META_GRAPH_VERSION, 20) || "v25.0";
+    const url = new URL(`https://graph.facebook.com/${version}/${encodeURIComponent(metaLeadId)}`);
+    url.searchParams.set("fields", "field_data");
+    url.searchParams.set("access_token", token);
 
-  const response = await fetch(url.toString(), {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    signal: AbortSignal.timeout(8000)
-  });
-  if (!response.ok) throw new ProviderError(`meta_lead_${response.status}`);
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!response.ok) return [];
 
-  const payload = await response.json() as { field_data?: unknown };
-  if (!Array.isArray(payload.field_data)) throw new ProviderError("meta_field_data_missing");
+    const payload = await response.json() as { field_data?: unknown };
+    if (!Array.isArray(payload.field_data)) return [];
 
-  const fields: MetaField[] = [];
-  for (const item of payload.field_data) {
-    if (!item || typeof item !== "object") continue;
-    const record = item as Record<string, unknown>;
-    const name = cleanText(record.name, 180);
-    const values = Array.isArray(record.values)
-      ? record.values.map((value) => cleanText(value, 512)).filter(Boolean)
-      : [];
-    if (name || values.length) fields.push({ name, values });
+    const fields: MetaField[] = [];
+    for (const item of payload.field_data) {
+      if (!item || typeof item !== "object") continue;
+      const record = item as Record<string, unknown>;
+      const name = cleanText(record.name, 180);
+      const values = Array.isArray(record.values)
+        ? record.values.map((value) => cleanText(value, 512)).filter(Boolean)
+        : [];
+      if (name || values.length) fields.push({ name, values });
+    }
+    return fields;
+  } catch {
+    return [];
   }
-  return fields;
 }
 
 export const onRequestPost = async ({ request, env }: RequestContext) => {
@@ -161,13 +164,17 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     metaLeadId = cleanText(body.leadgen_id ?? body.leadgenId ?? body.id, 100);
     if (!metaLeadId) throw new PublicError(400, "missing_leadgen_id");
 
-    // Source of truth: fetch the original lead answers directly from Meta by leadgen_id.
     const metaFields = await fetchMetaLeadFields(metaLeadId, env);
     const metaValues = metaFields.flatMap((field) => field.values);
     const fallbackValues = splitValues(body.all_values ?? body.values ?? body.form_values);
     const values = metaValues.length ? metaValues : fallbackValues;
 
-    let relation = values.find((value) => isQualifiedParentRelation(value) || isStudentRelation(value)) || "";
+    const parentSeen = values.some((value) => isQualifiedParentRelation(value));
+    const studentSeen = values.some((value) => isStudentRelation(value));
+
+    let relation = "";
+    if (studentSeen && !parentSeen) relation = values.find((value) => isStudentRelation(value)) || "";
+    else if (parentSeen && !studentSeen) relation = values.find((value) => isQualifiedParentRelation(value)) || "";
     if (!relation) relation = cleanText(body.relacao_estudante ?? body.relacao ?? body.relationship, 254);
 
     let email = "";
@@ -191,9 +198,10 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       "SELECT id FROM kit_events WHERE meta_lead_id = ? AND event = 'make_meta_lead_fetched' LIMIT 1"
     ).bind(metaLeadId).first();
     if (duplicate) {
+      const probe = `p${parentSeen ? 1 : 0}_s${studentSeen ? 1 : 0}_c${city ? 1 : 0}_f${phase ? 1 : 0}_g${metaFields.length ? 1 : 0}`;
       await logEvent(db, {
         source: "meta", event: "make_meta_lead_duplicate_check", status: "ignored",
-        field: "est_relacao", value: relationValue || "unknown",
+        field: "classification_probe", value: probe,
         metaLeadId, requestId: reqId
       });
       return json({
