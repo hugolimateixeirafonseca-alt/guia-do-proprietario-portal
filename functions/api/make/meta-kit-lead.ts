@@ -132,8 +132,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     const relationValue = isStudent ? "estudante" : "pai_mae_encarregado";
     const fields: Record<string, string> = {
-      "{$est_origem}": "meta",
-      "{$est_relacao}": relationValue
+      "{$est_origem}": "meta"
     };
     if (isParent && ALLOWED_CITIES.has(city)) fields["{$est_cidade}"] = city;
     if (isParent && ALLOWED_PHASES.has(phase)) fields["{$est_fase}"] = phase;
