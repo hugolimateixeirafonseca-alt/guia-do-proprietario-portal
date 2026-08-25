@@ -74,6 +74,25 @@ function splitValues(value: unknown) {
   return raw.split(/\s*\|\|\|\s*/).map((item) => item.trim()).filter(Boolean).slice(0, 250);
 }
 
+async function readMetaBody(request: Request) {
+  const contentType = (request.headers.get("Content-Type") || "").toLowerCase();
+  if (contentType.includes("application/json")) return readSmallJson(request, 16384);
+
+  const raw = await request.text();
+  if (raw.length > 16384) throw new PublicError(413, "payload_too_large");
+  const body: Record<string, unknown> = {};
+  for (const line of raw.split(/\r?\n/)) {
+    const idx = line.indexOf("=");
+    if (idx <= 0) continue;
+    const key = line.slice(0, idx).trim();
+    const value = line.slice(idx + 1).trim();
+    if (!key) continue;
+    body[key] = value;
+  }
+  if (String(body.consentimento || "").toLowerCase() === "true") body.consentimento = true;
+  return body;
+}
+
 export const onRequestPost = async ({ request, env }: RequestContext) => {
   const reqId = requestId(request);
   let db: ReturnType<typeof requireConfiguration>["db"] | undefined;
@@ -102,7 +121,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     const config = requireConfiguration(env);
     db = config.db;
-    const body = await readSmallJson(request, 16384);
+    const body = await readMetaBody(request);
 
     metaLeadId = cleanText(body.leadgen_id ?? body.leadgenId ?? body.id, 100);
     if (!metaLeadId) throw new PublicError(400, "missing_leadgen_id");
@@ -129,8 +148,6 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     let isParent = isQualifiedParentRelation(relation);
     const isStudent = isStudentRelation(relation);
 
-    // Safe fallback: Q2/Q3 only exist on the parent branch. Never infer "student"
-    // merely because fields are missing; that would risk misrouting a parent.
     if (!isParent && !isStudent && !relation && (city || phase)) isParent = true;
 
     if (!isParent && !isStudent) {
