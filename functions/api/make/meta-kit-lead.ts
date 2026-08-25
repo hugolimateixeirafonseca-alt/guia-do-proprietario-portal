@@ -164,8 +164,16 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     ).bind(metaLeadId).first();
     if (duplicate) return json({ ok: true, duplicate: true });
 
-    const isParent = isQualifiedParentRelation(relation);
-    const isStudent = isStudentRelation(relation);
+    let isParent = isQualifiedParentRelation(relation);
+    let isStudent = isStudentRelation(relation);
+
+    // The Meta form routes parents through Q2/Q3 (city + search phase), while
+    // students skip those questions and still submit as leads. This fallback
+    // avoids depending on Meta's unstable internal key for Q1.
+    if (!isParent && !isStudent && !relation) {
+      if (city || phase) isParent = true;
+      else if (isValidEmail(email)) isStudent = true;
+    }
 
     if (!isParent && !isStudent) {
       await logEvent(db, {
