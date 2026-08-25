@@ -2,6 +2,7 @@ import {
   ALLOWED_CITIES,
   ALLOWED_PHASES,
   CONSENT_VERSION,
+  ProviderError,
   PublicError,
   addKitGroup,
   cleanText,
@@ -93,6 +94,40 @@ async function readMetaBody(request: Request) {
   return body;
 }
 
+type MetaField = { name: string; values: string[] };
+
+async function fetchMetaLeadFields(metaLeadId: string, env: RequestContext["env"]): Promise<MetaField[]> {
+  const token = cleanText(env.META_PAGE_ACCESS_TOKEN, 4096);
+  if (!token) throw new ProviderError("meta_page_token_missing");
+
+  const version = cleanText(env.META_GRAPH_VERSION, 20) || "v25.0";
+  const url = new URL(`https://graph.facebook.com/${version}/${encodeURIComponent(metaLeadId)}`);
+  url.searchParams.set("fields", "field_data");
+  url.searchParams.set("access_token", token);
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(8000)
+  });
+  if (!response.ok) throw new ProviderError(`meta_lead_${response.status}`);
+
+  const payload = await response.json() as { field_data?: unknown };
+  if (!Array.isArray(payload.field_data)) throw new ProviderError("meta_field_data_missing");
+
+  const fields: MetaField[] = [];
+  for (const item of payload.field_data) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    const name = cleanText(record.name, 180);
+    const values = Array.isArray(record.values)
+      ? record.values.map((value) => cleanText(value, 512)).filter(Boolean)
+      : [];
+    if (name || values.length) fields.push({ name, values });
+  }
+  return fields;
+}
+
 export const onRequestPost = async ({ request, env }: RequestContext) => {
   const reqId = requestId(request);
   let db: ReturnType<typeof requireConfiguration>["db"] | undefined;
@@ -126,29 +161,47 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     metaLeadId = cleanText(body.leadgen_id ?? body.leadgenId ?? body.id, 100);
     if (!metaLeadId) throw new PublicError(400, "missing_leadgen_id");
 
+    // Source of truth: fetch the original lead answers directly from Meta by leadgen_id.
+    const metaFields = await fetchMetaLeadFields(metaLeadId, env);
+    const metaValues = metaFields.flatMap((field) => field.values);
+    const fallbackValues = splitValues(body.all_values ?? body.values ?? body.form_values);
+    const values = metaValues.length ? metaValues : fallbackValues;
+
+    let relation = values.find((value) => isQualifiedParentRelation(value) || isStudentRelation(value)) || "";
+    if (!relation) relation = cleanText(body.relacao_estudante ?? body.relacao ?? body.relationship, 254);
+
+    let email = "";
+    const emailField = metaFields.find((field) => normalize(field.name, 180) === "email");
+    if (emailField?.values[0]) email = normalizeEmail(emailField.values[0]);
+    if (!isValidEmail(email)) email = normalizeEmail(body.email ?? body.email_address);
+    if (!isValidEmail(email)) email = values.map(normalizeEmail).find(isValidEmail) || email;
+
+    let city = values.map(normalizeCity).find(Boolean) || "";
+    if (!city) city = normalizeCity(body.cidade ?? body.city);
+
+    let phase = values.map(normalizePhase).find(Boolean) || "";
+    if (!phase) phase = normalizePhase(body.fase ?? body.phase);
+
+    const consent = body.consentimento === true || body.consent === true || body.consentimento_email === true;
+    const isParent = isQualifiedParentRelation(relation);
+    const isStudent = isStudentRelation(relation);
+    const relationValue = isStudent ? "estudante" : isParent ? "pai_mae_encarregado" : "";
+
     const duplicate = await db.prepare(
       "SELECT id FROM kit_events WHERE meta_lead_id = ? AND event = 'make_meta_lead_fetched' LIMIT 1"
     ).bind(metaLeadId).first();
-    if (duplicate) return json({ ok: true, duplicate: true });
-
-    const values = splitValues(body.all_values ?? body.values ?? body.form_values);
-    let relation = cleanText(body.relacao_estudante ?? body.relacao ?? body.relationship, 254);
-    if (!relation) relation = values.find((v) => isQualifiedParentRelation(v) || isStudentRelation(v)) || "";
-
-    let email = normalizeEmail(body.email ?? body.email_address);
-    if (!isValidEmail(email)) email = values.map(normalizeEmail).find(isValidEmail) || email;
-
-    let city = normalizeCity(body.cidade ?? body.city);
-    if (!city) city = values.map(normalizeCity).find(Boolean) || "";
-
-    let phase = normalizePhase(body.fase ?? body.phase);
-    if (!phase) phase = values.map(normalizePhase).find(Boolean) || "";
-
-    const consent = body.consentimento === true || body.consent === true || body.consentimento_email === true;
-    let isParent = isQualifiedParentRelation(relation);
-    const isStudent = isStudentRelation(relation);
-
-    if (!isParent && !isStudent && !relation && (city || phase)) isParent = true;
+    if (duplicate) {
+      await logEvent(db, {
+        source: "meta", event: "make_meta_lead_duplicate_check", status: "ignored",
+        field: "est_relacao", value: relationValue || "unknown",
+        metaLeadId, requestId: reqId
+      });
+      return json({
+        ok: true,
+        duplicate: true,
+        segment: isStudent ? "student" : isParent ? "parent" : null
+      });
+    }
 
     if (!isParent && !isStudent) {
       await logEvent(db, {
@@ -173,7 +226,6 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     if (!sender.created && !sender.inGroup) await addKitGroup(senderEnv, email, true);
 
     const leadId = await upsertLead(db, email, config.sessionSecret, "meta", CONSENT_VERSION, sender.contactId);
-    const relationValue = isStudent ? "estudante" : "pai_mae_encarregado";
 
     await logEvent(db, {
       leadId, source: "meta", event: "make_meta_lead_fetched", status: "success",
