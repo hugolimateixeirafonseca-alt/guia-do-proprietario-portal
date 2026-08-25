@@ -1,0 +1,162 @@
+---
+import Squeeze from "../../layouts/Squeeze.astro";
+import { ALOJAMENTO_LOCAL_CONSENT_VERSION } from "../../data/consent";
+import "../../styles/alojamento-local-cleaning.css";
+
+const titulo = "Limpeza para alojamento local | Guia do Proprietário";
+const descricao = "Peça preço e disponibilidade a empresas de limpeza da sua zona preparadas para alojamento local.";
+const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
+---
+
+<Squeeze titulo={titulo} descricao={descricao} imagemOg={imagemOg} robots="noindex,follow">
+  <header class="al-topbar">
+    <div class="al-wrap al-topbar-inner">
+      <a class="al-brand" href="#top" aria-label="Guia do Proprietário">
+        <img src="/favicon.svg" alt="" />
+        <span><strong>Guia do Proprietário</strong><small>Alojamento local</small></span>
+      </a>
+      <a class="al-header-cta" href="#pedido">Verificar disponibilidade</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="al-hero">
+      <div class="al-wrap al-hero-grid">
+        <div class="al-copy">
+          <span class="al-pill">Limpeza e lavandaria</span>
+          <h1><mark>Alojamento local</mark> limpo e pronto antes do próximo hóspede chegar.</h1>
+          <p class="al-lead">Diga-nos como funciona a sua operação. Encaminhamos o pedido para empresas da sua zona preparadas para trabalhar entre o check-out e o check-in.</p>
+          <ul class="al-benefits">
+            <li><span>✓</span><div><strong>Operação de alojamento local</strong><small>O parceiro recebe o contexto da rotação antes de aceitar o pedido.</small></div></li>
+            <li><span>✓</span><div><strong>Match pela localização e pelo serviço</strong><small>O concelho é confirmado automaticamente a partir do código postal.</small></div></li>
+            <li><span>✓</span><div><strong>Lavandaria e consumíveis</strong><small>Pode pedir apenas a limpeza ou indicar tudo o que precisa.</small></div></li>
+          </ul>
+          <div class="al-metrics" aria-label="Vantagens do pedido">
+            <div><strong>3</strong><span>parceiros, no máximo</span></div>
+            <div><strong>1 min</strong><span>para enviar o pedido</span></div>
+            <div><strong>0 €</strong><span>para pedir disponibilidade</span></div>
+          </div>
+        </div>
+
+        <section class="al-panel" id="pedido" aria-labelledby="al-form-title">
+          <header class="al-panel-head">
+            <div><h2 id="al-form-title">Peça preço e disponibilidade</h2><p>Sem registo. O contacto só é pedido no fim.</p></div>
+            <span id="alStepLabel">Passo 1 de 4</span>
+          </header>
+          <div class="al-progress" aria-hidden="true"><i class="is-active"></i><i></i><i></i><i></i></div>
+
+          <form id="alQuoteForm" data-consent-version={ALOJAMENTO_LOCAL_CONSENT_VERSION} novalidate>
+            <section class="al-step is-active" data-step="1">
+              <fieldset>
+                <legend>Quantos alojamentos quer incluir?</legend>
+                <p class="al-help">Escolha a dimensão atual da operação.</p>
+                <div class="al-options al-options-2">
+                  <label><input type="radio" name="al_units" value="1"><strong>1</strong></label>
+                  <label><input type="radio" name="al_units" value="2-3"><strong>2 a 3</strong></label>
+                  <label><input type="radio" name="al_units" value="4-9"><strong>4 a 9</strong></label>
+                  <label><input type="radio" name="al_units" value="10-plus"><strong>10 ou mais</strong></label>
+                </div>
+                <p class="al-error" data-error-for="al_units"></p>
+              </fieldset>
+              <p class="al-auto-note">A seleção avança automaticamente.</p>
+            </section>
+
+            <section class="al-step" data-step="2">
+              <fieldset>
+                <legend>De que serviços precisa?</legend>
+                <p class="al-help">Pode selecionar várias opções.</p>
+                <div class="al-options al-options-list">
+                  <label><input type="checkbox" name="al_services" value="rotation"><span><strong>Limpeza entre estadias</strong><small>A cada check-out</small></span></label>
+                  <label><input type="checkbox" name="al_services" value="laundry"><span><strong>Roupa de cama e banho</strong><small>Recolha, lavagem e entrega</small></span></label>
+                  <label><input type="checkbox" name="al_services" value="consumables"><span><strong>Reposição de consumíveis</strong><small>Papel, sabonete, café e outros essenciais</small></span></label>
+                  <label><input type="checkbox" name="al_services" value="deep"><span><strong>Limpeza profunda pontual</strong><small>Início de operação, época ou intervenção específica</small></span></label>
+                  <label><input type="checkbox" name="al_services" value="maintenance"><span><strong>Pequenas reparações</strong><small>Problemas identificados entre hóspedes</small></span></label>
+                </div>
+                <p class="al-error" data-error-for="al_services"></p>
+              </fieldset>
+              <div class="al-actions"><button type="button" class="al-back">Voltar</button><button type="button" class="al-primary al-next">Continuar</button></div>
+            </section>
+
+            <section class="al-step" data-step="3">
+              <fieldset>
+                <legend>Onde fica e como funciona?</legend>
+                <p class="al-help">Estes dados ajudam a encontrar parceiros preparados para a sua operação.</p>
+                <div class="al-field">
+                  <label for="al_postal_code">Código postal</label>
+                  <input id="al_postal_code" name="postal_code" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="4000-123" required />
+                  <small>Confirmamos o concelho automaticamente para evitar falhas no match.</small>
+                  <p class="al-error" data-error-for="postal_code"></p>
+                </div>
+                <div class="al-field">
+                  <label for="al_turnaround">Tempo entre o check-out e o check-in</label>
+                  <select id="al_turnaround" name="al_turnaround" required>
+                    <option value="">Escolha uma opção</option>
+                    <option value="under_3h">Menos de 3 horas</option>
+                    <option value="3_5h">Entre 3 e 5 horas</option>
+                    <option value="over_5h">Mais de 5 horas</option>
+                    <option value="free_day">Costuma haver um dia livre</option>
+                    <option value="varies">Varia muito</option>
+                  </select>
+                  <p class="al-error" data-error-for="al_turnaround"></p>
+                </div>
+                <div class="al-field">
+                  <label for="al_access">Como se entra no alojamento?</label>
+                  <select id="al_access" name="al_access" required>
+                    <option value="">Escolha uma opção</option>
+                    <option value="lockbox">Cofre ou código</option>
+                    <option value="company_key">A empresa fica com chave</option>
+                    <option value="in_person">Alguém abre a porta</option>
+                    <option value="undecided">Ainda por definir</option>
+                  </select>
+                  <p class="al-error" data-error-for="al_access"></p>
+                </div>
+              </fieldset>
+              <div class="al-actions"><button type="button" class="al-back">Voltar</button><button type="button" class="al-primary al-next">Continuar</button></div>
+            </section>
+
+            <section class="al-step" data-step="4">
+              <fieldset>
+                <legend>Como podem contactá-lo?</legend>
+                <p class="al-help">Os parceiros que aceitarem o pedido poderão falar consigo diretamente.</p>
+                <div class="al-field"><label for="al_name">Nome</label><input id="al_name" name="name" type="text" autocomplete="name" required><p class="al-error" data-error-for="name"></p></div>
+                <div class="al-two-cols">
+                  <div class="al-field"><label for="al_phone">Telemóvel</label><input id="al_phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="912 345 678" required><p class="al-error" data-error-for="phone"></p></div>
+                  <div class="al-field"><label for="al_email">Email</label><input id="al_email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="nome@exemplo.pt" required><p class="al-error" data-error-for="email"></p></div>
+                </div>
+                <div class="al-field"><label for="al_notes">Informação adicional <span>opcional</span></label><textarea id="al_notes" name="additional_notes" maxlength="500" placeholder="Ex.: stock de roupa, piscina, acesso ao prédio ou outras condições."></textarea></div>
+
+                <label class="al-consent"><input type="checkbox" name="consent_partner_sharing" required><span><strong>Autorizo o Guia do Proprietário a partilhar os dados deste pedido com até 3 parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade, para que me possam contactar sobre este pedido.</strong><small>Consulte a <a href="/parceiros/">Lista de Parceiros</a> e a <a href="/privacidade/">Política de Privacidade</a>.</small></span></label>
+                <label class="al-consent al-consent-optional"><input type="checkbox" name="consent_marketing"><span><strong>Quero receber por email conteúdos e comunicações do Guia do Proprietário sobre gestão de imóveis e alojamento local.</strong><small>Este consentimento é opcional e pode ser retirado a qualquer momento.</small></span></label>
+                <p class="al-error" data-error-for="consent_partner_sharing"></p>
+                <p class="al-legal-links"><a href="/privacidade/">Privacidade</a> · <a href="/termos/">Termos</a> · <a href="/parceiros/">Parceiros</a></p>
+              </fieldset>
+              <div class="al-limit"><strong>Máximo de 3 parceiros</strong><span>Os seus dados de contacto só ficam visíveis quando um parceiro aceita o pedido.</span></div>
+              <div class="al-actions"><button type="button" class="al-back">Voltar</button><button type="submit" class="al-primary">Pedir preço e disponibilidade</button></div>
+            </section>
+          </form>
+
+          <div id="alSendingState" class="al-state is-hidden" role="status" aria-live="polite"><span class="al-spinner"></span><h3>A enviar o pedido...</h3><p>Estamos a confirmar o código postal e a guardar os dados em segurança.</p></div>
+          <div id="alSuccessState" class="al-state is-hidden" role="status" aria-live="polite"><span class="al-state-icon">✓</span><h3>Pedido enviado</h3><p>O pedido ficou disponível para parceiros compatíveis com a sua localização e serviços.</p><button id="alResetForm" type="button" class="al-back">Fazer outro pedido</button></div>
+          <div id="alErrorState" class="al-state is-hidden" role="alert"><span class="al-state-icon is-error">!</span><h3>Não foi possível enviar agora</h3><p>Os dados não foram perdidos. Tente novamente dentro de alguns instantes.</p><button id="alRetryForm" type="button" class="al-back">Tentar novamente</button></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="al-difference">
+      <div class="al-wrap">
+        <h2>Uma casa que roda não se limpa como uma casa onde se vive.</h2>
+        <p>A diferença está na hora marcada, na roupa de cama e no que acontece quando um hóspede sai e o seguinte está prestes a entrar.</p>
+        <div class="al-feature-grid">
+          <article><h3>Hora de entrega definida</h3><p>A limpeza tem de acompanhar a janela real entre check-out e check-in.</p></article>
+          <article><h3>Roupa sempre a rodar</h3><p>A operação pode incluir recolha, lavagem, entrega e controlo do stock.</p></article>
+          <article><h3>Acesso sem depender de si</h3><p>Indique se existe cofre, código, chave permanente ou entrega presencial.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="al-disclaimer"><div class="al-wrap"><p><strong>O Guia do Proprietário encaminha pedidos.</strong> O contrato, o preço, a disponibilidade e a execução do serviço são acordados diretamente entre o proprietário ou gestor e o parceiro escolhido.</p></div></section>
+  </main>
+
+  <footer class="al-footer"><div class="al-wrap"><span>© Guia do Proprietário</span><nav><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><a href="/parceiros/">Lista de Parceiros</a></nav></div></footer>
+  <script is:inline src="/scripts/landings/alojamento-local-cleaning.js"></script>
+</Squeeze>

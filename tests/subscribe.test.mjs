@@ -60,6 +60,27 @@ const cleaningBody = {
   eventId: "limpeza-123"
 };
 
+const alojamentoLocalBody = {
+  ...cleaningBody,
+  email: "gestor@exemplo.pt",
+  name: "Rita Almeida",
+  serviceType: "regular",
+  spaceType: "alojamento_local",
+  spaceSize: "unknown",
+  serviceFrequency: "undecided",
+  oneTimeTiming: "",
+  preferredWeekdays: ["flexible"],
+  preferredTimePeriods: ["flexible"],
+  alUnits: "2-3",
+  alServices: ["rotation", "laundry"],
+  alTurnaround: "3_5h",
+  alAccess: "lockbox",
+  consentVersion: "alojamento-local-2026-08-a",
+  source: "guia_limpeza_alojamento_local",
+  pageUrl: "https://guiadoproprietario.pt/servicos-limpeza/alojamento-local/",
+  eventId: "alojamento-local-123"
+};
+
 before(async () => {
   buildDirectory = await mkdtemp(path.join(process.cwd(), ".tmp-subscribe-test-"));
   const outfile = path.join(buildDirectory, "subscribe.mjs");
@@ -444,6 +465,58 @@ test("adiciona o pedido de limpeza à newsletter apenas com autorização opcion
   assert.equal("phone" in createBody, false);
   assert.equal("{$LIMPEZA_SERVICO}" in createBody.fields, false);
   assert.equal("{$CONSENT_PARCEIROS}" in createBody.fields, false);
+});
+
+test("guarda um pedido de alojamento local no dashboard sem o enviar ao Sender", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Porto", Concelho: "Porto" });
+    if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-al-1" }, { status: 201 });
+    throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
+  };
+
+  const response = await onRequestPost({ request: requestFor(alojamentoLocalBody), env });
+  assert.equal(response.status, 200);
+  const dashboardBody = JSON.parse(calls.at(-1).init.body);
+  assert.equal(dashboardBody.segmento, "alojamento-local");
+  assert.equal(dashboardBody.space_type, "alojamento_local");
+  assert.equal(dashboardBody.municipality, "Porto");
+  assert.equal(dashboardBody.al_units, "2-3");
+  assert.deepEqual(dashboardBody.al_services, ["rotation", "laundry"]);
+  assert.equal(dashboardBody.al_turnaround, "3_5h");
+  assert.equal(dashboardBody.al_access, "lockbox");
+  assert.equal(dashboardBody.origem, "landing-alojamento-local");
+});
+
+test("adiciona o contacto de alojamento local ao Sender apenas com consentimento opcional", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Porto", Concelho: "Porto" });
+    if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-al-2" }, { status: 201 });
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({ request: requestFor({ ...alojamentoLocalBody, consent2: true }), env });
+  assert.equal(response.status, 200);
+  const createBody = JSON.parse(calls[3].init.body);
+  assert.deepEqual(createBody.groups, ["egK8WG"]);
+  assert.equal(createBody.fields["{$AL_UNIDADES}"], "2 a 3 alojamentos");
+  assert.equal(createBody.fields["{$AL_SERVICOS}"], "Limpeza entre estadias, Roupa de cama e banho");
+  assert.equal(createBody.fields["{$AL_JANELA}"], "Entre 3 e 5 horas");
+  assert.equal(createBody.fields["{$AL_ACESSO}"], "Cofre ou código");
+});
+
+test("recusa pedidos de alojamento local incompletos", async () => {
+  globalThis.fetch = async () => { throw new Error("A API não deveria ser chamada"); };
+  const missingUnits = await onRequestPost({ request: requestFor({ ...alojamentoLocalBody, alUnits: "" }), env });
+  const missingServices = await onRequestPost({ request: requestFor({ ...alojamentoLocalBody, alServices: [] }), env });
+  const missingTurnaround = await onRequestPost({ request: requestFor({ ...alojamentoLocalBody, alTurnaround: "" }), env });
+  const missingAccess = await onRequestPost({ request: requestFor({ ...alojamentoLocalBody, alAccess: "" }), env });
+  assert.deepEqual(await missingUnits.json(), { error: "invalid_al_units" });
+  assert.deepEqual(await missingServices.json(), { error: "invalid_al_services" });
+  assert.deepEqual(await missingTurnaround.json(), { error: "invalid_al_turnaround" });
+  assert.deepEqual(await missingAccess.json(), { error: "invalid_al_access" });
 });
 
 test("não apresenta sucesso quando o dashboard de limpeza falha", async () => {
