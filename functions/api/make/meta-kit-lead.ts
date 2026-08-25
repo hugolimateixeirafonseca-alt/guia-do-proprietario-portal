@@ -73,6 +73,36 @@ function isStudentRelation(value: unknown) {
     || normalized === "sou estudante do ensino superior";
 }
 
+function parseRawData(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  try { return JSON.parse(trimmed); } catch { return value; }
+}
+
+function collectScalarStrings(value: unknown, out: string[] = [], depth = 0): string[] {
+  if (depth > 8 || value == null || out.length >= 200) return out;
+  if (typeof value === "string") {
+    const text = cleanText(value, 512);
+    if (text) out.push(text);
+    return out;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    out.push(String(value));
+    return out;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) collectScalarStrings(item, out, depth + 1);
+    return out;
+  }
+  if (typeof value === "object") {
+    for (const child of Object.values(value as Record<string, unknown>)) {
+      collectScalarStrings(child, out, depth + 1);
+    }
+  }
+  return out;
+}
+
 export const onRequestPost = async ({ request, env }: RequestContext) => {
   const reqId = requestId(request);
   let db: ReturnType<typeof requireConfiguration>["db"] | undefined;
@@ -99,19 +129,38 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     const config = requireConfiguration(env);
     db = config.db;
-    const body = await readSmallJson(request, 8192);
+    const body = await readSmallJson(request, 16384);
+    const rawData = parseRawData(body.raw_data ?? body.rawData ?? body.form_data ?? body.data);
+    const rawValues = collectScalarStrings(rawData);
 
     metaLeadId = cleanText(body.leadgen_id ?? body.leadgenId ?? body.id, 100);
-    const relation = cleanText(body.relacao_estudante ?? body.relacao ?? body.relationship, 254);
-    const email = normalizeEmail(body.email ?? body.email_address);
-    const city = normalizeCity(body.cidade ?? body.city);
-    const phase = normalizePhase(body.fase ?? body.phase);
+
+    let relation = cleanText(body.relacao_estudante ?? body.relacao ?? body.relationship, 254);
+    if (!relation) {
+      relation = rawValues.find((value) => isQualifiedParentRelation(value) || isStudentRelation(value)) || "";
+    }
+
+    let email = normalizeEmail(body.email ?? body.email_address);
+    if (!isValidEmail(email)) {
+      email = rawValues.map(normalizeEmail).find(isValidEmail) || email;
+    }
+
+    let city = normalizeCity(body.cidade ?? body.city);
+    if (!city) {
+      city = rawValues.map(normalizeCity).find((value) => Boolean(value)) || "";
+    }
+
+    let phase = normalizePhase(body.fase ?? body.phase);
+    if (!phase) {
+      phase = rawValues.map(normalizePhase).find((value) => Boolean(value)) || "";
+    }
+
     const consent = body.consentimento === true || body.consent === true || body.consentimento_email === true;
 
     if (!metaLeadId) throw new PublicError(400, "missing_leadgen_id");
 
     const duplicate = await db.prepare(
-      "SELECT id FROM kit_events WHERE meta_lead_id = ? AND event IN ('make_meta_lead_fetched', 'make_meta_lead_disqualified') LIMIT 1"
+      "SELECT id FROM kit_events WHERE meta_lead_id = ? AND event = 'make_meta_lead_fetched' LIMIT 1"
     ).bind(metaLeadId).first();
     if (duplicate) return json({ ok: true, duplicate: true });
 
