@@ -32,6 +32,10 @@ interface SubscribeBody {
   preferredWeekdays?: unknown;
   preferredTimePeriods?: unknown;
   additionalNotes?: unknown;
+  alUnits?: unknown;
+  alServices?: unknown;
+  alTurnaround?: unknown;
+  alAccess?: unknown;
 }
 
 interface RequestContext {
@@ -74,6 +78,23 @@ const CLEANING_LABELS = {
     thursday: "Quinta-feira", friday: "Sexta-feira", saturday: "Sábado", flexible: "Dia flexível"
   },
   period: { morning: "Manhã", afternoon: "Tarde", flexible: "Período indiferente" }
+} as const;
+
+const AL_LABELS = {
+  units: { "1": "1 alojamento", "2-3": "2 a 3 alojamentos", "4-9": "4 a 9 alojamentos", "10-plus": "10 ou mais alojamentos" },
+  service: {
+    rotation: "Limpeza entre estadias", laundry: "Roupa de cama e banho",
+    consumables: "Reposição de consumíveis", deep: "Limpeza profunda pontual",
+    maintenance: "Pequenas reparações"
+  },
+  turnaround: {
+    under_3h: "Menos de 3 horas", "3_5h": "Entre 3 e 5 horas", over_5h: "Mais de 5 horas",
+    free_day: "Costuma haver um dia livre", varies: "Varia muito"
+  },
+  access: {
+    lockbox: "Cofre ou código", company_key: "A empresa fica com chave",
+    in_person: "Alguém abre a porta", undecided: "Ainda por definir"
+  }
 } as const;
 
 const SALE_TIMELINES = {
@@ -165,7 +186,12 @@ async function sendCleaningLead(
         consent_partner_sharing_text: consentText.c1,
         consent_marketing: body.consent2 === true,
         consent_marketing_text: body.consent2 === true ? consentText.c2 : "",
-        origem: "landing-servicos-limpeza"
+        segmento: cleanText(body.source, 64) === "guia_limpeza_alojamento_local" ? "alojamento-local" : "geral",
+        al_units: cleanText(body.alUnits, 32),
+        al_services: cleanChoiceList(body.alServices, 5),
+        al_turnaround: cleanText(body.alTurnaround, 32),
+        al_access: cleanText(body.alAccess, 32),
+        origem: cleanText(body.source, 64) === "guia_limpeza_alojamento_local" ? "landing-alojamento-local" : "landing-servicos-limpeza"
       })
     });
     return { ok: response.ok, status: response.status, code: response.ok ? "" : `dashboard_${response.status}` };
@@ -205,7 +231,8 @@ async function createOrUpdateSubscriber(
     "{$CODIGO_POSTAL}", "{$LOCALIDADE}", "{$PRAZO_VENDA}", "{$LIMPEZA_SERVICO}",
     "{$LIMPEZA_ESPACO}", "{$LIMPEZA_DIMENSAO}", "{$LIMPEZA_FREQUENCIA}",
     "{$LIMPEZA_QUANDO}", "{$LIMPEZA_DATA}", "{$LIMPEZA_DIA}",
-    "{$LIMPEZA_PERIODO}", "{$LIMPEZA_NOTAS}", "{$PEDIDO_RESUMO}"
+    "{$LIMPEZA_PERIODO}", "{$LIMPEZA_NOTAS}", "{$PEDIDO_RESUMO}",
+    "{$AL_UNIDADES}", "{$AL_SERVICOS}", "{$AL_JANELA}", "{$AL_ACESSO}"
   ];
   const hasOptionalProfileFields = optionalProfileFields.some((field) => field in fields);
   const fieldsWithoutOptionalProfile = { ...fields };
@@ -288,17 +315,18 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   const consentVersion = cleanText(body.consentVersion, 64);
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
-  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" || body.source === "valor-liquido-venda-direct" || body.source === "guia_limpeza_preco_disponibilidade" ? body.source : "";
+  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" || body.source === "valor-liquido-venda-direct" || body.source === "guia_limpeza_preco_disponibilidade" || body.source === "guia_limpeza_alojamento_local" ? body.source : "";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
   const isDirectValueLead = source === "valor-liquido-venda-direct";
-  const isCleaningLead = source === "guia_limpeza_preco_disponibilidade";
+  const isCleaningAlLead = source === "guia_limpeza_alojamento_local";
+  const isCleaningLead = source === "guia_limpeza_preco_disponibilidade" || isCleaningAlLead;
   const isQualifiedLead = isPartnerFollowup || isDirectValueLead || isCleaningLead;
   const expectedVersion = source === "newsletter"
     ? "newsletter-2026-08-c"
     : isDirectValueLead
       ? "valor-liquido-2026-08-a"
       : isCleaningLead
-        ? "limpeza-2026-08-b"
+        ? isCleaningAlLead ? "alojamento-local-2026-08-a" : "limpeza-2026-08-b"
       : "2026-08-k";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");
@@ -331,6 +359,14 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const preferredTimePeriods = periodCodes.map(code => CLEANING_LABELS.period[code]).filter(Boolean);
   const preferredDate = cleanText(body.preferredDate, 10);
   const additionalNotes = cleanText(body.additionalNotes, 500);
+  const alUnitsCode = cleanText(body.alUnits, 32) as keyof typeof AL_LABELS.units;
+  const alServiceCodes = cleanChoiceList(body.alServices, 5) as Array<keyof typeof AL_LABELS.service>;
+  const alTurnaroundCode = cleanText(body.alTurnaround, 32) as keyof typeof AL_LABELS.turnaround;
+  const alAccessCode = cleanText(body.alAccess, 32) as keyof typeof AL_LABELS.access;
+  const alUnits = AL_LABELS.units[alUnitsCode] || "";
+  const alServices = alServiceCodes.map(code => AL_LABELS.service[code]).filter(Boolean);
+  const alTurnaround = AL_LABELS.turnaround[alTurnaroundCode] || "";
+  const alAccess = AL_LABELS.access[alAccessCode] || "";
 
   if (!emailOk) return json({ error: "invalid_email" }, 400);
   if (body.consent1 !== true) return json({ error: "invalid_consent" }, 400);
@@ -347,18 +383,25 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   }
 
   if (isCleaningLead) {
-    if (!serviceType) return json({ error: "invalid_service_type" }, 400);
-    if (!spaceType) return json({ error: "invalid_space_type" }, 400);
-    if (!spaceSize) return json({ error: "invalid_space_size" }, 400);
-    if (!serviceFrequency) return json({ error: "invalid_service_frequency" }, 400);
+    if (isCleaningAlLead) {
+      if (!alUnits) return json({ error: "invalid_al_units" }, 400);
+      if (!alServices.length || alServices.length !== alServiceCodes.length) return json({ error: "invalid_al_services" }, 400);
+      if (!alTurnaround) return json({ error: "invalid_al_turnaround" }, 400);
+      if (!alAccess) return json({ error: "invalid_al_access" }, 400);
+    } else {
+      if (!serviceType) return json({ error: "invalid_service_type" }, 400);
+      if (!spaceType) return json({ error: "invalid_space_type" }, 400);
+      if (!spaceSize) return json({ error: "invalid_space_size" }, 400);
+      if (!serviceFrequency) return json({ error: "invalid_service_frequency" }, 400);
+    }
     if (!preferredTimePeriods.length || preferredTimePeriods.length !== periodCodes.length || (periodCodes.includes("flexible") && periodCodes.length > 1)) {
       return json({ error: "invalid_preferred_time_period" }, 400);
     }
-    if (frequencyCode === "one_time" && !oneTimeTiming) return json({ error: "invalid_one_time_timing" }, 400);
-    if (frequencyCode === "one_time" && timingCode === "specific_date" && !/^\d{4}-\d{2}-\d{2}$/.test(preferredDate)) {
+    if (!isCleaningAlLead && frequencyCode === "one_time" && !oneTimeTiming) return json({ error: "invalid_one_time_timing" }, 400);
+    if (!isCleaningAlLead && frequencyCode === "one_time" && timingCode === "specific_date" && !/^\d{4}-\d{2}-\d{2}$/.test(preferredDate)) {
       return json({ error: "invalid_preferred_date" }, 400);
     }
-    if (["weekly", "fortnightly", "monthly"].includes(frequencyCode) && (!preferredWeekdays.length || preferredWeekdays.length !== weekdayCodes.length || (weekdayCodes.includes("flexible") && weekdayCodes.length > 1))) {
+    if (!isCleaningAlLead && ["weekly", "fortnightly", "monthly"].includes(frequencyCode) && (!preferredWeekdays.length || preferredWeekdays.length !== weekdayCodes.length || (weekdayCodes.includes("flexible") && weekdayCodes.length > 1))) {
       return json({ error: "invalid_preferred_weekday" }, 400);
     }
     if (cleanText(body.eventId, 128).length < 8) return json({ error: "invalid_event_id" }, 400);
@@ -408,6 +451,15 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       "{$CODIGO_POSTAL}": postalCode,
       "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar",
       "{$PRAZO_VENDA}": saleTimeline
+    } : {}),
+    ...(isCleaningAlLead && marketingConsent ? {
+      "{$CODIGO_POSTAL}": postalCode,
+      "{$LOCALIDADE}": postalLookup?.locality || "Por confirmar",
+      "{$AL_UNIDADES}": alUnits,
+      "{$AL_SERVICOS}": alServices.join(", "),
+      "{$AL_JANELA}": alTurnaround,
+      "{$AL_ACESSO}": alAccess,
+      "{$PEDIDO_RESUMO}": [alUnits, alServices.join(", "), alTurnaround, alAccess].filter(Boolean).join(" · ")
     } : {})
   };
 
