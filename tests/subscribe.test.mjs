@@ -420,7 +420,7 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
   assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", dashboardStored: true });
 });
 
-test("não perde a lead de limpeza quando a confirmação do concelho está temporariamente indisponível", async () => {
+test("recupera o concelho local do dashboard quando a confirmação externa está indisponível", async () => {
   let geoAttempts = 0;
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
@@ -429,7 +429,7 @@ test("não perde a lead de limpeza quando a confirmação do concelho está temp
       throw new Error("serviço temporariamente indisponível");
     }
     if (String(url) === env.CLEANING_DASHBOARD_API_URL) {
-      return Response.json({ ok: true, lead_id: "lead-pendente" }, { status: 201 });
+      return Response.json({ ok: true, lead_id: "lead-local", municipality: "Lisboa" }, { status: 201 });
     }
     throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
   };
@@ -442,9 +442,8 @@ test("não perde a lead de limpeza quando a confirmação do concelho está temp
   assert.equal(dashboardBody.municipality, "Por confirmar");
   assert.deepEqual(await response.json(), {
     ok: true,
-    locality: "Por confirmar",
-    dashboardStored: true,
-    locationPending: true
+    locality: "Lisboa",
+    dashboardStored: true
   });
 });
 
@@ -505,6 +504,30 @@ test("adiciona o contacto de alojamento local ao Sender apenas com consentimento
   assert.equal(createBody.fields["{$AL_SERVICOS}"], "Limpeza entre estadias, Roupa de cama e banho");
   assert.equal(createBody.fields["{$AL_JANELA}"], "Entre 3 e 5 horas");
   assert.equal(createBody.fields["{$AL_ACESSO}"], "Cofre ou código");
+});
+
+test("preenche a localidade do Sender com a tabela postal local quando o serviço externo falha", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) throw new Error("serviço externo indisponível");
+    if (String(url) === env.CLEANING_DASHBOARD_API_URL) {
+      return Response.json({ ok: true, lead_id: "lead-al-local", municipality: "Lisboa" }, { status: 201 });
+    }
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({ ...alojamentoLocalBody, postalCode: "1600-014", consent2: true }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  const createCall = calls.find(({ url, init }) => url.endsWith("/subscribers") && init.method === "POST");
+  const createBody = JSON.parse(createCall.init.body);
+  assert.equal(createBody.fields["{$CODIGO_POSTAL}"], "1600-014");
+  assert.equal(createBody.fields["{$LOCALIDADE}"], "Lisboa");
+  assert.equal((await response.json()).locality, "Lisboa");
 });
 
 test("recusa pedidos de alojamento local incompletos", async () => {
