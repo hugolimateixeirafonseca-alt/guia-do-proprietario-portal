@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-24T22:47:41.788Z",
+  "generatedAt": "2026-08-25T08:42:12.905Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 81,
+    "published": 82,
     "newsOnline": 19
   },
   "articles": [
@@ -1520,14 +1520,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "seguro-condominio.mdx",
       "arrivedAt": "2026-08-11T19:45:03+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-25T07:01:57Z",
+      "url": "https://guiadoproprietario.pt/condominio/seguro-condominio/"
     },
     {
       "id": "EXTRA-008",
