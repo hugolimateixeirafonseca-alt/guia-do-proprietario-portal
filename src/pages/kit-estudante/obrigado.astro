@@ -37,39 +37,6 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
         <p>Devem chegar nos próximos minutos. Se não os encontrar, verifique a pasta de spam ou promoções.</p>
         <p>Caso não receba o email dentro de 30 minutos, contacte-nos e resolvemos a situação com a maior brevidade possível.</p>
 
-        <div class="profile-step" id="city-step">
-          <p class="step-count">Pergunta 1 de 2</p>
-          <h2>ONDE VAI O SEU FILHO ESTUDAR?</h2>
-          <p>Ajuda-nos a enviar-lhe apenas informação relevante.</p>
-          <div class="choice-grid" data-profile-field="est_cidade">
-            <button type="button" data-value="lisboa">Lisboa</button>
-            <button type="button" data-value="porto">Porto</button>
-            <button type="button" data-value="coimbra">Coimbra</button>
-            <button type="button" data-value="braga">Braga</button>
-            <button type="button" data-value="aveiro">Aveiro</button>
-            <button type="button" data-value="evora">Évora</button>
-            <button type="button" data-value="faro">Faro</button>
-            <button type="button" data-value="outra">Outra</button>
-          </div>
-          <p class="profile-status" aria-live="polite"></p>
-        </div>
-
-        <div class="profile-step" id="phase-step" hidden>
-          <p class="step-count">Pergunta 2 de 2</p>
-          <h2>E EM QUE PONTO ESTÁ A PROCURA?</h2>
-          <div class="choice-list" data-profile-field="est_fase">
-            <button type="button" data-value="procura">Ainda estamos à procura</button>
-            <button type="button" data-value="encontrou">Já encontrámos quarto</button>
-            <button type="button" data-value="tratado">Já está tudo tratado</button>
-          </div>
-          <p class="profile-status" aria-live="polite"></p>
-        </div>
-
-        <div class="complete-step" id="complete-step" tabindex="-1" hidden>
-          <h2>Obrigado. Já sabemos o que lhe pode ser mais útil.</h2>
-          <p id="complete-copy">Vamos adaptar os próximos conteúdos à fase em que está.</p>
-          <a class="primary-link" id="complete-link" href="/casa/equipar-quarto-estudante/" hidden>Ver o que comprar para o primeiro quarto</a>
-        </div>
       </div>
 
       <div class="share-panel" id="share-panel" hidden>
@@ -93,11 +60,6 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
   const noSessionMode = document.getElementById("no-session-mode")!;
   const landingMode = document.getElementById("landing-mode")!;
   const sharePanel = document.getElementById("share-panel")!;
-  const cityStep = document.getElementById("city-step")!;
-  const phaseStep = document.getElementById("phase-step")!;
-  const completeStep = document.getElementById("complete-step")!;
-  const completeCopy = document.getElementById("complete-copy")!;
-  const completeLink = document.getElementById("complete-link") as HTMLAnchorElement;
   const params = new URLSearchParams(location.search);
   const cities = new Set(["lisboa", "porto", "coimbra", "braga", "aveiro", "evora", "faro", "outra"]);
   const owners = new Set(["arrenda", "tem_nao_arrenda", "nao_tem"]);
@@ -116,8 +78,7 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
     emailMode.hidden = true;
     noSessionMode.hidden = true;
     landingMode.hidden = false;
-    sharePanel.hidden = true;
-    cityStep.querySelector<HTMLButtonElement>("button")?.focus();
+    sharePanel.hidden = false;
   };
 
   const showNoSessionMode = () => {
@@ -136,46 +97,6 @@ import KitEstudanteLayout from "../../layouts/KitEstudanteLayout.astro";
       .then((result) => result.active ? showLandingMode() : showNoSessionMode())
       .catch(showNoSessionMode);
   }
-
-  document.querySelectorAll<HTMLElement>("[data-profile-field]").forEach((group) => {
-    group.querySelectorAll<HTMLButtonElement>("button[data-value]").forEach((button) => {
-      button.addEventListener("click", async () => {
-        const status = group.parentElement?.querySelector<HTMLElement>(".profile-status");
-        const buttons = group.querySelectorAll<HTMLButtonElement>("button");
-        buttons.forEach((item) => { item.disabled = true; });
-        if (status) status.textContent = "A guardar…";
-        try {
-          const response = await fetch("/api/kit-estudante/perfil", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ campo: group.dataset.profileField, valor: button.dataset.value })
-          });
-          const result = await response.json();
-          if (!response.ok || !result.ok) throw new Error(result.error || "profile_failed");
-          if (group.dataset.profileField === "est_cidade") {
-            cityStep.hidden = true;
-            phaseStep.hidden = false;
-            phaseStep.querySelector<HTMLButtonElement>("button")?.focus();
-          } else {
-            const phase = button.dataset.value;
-            completeCopy.textContent = phase === "procura"
-              ? "Vamos privilegiar conteúdos para procurar e verificar um quarto com segurança."
-              : phase === "encontrou"
-                ? "Vamos privilegiar os próximos passos para instalar o estudante e organizar as despesas."
-                : "Vamos privilegiar os prazos, apoios e obrigações que ainda merecem acompanhamento.";
-            completeLink.hidden = phase !== "encontrou";
-            phaseStep.hidden = true;
-            completeStep.hidden = false;
-            sharePanel.hidden = false;
-            completeStep.focus();
-          }
-        } catch {
-          if (status) status.textContent = "Não foi possível guardar. Tente novamente.";
-          buttons.forEach((item) => { item.disabled = false; });
-        }
-      });
-    });
-  });
 
   document.getElementById("share-button")?.addEventListener("click", async () => {
     const shareUrl = "https://guiadoproprietario.pt/kit-estudante/?src=grupo";

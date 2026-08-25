@@ -245,13 +245,14 @@ test("um contacto novo mantém origem, Coimbra e tratado após cada PATCH", asyn
   assert.equal(calls.some((call) => call.url.includes("/fields?")), false);
 });
 
-test("mantém os modos de email e sessão separados e só mostra a partilha no fim", () => {
+test("mantém os modos de email e sessão separados sem repetir perguntas no agradecimento", () => {
   assert.match(thankYouSource, /cities\.has\(params\.get\("cidade"\)/);
   assert.match(thankYouSource, /owners\.has\(params\.get\("proprietario"\)/);
   assert.match(thankYouSource, /result\.active \? showLandingMode\(\) : showNoSessionMode\(\)/);
-  assert.match(thankYouSource, /showLandingMode[\s\S]*?sharePanel\.hidden = true/);
-  assert.match(thankYouSource, /completeStep\.hidden = false;[\s\S]*?sharePanel\.hidden = false/);
-  assert.match(thankYouSource, /completeLink\.hidden = phase !== "encontrou"/);
+  assert.match(thankYouSource, /showLandingMode[\s\S]*?sharePanel\.hidden = false/);
+  assert.doesNotMatch(thankYouSource, /data-profile-field/);
+  assert.doesNotMatch(thankYouSource, /Pergunta 1 de 2/);
+  assert.doesNotMatch(thankYouSource, /api\/kit-estudante\/perfil/);
   assert.doesNotMatch(thankYouSource, /procurar-quarto-olx-grupos-facebook/);
 });
 
@@ -259,7 +260,7 @@ test("mantém o Meta Pixel na landing e nos builds diretos", () => {
   assert.match(kitLayoutSource, /import CookieConsent/);
   assert.match(kitLayoutSource, /<CookieConsent \/>/);
   assert.match(landingSource, /measurementAllowed\(\)/);
-  assert.match(landingSource, /fbq\("track", "Lead", \{ content_name: "kit_estudante_2026" \}, \{ eventID: eventId \}\)/);
+  assert.match(landingSource, /fbq\("track", "Lead", \{[\s\S]*?content_name: "kit_estudante_2026",[\s\S]*?lead_type: relation,[\s\S]*?\}, \{ eventID: eventId \}\)/);
   assert.match(directDeployWorkflowSource, /deployment_configs\?\.production\?\.env_vars\?\.PUBLIC_META_PIXEL_ID\?\.value/);
   assert.match(directDeployWorkflowSource, /method: 'PATCH'/);
   assert.match(directDeployWorkflowSource, /PUBLIC_META_PIXEL_ID: \{ type: 'plain_text', value: fallbackPixelId \}/);
@@ -303,51 +304,52 @@ test("o formulário Meta usa as perguntas e o consentimento aprovados", () => {
 test("o endpoint Make bloqueia não-pais antes do Sender", () => {
   assert.match(makeMetaLeadSource, /MAKE_META_LEADS_SECRET/);
   assert.match(makeMetaLeadSource, /isQualifiedParentRelation\(relation\)/);
+  assert.match(makeMetaLeadSource, /isStudentRelation\(relation\)/);
   assert.match(makeMetaLeadSource, /make_meta_lead_disqualified/);
   assert.ok(
-    makeMetaLeadSource.indexOf("isQualifiedParentRelation(relation)")
-      < makeMetaLeadSource.indexOf("createOrUpdateKitSubscriber(env, email")
+    makeMetaLeadSource.indexOf("if (!isParent && !isStudent)")
+      < makeMetaLeadSource.indexOf("createOrUpdateKitSubscriber(senderEnv, email")
   );
 });
 
 test("o endpoint Make deduplica por leadgen_id e grava campos do Kit", () => {
   assert.match(makeMetaLeadSource, /missing_leadgen_id/);
   assert.match(makeMetaLeadSource, /make_meta_lead_fetched/);
-  assert.match(makeMetaLeadSource, /\{\$est_origem\}: "meta"/);
-  assert.match(makeMetaLeadSource, /\{\$est_relacao\}: "pai_mae_encarregado"/);
-  assert.match(makeMetaLeadSource, /\{\$est_cidade\}/);
-  assert.match(makeMetaLeadSource, /\{\$est_fase\}/);
+  assert.match(makeMetaLeadSource, /"\{\$est_origem\}": "meta"/);
+  assert.match(makeMetaLeadSource, /const relationValue = isStudent \? "estudante" : "pai_mae_encarregado"/);
+  assert.match(makeMetaLeadSource, /fields\["\{\$est_cidade\}"\]/);
+  assert.match(makeMetaLeadSource, /fields\["\{\$est_fase\}"\]/);
   assert.match(makeMetaLeadSource, /consent_required/);
 });
 
 
-test("a landing qualifica pais antes de pedir o email", () => {
+test("a landing continua para pais, estudantes e outros", () => {
   assert.match(landingSource, /name="relacao" value="pai_mae_encarregado"/);
   assert.match(landingSource, /name="relacao" value="estudante"/);
-  assert.match(landingSource, /data-parent-fields hidden/);
+  assert.match(landingSource, /name="relacao" value="outro"/);
+  assert.match(landingSource, /data-form-fields hidden/);
+  assert.match(landingSource, /data-profile-fields/);
   assert.match(landingSource, /name="cidade"/);
   assert.match(landingSource, /name="fase"/);
+  assert.match(landingSource, /Em que cidade vai estudar\?/);
+  assert.match(landingSource, /Em que fase está a sua procura de alojamento\?/);
+  assert.match(landingSource, /relation === "pai_mae_encarregado" \|\| relation === "estudante"/);
+  assert.match(landingSource, /profileFields\.hidden = !asksProfile/);
   assert.match(landingSource, /new Set\(\["meta", "artigo", "grupo", "pdf", "direto"\]\)/);
   assert.match(landingSource, /relacao: relation/);
   assert.match(landingSource, /cidade: city\.value/);
   assert.match(landingSource, /fase: phase\.value/);
-  assert.ok(
-    landingSource.indexOf('relation !== "pai_mae_encarregado"')
-      < landingSource.indexOf('fetch("/api/kit-estudante/lead"')
-  );
+  assert.doesNotMatch(landingSource, /data-non-parent/);
 });
 
-test("o endpoint da landing bloqueia não-pais antes do Sender e guarda a qualificação", () => {
-  assert.match(landingLeadSource, /isQualifiedParentRelation\(relation\)/);
-  assert.match(landingLeadSource, /landing_subscription_disqualified/);
-  assert.match(landingLeadSource, /qualified: false/);
-  assert.match(landingLeadSource, /ALLOWED_CITIES\.has\(city\)/);
-  assert.match(landingLeadSource, /ALLOWED_PHASES\.has\(phase\)/);
-  assert.match(landingLeadSource, /"\{\$est_relacao\}": "pai_mae_encarregado"/);
-  assert.match(landingLeadSource, /"\{\$est_cidade\}": city/);
-  assert.match(landingLeadSource, /"\{\$est_fase\}": phase/);
-  assert.ok(
-    landingLeadSource.indexOf("isQualifiedParentRelation(relation)")
-      < landingLeadSource.indexOf("createOrUpdateKitSubscriber")
-  );
+test("o endpoint aceita os três percursos e só exige perfil a pais e estudantes", () => {
+  assert.match(landingLeadSource, /new Set\(\["pai_mae_encarregado", "estudante", "outro"\]\)/);
+  assert.match(landingLeadSource, /const requiresProfile = relation !== "outro"/);
+  assert.match(landingLeadSource, /requiresProfile && !ALLOWED_CITIES\.has\(city\)/);
+  assert.match(landingLeadSource, /requiresProfile && !ALLOWED_PHASES\.has\(phase\)/);
+  assert.match(landingLeadSource, /"\{\$est_relacao\}": relation/);
+  assert.match(landingLeadSource, /if \(requiresProfile\) \{/);
+  assert.match(landingLeadSource, /senderFields\["\{\$est_cidade\}"\] = city/);
+  assert.match(landingLeadSource, /senderFields\["\{\$est_fase\}"\] = phase/);
+  assert.doesNotMatch(landingLeadSource, /qualified: false/);
 });
