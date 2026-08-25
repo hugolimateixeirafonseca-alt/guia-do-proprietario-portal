@@ -21,13 +21,9 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
           <label class="qualifier-option"><input type="radio" name="relacao" value="outro" required /><span>Outro</span></label>
         </fieldset>
         <p class="field-error" data-relation-error hidden>Escolha uma opção para continuar.</p>
-        <div class="non-parent-note" data-non-parent hidden>
-          Este kit foi criado especificamente para pais, mães e encarregados de educação de estudantes do ensino superior.
-        </div>
-
-        <div data-parent-fields hidden>
-          <div class="qualifier-grid">
-            <label class="field-label" for="hero-cidade">Em que cidade vai estudar o seu filho/a?
+        <div data-form-fields hidden>
+          <div class="qualifier-grid" data-profile-fields>
+            <label class="field-label" for="hero-cidade"><span data-city-question>Em que cidade vai estudar o seu filho/a?</span>
               <select id="hero-cidade" name="cidade" required>
                 <option value="">Escolha uma opção</option>
                 <option value="lisboa">Lisboa</option>
@@ -40,11 +36,11 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
                 <option value="outra">Outra</option>
               </select>
             </label>
-            <label class="field-label" for="hero-fase">Em que fase está a procura de alojamento?
+            <label class="field-label" for="hero-fase"><span data-phase-question>Em que fase está a procura de alojamento?</span>
               <select id="hero-fase" name="fase" required>
                 <option value="">Escolha uma opção</option>
-                <option value="procura">Ainda estamos à procura</option>
-                <option value="encontrou">Já encontrámos alojamento</option>
+                <option value="procura" data-parent-copy="Ainda estamos à procura" data-student-copy="Ainda estou à procura">Ainda estamos à procura</option>
+                <option value="encontrou" data-parent-copy="Já encontrámos alojamento" data-student-copy="Já encontrei alojamento">Já encontrámos alojamento</option>
                 <option value="tratado">Já está tudo tratado</option>
               </select>
             </label>
@@ -166,13 +162,9 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
           <label class="qualifier-option"><input type="radio" name="relacao" value="outro" required /><span>Outro</span></label>
         </fieldset>
         <p class="field-error" data-relation-error hidden>Escolha uma opção para continuar.</p>
-        <div class="non-parent-note" data-non-parent hidden>
-          Este kit foi criado especificamente para pais, mães e encarregados de educação de estudantes do ensino superior.
-        </div>
-
-        <div data-parent-fields hidden>
-          <div class="qualifier-grid">
-            <label class="field-label" for="final-cidade">Em que cidade vai estudar o seu filho/a?
+        <div data-form-fields hidden>
+          <div class="qualifier-grid" data-profile-fields>
+            <label class="field-label" for="final-cidade"><span data-city-question>Em que cidade vai estudar o seu filho/a?</span>
               <select id="final-cidade" name="cidade" required>
                 <option value="">Escolha uma opção</option>
                 <option value="lisboa">Lisboa</option>
@@ -185,11 +177,11 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
                 <option value="outra">Outra</option>
               </select>
             </label>
-            <label class="field-label" for="final-fase">Em que fase está a procura de alojamento?
+            <label class="field-label" for="final-fase"><span data-phase-question>Em que fase está a procura de alojamento?</span>
               <select id="final-fase" name="fase" required>
                 <option value="">Escolha uma opção</option>
-                <option value="procura">Ainda estamos à procura</option>
-                <option value="encontrou">Já encontrámos alojamento</option>
+                <option value="procura" data-parent-copy="Ainda estamos à procura" data-student-copy="Ainda estou à procura">Ainda estamos à procura</option>
+                <option value="encontrou" data-parent-copy="Já encontrámos alojamento" data-student-copy="Já encontrei alojamento">Já encontrámos alojamento</option>
                 <option value="tratado">Já está tudo tratado</option>
               </select>
             </label>
@@ -231,8 +223,10 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
 
   document.querySelectorAll<HTMLFormElement>(".lead-form").forEach((form) => {
     const relationInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="relacao"]'));
-    const parentFields = form.querySelector<HTMLElement>("[data-parent-fields]")!;
-    const nonParent = form.querySelector<HTMLElement>("[data-non-parent]")!;
+    const formFields = form.querySelector<HTMLElement>("[data-form-fields]")!;
+    const profileFields = form.querySelector<HTMLElement>("[data-profile-fields]")!;
+    const cityQuestion = form.querySelector<HTMLElement>("[data-city-question]")!;
+    const phaseQuestion = form.querySelector<HTMLElement>("[data-phase-question]")!;
     const relationError = form.querySelector<HTMLElement>("[data-relation-error]")!;
     const profileError = form.querySelector<HTMLElement>("[data-profile-error]")!;
     const city = form.elements.namedItem("cidade") as HTMLSelectElement;
@@ -246,23 +240,37 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
     const consentError = form.querySelector<HTMLElement>("[data-consent-error]")!;
 
     const selectedRelation = () => relationInputs.find((input) => input.checked)?.value || "";
-    const setParentState = () => {
+    const setRelationState = () => {
       const relation = selectedRelation();
-      const qualified = relation === "pai_mae_encarregado";
-      const answeredNonParent = Boolean(relation) && !qualified;
-      parentFields.hidden = !qualified;
-      nonParent.hidden = !answeredNonParent;
+      const asksProfile = relation === "pai_mae_encarregado" || relation === "estudante";
+      formFields.hidden = !relation;
+      profileFields.hidden = !asksProfile;
       relationError.hidden = Boolean(relation);
-      for (const control of [city, phase, email, consent, company]) control.disabled = !qualified;
-      if (!qualified) status.textContent = "";
+      for (const control of [email, consent, company]) control.disabled = !relation;
+      for (const control of [city, phase]) {
+        control.disabled = !asksProfile;
+        control.required = asksProfile;
+      }
+      if (!asksProfile) {
+        city.value = "";
+        phase.value = "";
+        profileError.hidden = true;
+      }
+      const isStudent = relation === "estudante";
+      cityQuestion.textContent = isStudent ? "Em que cidade vai estudar?" : "Em que cidade vai estudar o seu filho/a?";
+      phaseQuestion.textContent = isStudent ? "Em que fase está a sua procura de alojamento?" : "Em que fase está a procura de alojamento?";
+      phase.querySelectorAll<HTMLOptionElement>("option[data-parent-copy]").forEach((option) => {
+        option.textContent = isStudent ? option.dataset.studentCopy || "" : option.dataset.parentCopy || "";
+      });
+      status.textContent = "";
     };
 
-    for (const input of relationInputs) input.addEventListener("change", setParentState);
+    for (const input of relationInputs) input.addEventListener("change", setRelationState);
     city.addEventListener("change", () => { profileError.hidden = true; city.removeAttribute("aria-invalid"); });
     phase.addEventListener("change", () => { profileError.hidden = true; phase.removeAttribute("aria-invalid"); });
     email.addEventListener("input", () => { emailError.hidden = true; email.removeAttribute("aria-invalid"); });
     consent.addEventListener("change", () => { consentError.hidden = true; consent.removeAttribute("aria-invalid"); });
-    setParentState();
+    setRelationState();
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -273,15 +281,11 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
         relationInputs[0]?.focus();
         return;
       }
-      if (relation !== "pai_mae_encarregado") {
-        nonParent.hidden = false;
-        return;
-      }
-
-      const profileValid = Boolean(city.value) && Boolean(phase.value);
+      const asksProfile = relation === "pai_mae_encarregado" || relation === "estudante";
+      const profileValid = !asksProfile || (Boolean(city.value) && Boolean(phase.value));
       profileError.hidden = profileValid;
-      city.toggleAttribute("aria-invalid", !city.value);
-      phase.toggleAttribute("aria-invalid", !phase.value);
+      city.toggleAttribute("aria-invalid", asksProfile && !city.value);
+      phase.toggleAttribute("aria-invalid", asksProfile && !phase.value);
       emailError.hidden = email.validity.valid;
       consentError.hidden = consent.checked;
       email.toggleAttribute("aria-invalid", !email.validity.valid);
@@ -317,17 +321,11 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
         });
         const result = await response.json();
         if (!response.ok || !result.ok) throw new Error(result.error || "submit_failed");
-        if (result.qualified === false) {
-          parentFields.hidden = true;
-          nonParent.hidden = false;
-          return;
-        }
-
         const fbq = (window as Window & { fbq?: (...args: unknown[]) => void }).fbq;
         if (measurementAllowed() && typeof fbq === "function") {
           fbq("track", "Lead", {
             content_name: "kit_estudante_2026",
-            lead_type: "pai_mae_encarregado",
+            lead_type: relation,
             cidade: city.value,
             fase: phase.value
           }, { eventID: eventId });
