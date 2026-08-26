@@ -1,0 +1,85 @@
+name: Reconcile missing daily Reels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/reconcile-reels.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '30 10 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reconcile-daily-reels
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    if: ${{ vars.REELS_AUTO_PUBLISH_ENABLED != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Obter main com histórico completo
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Reemitir candidatos recentes de forma idempotente
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t SHAS < <(
+            git log --since='48 hours ago' \
+              --format='%H%x09%s' \
+              -- src/content/artigos \
+            | awk -F '\t' '$2 ~ /^Publicar [0-9]+ artigo com imagem automática$/ { print $1 }' \
+            | awk '!seen[$0]++'
+          )
+
+          if [[ "${#SHAS[@]}" -eq 0 ]]; then
+            echo "Nenhuma publicação diária das últimas 48 horas para reconciliar."
+            exit 0
+          fi
+
+          FAILED=0
+          for SHA in "${SHAS[@]}"; do
+            if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::warning::SHA inválido ignorado: $SHA"
+              continue
+            fi
+
+            SENT=false
+            for attempt in 1 2 3; do
+              if gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
+                -f event_type='reel_publish_candidate' \
+                -f "client_payload[sha]=$SHA"; then
+                echo "Reconciliação enviada para $SHA (tentativa $attempt)."
+                SENT=true
+                break
+              fi
+              echo "::warning::Falhou a reconciliação de $SHA na tentativa $attempt."
+              sleep $((attempt * 5))
+            done
+
+            if [[ "$SENT" != "true" ]]; then
+              echo "::error::Não foi possível reconciliar $SHA."
+              FAILED=1
+            fi
+          done
+
+          if [[ "$FAILED" -ne 0 ]]; then
+            exit 1
+          fi
+
+          {
+            echo "### Reconciliação de Reels"
+            echo "Candidatos recentes reenviados: ${#SHAS[@]}"
+            echo "O claim D1 do gerador impede duplicações e só recupera itens em falta/falhados."
+          } >> "$GITHUB_STEP_SUMMARY"
