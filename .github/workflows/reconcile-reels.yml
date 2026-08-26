@@ -7,7 +7,7 @@ on:
       - '.github/workflows/reconcile-reels.yml'
   workflow_dispatch:
   schedule:
-    - cron: '30 10 * * *'
+    - cron: '15 8,10,12 * * *'
 
 permissions:
   contents: write
@@ -30,56 +30,43 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Reemitir candidatos recentes de forma idempotente
+      - name: Reemitir apenas o candidato diário mais recente
         shell: bash
         run: |
           set -euo pipefail
 
-          mapfile -t SHAS < <(
+          LATEST_SHA="$(
             git log --since='48 hours ago' \
               --format='%H%x09%s' \
               -- src/content/artigos \
-            | awk -F '\t' '$2 ~ /^Publicar [0-9]+ artigo com imagem automática$/ { print $1 }' \
-            | awk '!seen[$0]++'
-          )
+            | awk -F '\t' '$2 ~ /^Publicar [0-9]+ artigo com imagem automática$/ { print $1; exit }'
+          )"
 
-          if [[ "${#SHAS[@]}" -eq 0 ]]; then
+          if [[ -z "$LATEST_SHA" ]]; then
             echo "Nenhuma publicação diária das últimas 48 horas para reconciliar."
             exit 0
           fi
 
-          FAILED=0
-          for SHA in "${SHAS[@]}"; do
-            if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
-              echo "::warning::SHA inválido ignorado: $SHA"
-              continue
-            fi
-
-            SENT=false
-            for attempt in 1 2 3; do
-              if gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
-                -f event_type='reel_publish_candidate' \
-                -f "client_payload[sha]=$SHA"; then
-                echo "Reconciliação enviada para $SHA (tentativa $attempt)."
-                SENT=true
-                break
-              fi
-              echo "::warning::Falhou a reconciliação de $SHA na tentativa $attempt."
-              sleep $((attempt * 5))
-            done
-
-            if [[ "$SENT" != "true" ]]; then
-              echo "::error::Não foi possível reconciliar $SHA."
-              FAILED=1
-            fi
-          done
-
-          if [[ "$FAILED" -ne 0 ]]; then
+          if [[ ! "$LATEST_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::SHA inválido encontrado na reconciliação: $LATEST_SHA"
             exit 1
           fi
 
-          {
-            echo "### Reconciliação de Reels"
-            echo "Candidatos recentes reenviados: ${#SHAS[@]}"
-            echo "O claim D1 do gerador impede duplicações e só recupera itens em falta/falhados."
-          } >> "$GITHUB_STEP_SUMMARY"
+          for attempt in 1 2 3; do
+            if gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
+              -f event_type='reel_publish_candidate' \
+              -f "client_payload[sha]=$LATEST_SHA"; then
+              echo "Reconciliação enviada para o candidato mais recente $LATEST_SHA (tentativa $attempt)."
+              {
+                echo "### Reconciliação de Reels"
+                echo "Candidato recente reenviado: \`$LATEST_SHA\`"
+                echo "A reconciliação é limitada ao artigo diário mais recente; o claim D1 impede duplicação quando já foi concluído."
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "::warning::Falhou a reconciliação de $LATEST_SHA na tentativa $attempt."
+            sleep $((attempt * 5))
+          done
+
+          echo "::error::Não foi possível reconciliar $LATEST_SHA após 3 tentativas."
+          exit 1
