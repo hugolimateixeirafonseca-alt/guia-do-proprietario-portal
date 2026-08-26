@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import subprocess
@@ -15,6 +16,8 @@ from typing import Mapping
 
 SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
 TERMINAL_FAILURE_STATES = {"failure", "failed", "canceled", "cancelled", "skipped"}
+PAGES_PER_PAGE = 25
+MAX_PAGES_TO_SCAN = 20
 
 
 @dataclass(frozen=True)
@@ -52,10 +55,11 @@ def extract_candidate_sha(payload: dict, event_name: str) -> str:
     return sha
 
 
-def fetch_production_deployments(config: PagesReadConfig) -> list[dict]:
+def _request_deployments_page(config: PagesReadConfig, page: int) -> dict:
     url = (
         f"https://api.cloudflare.com/client/v4/accounts/{config.account_id}"
-        f"/pages/projects/{config.project_name}/deployments?env=production&per_page=25"
+        f"/pages/projects/{config.project_name}/deployments"
+        f"?env=production&page={page}&per_page={PAGES_PER_PAGE}"
     )
     request = urllib.request.Request(url, headers={"Authorization": f"Bearer {config.api_token}"})
     try:
@@ -65,7 +69,56 @@ def fetch_production_deployments(config: PagesReadConfig) -> list[dict]:
         raise RuntimeError(f"A validação Pages Read falhou com HTTP {exc.code}.") from None
     if not payload.get("success") or not isinstance(payload.get("result"), list):
         raise RuntimeError("A API Cloudflare não devolveu a lista de deployments esperada.")
-    return payload["result"]
+    return payload
+
+
+def fetch_production_deployments(
+    config: PagesReadConfig,
+    target_sha: str,
+    *,
+    max_pages: int = MAX_PAGES_TO_SCAN,
+    page_fetcher=_request_deployments_page,
+) -> list[dict]:
+    """Procura o SHA em páginas sucessivas de deployments Production.
+
+    O portal tem muitos deployments. Limitar a pesquisa à primeira página fazia
+    uma reconciliação antiga esperar até ao timeout mesmo quando o deployment
+    existia. Paramos logo que encontramos o SHA e impomos um teto para evitar
+    uma varredura ilimitada da API.
+    """
+    if not SHA_PATTERN.fullmatch(target_sha):
+        raise ValueError("O SHA alvo da pesquisa Pages é inválido.")
+    if max_pages < 1:
+        raise ValueError("max_pages tem de ser pelo menos 1.")
+
+    collected: list[dict] = []
+    for page in range(1, max_pages + 1):
+        payload = page_fetcher(config, page)
+        results = payload["result"]
+        collected.extend(results)
+
+        if any(
+            item.get("deployment_trigger", {}).get("metadata", {}).get("commit_hash") == target_sha
+            and item.get("environment") == "production"
+            for item in results
+        ):
+            return collected
+
+        info = payload.get("result_info") if isinstance(payload.get("result_info"), dict) else {}
+        total_pages = info.get("total_pages")
+        if isinstance(total_pages, int) and total_pages > 0 and page >= total_pages:
+            break
+
+        total_count = info.get("total_count")
+        if isinstance(total_count, int) and total_count >= 0:
+            calculated_pages = max(1, math.ceil(total_count / PAGES_PER_PAGE))
+            if page >= calculated_pages:
+                break
+
+        if len(results) < PAGES_PER_PAGE:
+            break
+
+    return collected
 
 
 def validate_production_deployment(deployment: dict, *, sha: str, project_name: str) -> None:
@@ -101,7 +154,7 @@ def wait_for_production_deployment(
 ) -> dict:
     deadline = monotonic() + timeout_seconds
     while True:
-        deployments = fetcher(config)
+        deployments = fetcher(config, sha)
         matching = [
             item for item in deployments
             if item.get("deployment_trigger", {}).get("metadata", {}).get("commit_hash") == sha
