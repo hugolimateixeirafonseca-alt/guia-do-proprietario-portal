@@ -7,9 +7,10 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: reel-auto-publish-${{ github.event.client_payload.sha || github.sha }}
-  cancel-in-progress: false
+# Não existe concurrency ao nível deste workflow de propósito. O lock autoritativo
+# é o claim no D1 dentro de generate-reel-ai.yml. Assim, um detector antigo que
+# fique preso a aguardar o Pages nunca bloqueia uma recuperação mais recente.
+# Duplicados podem chegar ao detect, mas só um consegue reservar a geração no D1.
 
 jobs:
   detect:
