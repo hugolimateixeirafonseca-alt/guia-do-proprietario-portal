@@ -221,4 +221,23 @@ jobs:
             echo "::error::O artigo entrou no main, mas não foi possível solicitar o deploy do portal."
             exit 1
           fi
-          echo "Deploy do portal solicitado para $PUBLISHED_SHA. O Reel será emitido apenas após o Pages confirmar sucesso."
+          echo "Deploy do portal solicitado para $PUBLISHED_SHA."
+
+          # O Reel é disparado já aqui e o próprio workflow de Reels confirma o
+          # deployment Production antes de gerar. Assim um watcher lento do Pages
+          # nunca consegue impedir o Reel diário de arrancar.
+          REEL_DISPATCHED=false
+          for attempt in 1 2 3; do
+            if gh api --method POST "repos/$GITHUB_REPOSITORY/dispatches" \
+              -f event_type='reel_publish_candidate' \
+              -f "client_payload[sha]=$PUBLISHED_SHA"; then
+              echo "Candidato a Reel enviado diretamente: $PUBLISHED_SHA (tentativa $attempt)."
+              REEL_DISPATCHED=true
+              break
+            fi
+            echo "::warning::Falhou o dispatch direto do Reel na tentativa $attempt."
+            sleep $((attempt * 5))
+          done
+          if [[ "$REEL_DISPATCHED" != "true" ]]; then
+            echo "::warning::O dispatch direto do Reel falhou; a reconciliação diária irá recuperar este SHA automaticamente."
+          fi

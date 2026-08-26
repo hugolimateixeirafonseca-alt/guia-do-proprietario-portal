@@ -17,7 +17,7 @@ permissions:
 jobs:
   deploy-latest:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_PAGES_API_TOKEN }}
@@ -41,7 +41,7 @@ jobs:
           const project = process.env.CF_PAGES_PROJECT;
           const commit = process.env.TARGET_SHA;
           const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}`;
-          const deadline = Date.now() + 13 * 60 * 1000;
+          const deadline = Date.now() + 35 * 60 * 1000;
           const pollMs = 10_000;
 
           function shaOf(d) { return d?.deployment_trigger?.metadata?.commit_hash || ''; }
