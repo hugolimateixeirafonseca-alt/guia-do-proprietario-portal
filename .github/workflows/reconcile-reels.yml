@@ -35,12 +35,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          LATEST_SHA="$(
+          # Não usar `git log | awk ... exit` aqui: com pipefail, o awk fecha a
+          # pipe assim que encontra o primeiro resultado e o git pode terminar
+          # com SIGPIPE (141), fazendo uma reconciliação válida parecer falhada.
+          LATEST_SHA=""
+          while IFS=$'\t' read -r CANDIDATE_SHA CANDIDATE_SUBJECT; do
+            if [[ "$CANDIDATE_SUBJECT" =~ ^Publicar\ [0-9]+\ artigo\ com\ imagem\ automática$ ]]; then
+              LATEST_SHA="$CANDIDATE_SHA"
+              break
+            fi
+          done < <(
             git log --since='48 hours ago' \
               --format='%H%x09%s' \
-              -- src/content/artigos \
-            | awk -F '\t' '$2 ~ /^Publicar [0-9]+ artigo com imagem automática$/ { print $1; exit }'
-          )"
+              -- src/content/artigos
+          )
 
           if [[ -z "$LATEST_SHA" ]]; then
             echo "Nenhuma publicação diária das últimas 48 horas para reconciliar."
