@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-26T07:12:14.659Z",
+  "generatedAt": "2026-08-26T08:43:08.162Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 82,
+    "published": 83,
     "newsOnline": 19
   },
   "articles": [
@@ -1536,14 +1536,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "vender-casa-arrendada.mdx",
       "arrivedAt": "2026-08-11T19:45:03+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-26T07:01:58Z",
+      "url": "https://guiadoproprietario.pt/vender/vender-casa-arrendada/"
     },
     {
       "id": "EXTRA-005",
