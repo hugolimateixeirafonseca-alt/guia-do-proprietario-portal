@@ -370,7 +370,8 @@ export async function createOrUpdateKitSubscriber(
   env: KitEnv,
   email: string,
   fields: Record<string, SenderFieldValue>,
-  triggerAutomation: boolean
+  triggerAutomation: boolean,
+  additionalGroupIds: string[] = []
 ) {
   const identifier = encodeURIComponent(email);
   const existing = await senderRequest(env, `/subscribers/${identifier}`, { method: "GET" });
@@ -392,9 +393,10 @@ export async function createOrUpdateKitSubscriber(
   if (existing.status !== 404) throw new ProviderError(`sender_lookup_${existing.status}`);
 
   const groupId = await getKitGroupId(env);
+  const requestedGroupIds = [...new Set([groupId, ...additionalGroupIds.map((id) => cleanText(id, 80)).filter(Boolean)])];
   const created = await senderRequest(env, "/subscribers", {
     method: "POST",
-    body: JSON.stringify({ email, groups: [groupId], fields, trigger_automation: triggerAutomation })
+    body: JSON.stringify({ email, groups: requestedGroupIds, fields, trigger_automation: triggerAutomation })
   });
   if (created.ok) return { created: true, contactId: senderContactId(await created.json().catch(() => ({}))), inGroup: true };
 
@@ -431,8 +433,13 @@ export async function ensureKitGroupMembership(env: KitEnv, email: string, trigg
   if (!existing.ok) throw new ProviderError(`sender_lookup_${existing.status}`);
   const existingPayload = await existing.json().catch(() => ({}));
   const groupId = await getKitGroupId(env);
-  if (senderGroupIds(existingPayload).has(groupId)) return false;
-  await addKitGroup(env, email, triggerAutomation);
+  const existingGroupIds = senderGroupIds(existingPayload);
+  if (existingGroupIds.has(groupId)) return false;
+  const updated = await senderRequest(env, `/subscribers/${identifier}`, {
+    method: "PATCH",
+    body: JSON.stringify({ groups: [...existingGroupIds, groupId], trigger_automation: triggerAutomation })
+  });
+  if (!updated.ok) throw new ProviderError(`sender_group_update_${updated.status}`);
   return true;
 }
 

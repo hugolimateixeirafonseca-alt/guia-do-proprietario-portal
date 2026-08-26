@@ -114,12 +114,13 @@ test("descobre o grupo pelo nome e cria o subscritor com a automação ativa", a
     { SENDER_API_TOKEN: "token" },
     "pessoa@exemplo.pt",
     { "{$est_origem}": "direto" },
-    true
+    true,
+    ["grupo-newsletter"]
   );
   assert.deepEqual(result, { created: true, contactId: "contacto123", inGroup: true });
   const createCall = calls.find((call) => call.url.endsWith("/subscribers") && call.init.method === "POST");
   const payload = JSON.parse(createCall.init.body);
-  assert.deepEqual(payload.groups, ["grupo123"]);
+  assert.deepEqual(payload.groups, ["grupo123", "grupo-newsletter"]);
   assert.equal(payload.fields["{$est_origem}"], "direto");
   assert.equal(payload.trigger_automation, true);
 });
@@ -160,7 +161,7 @@ test("só acrescenta um contacto ao grupo complementar quando ainda não pertenc
     if (String(url).endsWith("/subscribers/pessoa%40exemplo.pt") && init.method === "GET") {
       return Response.json({ data: { id: "contacto123", subscriber_tags: [{ id: "grupo-principal" }] } });
     }
-    if (String(url).endsWith("/subscribers/groups/grupo-newsletter") && init.method === "POST") {
+    if (String(url).endsWith("/subscribers/pessoa%40exemplo.pt") && init.method === "PATCH") {
       return Response.json({ success: true });
     }
     throw new Error(`Pedido inesperado: ${url}`);
@@ -172,9 +173,9 @@ test("só acrescenta um contacto ao grupo complementar quando ainda não pertenc
     true
   );
   assert.equal(added, true);
-  const groupCall = calls.find((call) => call.init.method === "POST");
+  const groupCall = calls.find((call) => call.init.method === "PATCH");
   assert.deepEqual(JSON.parse(groupCall.init.body), {
-    subscribers: ["pessoa@exemplo.pt"],
+    groups: ["grupo-principal", "grupo-newsletter"],
     trigger_automation: true
   });
 
@@ -401,8 +402,9 @@ test("o endpoint aceita os três percursos e só exige perfil a pais e estudante
   assert.match(landingLeadSource, /const NEWSLETTER_SENDER_GROUP_ID = "egK8WG"/);
   assert.match(landingLeadSource, /relation === "estudante"[\s\S]*SENDER_GROUP_KIT_ESTUDANTE: STUDENT_SENDER_GROUP_ID/);
   assert.match(landingLeadSource, /createOrUpdateKitSubscriber\([\s\S]*?senderEnv,/);
+  assert.match(landingLeadSource, /relation !== "estudante" \? \[NEWSLETTER_SENDER_GROUP_ID\] : \[\]/);
   assert.match(landingLeadSource, /addKitGroup\(senderEnv, email, true\)/);
-  assert.match(landingLeadSource, /relation !== "estudante"/);
+  assert.match(landingLeadSource, /!senderResult\.created && relation !== "estudante"/);
   assert.match(landingLeadSource, /SENDER_GROUP_KIT_ESTUDANTE: NEWSLETTER_SENDER_GROUP_ID/);
   assert.match(landingLeadSource, /ensureKitGroupMembership\(newsletterEnv, email, true\)/);
   assert.match(landingLeadSource, /throw new PublicError\(400, "invalid_submission"\)/);
