@@ -81,7 +81,57 @@ test('relevance scoring preserves the required housing benchmarks',()=>{
       direct_source:'CNN Portugal'
     });
     assert.equal(result.relevant,true,title);
-    assert.ok(result.score>=5,title);
+    assert.ok(result.score>=50,title);
+  }
+});
+
+test('prefilter deixa passar casa prática e estudantes antes do Validator',()=>{
+  const practical=scoreHarvestRelevance({
+    url:'https://publisher.pt/casa/ondas-de-calor',
+    verified_title:'Ondas de calor: quanto custa manter a casa fresca?',
+    article_type:'NewsArticle',
+    direct_source:'Publisher'
+  });
+  const students=scoreHarvestRelevance({
+    url:'https://publisher.pt/casa/plataforma-estudantes',
+    verified_title:'Vai estudar longe? Nova plataforma ajuda a encontrar casa',
+    source_description:'Ferramenta portuguesa ajuda estudantes universitários a procurar alojamento e quartos.',
+    article_type:'NewsArticle',
+    direct_source:'Publisher'
+  });
+  assert.equal(practical.relevant,true);
+  assert.equal(students.relevant,true);
+  assert.ok(practical.score>=70,practical.score);
+  assert.ok(students.score>=70,students.score);
+});
+
+test('prefilter mantém Euribor de rotina mas abaixo de casa prática',()=>{
+  const euribor=scoreHarvestRelevance({
+    url:'https://publisher.pt/economia/euribor-sobe',
+    verified_title:'Euribor sobe a três meses e recua a seis meses',
+    article_type:'NewsArticle',
+    direct_source:'Publisher'
+  });
+  const practical=scoreHarvestRelevance({
+    url:'https://publisher.pt/casa/humidade',
+    verified_title:'Humidade em casa: como evitar bolor e infiltrações',
+    article_type:'NewsArticle',
+    direct_source:'Publisher'
+  });
+  assert.equal(euribor.relevant,true);
+  assert.equal(practical.relevant,true);
+  assert.ok(practical.score>euribor.score,{practical:practical.score,euribor:euribor.score});
+});
+
+test('falsos positivos semânticos são travados antes do Validator',()=>{
+  const cases=[
+    ['Homem encontrado morto em casa durante a madrugada','https://publisher.pt/pais/morto-em-casa'],
+    ['Quatro obras de arte roubadas de museu','https://publisher.pt/cultura/obras-de-arte'],
+    ['Concursos de obras públicas atingem novo máximo','https://publisher.pt/economia/obras-publicas']
+  ];
+  for (const [title,url] of cases) {
+    const result=scoreHarvestRelevance({url,verified_title:title,article_type:'NewsArticle',direct_source:'Publisher'});
+    assert.equal(result.relevant,false,title);
   }
 });
 
