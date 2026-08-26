@@ -425,6 +425,17 @@ export async function addKitGroup(env: KitEnv, email: string, triggerAutomation:
   if (!response.ok) throw new ProviderError(`sender_group_${response.status}`);
 }
 
+export async function ensureKitGroupMembership(env: KitEnv, email: string, triggerAutomation: boolean) {
+  const identifier = encodeURIComponent(email);
+  const existing = await senderRequest(env, `/subscribers/${identifier}`, { method: "GET" });
+  if (!existing.ok) throw new ProviderError(`sender_lookup_${existing.status}`);
+  const existingPayload = await existing.json().catch(() => ({}));
+  const groupId = await getKitGroupId(env);
+  if (senderGroupIds(existingPayload).has(groupId)) return false;
+  await addKitGroup(env, email, triggerAutomation);
+  return true;
+}
+
 export async function upsertLead(
   db: D1Database,
   email: string,

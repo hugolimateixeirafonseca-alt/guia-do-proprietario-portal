@@ -11,6 +11,7 @@ import {
   cleanupExpiredSessions,
   createOrUpdateKitSubscriber,
   createSession,
+  ensureKitGroupMembership,
   isValidEmail,
   json,
   logEvent,
@@ -25,7 +26,7 @@ import {
 } from "../../lib/kit-estudante";
 
 const STUDENT_SENDER_GROUP_ID = "b4wZA2";
-const OTHER_SENDER_GROUP_ID = "egK8WG";
+const NEWSLETTER_SENDER_GROUP_ID = "egK8WG";
 
 export const onRequestPost = async ({ request, env }: RequestContext) => {
   const reqId = requestId(request);
@@ -81,9 +82,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     const senderEnv = relation === "estudante"
       ? { ...env, SENDER_GROUP_KIT_ESTUDANTE: STUDENT_SENDER_GROUP_ID }
-      : relation === "outro"
-        ? { ...env, SENDER_GROUP_KIT_ESTUDANTE: OTHER_SENDER_GROUP_ID }
-        : env;
+      : env;
 
     const senderResult = await createOrUpdateKitSubscriber(
       senderEnv,
@@ -94,6 +93,11 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
     if (!senderResult.created && !senderResult.inGroup) {
       await addKitGroup(senderEnv, email, true);
+    }
+
+    if (relation !== "estudante") {
+      const newsletterEnv = { ...env, SENDER_GROUP_KIT_ESTUDANTE: NEWSLETTER_SENDER_GROUP_ID };
+      await ensureKitGroupMembership(newsletterEnv, email, true);
     }
 
     leadId = await upsertLead(

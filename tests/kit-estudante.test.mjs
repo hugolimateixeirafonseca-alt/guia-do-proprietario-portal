@@ -154,6 +154,44 @@ test("não marca um contacto existente para reiniciar a automação", async () =
   assert.equal(calls.some((call) => call.url.includes("/fields?")), false);
 });
 
+test("só acrescenta um contacto ao grupo complementar quando ainda não pertence", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).endsWith("/subscribers/pessoa%40exemplo.pt") && init.method === "GET") {
+      return Response.json({ data: { id: "contacto123", subscriber_tags: [{ id: "grupo-principal" }] } });
+    }
+    if (String(url).endsWith("/subscribers/groups/grupo-newsletter") && init.method === "POST") {
+      return Response.json({ success: true });
+    }
+    throw new Error(`Pedido inesperado: ${url}`);
+  };
+
+  const added = await helper.ensureKitGroupMembership(
+    { SENDER_API_TOKEN: "token", SENDER_GROUP_KIT_ESTUDANTE: "grupo-newsletter" },
+    "pessoa@exemplo.pt",
+    true
+  );
+  assert.equal(added, true);
+  const groupCall = calls.find((call) => call.init.method === "POST");
+  assert.deepEqual(JSON.parse(groupCall.init.body), {
+    subscribers: ["pessoa@exemplo.pt"],
+    trigger_automation: true
+  });
+
+  calls = [];
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    return Response.json({ data: { id: "contacto123", subscriber_tags: [{ id: "grupo-newsletter" }] } });
+  };
+  const alreadyPresent = await helper.ensureKitGroupMembership(
+    { SENDER_API_TOKEN: "token", SENDER_GROUP_KIT_ESTUDANTE: "grupo-newsletter" },
+    "pessoa@exemplo.pt",
+    true
+  );
+  assert.equal(alreadyPresent, false);
+  assert.equal(calls.length, 1);
+});
+
 test("um contacto novo mantém origem, Coimbra e tratado após cada PATCH", async () => {
   const fieldIds = new Map([
     ["{$est_origem}", "origem-id"],
@@ -253,6 +291,10 @@ test("mantém os modos de email e sessão separados sem repetir perguntas no agr
   assert.doesNotMatch(thankYouSource, /data-profile-field/);
   assert.doesNotMatch(thankYouSource, /Pergunta 1 de 2/);
   assert.doesNotMatch(thankYouSource, /api\/kit-estudante\/perfil/);
+  assert.doesNotMatch(thankYouSource, /Se ainda não pediu os manuais/);
+  assert.doesNotMatch(thankYouSource, /Pedir os dois manuais/);
+  assert.match(thankYouSource, /Se não os encontrar, verifique a pasta de spam ou promoções/);
+  assert.match(thankYouSource, /não receba o email dentro de 30 minutos, contacte-nos/);
   assert.doesNotMatch(thankYouSource, /procurar-quarto-olx-grupos-facebook/);
 });
 
@@ -352,10 +394,12 @@ test("o endpoint aceita os três percursos e só exige perfil a pais e estudante
   assert.match(landingLeadSource, /senderFields\["\{\$est_cidade\}"\] = city/);
   assert.match(landingLeadSource, /senderFields\["\{\$est_fase\}"\] = phase/);
   assert.match(landingLeadSource, /const STUDENT_SENDER_GROUP_ID = "b4wZA2"/);
-  assert.match(landingLeadSource, /const OTHER_SENDER_GROUP_ID = "egK8WG"/);
+  assert.match(landingLeadSource, /const NEWSLETTER_SENDER_GROUP_ID = "egK8WG"/);
   assert.match(landingLeadSource, /relation === "estudante"[\s\S]*SENDER_GROUP_KIT_ESTUDANTE: STUDENT_SENDER_GROUP_ID/);
-  assert.match(landingLeadSource, /relation === "outro"[\s\S]*SENDER_GROUP_KIT_ESTUDANTE: OTHER_SENDER_GROUP_ID/);
   assert.match(landingLeadSource, /createOrUpdateKitSubscriber\([\s\S]*?senderEnv,/);
   assert.match(landingLeadSource, /addKitGroup\(senderEnv, email, true\)/);
+  assert.match(landingLeadSource, /relation !== "estudante"/);
+  assert.match(landingLeadSource, /SENDER_GROUP_KIT_ESTUDANTE: NEWSLETTER_SENDER_GROUP_ID/);
+  assert.match(landingLeadSource, /ensureKitGroupMembership\(newsletterEnv, email, true\)/);
   assert.doesNotMatch(landingLeadSource, /qualified: false/);
 });
