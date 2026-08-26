@@ -26,6 +26,12 @@ class WorkflowWiringTests(unittest.TestCase):
         self.assertIn("types: [reel_publish_candidate]", AUTO_WORKFLOW)
         self.assertNotIn("check_run:", AUTO_WORKFLOW)
 
+    def test_detector_nao_tem_concurrency_que_bloqueie_recovery(self):
+        self.assertNotIn("reel-auto-publish-", AUTO_WORKFLOW)
+        parsed = yaml.safe_load(AUTO_WORKFLOW)
+        self.assertNotIn("concurrency", parsed)
+        self.assertIn("claim no D1", AUTO_WORKFLOW)
+
     def test_feature_flag_so_desliga_quando_explicitamente_false(self):
         self.assertIn("vars.REELS_AUTO_PUBLISH_ENABLED != 'false'", AUTO_WORKFLOW)
         self.assertIn("vars.REELS_AUTO_PUBLISH_ENABLED != 'false'", RECONCILE_WORKFLOW)
