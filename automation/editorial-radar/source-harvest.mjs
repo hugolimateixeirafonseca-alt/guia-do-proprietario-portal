@@ -1,20 +1,30 @@
 import {inspectSourceUrl} from './source-metadata.mjs';
+import {scoreEditorialEvent} from './editorial-scoring.mjs';
 
 const USER_AGENT='Mozilla/5.0 (compatible; GuiaDoProprietario-EditorialRadar/21.2; +https://guiadoproprietario.pt/)';
-const RELEVANT_TERMS=['casa','casas','habitação','imóvel','imobiliário','condomínio','renda','arrendamento','senhorio','crédito','euribor','imi','imt','irs','obras','energia','herança','propriedade','venda','preços'];
+const RELEVANT_TERMS=[
+  'casa','casas','habitação','imóvel','imobiliário','condomínio','renda','arrendamento','senhorio','crédito','euribor','imi','imt','irs','obras','energia','herança','propriedade','venda','preços',
+  'reparação','manutenção','humidade','bolor','infiltração','canalização','isolamento','janelas','telhado','pintura','remodelação','limpeza','pragas',
+  'eficiência energética','painéis solares','conta da luz','fatura da luz','conta de água','seguro multirriscos','segurança doméstica','aquecimento','ar condicionado','ventilação','calor',
+  'quarto','quartos','estudante','estudantes','residência universitária','alojamento estudantil','vizinhos','ruído','elevador','cozinha','casa de banho','eletrodomésticos','decoração','arrumação','jardim','varanda','terraço'
+];
 const EXCLUDED=/(?:^|\/)(?:login|newsletter|autor(?:es)?|author|tags?|pesquisa|search|contactos?|contacts?|politica(?:-de)?-cookies?|cookies?|privacy|privacidade|facebook|instagram|linkedin|twitter|x\.com)(?:\/|$)/i;
 const ARTICLE_TYPES=new Set(['newsarticle','article','reportagenewsarticle','blogposting']);
 const HIGH_RELEVANCE=[
   'condomínio','condomínios','habitação','arrendamento','senhorio','senhorios','inquilino','inquilinos',
   'renda','rendas','imóvel','imóveis','imobiliário','moradia','moradias','crédito habitação',
   'crédito à habitação','euribor','imi','imt','mais-valias','propriedade','proprietário','proprietários',
-  'herança','heranças','despejo','despejos'
+  'herança','heranças','despejo','despejos','reparação','reparações','manutenção','humidade','bolor','infiltração',
+  'eficiência energética','painéis solares','quarto para estudante','quartos para estudantes','residência universitária',
+  'alojamento estudantil','vizinhos','ruído','elevador','segurança doméstica'
 ];
 const MEDIUM_RELEVANCE=[
-  'obras','construção','eficiência energética','energia','hipoteca','prestação','prestações','preços das casas',
-  'compra de casa','venda de casa','alojamento','fiscalidade habitação','irs rendas','reabilitação','licença','licenciamento'
+  'obras','construção','energia','hipoteca','prestação','prestações','preços das casas',
+  'compra de casa','venda de casa','alojamento','fiscalidade habitação','irs rendas','reabilitação','licença','licenciamento',
+  'canalização','isolamento','janelas','telhado','pintura','remodelação','limpeza','pragas','aquecimento','ar condicionado',
+  'ventilação','cozinha','casa de banho','eletrodomésticos','decoração','arrumação','jardim','varanda','terraço','calor'
 ];
-const CONTEXT_RELEVANCE=['impostos','juros','banco','financiamento','seguros','calor','eficiência','município','prédio','edifício'];
+const CONTEXT_RELEVANCE=['impostos','juros','banco','financiamento','seguros','calor','eficiência','município','prédio','edifício','água','luz','gás'];
 const NEGATIVE_TOPICS=[
   'futebol','benfica','sporting','fc porto','voleibol','andebol','atletismo','desporto','trump','ucrânia','rússia',
   'bolsa internacional','petróleo','automóvel','turismo','aviação','telecomunicações','celebridades',
@@ -160,20 +170,28 @@ export function scoreHarvestRelevance(source) {
   const titleForScoring=title.replace(/\bcasa branca\b/gi,'');
   const anchor=source.anchor_text || '';
   const pathname=decodedPathname(source.url);
-  const contentText=[titleForScoring,anchor,pathname,source.article_type||''].join(' ');
+  const contentText=[titleForScoring,source.source_description||'',anchor,pathname,source.article_type||''].join(' ');
   const high=termMatches(contentText,HIGH_RELEVANCE);
   const medium=termMatches(contentText,MEDIUM_RELEVANCE);
   const contextual=termMatches(contentText,CONTEXT_RELEVANCE);
   const titleHigh=termMatches(titleForScoring,HIGH_RELEVANCE);
   const negative=termMatches(`${title} ${pathname}`,NEGATIVE_TOPICS);
   const articleType=ARTICLE_TYPES.has(normalized(source.article_type).replace(/\s+/g,''));
-  let score=high.length*5 + medium.length*3 + contextual.length*1 + (articleType ? 2 : 0);
+  const balanced=scoreEditorialEvent({
+    source_title:titleForScoring,
+    title:titleForScoring,
+    source_description:source.source_description||anchor||'',
+    article_url:source.url||'',
+    source_domain:source.source_domain||'',
+    is_official:Boolean(source.is_official)
+  });
+  let score=balanced.news_score + (articleType ? 2 : 0);
   let reason='';
 
   if (genericPage(source)) reason='non_article';
   const directSource=normalized(source.direct_source||'');
   const titleNormalized=normalized(title);
-  const hasStrongOwnerSignal=titleHigh.length>0;
+  const hasStrongOwnerSignal=titleHigh.length>0 || balanced.signals?.direct_home_relevance===true;
   if (!reason && /(?:^|\/)mundo(?:\/|$)/i.test(pathname)) reason='excluded_section';
   if (!reason && /(?:^|\/)opiniao(?:\/|$)/i.test(pathname) && !hasStrongOwnerSignal) reason='excluded_section';
   if (!reason && /\b(?:morto|morte|plagio|policia|pj)\b/i.test(titleNormalized) && !hasStrongOwnerSignal) reason='excluded_section';
@@ -183,18 +201,24 @@ export function scoreHarvestRelevance(source) {
   }
   if (!reason && directSource==='dinheiro vivo imobiliario') {
     if (pathname.startsWith('/imobiliario/')) score+=4;
-    else if (!titleHigh.length) reason='excluded_section';
+    else if (!hasStrongOwnerSignal) reason='excluded_section';
   }
-  if (!reason && negative.length && !titleHigh.length) reason='excluded_section';
+  if (!reason && negative.length && !hasStrongOwnerSignal) reason='excluded_section';
 
-  const hasCoreSignal=high.length>0 || medium.length>0;
-  const minimum=directSource==='cnn portugal' ? 5 : 5;
-  if (!reason && (!hasCoreSignal || score<minimum)) reason='low_relevance';
+  const minimum=50;
+  if (!reason && score<minimum) reason='low_relevance';
   return {
     score,
     relevant:!reason,
     reason,
-    signals:{high,medium,contextual,negative,article_type:articleType}
+    signals:{
+      high,medium,contextual,negative,article_type:articleType,
+      balanced_news_score:balanced.news_score,
+      balanced_version:balanced.scoring_version,
+      direct_home_relevance:Boolean(balanced.signals?.direct_home_relevance),
+      routine_finance:Boolean(balanced.signals?.routine_finance),
+      false_positive:balanced.signals?.false_positive||''
+    }
   };
 }
 
