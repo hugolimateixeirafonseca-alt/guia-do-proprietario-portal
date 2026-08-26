@@ -11,7 +11,12 @@ from pathlib import Path
 REELS_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REELS_DIR))
 
-from automatic_trigger import claim_initial_trigger, complete_initial_trigger, fail_initial_trigger
+from automatic_trigger import (
+    claim_initial_trigger,
+    complete_initial_trigger,
+    describe_initial_trigger,
+    fail_initial_trigger,
+)
 
 
 class SQLiteQuery:
@@ -181,6 +186,57 @@ class AutomaticTriggerTests(unittest.TestCase):
             "novo", sha, query=database, claimed_at="2026-08-26 11:00:00"
         ))
         self.assertEqual(database.row("novo"), ("novo", sha, "completed", "generation-1", None))
+
+    def test_status_distingue_claim_recente_sem_generation_valida(self):
+        sha = "a" * 40
+        responses = iter([
+            [{
+                "slug": "novo",
+                "publication_sha": sha,
+                "state": "claimed",
+                "claimed_at": "2026-08-26T11:10:00+00:00",
+                "completed_at": None,
+                "failed_at": None,
+                "generation_id": None,
+                "error": None,
+            }],
+            [{
+                "generation_id": "failed-1",
+                "status": "generation_failed",
+                "created_at": "2026-08-26T11:05:00+00:00",
+                "publication_sha": None,
+            }],
+        ])
+        result = describe_initial_trigger("novo", sha, fetch=lambda _sql, _params: next(responses))
+        self.assertEqual(result["block_reason"], "active_or_recent_claim")
+        self.assertEqual(result["valid_generation_count"], 0)
+        self.assertEqual(result["trigger"]["claimed_at"], "2026-08-26T11:10:00+00:00")
+
+    def test_status_distingue_generation_valida(self):
+        sha = "a" * 40
+        responses = iter([
+            [{
+                "slug": "novo",
+                "publication_sha": sha,
+                "state": "claimed",
+                "claimed_at": "2026-08-26T11:10:00+00:00",
+                "completed_at": None,
+                "failed_at": None,
+                "generation_id": None,
+                "error": None,
+            }],
+            [{
+                "generation_id": "review-1",
+                "status": "pending_review",
+                "created_at": "2026-08-26T11:12:00+00:00",
+                "publication_sha": sha,
+            }],
+        ])
+        result = describe_initial_trigger("novo", sha, fetch=lambda _sql, _params: next(responses))
+        self.assertEqual(result["block_reason"], "valid_generation_exists")
+        self.assertEqual(result["valid_generation_count"], 1)
+        self.assertEqual(result["latest_generations"][0]["status"], "pending_review")
+        self.assertNotIn("video_key", result["latest_generations"][0])
 
 
 if __name__ == "__main__":
