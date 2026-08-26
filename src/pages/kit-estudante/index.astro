@@ -53,7 +53,7 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
             <button type="submit">Receber os dois manuais</button>
           </div>
           <p class="field-error" data-email-error hidden>Introduza um endereço de email válido.</p>
-          <label class="honeypot" aria-hidden="true">Empresa<input name="company" tabindex="-1" autocomplete="off" /></label>
+          <label class="honeypot" aria-hidden="true">Website<input name="website_confirm_url_x9" tabindex="-1" autocomplete="new-password" data-honeypot /></label>
           <label class="consent">
             <input type="checkbox" name="consent" required />
             <span>{KIT_ESTUDANTE_CONSENT_TEXT} Consulte a <a href="/privacidade/">Política de Privacidade</a>.</span>
@@ -194,7 +194,7 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
             <button type="submit">Receber os dois manuais</button>
           </div>
           <p class="field-error" data-email-error hidden>Introduza um endereço de email válido.</p>
-          <label class="honeypot" aria-hidden="true">Empresa<input name="company" tabindex="-1" autocomplete="off" /></label>
+          <label class="honeypot" aria-hidden="true">Website<input name="website_confirm_url_x9" tabindex="-1" autocomplete="new-password" data-honeypot /></label>
           <label class="consent">
             <input type="checkbox" name="consent" required />
             <span>{KIT_ESTUDANTE_CONSENT_TEXT} Consulte a <a href="/privacidade/">Política de Privacidade</a>.</span>
@@ -233,7 +233,7 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
     const phase = form.elements.namedItem("fase") as HTMLSelectElement;
     const email = form.elements.namedItem("email") as HTMLInputElement;
     const consent = form.elements.namedItem("consent") as HTMLInputElement;
-    const company = form.elements.namedItem("company") as HTMLInputElement;
+    const honeypot = form.querySelector<HTMLInputElement>("[data-honeypot]")!;
     const button = form.querySelector<HTMLButtonElement>("button[type='submit']")!;
     const status = form.querySelector<HTMLElement>(".form-status")!;
     const emailError = form.querySelector<HTMLElement>("[data-email-error]")!;
@@ -246,7 +246,7 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
       formFields.hidden = !relation;
       profileFields.hidden = !asksProfile;
       relationError.hidden = Boolean(relation);
-      for (const control of [email, consent, company]) control.disabled = !relation;
+      for (const control of [email, consent, honeypot]) control.disabled = !relation;
       for (const control of [city, phase]) {
         control.disabled = !asksProfile;
         control.required = asksProfile;
@@ -315,7 +315,7 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
             relacao: relation,
             cidade: city.value,
             fase: phase.value,
-            company: company.value,
+            company: honeypot.value,
             eventId
           })
         });

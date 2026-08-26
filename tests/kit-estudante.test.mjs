@@ -381,6 +381,10 @@ test("a landing continua para pais, estudantes e outros", () => {
   assert.match(landingSource, /relacao: relation/);
   assert.match(landingSource, /cidade: city\.value/);
   assert.match(landingSource, /fase: phase\.value/);
+  assert.match(landingSource, /name="website_confirm_url_x9"/);
+  assert.match(landingSource, /autocomplete="new-password" data-honeypot/);
+  assert.match(landingSource, /querySelector<HTMLInputElement>\("\[data-honeypot\]"\)/);
+  assert.doesNotMatch(landingSource, /name="company"/);
   assert.doesNotMatch(landingSource, /data-non-parent/);
 });
 
@@ -401,5 +405,7 @@ test("o endpoint aceita os três percursos e só exige perfil a pais e estudante
   assert.match(landingLeadSource, /relation !== "estudante"/);
   assert.match(landingLeadSource, /SENDER_GROUP_KIT_ESTUDANTE: NEWSLETTER_SENDER_GROUP_ID/);
   assert.match(landingLeadSource, /ensureKitGroupMembership\(newsletterEnv, email, true\)/);
+  assert.match(landingLeadSource, /throw new PublicError\(400, "invalid_submission"\)/);
+  assert.doesNotMatch(landingLeadSource, /cleanText\(body\.company, 120\)\) return json\(\{ ok: true \}/);
   assert.doesNotMatch(landingLeadSource, /qualified: false/);
 });

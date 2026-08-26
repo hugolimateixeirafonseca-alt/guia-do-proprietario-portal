@@ -42,7 +42,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     const body = await readSmallJson(request);
     eventRef = cleanText(body.eventId, 80) || reqId;
 
-    if (cleanText(body.company, 120)) return json({ ok: true }, 200);
+    if (cleanText(body.company, 120)) throw new PublicError(400, "invalid_submission");
 
     source = ALLOWED_SOURCES.has(cleanText(body.origem, 24)) ? cleanText(body.origem, 24) : "direto";
     const relation = cleanText(body.relacao, 40);
