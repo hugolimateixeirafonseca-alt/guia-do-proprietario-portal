@@ -37,13 +37,22 @@ test('source_title estável prevalece sobre título variável do modelo',()=>{
   );
 });
 
-test('Euribor ligada a crédito habitação atinge relevância de notícia',()=>{
+test('Euribor diária sem impacto concreto deixa de dominar o Radar',()=>{
   const candidate={
     source_title:'Euribor desce a três e 12 meses, mas taxa mais usada volta a subir',
-    article_url:'https://cnnportugal.iol.pt/credito-a-habitacao/prestacao-da-casa/euribor-desce-a-tres-e-12-meses-mas-taxa-mais-usada-volta-a-subir/20260814/x',
+    article_url:'https://cnnportugal.iol.pt/economia/euribor/euribor-desce-a-tres-e-12-meses-mas-taxa-mais-usada-volta-a-subir/20260814/x',
     pillar:'casa'
   };
-  assert.ok(scoreEditorialEvent(candidate,{pillar:'casa',legal_stage:'na'}).news_score>=70);
+  const score=scoreEditorialEvent(candidate,{pillar:'casa',legal_stage:'na'}).news_score;
+  assert.ok(score>=40&&score<=60,score);
+});
+
+test('impacto concreto na prestação do crédito habitação continua publicável',()=>{
+  const candidate={
+    source_title:'Prestação da casa desce 54 euros com nova Euribor no crédito habitação',
+    article_url:'https://eco.sapo.pt/credito-habitacao/prestacao-da-casa'
+  };
+  assert.ok(scoreEditorialEvent(candidate).news_score>=70);
 });
 
 test('proposta sobre arrendamento e despejo é claramente publicável',()=>{
@@ -82,13 +91,68 @@ test('artigo de opinião sobre energia solar não passa o limiar',()=>{
   assert.ok(scoreEditorialEvent(candidate,{pillar:'casa',legal_stage:'na'}).news_score<70);
 });
 
+test('onda de calor com utilidade doméstica passa o limiar',()=>{
+  const candidate={
+    source_title:'Ondas de calor: quanto custa manter a casa fresca?',
+    article_url:'https://www.idealista.pt/news/financas/lar/ondas-de-calor-casa-fresca'
+  };
+  const result=scoreEditorialEvent(candidate);
+  assert.ok(result.news_score>=70,result.news_score);
+  assert.equal(result.pillar,'casa');
+});
+
+test('plataforma para estudante encontrar casa passa o limiar',()=>{
+  const candidate={
+    source_title:'Vai estudar longe? Nova plataforma ajuda a encontrar casa',
+    source_description:'Ferramenta portuguesa ajuda estudantes universitários a procurar alojamento e quartos.',
+    article_url:'https://www.rtp.pt/noticias/pais/plataforma-estudantes-casa'
+  };
+  assert.ok(scoreEditorialEvent(candidate).news_score>=70);
+});
+
+test('arquitetura residencial portuguesa ganha relevância sem virar prioridade máxima',()=>{
+  const candidate={
+    source_title:'Casas icónicas: as três portuguesas no mapa mundial',
+    article_url:'https://www.idealista.pt/news/imobiliario/habitacao/casas-iconicas-portuguesas'
+  };
+  const score=scoreEditorialEvent(candidate).news_score;
+  assert.ok(score>=55&&score<70,score);
+});
+
+test('encontrado morto em casa é falso positivo semântico',()=>{
+  const candidate={
+    source_title:'Homem encontrado morto em casa durante a madrugada',
+    article_url:'https://noticias.pt/pais/homem-encontrado-morto-em-casa'
+  };
+  const result=scoreEditorialEvent(candidate);
+  assert.ok(result.news_score<=10,result.news_score);
+  assert.equal(result.signals.false_positive,'crime_home_word');
+});
+
+test('obras de arte não são obras da casa',()=>{
+  const candidate={
+    source_title:'Quatro obras de arte de Messina roubadas de museu',
+    article_url:'https://noticias.pt/cultura/obras-de-arte-messina'
+  };
+  assert.ok(scoreEditorialEvent(candidate).news_score<=10);
+});
+
+test('concursos de obras públicas não entram apenas pela palavra obras',()=>{
+  const candidate={
+    source_title:'Concursos de obras públicas atingem novo máximo este ano',
+    article_url:'https://jornaleconomico.sapo.pt/noticias/concursos-obras-publicas'
+  };
+  assert.ok(scoreEditorialEvent(candidate).news_score<=20);
+});
+
 test('todos os scores são inteiros entre 0 e 100',()=>{
   const result=scoreEditorialEvent(prr,{pillar:'casa',legal_stage:'anuncio'});
   for (const value of [result.news_score,result.seo_score,result.lead_score]) {
     assert.equal(Number.isInteger(value),true);
-    assert.ok(value>=0 && value<=100);
+    assert.ok(value>=0&&value<=100);
   }
 });
+
 test('numero apenas no URL nao acrescenta pontos',()=>{
   const base={
     source_title:'Conheça as propostas para flexibilizar lei das rendas',
