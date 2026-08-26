@@ -1,6 +1,13 @@
 name: Editorial Radar Tests
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'automation/editorial-radar/**'
+      - '.github/workflows/editorial-radar.yml'
+      - '.github/workflows/editorial-radar-tests.yml'
   pull_request:
     paths:
       - 'automation/editorial-radar/**'
@@ -23,6 +30,7 @@ jobs:
       - name: Syntax check v22
         run: |
           node --check automation/editorial-radar/radar-v22.mjs
+          node --check automation/editorial-radar/source-harvest.mjs
           node --check automation/editorial-radar/source-metadata.mjs
           node --check automation/editorial-radar/editorial-scoring.mjs
           node --check automation/editorial-radar/factual-extraction.mjs
