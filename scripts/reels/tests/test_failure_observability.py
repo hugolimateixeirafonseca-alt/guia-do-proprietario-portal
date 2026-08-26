@@ -39,6 +39,19 @@ class FailureObservabilityTests(unittest.TestCase):
         self.assertIn('ERROR_CODE="${REEL_FAILURE_STAGE:-workflow_failed}"', workflow)
         self.assertIn("env.REEL_REVIEW_SAVED != 'true'", workflow)
 
+    def test_recuperacao_usa_conteudo_historico_com_motor_atual(self):
+        workflow = (ROOT / ".github" / "workflows" / "generate-reel-ai.yml").read_text(encoding="utf-8")
+        self.assertIn("ref: ${{ inputs.publication_sha || github.sha }}", workflow)
+        self.assertIn("git archive origin/reels-engine-main scripts/reels", workflow)
+        self.assertIn("PUBLICATION_SHA != ''", workflow)
+
+    def test_gerador_tenta_repair_editorial_mais_de_uma_vez(self):
+        source = (REELS_DIR / "generate_json.py").read_text(encoding="utf-8")
+        self.assertIn("MAX_EDITORIAL_REPAIR_PASSES = 3", source)
+        self.assertIn("for attempt in range(1, MAX_EDITORIAL_REPAIR_PASSES + 1)", source)
+        self.assertIn("Repair ainda fora dos limites", source)
+        self.assertIn("validate_facts(raw_candidate", source)
+
 
 if __name__ == "__main__":
     unittest.main()
