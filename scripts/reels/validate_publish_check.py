@@ -93,7 +93,7 @@ def wait_for_production_deployment(
     config: PagesReadConfig,
     *,
     sha: str,
-    timeout_seconds: float = 1200,
+    timeout_seconds: float = 2400,
     poll_interval_seconds: float = 15,
     fetcher=fetch_production_deployments,
     sleeper=time.sleep,
