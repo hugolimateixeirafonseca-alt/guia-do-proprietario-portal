@@ -40,8 +40,10 @@ class WorkflowWiringTests(unittest.TestCase):
     def test_reconciliador_tem_tres_janelas_e_so_reenvia_o_mais_recente(self):
         self.assertIn("cron: '15 8,10,12 * * *'", RECONCILE_WORKFLOW)
         self.assertIn("--since='48 hours ago'", RECONCILE_WORKFLOW)
-        self.assertIn("print $1; exit", RECONCILE_WORKFLOW)
         self.assertIn("LATEST_SHA", RECONCILE_WORKFLOW)
+        self.assertIn("while IFS=$'\\t' read -r CANDIDATE_SHA CANDIDATE_SUBJECT", RECONCILE_WORKFLOW)
+        self.assertIn("break", RECONCILE_WORKFLOW)
+        self.assertNotIn("print $1; exit", RECONCILE_WORKFLOW)
         self.assertIn("event_type='reel_publish_candidate'", RECONCILE_WORKFLOW)
         self.assertIn("client_payload[sha]", RECONCILE_WORKFLOW)
         self.assertNotIn("mapfile -t SHAS", RECONCILE_WORKFLOW)
