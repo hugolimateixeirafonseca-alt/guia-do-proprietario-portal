@@ -13,6 +13,7 @@ sys.path.insert(0, str(REELS_DIR))
 from validate_publish_check import (
     PagesReadConfig,
     extract_candidate_sha,
+    fetch_production_deployments,
     validate_production_deployment,
     validate_sha,
     wait_for_production_deployment,
@@ -63,7 +64,7 @@ def wait_with(responses: list[list[dict]], *, timeout: float = 10) -> dict:
         sha=SHA,
         timeout_seconds=timeout,
         poll_interval_seconds=0,
-        fetcher=lambda _config: next(pending),
+        fetcher=lambda _config, _sha: next(pending),
         sleeper=lambda _seconds: None,
         monotonic=lambda: next(ticks),
     )
@@ -120,6 +121,42 @@ class PublishCheckTests(unittest.TestCase):
         result = wait_with([[deployment(sha=OTHER_SHA)], [deployment()]])
         self.assertEqual(result["id"], DEPLOYMENT_ID)
 
+    def test_pages_paginadas_encontram_sha_na_segunda_pagina(self):
+        calls: list[int] = []
+
+        def page_fetcher(_config, page: int) -> dict:
+            calls.append(page)
+            if page == 1:
+                return {
+                    "success": True,
+                    "result": [deployment(sha=OTHER_SHA) for _ in range(25)],
+                    "result_info": {"page": 1, "per_page": 25, "total_count": 26, "total_pages": 2},
+                }
+            return {
+                "success": True,
+                "result": [deployment(sha=SHA)],
+                "result_info": {"page": 2, "per_page": 25, "total_count": 26, "total_pages": 2},
+            }
+
+        result = fetch_production_deployments(CONFIG, SHA, page_fetcher=page_fetcher)
+        self.assertEqual(calls, [1, 2])
+        self.assertTrue(any(item["deployment_trigger"]["metadata"]["commit_hash"] == SHA for item in result))
+
+    def test_pages_paginadas_param_quando_sha_ja_esta_na_primeira(self):
+        calls: list[int] = []
+
+        def page_fetcher(_config, page: int) -> dict:
+            calls.append(page)
+            return {
+                "success": True,
+                "result": [deployment(sha=SHA)],
+                "result_info": {"page": 1, "per_page": 25, "total_count": 100, "total_pages": 4},
+            }
+
+        result = fetch_production_deployments(CONFIG, SHA, page_fetcher=page_fetcher)
+        self.assertEqual(calls, [1])
+        self.assertEqual(result[0]["id"], DEPLOYMENT_ID)
+
     def test_timeout_sem_deployment(self):
         ticks = iter([0, 11])
         with self.assertRaisesRegex(RuntimeError, "Timeout"):
@@ -128,7 +165,7 @@ class PublishCheckTests(unittest.TestCase):
                 sha=SHA,
                 timeout_seconds=10,
                 poll_interval_seconds=0,
-                fetcher=lambda _config: [],
+                fetcher=lambda _config, _sha: [],
                 sleeper=lambda _seconds: None,
                 monotonic=lambda: next(ticks),
             )
