@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/reconcile-reels.yml'
+      - '.github/workflows/generate-reel-on-publish.yml'
+      - '.github/workflows/generate-reel-ai.yml'
+      - 'scripts/reels/automatic_trigger.py'
   workflow_dispatch:
   schedule:
     - cron: '15 8,10,12 * * *'
