@@ -90,7 +90,10 @@ jobs:
             --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA")"
           echo "claimed=$CLAIMED" >> "$GITHUB_OUTPUT"
           if [[ "$CLAIMED" == "false" ]]; then
-            echo "Já existe uma tentativa automática inicial ativa ou concluída para $REEL_SLUG. Nada será gerado."
+            echo "Claim D1 não adquirido para $REEL_SLUG. Estado sanitizado:"
+            python scripts/reels/automatic_trigger.py status \
+              --slug "$REEL_SLUG" --publication-sha "$PUBLICATION_SHA"
+            echo "Já existe uma geração válida ou uma reserva automática recente; este run não cria duplicados."
           fi
 
       - name: Validar configuração
