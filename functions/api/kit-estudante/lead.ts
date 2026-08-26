@@ -88,14 +88,15 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       senderEnv,
       email,
       senderFields,
-      true
+      true,
+      relation !== "estudante" ? [NEWSLETTER_SENDER_GROUP_ID] : []
     );
 
     if (!senderResult.created && !senderResult.inGroup) {
       await addKitGroup(senderEnv, email, true);
     }
 
-    if (relation !== "estudante") {
+    if (!senderResult.created && relation !== "estudante") {
       const newsletterEnv = { ...env, SENDER_GROUP_KIT_ESTUDANTE: NEWSLETTER_SENDER_GROUP_ID };
       await ensureKitGroupMembership(newsletterEnv, email, true);
     }
