@@ -50,10 +50,22 @@ jobs:
       R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
     steps:
-      - name: Obter repositório
+      - name: Obter conteúdo exato da publicação
         uses: actions/checkout@v6
         with:
           ref: ${{ inputs.publication_sha || github.sha }}
+
+      - name: Usar motor de Reels mais recente
+        if: ${{ env.PUBLICATION_SHA != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Preservamos o artigo/imagens exatamente no publication_sha, mas o
+          # motor deve receber correções futuras. Caso contrário uma recuperação
+          # de um artigo antigo fica presa para sempre ao código antigo que falhou.
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/reels-engine-main
+          git archive origin/reels-engine-main scripts/reels | tar -xf -
+          echo "Motor de Reels atualizado a partir de main; conteúdo editorial permanece em $PUBLICATION_SHA."
 
       - name: Preparar Python
         uses: actions/setup-python@v6
