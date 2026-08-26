@@ -1,15 +1,15 @@
 const STRONG_HOMEOWNER=[
-  'habitação','habitacao','imóvel','imovel','imobiliário','imobiliario','propriedade','proprietário','proprietario',
-  'arrendamento','senhorio','inquilino','renda','rendas','despejo','condomínio','condominio','imi','imt','mais valias','mais-valias',
-  'herança','heranca','comprar casa','compra de casa','vender casa','venda de casa','caução','caucao'
+  'habitação','habitacao','imóvel','imovel','imóveis','imoveis','imobiliário','imobiliario','propriedade','proprietário','proprietario','proprietários','proprietarios',
+  'moradia','moradias','arrendamento','senhorio','senhorios','inquilino','inquilinos','renda','rendas','despejo','despejos','condomínio','condominio','condomínios','condominios','imi','imt','mais valias','mais-valias',
+  'herança','heranca','heranças','herancas','comprar casa','compra de casa','vender casa','venda de casa','caução','caucao'
 ];
 const MORTGAGE=[
   'crédito habitação','credito habitacao','crédito à habitação','credito a habitacao','euribor',
   'prestação da casa','prestacao da casa','prestação do crédito','prestacao do credito','hipoteca'
 ];
 const POLICY=[
-  'governo','lei','decreto','portaria','regra','regulamento','proposta','aprovação','aprovacao',
-  'aprovado','aprovada','medida','pacote','parlamento','diário da república','diario da republica','prr'
+  'governo','lei','decreto','portaria','regra','regras','regulamento','regulamentos','proposta','aprovação','aprovacao',
+  'aprovado','aprovada','medida','medidas','pacote','parlamento','diário da república','diario da republica','prr'
 ];
 const HOUSING_SUPPLY=[
   'prr','casas entregues','casas serão entregues','casas serao entregues','casas concluídas','casas concluidas',
@@ -18,8 +18,8 @@ const HOUSING_SUPPLY=[
   'novas casas','novas habitações','novas habitacoes','residência estudantil','residencia estudantil','residência universitária','residencia universitaria'
 ];
 const OWNER_RULES=[
-  'prazo','limite','isenção','isencao','obrigação','obrigacao','direito','caução','caucao',
-  'comunicação','comunicacao','licença','licenca','licenciamento','seguro','apoio','subsídio','subsidio'
+  'prazo','prazos','limite','limites','isenção','isencao','isenções','isencoes','obrigação','obrigacao','obrigações','obrigacoes','direito','direitos','caução','caucao',
+  'comunicação','comunicacao','licença','licenca','licenças','licencas','licenciamento','seguro','seguros','apoio','apoios','subsídio','subsidio','subsídios','subsidios'
 ];
 const HOME_PRACTICAL=[
   'onda de calor','ondas de calor','casa fresca','casa fria','casa quente','calor em casa','frio em casa',
@@ -117,7 +117,7 @@ export function inferDeterministicPillar(candidate={}) {
   const text=normalizeEditorialText(stableScoringText(candidate));
   if (/\b(?:imi|imt|irs|imposto|impostos|fisco|fiscal|mais valias)\b/u.test(text)) return 'impostos';
   if (/\b(?:condominio|condominios|condomino|condominos|fundo comum|administrador do condominio|assembleia de condominio)\b/u.test(text)) return 'condominio';
-  if (/\b(?:arrendamento|renda|rendas|senhorio|senhorios|inquilino|inquilinos|despejo|caucao|arrendar quarto|alugar quarto|residencia universitaria|alojamento estudantil)\b/u.test(text)) return 'arrendar';
+  if (/\b(?:arrendamento|renda|rendas|senhorio|senhorios|inquilino|inquilinos|despejo|despejos|caucao|arrendar quarto|alugar quarto|residencia universitaria|alojamento estudantil)\b/u.test(text)) return 'arrendar';
   if (/\b(?:vender|venda de casa|venda da casa|avaliacao do imovel|mediacao imobiliaria|preco de venda)\b/u.test(text)) return 'vender';
   return 'casa';
 }
