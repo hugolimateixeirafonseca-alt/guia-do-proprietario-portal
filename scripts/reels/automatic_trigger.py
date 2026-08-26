@@ -13,6 +13,7 @@ from typing import Callable, Mapping
 
 
 Query = Callable[[str, list[str | None]], int]
+Fetch = Callable[[str, list[str | None]], list[dict]]
 VALID_REVIEW_STATUSES = ("pending_review", "approved", "rejected", "superseded")
 
 
@@ -43,7 +44,7 @@ def _validate_identity(slug: str, publication_sha: str) -> None:
         raise ValueError("SHA de publicação inválido para o trigger automático.")
 
 
-def d1_query(sql: str, params: list[str | None], config: D1Config | None = None) -> int:
+def _d1_request(sql: str, params: list[str | None], config: D1Config | None = None) -> dict:
     active = config or D1Config.from_env()
     url = (
         f"https://api.cloudflare.com/client/v4/accounts/{active.account_id}"
@@ -62,7 +63,23 @@ def d1_query(sql: str, params: list[str | None], config: D1Config | None = None)
         raise RuntimeError(f"A operação D1 do trigger automático falhou com HTTP {exc.code}.") from None
     if not payload.get("success") or not payload.get("result"):
         raise RuntimeError("A operação D1 do trigger automático falhou.")
-    return int(payload["result"][0].get("meta", {}).get("changes", 0))
+    result = payload["result"][0]
+    if not isinstance(result, dict):
+        raise RuntimeError("A operação D1 devolveu um resultado inesperado.")
+    return result
+
+
+def d1_query(sql: str, params: list[str | None], config: D1Config | None = None) -> int:
+    result = _d1_request(sql, params, config)
+    return int(result.get("meta", {}).get("changes", 0))
+
+
+def d1_fetch(sql: str, params: list[str | None], config: D1Config | None = None) -> list[dict]:
+    result = _d1_request(sql, params, config)
+    rows = result.get("results", [])
+    if not isinstance(rows, list):
+        raise RuntimeError("A leitura D1 não devolveu linhas no formato esperado.")
+    return [row for row in rows if isinstance(row, dict)]
 
 
 def claim_initial_trigger(
@@ -122,6 +139,58 @@ def claim_initial_trigger(
     return changes == 1
 
 
+def describe_initial_trigger(
+    slug: str,
+    publication_sha: str,
+    *,
+    fetch: Fetch = d1_fetch,
+) -> dict:
+    """Devolve apenas estado operacional não sensível para diagnóstico nos logs."""
+    _validate_identity(slug, publication_sha)
+    trigger_rows = fetch(
+        """SELECT slug, publication_sha, state, claimed_at, completed_at, failed_at,
+                  generation_id, error
+           FROM reel_initial_triggers
+           WHERE slug = ?
+           LIMIT 1""",
+        [slug],
+    )
+    generation_rows = fetch(
+        """SELECT generation_id, status, created_at, publication_sha
+           FROM reel_generations
+           WHERE slug = ?
+           ORDER BY datetime(created_at) DESC
+           LIMIT 8""",
+        [slug],
+    )
+    trigger = trigger_rows[0] if trigger_rows else None
+    valid = [row for row in generation_rows if row.get("status") in VALID_REVIEW_STATUSES]
+
+    if valid:
+        reason = "valid_generation_exists"
+    elif trigger and trigger.get("publication_sha") != publication_sha:
+        reason = "different_publication_sha"
+    elif trigger and trigger.get("state") == "claimed":
+        reason = "active_or_recent_claim"
+    elif trigger and trigger.get("state") == "completed":
+        reason = "completed_without_valid_generation"
+    elif trigger and trigger.get("state") == "failed":
+        reason = "failed_recoverable"
+    elif trigger:
+        reason = "other_trigger_state"
+    else:
+        reason = "no_trigger_row"
+
+    return {
+        "slug": slug,
+        "requested_publication_sha": publication_sha,
+        "block_reason": reason,
+        "trigger": trigger,
+        "latest_generations": generation_rows,
+        "valid_generation_count": len(valid),
+    }
+
+
 def complete_initial_trigger(
     slug: str,
     publication_sha: str,
@@ -162,9 +231,9 @@ def fail_initial_trigger(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Reserva e conclui triggers automáticos iniciais de Reels.")
+    parser = argparse.ArgumentParser(description="Reserva, conclui e diagnostica triggers automáticos iniciais de Reels.")
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for command in ("claim", "complete", "fail"):
+    for command in ("claim", "complete", "fail", "status"):
         subparser = subparsers.add_parser(command)
         subparser.add_argument("--slug", required=True)
         subparser.add_argument("--publication-sha", required=True)
@@ -176,6 +245,12 @@ def main() -> int:
 
     if args.command == "claim":
         print("true" if claim_initial_trigger(args.slug, args.publication_sha) else "false")
+    elif args.command == "status":
+        print(json.dumps(
+            describe_initial_trigger(args.slug, args.publication_sha),
+            ensure_ascii=False,
+            sort_keys=True,
+        ))
     elif args.command == "complete":
         if not args.generation_id:
             raise ValueError("--generation-id é obrigatório para completar o trigger.")
