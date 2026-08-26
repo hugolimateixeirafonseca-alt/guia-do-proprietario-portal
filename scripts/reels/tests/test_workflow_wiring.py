@@ -37,11 +37,14 @@ class WorkflowWiringTests(unittest.TestCase):
         self.assertIn("REEL_DISPATCHED=false", PUBLISH_WORKFLOW)
         self.assertNotRegex(PUBLISH_WORKFLOW, r"client_payload\[(slug|path|template|generation_id)\]")
 
-    def test_reconciliador_recupera_publicacoes_recentes_sem_duplicar_payload(self):
-        self.assertIn("cron: '30 10 * * *'", RECONCILE_WORKFLOW)
+    def test_reconciliador_tem_tres_janelas_e_so_reenvia_o_mais_recente(self):
+        self.assertIn("cron: '15 8,10,12 * * *'", RECONCILE_WORKFLOW)
         self.assertIn("--since='48 hours ago'", RECONCILE_WORKFLOW)
+        self.assertIn("print $1; exit", RECONCILE_WORKFLOW)
+        self.assertIn("LATEST_SHA", RECONCILE_WORKFLOW)
         self.assertIn("event_type='reel_publish_candidate'", RECONCILE_WORKFLOW)
         self.assertIn("client_payload[sha]", RECONCILE_WORKFLOW)
+        self.assertNotIn("mapfile -t SHAS", RECONCILE_WORKFLOW)
         self.assertNotRegex(RECONCILE_WORKFLOW, r"client_payload\[(slug|path|template|generation_id)\]")
 
     def test_validador_recebe_evento_sem_slug(self):
