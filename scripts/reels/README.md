@@ -2,6 +2,8 @@
 
 O renderer recebe conteúdo editorial já estruturado em JSON, cria as cenas com Pillow e entrega a sequência ao FFmpeg. Não lê nem interpreta artigos e não faz chamadas externas.
 
+Os títulos usam uma composição tipográfica própria no renderer. O tamanho máximo desce gradualmente com o comprimento, as linhas recebem espaçamento proporcional ao corpo, o wrapping equilibra a largura sem partir nem hifenizar palavras e os blocos principais aceitam até quatro linhas. Assim, esta correção aplica-se automaticamente a novos conteúdos e não depende de ajustes por Reel.
+
 ## Executar
 
 Requisitos: Python 3.11 ou superior, Pillow, FFmpeg, ffprobe e uma fonte Inter ou equivalente disponível no sistema.
