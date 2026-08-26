@@ -13,6 +13,7 @@ from typing import Callable, Mapping
 
 
 Query = Callable[[str, list[str | None]], int]
+VALID_REVIEW_STATUSES = ("pending_review", "approved", "rejected", "superseded")
 
 
 @dataclass(frozen=True)
@@ -71,26 +72,53 @@ def claim_initial_trigger(
     query: Query = d1_query,
     claimed_at: str | None = None,
 ) -> bool:
+    """Reserva a geração inicial, usando D1 como lock autoritativo.
+
+    Uma geração que já chegou a um estado de revisão válido bloqueia novos claims,
+    mesmo que o passo final que marcava o trigger como completed tenha falhado.
+    Estados failed, claims abandonados há mais de 30 minutos e completed órfãos
+    podem ser recuperados automaticamente para o mesmo SHA de publicação.
+    """
     _validate_identity(slug, publication_sha)
     now = claimed_at or _timestamp()
-    changes = query(
-        """INSERT INTO reel_initial_triggers
+    status_placeholders = ", ".join("?" for _ in VALID_REVIEW_STATUSES)
+    sql = f"""INSERT INTO reel_initial_triggers
         (slug, publication_sha, state, claimed_at)
-        VALUES (?, ?, 'claimed', ?)
-        ON CONFLICT(slug, publication_sha) DO UPDATE SET
+        SELECT ?, ?, 'claimed', ?
+        WHERE NOT EXISTS (
+            SELECT 1 FROM reel_generations
+            WHERE slug = ? AND status IN ({status_placeholders})
+        )
+        ON CONFLICT(slug) DO UPDATE SET
             state = 'claimed',
             claimed_at = excluded.claimed_at,
             completed_at = NULL,
             failed_at = NULL,
             generation_id = NULL,
             error = NULL
-        WHERE reel_initial_triggers.state = 'failed'
-           OR (
-               reel_initial_triggers.state = 'claimed'
-               AND datetime(reel_initial_triggers.claimed_at) <= datetime(?, '-30 minutes')
-           )""",
-        [slug, publication_sha, now, now],
-    )
+        WHERE reel_initial_triggers.publication_sha = excluded.publication_sha
+          AND NOT EXISTS (
+              SELECT 1 FROM reel_generations
+              WHERE slug = excluded.slug AND status IN ({status_placeholders})
+          )
+          AND (
+              reel_initial_triggers.state = 'failed'
+              OR (
+                  reel_initial_triggers.state = 'claimed'
+                  AND datetime(reel_initial_triggers.claimed_at) <= datetime(?, '-30 minutes')
+              )
+              OR reel_initial_triggers.state = 'completed'
+          )"""
+    params: list[str | None] = [
+        slug,
+        publication_sha,
+        now,
+        slug,
+        *VALID_REVIEW_STATUSES,
+        *VALID_REVIEW_STATUSES,
+        now,
+    ]
+    changes = query(sql, params)
     return changes == 1
 
 
