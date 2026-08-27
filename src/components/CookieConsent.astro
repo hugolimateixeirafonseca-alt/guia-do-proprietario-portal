@@ -1,5 +1,9 @@
 ---
-const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || "";
+const OFFICIAL_META_PIXEL_ID = "1394294186173855";
+const configuredMetaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID || "";
+const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
+  ? configuredMetaPixelId
+  : OFFICIAL_META_PIXEL_ID;
 ---
 
 <aside class="cookie-banner" id="cookie-banner" aria-labelledby="cookie-title" role="dialog" aria-modal="false" hidden>
