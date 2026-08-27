@@ -207,7 +207,7 @@
 
       sendingState.classList.add("is-hidden");
       successState.classList.remove("is-hidden");
-      if (window.fbq) window.fbq("track", "Contact", { content_name: "servicos-limpeza" }, { eventID: submissionId });
+      if (window.fbq) window.fbq("track", "Lead", { content_name: "servicos-limpeza" }, { eventID: submissionId });
     } catch {
       sendingState.classList.add("is-hidden");
       errorState.classList.remove("is-hidden");

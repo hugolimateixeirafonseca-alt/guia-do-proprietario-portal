@@ -7,6 +7,8 @@ on:
     paths:
       - 'functions/**'
       - 'public/social/**'
+      - 'public/scripts/landings/limpezas.js'
+      - 'public/scripts/landings/alojamento-local-cleaning.js'
       - 'src/pages/social-feed.json.ts'
       - 'scripts/converter-imagens.mjs'
       - 'scripts/check-social-images.mjs'
