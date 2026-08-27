@@ -6,6 +6,10 @@ on:
       - main
     paths:
       - 'functions/**'
+      - 'src/components/CookieConsent.astro'
+      - 'src/layouts/KitEstudanteLayout.astro'
+      - 'src/pages/kit-estudante/**'
+      - 'tests/kit-estudante.test.mjs'
       - 'public/social/**'
       - 'src/pages/social-feed.json.ts'
       - 'scripts/converter-imagens.mjs'

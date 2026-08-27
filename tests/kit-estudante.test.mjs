@@ -13,6 +13,7 @@ let profileSource;
 let landingSource;
 let landingLeadSource;
 let kitLayoutSource;
+let cookieConsentSource;
 let directDeployWorkflowSource;
 let metaWebhookSource;
 let metaFormCreatorSource;
@@ -33,6 +34,7 @@ before(async () => {
   landingSource = await readFile(path.resolve("src/pages/kit-estudante/index.astro"), "utf8");
   landingLeadSource = await readFile(path.resolve("functions/api/kit-estudante/lead.ts"), "utf8");
   kitLayoutSource = await readFile(path.resolve("src/layouts/KitEstudanteLayout.astro"), "utf8");
+  cookieConsentSource = await readFile(path.resolve("src/components/CookieConsent.astro"), "utf8");
   directDeployWorkflowSource = await readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8");
   metaWebhookSource = await readFile(path.resolve("functions/api/meta/webhook.ts"), "utf8");
   metaFormCreatorSource = await readFile(path.resolve("functions/api/meta/create-kit-form.ts"), "utf8");
@@ -302,8 +304,14 @@ test("mantém os modos de email e sessão separados sem repetir perguntas no agr
 test("mantém o Meta Pixel na landing e nos builds diretos", () => {
   assert.match(kitLayoutSource, /import CookieConsent/);
   assert.match(kitLayoutSource, /<CookieConsent \/>/);
+  assert.match(cookieConsentSource, /const OFFICIAL_META_PIXEL_ID = "1394294186173855"/);
+  assert.match(cookieConsentSource, /const metaPixelId = \/\^\\d\{10,30\}\$\/.test\(configuredMetaPixelId\)/);
   assert.match(landingSource, /measurementAllowed\(\)/);
   assert.match(landingSource, /fbq\("track", "Lead", \{[\s\S]*?content_name: "kit_estudante_2026",[\s\S]*?lead_type: relation,[\s\S]*?\}, \{ eventID: eventId \}\)/);
+  assert.match(landingSource, /Leia estas 38 páginas antes de pagar o quarto\./);
+  assert.doesNotMatch(landingSource, /Leve os dois manuais consigo antes de pagar\./);
+  assert.match(directDeployWorkflowSource, /src\/components\/CookieConsent\.astro/);
+  assert.match(directDeployWorkflowSource, /src\/pages\/kit-estudante\/\*\*/);
   assert.match(directDeployWorkflowSource, /deployment_configs\?\.production\?\.env_vars\?\.PUBLIC_META_PIXEL_ID\?\.value/);
   assert.match(directDeployWorkflowSource, /method: 'PATCH'/);
   assert.match(directDeployWorkflowSource, /PUBLIC_META_PIXEL_ID: \{ type: 'plain_text', value: fallbackPixelId \}/);
