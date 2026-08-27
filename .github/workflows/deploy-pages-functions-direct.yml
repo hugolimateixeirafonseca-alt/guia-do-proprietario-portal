@@ -11,6 +11,8 @@ on:
       - 'src/pages/kit-estudante/**'
       - 'tests/kit-estudante.test.mjs'
       - 'public/social/**'
+      - 'public/scripts/landings/limpezas.js'
+      - 'public/scripts/landings/alojamento-local-cleaning.js'
       - 'src/pages/social-feed.json.ts'
       - 'scripts/converter-imagens.mjs'
       - 'scripts/check-social-images.mjs'

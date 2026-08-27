@@ -662,3 +662,18 @@ test("não apresenta sucesso quando o Sender falha", async () => {
   assert.equal(response.status, 502);
   assert.deepEqual(await response.json(), { error: "provider_error", code: "lookup_401" });
 });
+
+test("regista as submissões válidas das duas landings de limpeza como Lead no Meta", async () => {
+  const [generalLanding, localAccommodationLanding, deployWorkflow] = await Promise.all([
+    readFile(path.resolve("public/scripts/landings/limpezas.js"), "utf8"),
+    readFile(path.resolve("public/scripts/landings/alojamento-local-cleaning.js"), "utf8"),
+    readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8")
+  ]);
+
+  assert.match(generalLanding, /fbq\("track", "Lead", \{ content_name: "servicos-limpeza" \}, \{ eventID: submissionId \}\)/);
+  assert.match(localAccommodationLanding, /fbq\("track", "Lead", \{ content_name: "limpeza-alojamento-local" \}, \{ eventID: submissionId \}\)/);
+  assert.doesNotMatch(generalLanding, /fbq\("track", "Contact"/);
+  assert.doesNotMatch(localAccommodationLanding, /fbq\("track", "Contact"/);
+  assert.match(deployWorkflow, /public\/scripts\/landings\/limpezas\.js/);
+  assert.match(deployWorkflow, /public\/scripts\/landings\/alojamento-local-cleaning\.js/);
+});

@@ -141,7 +141,7 @@
       }
       sending.classList.add("is-hidden");
       success.classList.remove("is-hidden");
-      if (window.fbq) window.fbq("track", "Contact", { content_name: "limpeza-alojamento-local" }, { eventID: submissionId });
+      if (window.fbq) window.fbq("track", "Lead", { content_name: "limpeza-alojamento-local" }, { eventID: submissionId });
     } catch {
       sending.classList.add("is-hidden");
       technicalError.classList.remove("is-hidden");
