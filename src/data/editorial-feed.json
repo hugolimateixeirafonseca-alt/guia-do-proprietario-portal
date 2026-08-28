@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-28T07:10:42.151Z",
+  "generatedAt": "2026-08-28T19:56:03.285Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 84,
+    "published": 85,
     "newsOnline": 19
   },
   "articles": [
@@ -1136,14 +1136,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "alarme-em-casa-precisa-custo.mdx",
       "arrivedAt": "2026-08-12T16:46:17+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-28T07:01:20Z",
+      "url": "https://guiadoproprietario.pt/casa/alarme-em-casa-precisa-custo/"
     },
     {
       "id": "SC22",
