@@ -154,6 +154,104 @@ def _title_size_cap(text: str, maximum: int, minimum: int) -> int:
     return max(minimum, maximum - reduction)
 
 
+def _multiline_metrics(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    candidate_font: object,
+    spacing: int,
+) -> tuple[int, int, tuple[int, int, int, int]]:
+    bbox = draw.multiline_textbbox((0, 0), text, font=candidate_font, spacing=spacing)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1], bbox
+
+
+def _draw_intro_headline(
+    image: Image.Image,
+    title: str,
+    accent: str,
+    box: tuple[int, int, int, int],
+    maximum: int = 68,
+    minimum: int = 44,
+    gap: int = 20,
+) -> tuple[tuple[int, int, int, int], tuple[int, int, int, int]]:
+    """Lay out title and accent as one block so their lines can never collide."""
+    draw = ImageDraw.Draw(image)
+    title = _normalise_text(title).upper()
+    accent = _normalise_text(accent).upper()
+    width = box[2] - box[0]
+    height = box[3] - box[1]
+    size_cap = _title_size_cap(f"{title} {accent}", maximum, minimum)
+
+    for size in range(size_cap, minimum - 1, -2):
+        candidate_font = font(size, True)
+        spacing = max(12, round(size * 0.24))
+        wrapped_title = _balanced_wrap(draw, title, candidate_font, width, 3)
+        wrapped_accent = _balanced_wrap(draw, accent, candidate_font, width, 3)
+        if wrapped_title is None or wrapped_accent is None:
+            continue
+        if len(wrapped_title.splitlines()) + len(wrapped_accent.splitlines()) > 4:
+            continue
+
+        title_width, title_height, title_font_bbox = _multiline_metrics(draw, wrapped_title, candidate_font, spacing)
+        accent_width, accent_height, accent_font_bbox = _multiline_metrics(draw, wrapped_accent, candidate_font, spacing)
+        if title_width > width or accent_width > width or title_height + gap + accent_height > height:
+            continue
+
+        title_top = box[1]
+        accent_top = title_top + title_height + gap
+        draw.multiline_text(
+            (box[0] - title_font_bbox[0], title_top - title_font_bbox[1]),
+            wrapped_title,
+            font=candidate_font,
+            fill=INK,
+            spacing=spacing,
+        )
+        draw.multiline_text(
+            (box[0] - accent_font_bbox[0], accent_top - accent_font_bbox[1]),
+            wrapped_accent,
+            font=candidate_font,
+            fill=GREEN,
+            spacing=spacing,
+        )
+        return (
+            (box[0], title_top, box[0] + title_width, title_top + title_height),
+            (box[0], accent_top, box[0] + accent_width, accent_top + accent_height),
+        )
+
+    raise ValueError(f"O título de introdução não cabe no layout: {title} / {accent}")
+
+
+def _draw_label_chip(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    xy: tuple[int, int],
+    max_right: int,
+    maximum: int = 22,
+    minimum: int = 16,
+) -> tuple[int, int, int, int]:
+    """Size the image label from its content while keeping it inside the safe margin."""
+    text = " ".join(text.split())
+    x, y = xy
+    padding_x = 24
+    padding_y = 12
+    available_text_width = max_right - x - padding_x * 2
+    for size in range(maximum, minimum - 1, -1):
+        candidate_font = font(size, True)
+        bbox = draw.textbbox((0, 0), text, font=candidate_font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        if text_width <= available_text_width:
+            chip = (x, y, x + text_width + padding_x * 2, y + text_height + padding_y * 2)
+            draw.rounded_rectangle(chip, radius=8, fill=PAPER)
+            draw.text(
+                (x + padding_x - bbox[0], y + padding_y - bbox[1]),
+                text,
+                font=candidate_font,
+                fill=GREEN_DARK,
+            )
+            return chip
+    raise ValueError(f"A etiqueta não cabe dentro das margens: {text}")
+
+
 def _fit_text(
     draw: ImageDraw.ImageDraw,
     text: str,
@@ -177,7 +275,7 @@ def _fit_text(
             continue
         line_spacing = max(spacing, round(size * 0.22)) if title else spacing
         bbox = draw.multiline_textbbox((0, 0), wrapped, font=candidate_font, spacing=line_spacing)
-        if bbox[3] - bbox[1] <= height:
+        if bbox[2] - bbox[0] <= width and bbox[3] - bbox[1] <= height:
             return candidate_font, wrapped, line_spacing
     raise ValueError(f"O texto não cabe no layout: {text}")
 
@@ -236,29 +334,15 @@ def render_intro(data: dict) -> Image.Image:
     draw = ImageDraw.Draw(image)
     hero = _cover(data["_hero_path"], (896, 610), 0.45)
     _paste_card(image, hero, (MARGIN, CONTENT_TOP), radius=20)
-    draw.rounded_rectangle((MARGIN + 32, 885, MARGIN + 342, 945), radius=8, fill=PAPER)
-    draw.text((MARGIN + 56, 903), data["intro"]["label"], font=font(22, True), fill=GREEN_DARK)
-    _text_box(
+    _draw_label_chip(draw, data["intro"]["label"], (MARGIN + 32, 885), WIDTH - MARGIN)
+    _draw_intro_headline(
         image,
         data["intro"]["title"].upper(),
-        (MARGIN, 1030, WIDTH - MARGIN, 1155),
-        74,
-        56,
-        title=True,
-        max_lines=2,
-    )
-    _text_box(
-        image,
         data["intro"]["accent"].upper(),
-        (MARGIN, 1155, WIDTH - MARGIN, 1270),
-        74,
-        56,
-        GREEN,
-        title=True,
-        max_lines=2,
+        (MARGIN, 1030, WIDTH - MARGIN, 1305),
     )
-    draw.line((MARGIN, 1328, MARGIN + 86, 1328), fill=SAND, width=8)
-    _text_box(image, data["intro"]["subtitle"], (MARGIN, 1380, WIDTH - MARGIN, 1515), 35, 29, MUTED, False, 8)
+    draw.line((MARGIN, 1340, MARGIN + 86, 1340), fill=SAND, width=8)
+    _text_box(image, data["intro"]["subtitle"], (MARGIN, 1390, WIDTH - MARGIN, 1535), 35, 29, MUTED, False, 8)
     return image
 
 

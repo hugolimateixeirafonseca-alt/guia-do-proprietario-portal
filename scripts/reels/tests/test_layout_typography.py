@@ -10,12 +10,39 @@ from PIL import Image, ImageDraw
 REELS_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REELS_DIR))
 
-from layouts import _fit_text, _normalise_text, _title_size_cap
+from layouts import MARGIN, WIDTH, _draw_intro_headline, _draw_label_chip, _fit_text, _normalise_text, _title_size_cap
 
 
 class ReelTitleTypographyTests(unittest.TestCase):
     def setUp(self):
-        self.draw = ImageDraw.Draw(Image.new("RGB", (1080, 1920), "white"))
+        self.image = Image.new("RGB", (1080, 1920), "white")
+        self.draw = ImageDraw.Draw(self.image)
+
+    def test_titulo_e_destaque_do_reel_reportado_nao_se_sobrepoem(self):
+        box = (MARGIN, 1030, WIDTH - MARGIN, 1305)
+        title_bbox, accent_bbox = _draw_intro_headline(
+            self.image,
+            "Aquecimento: o custo real",
+            "Compare por kW e horas",
+            box,
+        )
+
+        self.assertLess(title_bbox[3], accent_bbox[1])
+        self.assertGreaterEqual(title_bbox[0], box[0])
+        self.assertLessEqual(title_bbox[2], box[2])
+        self.assertLessEqual(accent_bbox[2], box[2])
+        self.assertLessEqual(accent_bbox[3], box[3])
+
+    def test_etiqueta_da_imagem_cresce_com_o_texto_sem_sair_da_margem(self):
+        chip = _draw_label_chip(
+            self.draw,
+            "Não se deixe enganar pelo preço",
+            (MARGIN + 32, 885),
+            WIDTH - MARGIN,
+        )
+
+        self.assertGreater(chip[2], MARGIN + 342)
+        self.assertLessEqual(chip[2], WIDTH - MARGIN)
 
     def test_tamanho_reduz_gradualmente_com_o_comprimento(self):
         short = _title_size_cap("Título curto", 64, 40)
