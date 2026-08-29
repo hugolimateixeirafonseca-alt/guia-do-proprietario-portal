@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-29T07:12:46.924Z",
+  "generatedAt": "2026-08-29T10:50:44.732Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 85,
+    "published": 86,
     "newsOnline": 20
   },
   "articles": [
@@ -1328,14 +1328,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "aquecimento-casa-mais-barato.mdx",
       "arrivedAt": "2026-08-12T16:46:17+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-29T07:01:19Z",
+      "url": "https://guiadoproprietario.pt/casa/aquecimento-casa-mais-barato/"
     },
     {
       "id": "SC34",
