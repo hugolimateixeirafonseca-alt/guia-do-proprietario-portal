@@ -1,4 +1,4 @@
-export const ENGINE_VERSION = "1.4";
+export const ENGINE_VERSION = "1.5";
 
 export const VERIFICATION_STATES = Object.freeze([
   "confirmado",
@@ -64,7 +64,8 @@ export const FORBIDDEN_OUTPUT_PATTERNS = Object.freeze([
   /\bfi[aá]v\w*\b/iu,
   /\bde\s+confian[cç]a\b/iu,
   /\bparece\s+honest\w*\b/iu,
-  /\bparece\s+suspeit\w*\b/iu
+  /\bparece\s+suspeit\w*\b/iu,
+  /\b(?:vers[aã]o|v)\s*\d+(?:[.,]\d+)?\b/iu
 ]);
 
 export const PII_PATTERNS = Object.freeze({

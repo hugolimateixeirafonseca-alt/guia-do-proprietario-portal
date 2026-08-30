@@ -32,10 +32,12 @@ test("o relatório web mantém 12 verificações, fonte e conteúdo escapado", (
   assert.match(html, /\/verificacao\/evidence\/token\/1/u);
   assert.doesNotMatch(html, /<script>alert/u);
   assert.match(html, /&lt;script&gt;alert/u);
-  assert.match(html, /Leitura executiva/u);
-  assert.match(html, /Guião para a próxima chamada/u);
-  assert.match(html, /As 12 verificações/u);
-  assert.match(html, /Não penalizamos um anúncio por não explicar tudo/u);
+  assert.match(html, /A decisão antes de pagar/u);
+  assert.match(html, /Não transfira dinheiro/u);
+  assert.match(html, /Sinais relevantes antes de pagar/u);
+  assert.match(html, /Mensagem pronta/u);
+  assert.match(html, /Evidência detalhada/u);
+  assert.doesNotMatch(html, /Cobertura observável|A V1|Esta versão/u);
   assert.match(html, /Confirme por escrito como será feita a comunicação do contrato às Finanças/u);
 });
 
@@ -47,4 +49,54 @@ test("o relatório é uma entrega web sem ligação para PDF", () => {
   });
   assert.doesNotMatch(html, /Descarregar PDF|\/verificacao\/pdf\//u);
   assert.match(html, /Relatório privado/u);
+});
+
+test("a pesquisa visual agrega resultados vazios e distingue pesquisas inconclusivas", () => {
+  const photoReport = {
+    ...report,
+    reverseImageEvidence: [
+      ...Array.from({ length: 4 }, (_, index) => ({
+        photo_id: `foto-${index + 1}`,
+        state: "sem_correspondencia_encontrada",
+        source_url: null,
+        source_domain: null
+      })),
+      {
+        photo_id: "foto-5",
+        state: "pesquisa_indisponivel",
+        source_url: null,
+        source_domain: null
+      }
+    ]
+  };
+  const html = renderReportHtml({
+    report: photoReport,
+    createdAt: "2026-08-29T12:00:00.000Z",
+    expiresAt: "2026-11-27T12:00:00.000Z"
+  });
+  assert.equal((html.match(/4 fotografias pesquisadas sem correspondências públicas relevantes/gu) || []).length, 1);
+  assert.match(html, /1 pesquisa ficou inconclusiva/u);
+  assert.doesNotMatch(html, /<li class="photo-row/u);
+});
+
+test("pagamento antes da visita domina o veredicto e linguagem interna antiga é ocultada", () => {
+  const checks = report.checks.map((check) => ({ ...check }));
+  checks[5] = {
+    ...checks[5],
+    state: "sinal_atencao",
+    observation: "O anúncio pede a caução antes da visita.",
+    action: "Não transferir antes de visitar ou fazer uma videochamada em direto."
+  };
+  checks[10] = {
+    ...checks[10],
+    observation: "Esta verificação não é confirmável na V1."
+  };
+  const html = renderReportHtml({
+    report: { ...report, checks, reverseImageEvidence: [] },
+    createdAt: "2026-08-29T12:00:00.000Z",
+    expiresAt: "2026-11-27T12:00:00.000Z"
+  });
+  assert.match(html, /O anúncio pede pagamento antes da visita ou do contrato/u);
+  assert.match(html, /Não transfira dinheiro/u);
+  assert.doesNotMatch(html, /V1|Esta versão|versão interna/u);
 });

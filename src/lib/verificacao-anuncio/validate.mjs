@@ -72,6 +72,8 @@ export function validateActionConfiguration(config = VERIFICATION_CONFIG) {
     ids.add(verification.id);
     const disallowed = findDisallowedText(verification.action);
     if (disallowed) issues.push(`ação #${verification.id} contém ${disallowed}`);
+    const questionDisallowed = findDisallowedText(verification.question);
+    if (questionDisallowed) issues.push(`pergunta #${verification.id} contém ${questionDisallowed}`);
   }
   for (let id = 1; id <= 12; id += 1) {
     if (!ids.has(id)) issues.push(`falta a configuração #${id}`);
@@ -171,7 +173,7 @@ export function validateClassification(output, availableEvidenceIds = []) {
       }
     }
     if (verification.id === 11 && verification.estado === "confirmado") {
-      issues.push("a verificação #11 não pode ser confirmada na V1");
+      issues.push("a verificação #11 não pode ser confirmada apenas com as capturas do anúncio");
     }
   }
   for (let id = 1; id <= 12; id += 1) {

@@ -19,7 +19,7 @@ const reportChecks = [
   { id: 8, title: "Contrato escrito", state: "por-confirmar", label: "Por confirmar", observation: "Não foi encontrada uma menção explícita a contrato escrito.", action: "Peça confirmação por escrito e solicite a minuta antes de transferir dinheiro." },
   { id: 9, title: "Recibos de renda", state: "por-confirmar", label: "Por confirmar", observation: "Não foi encontrada uma menção explícita à emissão de recibos.", action: "Confirme por escrito que serão emitidos os recibos aplicáveis." },
   { id: 10, title: "Titular da conta", state: "por-confirmar", label: "Por confirmar", observation: "O nome do titular da conta não aparece nas capturas de ecrã enviadas.", action: "Peça o nome completo do titular da conta e confirme a relação com o arrendamento." },
-  { id: 11, title: "Propriedade ou autorização documental", state: "nao-verificavel", label: "Não verificável", observation: "Esta versão não analisa documentação de propriedade ou autorização.", action: null },
+  { id: 11, title: "Propriedade ou autorização documental", state: "nao-verificavel", label: "Confirmar com documento", observation: "As capturas não permitem confirmar quem está autorizado a arrendar o imóvel.", action: "Peça documentação que confirme quem é o proprietário ou está autorizado a arrendar o imóvel." },
   { id: 12, title: "Comunicação às Finanças e recibos", state: "confirmado", label: "Confirmado", observation: "O anúncio menciona comunicação do contrato e emissão de recibos.", action: null }
 ];
 const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === "true";
@@ -27,7 +27,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
 <BaseLayout
   titulo="Verificação de Anúncio"
-  descricao="Doze verificações objetivas para rever um anúncio de arrendamento antes de transferir a caução."
+  descricao="Identificamos sinais observáveis, pesquisamos as fotografias e mostramos o que deve fazer antes de transferir dinheiro."
 >
   <div class="preview-ribbon"><strong>Oferta de lançamento: 7,99 €</strong><span>{checkoutEnabled ? "Pagamento seguro processado pela Stripe." : "Pré-visualização local. Pagamento e análise ainda não estão ativos."}</span></div>
   <section class="hero">
@@ -59,11 +59,11 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         <div class="report-top">
           <div>
             <span class="report-kicker">O seu relatório</span>
-            <strong>12 pontos analisados</strong>
+            <strong>A decisão antes de pagar</strong>
           </div>
-          <span class="report-score">5/12</span>
+          <span class="report-score report-verdict-pill">Não pague ainda</span>
         </div>
-        <div class="report-progress" aria-hidden="true"><span style="width:41.66%"></span></div>
+        <div class="report-verdict-preview"><small>Sinal principal</small><strong>Uma fotografia aparece associada a outra localização.</strong><p>Peça uma explicação verificável e confirme o imóvel presencialmente antes de transferir.</p></div>
         <div class="check-list">
           {checks.map((check) => (
             <div class="check-row">
@@ -73,7 +73,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
             </div>
           ))}
         </div>
-          <p class="report-note">Veja o que está sustentado, o que falta confirmar e o que deve perguntar antes de pagar.</p>
+          <p class="report-note">Primeiro recebe a decisão. As 12 verificações ficam disponíveis como evidência detalhada.</p>
         </div>
         <div class="floating-proof"><span>✓</span><div><small>Perguntas prontas</small><strong>Copiar e enviar ao anunciante</strong></div></div>
       </div>
@@ -173,13 +173,14 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
   <section class="results-section" id="relatorio-exemplo" data-results hidden>
     <div class="shell">
       <div class="results-heading">
-        <div><p class="eyebrow">Relatório de demonstração</p><h2>Das dúvidas dispersas às perguntas certas.</h2></div>
-        <div class="result-summary"><strong>5</strong><span>de 12 pontos confirmados</span></div>
+        <div><p class="eyebrow">Relatório de demonstração</p><h2>Primeiro a decisão. Depois, a prova.</h2></div>
+        <div class="result-summary decision-demo"><strong>!</strong><span>Não pague ainda</span></div>
       </div>
+      <div class="demo-decision"><span>Sinal principal</span><h3>Encontrámos uma fotografia associada a outra localização.</h3><p>Antes de transferir, peça uma explicação verificável, marque a visita e confirme a minuta do contrato.</p></div>
       <div class="summary-band">
-        <div class="good"><strong>5 confirmados</strong><span>Informação encontrada nas capturas de ecrã.</span></div>
-        <div class="attention"><strong>5 por confirmar</strong><span>Há perguntas concretas a fazer.</span></div>
-        <div class="neutral"><strong>2 não verificáveis</strong><span>Fora do alcance desta análise.</span></div>
+        <div class="attention"><strong>1 sinal concreto</strong><span>Baseado numa correspondência pública.</span></div>
+        <div class="good"><strong>4 fotografias pesquisadas</strong><span>Os resultados vazios são resumidos uma vez.</span></div>
+        <div class="neutral"><strong>5 perguntas prontas</strong><span>Para copiar e enviar ao anunciante.</span></div>
       </div>
 
       <div class="report-layout">
@@ -228,7 +229,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
   <section class="pricing-section" id="comprar">
     <div class="shell pricing-card">
-      <div class="pricing-copy"><p class="eyebrow">Uma pequena verificação antes de uma grande transferência</p><h2>Pague pela análise. Não pela dúvida.</h2><p>Recebe o relatório no navegador e em PDF por email, com 12 pontos, evidências e perguntas prontas.</p><ul><li>Uma única compra</li><li>Sem subscrição</li><li>Reembolso se a análise técnica falhar</li></ul></div>
+      <div class="pricing-copy"><p class="eyebrow">Uma pequena verificação antes de uma grande transferência</p><h2>Pague pela análise. Não pela dúvida.</h2><p>Recebe por email uma ligação privada para o relatório, com uma decisão clara, pesquisa das fotografias, evidências e uma mensagem pronta para enviar.</p><ul><li>Uma única compra</li><li>Sem subscrição</li><li>Reembolso se a análise técnica falhar</li></ul></div>
       <div class="price-box"><span class="offer-badge">Oferta de lançamento</span><span class="previous-price">Antes 11,99 €</span><strong>7,99 €</strong><span class="per-analysis">por anúncio analisado</span><button type="button" disabled={!checkoutEnabled} data-checkout-button>Comprar análise por 7,99 €</button><small data-checkout-status>{checkoutEnabled ? "Pagamento único e seguro através da Stripe" : "Compra disponível na próxima fase"}</small></div>
     </div>
   </section>
@@ -239,7 +240,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
       <div class="faq-list">
         <details open><summary>A análise confirma quem está a arrendar o imóvel?</summary><p>Não. Organiza a informação disponível e indica os documentos ou confirmações que ainda deve pedir.</p></details>
         <details><summary>O que significa não encontrar uma fotografia noutro site?</summary><p>Significa apenas que a pesquisa não devolveu uma correspondência suficiente. Não permite concluir onde a imagem apareceu primeiro.</p></details>
-        <details><summary>Posso enviar uma ligação em vez de capturas de ecrã?</summary><p>Na primeira versão, não. Envie as capturas de ecrã que mostram o texto, o preço, as condições e as fotografias do anúncio.</p></details>
+        <details><summary>Posso enviar uma ligação em vez de capturas de ecrã?</summary><p>O envio é feito através de capturas de ecrã que mostram o texto, o preço, as condições e as fotografias do anúncio.</p></details>
       </div>
     </div>
   </section>
@@ -487,5 +488,98 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
     .price-box > strong {
       font-size: 4rem;
     }
+  }
+
+  .report-verdict-pill {
+    width: auto;
+    height: auto;
+    padding: 9px 12px;
+    border-radius: 999px;
+    background: #ff7043;
+    color: #fff;
+    font-size: .68rem;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .report-verdict-preview {
+    margin: 20px 0 14px;
+    padding: 17px 18px;
+    border-radius: 13px;
+    background: #fff0ea;
+    border-left: 5px solid #ff7043;
+  }
+
+  .report-verdict-preview small,
+  .report-verdict-preview strong {
+    display: block;
+  }
+
+  .report-verdict-preview small {
+    margin-bottom: 5px;
+    color: #b54526;
+    font-size: .64rem;
+    font-weight: 950;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .report-verdict-preview strong {
+    color: #163a34;
+    font-size: .94rem;
+    line-height: 1.35;
+  }
+
+  .report-verdict-preview p {
+    margin: 7px 0 0;
+    color: #687a75;
+    font-size: .72rem;
+    line-height: 1.45;
+  }
+
+  .demo-decision {
+    margin: 38px 0 18px;
+    padding: 30px 32px;
+    border-radius: 19px;
+    background: linear-gradient(135deg, #9b3829, #e4663d);
+    color: #fff;
+    box-shadow: 0 20px 50px rgba(123, 41, 23, .2);
+  }
+
+  .demo-decision span {
+    display: inline-block;
+    padding: 6px 9px;
+    border-radius: 999px;
+    background: #d9ff72;
+    color: #143d34;
+    font-size: .66rem;
+    font-weight: 950;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .demo-decision h3 {
+    max-width: 850px;
+    margin: 12px 0 7px;
+    font-size: clamp(1.6rem, 3vw, 2.7rem);
+    line-height: 1.05;
+    letter-spacing: -.035em;
+  }
+
+  .demo-decision p {
+    max-width: 800px;
+    margin: 0;
+    color: #ffe4db;
+    line-height: 1.55;
+  }
+
+  .decision-demo strong {
+    color: #ff7043;
+  }
+
+  .decision-demo span {
+    max-width: 130px;
+    color: #8a3e29;
+    font-weight: 900;
   }
 </style>
