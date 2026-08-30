@@ -22,17 +22,23 @@
     "content:prepare-publish": "node scripts/preparar-publicacao-artigos.mjs",
     "validate:dates": "node scripts/preencher-chegada-artigos.mjs",
     "validate:images": "node scripts/validar-imagens-artigos.mjs",
-    "test": "npm run test:subscribe && npm run test:kit-estudante",
+    "test": "npm run test:subscribe && npm run test:kit-estudante && npm run test:verificacao",
     "test:subscribe": "node --test tests/subscribe.test.mjs",
     "test:kit-estudante": "node --test tests/kit-estudante.test.mjs",
+    "test:verificacao": "node --test tests/verificacao-anuncio/*.test.mjs",
     "test:radar": "node --test automation/editorial-radar/*.test.mjs",
     "test:renderer": "node --test tests/social-card-renderer.test.mjs tests/social-post-layout.test.mjs",
     "fixtures:social-card": "node automation/social-card-renderer/generate-fixtures.mjs",
-    "build:functions": "wrangler pages functions build --outdir .wrangler/functions-build"
+    "build:functions": "wrangler pages functions build --outdir .wrangler/functions-build",
+    "build:verificacao-worker": "wrangler deploy --dry-run --config workers/verificacao-anuncio/wrangler.jsonc --outdir .wrangler/verificacao-worker-build",
+    "verificacao:cli": "node scripts/verificacao-anuncio.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "latest",
     "@astrojs/sitemap": "latest",
+    "@jsquash/jpeg": "^1.6.0",
+    "@jsquash/png": "^3.1.1",
+    "@jsquash/webp": "^1.5.0",
     "@resvg/resvg-wasm": "2.6.2",
     "astro": "^7.1.3",
     "satori": "0.29.0"

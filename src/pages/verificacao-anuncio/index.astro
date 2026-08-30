@@ -1,0 +1,491 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const checks = [
+  { id: 1, title: "Localização", state: "confirmado", label: "Confirmado" },
+  { id: 3, title: "Tipologia e área", state: "confirmado", label: "Confirmado" },
+  { id: 4, title: "Fotografias", state: "por-confirmar", label: "Por confirmar" },
+  { id: 8, title: "Contrato escrito", state: "por-confirmar", label: "Por confirmar" }
+];
+
+const reportChecks = [
+  { id: 1, title: "Morada ou zona identificável", state: "confirmado", label: "Confirmado", observation: "Lisboa e Arroios aparecem no texto enviado.", action: null },
+  { id: 2, title: "Preço face à referência da zona", state: "nao-verificavel", label: "Não verificável", observation: "O preço está visível, mas falta uma área utilizável para comparar por metro quadrado.", action: null },
+  { id: 3, title: "Tipologia e área coerentes", state: "confirmado", label: "Confirmado", observation: "A tipologia T1 aparece de forma consistente nas capturas de ecrã analisadas.", action: null },
+  { id: 4, title: "Fotografias e correspondências externas", state: "por-confirmar", label: "Por confirmar", observation: "Foi encontrada uma imagem correspondente numa página com outra localização.", action: "Peça esclarecimento sobre a origem da fotografia e a localização indicada na outra página." },
+  { id: 5, title: "Despesas incluídas", state: "por-confirmar", label: "Por confirmar", observation: "O anúncio não especifica quais as despesas incluídas no valor mensal.", action: "Confirme por escrito quais as despesas incluídas e quais serão pagas à parte." },
+  { id: 6, title: "Condições de pagamento", state: "confirmado", label: "Confirmado", observation: "O anúncio indica uma renda e uma caução antes da entrada.", action: null },
+  { id: 7, title: "Visita presencial", state: "confirmado", label: "Confirmado", observation: "Existe indicação de visitas presenciais por marcação.", action: null },
+  { id: 8, title: "Contrato escrito", state: "por-confirmar", label: "Por confirmar", observation: "Não foi encontrada uma menção explícita a contrato escrito.", action: "Peça confirmação por escrito e solicite a minuta antes de transferir dinheiro." },
+  { id: 9, title: "Recibos de renda", state: "por-confirmar", label: "Por confirmar", observation: "Não foi encontrada uma menção explícita à emissão de recibos.", action: "Confirme por escrito que serão emitidos os recibos aplicáveis." },
+  { id: 10, title: "Titular da conta", state: "por-confirmar", label: "Por confirmar", observation: "O nome do titular da conta não aparece nas capturas de ecrã enviadas.", action: "Peça o nome completo do titular da conta e confirme a relação com o arrendamento." },
+  { id: 11, title: "Propriedade ou autorização documental", state: "nao-verificavel", label: "Não verificável", observation: "Esta versão não analisa documentação de propriedade ou autorização.", action: null },
+  { id: 12, title: "Comunicação às Finanças e recibos", state: "confirmado", label: "Confirmado", observation: "O anúncio menciona comunicação do contrato e emissão de recibos.", action: null }
+];
+const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === "true";
+---
+
+<BaseLayout
+  titulo="Verificação de Anúncio"
+  descricao="Doze verificações objetivas para rever um anúncio de arrendamento antes de transferir a caução."
+>
+  <div class="preview-ribbon"><strong>Oferta de lançamento: 7,99 €</strong><span>{checkoutEnabled ? "Pagamento seguro processado pela Stripe." : "Pré-visualização local. Pagamento e análise ainda não estão ativos."}</span></div>
+  <section class="hero">
+    <div class="hero-glow hero-glow-one" aria-hidden="true"></div>
+    <div class="hero-glow hero-glow-two" aria-hidden="true"></div>
+    <div class="shell hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Verificação de anúncio para arrendamento</p>
+        <h1>Não transfira a caução <span>às cegas.</span></h1>
+        <p class="lead">Envie as capturas de ecrã do anúncio. Pesquisamos as fotografias noutros sites, cruzamos a informação e mostramos o que deve confirmar antes de pagar.</p>
+        <div class="hero-offer">
+          <div class="hero-price">
+            <span class="old-price">11,99 €</span>
+            <strong>7,99 €</strong>
+            <small>Preço de lançamento</small>
+          </div>
+          <a class="primary-action" href="#experimentar">Analisar o meu anúncio <span aria-hidden="true">→</span></a>
+        </div>
+        <ul class="trust-list" aria-label="O que está incluído">
+          <li>Pesquisa de fotografias noutros sites</li>
+          <li>Comparação do preço na cidade</li>
+          <li>Contradições e condições em falta</li>
+        </ul>
+      </div>
+
+      <div class="product-visual">
+        <div class="floating-alert"><span>!</span><div><small>Sinal encontrado</small><strong>Fotografia noutra localização</strong></div></div>
+        <div class="report-preview" aria-label="Exemplo resumido do relatório">
+        <div class="report-top">
+          <div>
+            <span class="report-kicker">O seu relatório</span>
+            <strong>12 pontos analisados</strong>
+          </div>
+          <span class="report-score">5/12</span>
+        </div>
+        <div class="report-progress" aria-hidden="true"><span style="width:41.66%"></span></div>
+        <div class="check-list">
+          {checks.map((check) => (
+            <div class="check-row">
+              <span class={`check-icon ${check.state}`}>{check.state === "confirmado" ? "✓" : "?"}</span>
+              <span class="check-copy"><small>Verificação {check.id}</small><strong>{check.title}</strong></span>
+              <span class={`state-pill ${check.state}`}>{check.label}</span>
+            </div>
+          ))}
+        </div>
+          <p class="report-note">Veja o que está sustentado, o que falta confirmar e o que deve perguntar antes de pagar.</p>
+        </div>
+        <div class="floating-proof"><span>✓</span><div><small>Perguntas prontas</small><strong>Copiar e enviar ao anunciante</strong></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="intro-strip" id="experimentar">
+    <div class="shell intro-grid">
+      <div><span>6</span><strong>fotografias pesquisadas</strong><p>Procuramos correspondências noutros sites públicos.</p></div>
+      <div><span>10</span><strong>cidades com referência</strong><p>Comparamos o preço quando existem dados suficientes.</p></div>
+      <div><span>12</span><strong>pontos cruzados</strong><p>Detetamos omissões e preparamos perguntas concretas.</p></div>
+    </div>
+  </section>
+
+  <section class="risk-section">
+    <div class="shell">
+      <div class="section-heading risk-heading">
+        <div><p class="eyebrow">O que o anúncio não lhe diz</p><h2>Três detalhes podem mudar completamente a decisão.</h2></div>
+        <p>Um anúncio bonito não responde às perguntas mais importantes. A verificação transforma capturas de ecrã dispersas num relatório claro antes de enviar dinheiro.</p>
+      </div>
+      <div class="risk-grid">
+        <article class="risk-card risk-visual">
+          <div class="risk-card-copy"><span class="risk-number">01</span><p class="risk-label">Pesquisa visual</p><h3>Esta fotografia aparece noutro anúncio?</h3><p>Pesquisamos até 6 fotografias e destacamos correspondências que merecem uma explicação.</p></div>
+          <div class="match-visual" aria-hidden="true">
+            <div class="mock-photo"><span>Imagem enviada</span><div class="mock-room"><i></i><b></b></div></div>
+            <div class="match-link">↔</div>
+            <div class="mock-photo flagged"><span>Outra página</span><div class="mock-room"><i></i><b></b></div><strong>Localização diferente</strong></div>
+          </div>
+        </article>
+        <article class="risk-card price-risk">
+          <span class="risk-number">02</span><p class="risk-label">Referência de preço</p><h3>O valor faz sentido para a zona?</h3>
+          <div class="price-meter" aria-hidden="true"><span></span><i></i></div>
+          <div class="meter-labels"><span>Abaixo</span><strong>Referência</strong><span>Acima</span></div>
+          <p>Quando existem dados suficientes, o preço é comparado com a referência local.</p>
+        </article>
+        <article class="risk-card transfer-risk">
+          <span class="risk-number">03</span><p class="risk-label">Antes da transferência</p><h3>Sabe exatamente quem vai receber?</h3>
+          <div class="question-stack" aria-hidden="true"><span>Quem é o titular da conta?</span><span>Existe contrato escrito?</span><span>São emitidos recibos?</span></div>
+          <p>Recebe perguntas específicas para obter respostas por escrito.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo-section">
+    <div class="shell demo-grid">
+      <div class="demo-copy">
+        <p class="eyebrow">Veja a análise em ação</p>
+        <h2>Envie as capturas de ecrã. Nós fazemos o trabalho difícil.</h2>
+        <p>Inclua o texto, o preço, as condições, a conversa relevante e as fotografias. A demonstração organiza tudo e mostra como será o relatório.</p>
+        <div class="upload-tips">
+          <div><span>6</span><p><strong>Pesquisa visual</strong> noutros sites públicos.</p></div>
+          <div><span>10</span><p><strong>Referências locais</strong> para comparar o preço.</p></div>
+          <div><span>12</span><p><strong>Pontos cruzados</strong> num relatório acionável.</p></div>
+        </div>
+      </div>
+
+      <form class="upload-card" data-demo-form>
+        <div class="upload-card-head">
+          <div><small>Demonstração interativa</small><strong>Comece pelas capturas de ecrã (screenshot) do anúncio</strong></div>
+          <span data-file-count>0 adicionados</span>
+        </div>
+        <label class="drop-zone" for="ad-files">
+          <span class="upload-mark" aria-hidden="true">↑</span>
+          <strong>Adicione as capturas de ecrã (screenshot) do anúncio</strong>
+          <span>Texto, preço, condições e fotografias. Pode enviar até 8 ficheiros.</span>
+          <input id="ad-files" type="file" accept="image/png,image/jpeg,image/webp" multiple data-file-input />
+        </label>
+        <div class="selected-files" data-selected-files aria-live="polite">
+          <p>Ainda não escolheu ficheiros.</p>
+        </div>
+        <label class="city-field" for="ad-city"><span>Cidade indicada no anúncio</span>
+          <select id="ad-city" data-city-select>
+            <option value="">Escolha a cidade</option>
+            <option>Aveiro</option><option>Braga</option><option>Coimbra</option><option>Covilhã</option><option>Évora</option><option>Faro</option><option>Guimarães</option><option>Leiria</option><option>Lisboa</option><option>Porto</option><option>Outra</option>
+          </select>
+        </label>
+        <p class="upload-status" data-upload-status>Comece pelas capturas de ecrã que mostram o texto, o preço e as fotografias.</p>
+        <div class="demo-actions">
+          <button type="submit" disabled data-run-demo>Ver a análise em ação</button>
+          <button type="button" class="text-button" data-show-example>Ver relatório de exemplo</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="processing-section" data-processing hidden>
+    <div class="shell processing-card">
+      <div class="processing-heading"><span class="spinner" aria-hidden="true"></span><div><p class="eyebrow">Análise em curso</p><h2 data-processing-title>A organizar a informação do anúncio</h2></div><strong data-processing-percent>18%</strong></div>
+      <div class="processing-track"><span data-processing-bar></span></div>
+      <div class="processing-steps">
+        <span class="active">Leitura das capturas</span><span>Recorte das fotografias</span><span>Pesquisa visual</span><span>Relatório</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="results-section" id="relatorio-exemplo" data-results hidden>
+    <div class="shell">
+      <div class="results-heading">
+        <div><p class="eyebrow">Relatório de demonstração</p><h2>Das dúvidas dispersas às perguntas certas.</h2></div>
+        <div class="result-summary"><strong>5</strong><span>de 12 pontos confirmados</span></div>
+      </div>
+      <div class="summary-band">
+        <div class="good"><strong>5 confirmados</strong><span>Informação encontrada nas capturas de ecrã.</span></div>
+        <div class="attention"><strong>5 por confirmar</strong><span>Há perguntas concretas a fazer.</span></div>
+        <div class="neutral"><strong>2 não verificáveis</strong><span>Fora do alcance desta análise.</span></div>
+      </div>
+
+      <div class="report-layout">
+        <div class="full-checks">
+          {reportChecks.map((check) => (
+            <article class={`result-card ${check.state}`}>
+              <header>
+                <span class="result-number">{String(check.id).padStart(2, "0")}</span>
+                <div><h3>{check.title}</h3><span class={`state-pill ${check.state}`}>{check.label}</span></div>
+              </header>
+              <p>{check.observation}</p>
+              {check.action && <div class="next-step"><strong>O que fazer agora</strong><span>{check.action}</span></div>}
+            </article>
+          ))}
+        </div>
+
+        <aside class="evidence-column">
+          <section class="evidence-card visual-evidence">
+            <p class="eyebrow">Pesquisa de fotografias</p>
+            <h3>1 correspondência relevante</h3>
+            <div class="photo-pair"><div><span>Imagem enviada</span><div class="room-shape"><i></i><b></b></div></div><div><span>Página encontrada</span><div class="room-shape alternate"><i></i><b></b></div></div></div>
+            <p>A imagem apresenta uma correspondência forte, mas a página externa refere outra localização. A origem e o contexto devem ser esclarecidos.</p>
+          </section>
+          <section class="evidence-card price-evidence">
+            <p class="eyebrow">Preço</p>
+            <h3>1.350 € por mês</h3>
+            <div class="price-line"><span>Anúncio</span><strong>Área em falta</strong></div>
+            <div class="price-line"><span>Referência de Lisboa</span><strong>23,5 €/m²</strong></div>
+            <p>Sem uma área explícita, não é feita a comparação por metro quadrado.</p>
+          </section>
+          <section class="evidence-card questions-card">
+            <p class="eyebrow">Perguntas prontas</p>
+            <h3>Copie antes de responder ao anúncio.</h3>
+            <ol>
+              <li>Pode confirmar quais as despesas incluídas?</li>
+              <li>Pode enviar a minuta do contrato?</li>
+              <li>Em nome de quem será feita a transferência?</li>
+            </ol>
+            <button type="button" data-copy-questions>Copiar as 3 perguntas</button>
+            <span class="copy-status" data-copy-status aria-live="polite"></span>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing-section" id="comprar">
+    <div class="shell pricing-card">
+      <div class="pricing-copy"><p class="eyebrow">Uma pequena verificação antes de uma grande transferência</p><h2>Pague pela análise. Não pela dúvida.</h2><p>Recebe o relatório no navegador e em PDF por email, com 12 pontos, evidências e perguntas prontas.</p><ul><li>Uma única compra</li><li>Sem subscrição</li><li>Reembolso se a análise técnica falhar</li></ul></div>
+      <div class="price-box"><span class="offer-badge">Oferta de lançamento</span><span class="previous-price">Antes 11,99 €</span><strong>7,99 €</strong><span class="per-analysis">por anúncio analisado</span><button type="button" disabled={!checkoutEnabled} data-checkout-button>Comprar análise por 7,99 €</button><small data-checkout-status>{checkoutEnabled ? "Pagamento único e seguro através da Stripe" : "Compra disponível na próxima fase"}</small></div>
+    </div>
+  </section>
+
+  <section class="faq-section">
+    <div class="shell faq-wrap">
+      <div><p class="eyebrow">Sem letras pequenas</p><h2>Saiba exatamente o que recebe.</h2></div>
+      <div class="faq-list">
+        <details open><summary>A análise confirma quem está a arrendar o imóvel?</summary><p>Não. Organiza a informação disponível e indica os documentos ou confirmações que ainda deve pedir.</p></details>
+        <details><summary>O que significa não encontrar uma fotografia noutro site?</summary><p>Significa apenas que a pesquisa não devolveu uma correspondência suficiente. Não permite concluir onde a imagem apareceu primeiro.</p></details>
+        <details><summary>Posso enviar uma ligação em vez de capturas de ecrã?</summary><p>Na primeira versão, não. Envie as capturas de ecrã que mostram o texto, o preço, as condições e as fotografias do anúncio.</p></details>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("[data-demo-form]");
+  const fileInput = document.querySelector<HTMLInputElement>("[data-file-input]");
+  const citySelect = document.querySelector<HTMLSelectElement>("[data-city-select]");
+  const fileCount = document.querySelector<HTMLElement>("[data-file-count]");
+  const selectedFiles = document.querySelector<HTMLElement>("[data-selected-files]");
+  const uploadStatus = document.querySelector<HTMLElement>("[data-upload-status]");
+  const runButton = document.querySelector<HTMLButtonElement>("[data-run-demo]");
+  const showExample = document.querySelector<HTMLButtonElement>("[data-show-example]");
+  const processing = document.querySelector<HTMLElement>("[data-processing]");
+  const results = document.querySelector<HTMLElement>("[data-results]");
+  const checkoutButton = document.querySelector<HTMLButtonElement>("[data-checkout-button]");
+  const checkoutStatus = document.querySelector<HTMLElement>("[data-checkout-status]");
+
+  const refreshFiles = () => {
+    if (!fileInput || !selectedFiles || !fileCount || !runButton || !uploadStatus) return;
+    const files = Array.from(fileInput.files || []).slice(0, 8);
+    fileCount.textContent = `${files.length} ${files.length === 1 ? "adicionado" : "adicionados"}`;
+    selectedFiles.innerHTML = files.length
+      ? files.map((file, index) => `<div><span>${index + 1}</span><strong>${file.name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</strong><small>${Math.max(1, Math.round(file.size / 1024))} KB</small></div>`).join("")
+      : "<p>Ainda não escolheu ficheiros.</p>";
+    const ready = files.length >= 1 && files.length <= 8 && Boolean(citySelect?.value);
+    runButton.disabled = !ready;
+    uploadStatus.textContent = files.length === 0
+      ? "Comece pelas capturas de ecrã que mostram o texto, o preço e as fotografias."
+      : !citySelect?.value ? "Escolha a cidade indicada no anúncio." : "Tudo pronto para a demonstração.";
+  };
+
+  fileInput?.addEventListener("change", refreshFiles);
+  citySelect?.addEventListener("change", refreshFiles);
+
+  checkoutButton?.addEventListener("click", async () => {
+    if (checkoutButton.disabled) return;
+    checkoutButton.disabled = true;
+    checkoutButton.textContent = "A preparar o pagamento…";
+    if (checkoutStatus) checkoutStatus.textContent = "Ligação segura à Stripe.";
+    try {
+      const response = await fetch("/api/verificacao-anuncio/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ attemptId: crypto.randomUUID(), company: "" })
+      });
+      const result = await response.json();
+      if (!response.ok || typeof result.url !== "string") throw new Error("checkout_unavailable");
+      window.location.assign(result.url);
+    } catch {
+      checkoutButton.disabled = false;
+      checkoutButton.textContent = "Tentar novamente";
+      if (checkoutStatus) checkoutStatus.textContent = "Não foi possível abrir o pagamento. Tente novamente dentro de alguns minutos.";
+    }
+  });
+
+  const revealResults = () => {
+    if (!results) return;
+    results.hidden = false;
+    results.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  showExample?.addEventListener("click", revealResults);
+
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!processing || !results || !runButton) return;
+    processing.hidden = false;
+    results.hidden = true;
+    processing.scrollIntoView({ behavior: "smooth", block: "center" });
+    runButton.disabled = true;
+
+    const stages = [
+      { percent: 18, title: "A organizar a informação do anúncio" },
+      { percent: 42, title: "A separar as fotografias do imóvel" },
+      { percent: 71, title: "A preparar a pesquisa visual" },
+      { percent: 93, title: "A construir as 12 verificações" },
+      { percent: 100, title: "Relatório de demonstração concluído" }
+    ];
+    let index = 0;
+    const tick = () => {
+      const stage = stages[index];
+      const bar = processing.querySelector<HTMLElement>("[data-processing-bar]");
+      const percent = processing.querySelector<HTMLElement>("[data-processing-percent]");
+      const title = processing.querySelector<HTMLElement>("[data-processing-title]");
+      if (bar) bar.style.width = `${stage.percent}%`;
+      if (percent) percent.textContent = `${stage.percent}%`;
+      if (title) title.textContent = stage.title;
+      index += 1;
+      if (index < stages.length) window.setTimeout(tick, 520);
+      else window.setTimeout(() => { processing.hidden = true; revealResults(); refreshFiles(); }, 550);
+    };
+    tick();
+  });
+
+  document.querySelector<HTMLButtonElement>("[data-copy-questions]")?.addEventListener("click", async () => {
+    const questions = "1. Pode confirmar quais as despesas incluídas?\n2. Pode enviar a minuta do contrato?\n3. Em nome de quem será feita a transferência?";
+    const status = document.querySelector<HTMLElement>("[data-copy-status]");
+    try {
+      await navigator.clipboard.writeText(questions);
+      if (status) status.textContent = "Perguntas copiadas.";
+    } catch {
+      if (status) status.textContent = "Selecione e copie as perguntas acima.";
+    }
+  });
+</script>
+
+<style>
+  :global(body){background:#f5f1e8;color:#172d32}.preview-ribbon{padding:9px 18px;text-align:center;background:#17363a;color:#f5e5b9;font-size:.78rem;font-weight:800;letter-spacing:.02em}.shell{width:min(1180px,calc(100% - 40px));margin:auto}.hero{position:relative;overflow:hidden;padding:78px 0 86px;background:radial-gradient(circle at 87% 14%,rgba(213,169,86,.27),transparent 25%),linear-gradient(145deg,#f8f3e8 0%,#eef4ef 70%,#e1ece7 100%)}.hero:after{content:"";position:absolute;right:-110px;bottom:-180px;width:420px;height:420px;border:1px solid rgba(24,79,70,.14);border-radius:50%;box-shadow:0 0 0 52px rgba(24,79,70,.035),0 0 0 104px rgba(24,79,70,.025)}.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.02fr .98fr;gap:72px;align-items:center}.eyebrow{margin:0 0 15px;color:#236355;font-size:.78rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.hero h1{max-width:700px;margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(3.2rem,6.2vw,6rem);line-height:.96;letter-spacing:-.055em;color:#112e33}.lead{max-width:640px;margin:24px 0 0;color:#40575b;font-size:1.16rem;line-height:1.65}.hero-actions{display:flex;gap:22px;align-items:center;margin-top:30px}.primary-action{display:inline-flex;min-height:54px;align-items:center;padding:0 25px;border-radius:5px;background:#216454;color:#fff;text-decoration:none;font-weight:900;box-shadow:0 12px 26px rgba(33,100,84,.18)}.primary-action:hover{background:#164b40}.hero-actions span{color:#526569;font-size:.9rem}.hero-actions strong{display:block;color:#183a3d;font-size:1.25rem}.trust-list{display:flex;flex-wrap:wrap;gap:10px 22px;margin:25px 0 0;padding:0;list-style:none;color:#496064;font-size:.84rem}.trust-list li:before{content:"✓";margin-right:7px;color:#216454;font-weight:900}.report-preview{padding:28px;border:1px solid rgba(21,67,60,.14);border-radius:16px;background:rgba(255,255,255,.9);box-shadow:0 28px 70px rgba(25,54,57,.16);backdrop-filter:blur(8px)}.report-top{display:flex;justify-content:space-between;gap:20px;align-items:center}.report-top>div{display:grid;gap:5px}.report-kicker{color:#65777a;font-size:.72rem;font-weight:850;letter-spacing:.1em;text-transform:uppercase}.report-top strong{font-family:Georgia,"Times New Roman",serif;font-size:1.65rem;color:#17363a}.report-score{display:grid;width:70px;height:70px;place-items:center;border-radius:50%;background:#17363a;color:#f7e7b9;font-family:Georgia,"Times New Roman",serif;font-size:1.3rem;font-weight:800}.report-progress{height:7px;margin:22px 0 17px;overflow:hidden;border-radius:20px;background:#dfe8e3}.report-progress span{display:block;width:66.66%;height:100%;border-radius:inherit;background:#2e7a68}.check-list{display:grid;gap:8px}.check-row{display:grid;grid-template-columns:34px 1fr auto;gap:11px;align-items:center;padding:13px 0;border-bottom:1px solid #e3e8e5}.check-icon{display:grid;width:29px;height:29px;place-items:center;border-radius:50%;font-weight:900}.check-icon.confirmado{background:#dcefe7;color:#17614f}.check-icon.por-confirmar{background:#f7e7c2;color:#8a5d12}.check-copy{display:grid;gap:2px}.check-copy small{color:#829092;font-size:.68rem;text-transform:uppercase}.check-copy strong{font-size:.92rem}.state-pill{padding:6px 8px;border-radius:999px;font-size:.68rem;font-weight:850}.state-pill.confirmado{background:#e6f3ed;color:#17614f}.state-pill.por-confirmar{background:#fbefd5;color:#845810}.report-note{margin:17px 0 0;color:#65777a;font-size:.78rem;line-height:1.5}.intro-strip{padding:0 0 80px;background:#f5f1e8}.intro-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #d9d6cb;border-top:0;background:#fffdf8}.intro-grid>div{padding:32px}.intro-grid>div+div{border-left:1px solid #e1ded4}.intro-grid span{display:block;margin-bottom:14px;color:#b08235;font-family:Georgia,"Times New Roman",serif;font-size:1.6rem}.intro-grid strong{font-family:Georgia,"Times New Roman",serif;font-size:1.35rem;color:#17363a}.intro-grid p{margin:9px 0 0;color:#627174;font-size:.88rem;line-height:1.55}@media(max-width:940px){.hero-grid{grid-template-columns:1fr;gap:44px}.report-preview{max-width:680px}.hero h1{max-width:820px}.intro-grid{grid-template-columns:1fr}.intro-grid>div+div{border-left:0;border-top:1px solid #e1ded4}}@media(max-width:620px){.shell{width:calc(100% - 28px)}.hero{padding:54px 0 62px}.hero h1{font-size:clamp(2.8rem,14vw,4.2rem)}.hero-actions{align-items:flex-start;flex-direction:column}.report-preview{padding:20px 16px}.report-top strong{font-size:1.3rem}.report-score{width:58px;height:58px}.check-row{grid-template-columns:31px 1fr}.state-pill{grid-column:2;justify-self:start}.trust-list{display:grid}}
+  .demo-section{padding:94px 0;background:#17363a;color:#fff}.demo-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:74px;align-items:start}.demo-copy{position:sticky;top:24px}.demo-copy .eyebrow{color:#efd18d}.demo-copy h2,.results-heading h2,.pricing-card h2,.faq-wrap h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.45rem,4.4vw,4.5rem);line-height:1.02;letter-spacing:-.045em}.demo-copy>p:not(.eyebrow){max-width:520px;color:#cbd9d6;line-height:1.7}.upload-tips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:32px}.upload-tips div{padding:18px 13px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.04)}.upload-tips span{font-family:Georgia,"Times New Roman",serif;font-size:2rem;color:#efd18d}.upload-tips p{margin:8px 0 0;color:#cbd9d6;font-size:.78rem;line-height:1.45}.upload-tips strong{display:block;color:#fff}.upload-card{padding:27px;border-radius:14px;background:#fffdf8;color:#17363a;box-shadow:0 25px 70px rgba(0,0,0,.2)}.upload-card-head{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px}.upload-card-head>div{display:grid;gap:3px}.upload-card-head small{color:#78888a;font-size:.7rem;font-weight:850;text-transform:uppercase}.upload-card-head strong{font-family:Georgia,"Times New Roman",serif;font-size:1.55rem}.upload-card-head>span{padding:7px 10px;border-radius:99px;background:#e8f0ec;color:#236355;font-size:.75rem;font-weight:900}.drop-zone{display:grid;place-items:center;min-height:220px;padding:25px;border:1.5px dashed #85a59d;border-radius:9px;background:#f2f7f4;text-align:center;cursor:pointer}.drop-zone:hover{background:#eaf3ef}.drop-zone input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.drop-zone>span:last-of-type{margin-top:6px;color:#738284;font-size:.78rem}.upload-mark{display:grid;width:50px;height:50px;margin-bottom:13px;place-items:center;border-radius:50%;background:#216454;color:#fff;font-size:1.45rem;font-weight:900}.selected-files{display:grid;gap:6px;margin:15px 0}.selected-files>p{margin:0;padding:12px;color:#7b898a;font-size:.8rem;text-align:center}.selected-files>div{display:grid;grid-template-columns:27px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid #e0e5e1;border-radius:5px}.selected-files>div>span{display:grid;width:24px;height:24px;place-items:center;border-radius:4px;background:#e5efea;color:#216454;font-size:.7rem;font-weight:900}.selected-files strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem}.selected-files small{color:#7a898b;font-size:.7rem}.city-field{display:grid;gap:7px;margin-top:16px}.city-field span{font-size:.78rem;font-weight:850}.city-field select{width:100%;padding:13px;border:1px solid #b8c7c2;border-radius:5px;background:#fff;color:#17363a}.upload-status{margin:11px 0;color:#6d7e80;font-size:.76rem}.demo-actions{display:flex;gap:12px;align-items:center;margin-top:18px}.demo-actions button,.questions-card button,.price-box button{min-height:48px;padding:0 19px;border:0;border-radius:5px;background:#216454;color:#fff;font-weight:900;cursor:pointer}.demo-actions button:disabled{background:#adbbb6;cursor:not-allowed}.demo-actions .text-button{background:transparent;color:#216454;text-decoration:underline;text-underline-offset:3px}.processing-section{padding:42px 0;background:#dfece6}.processing-card{padding:30px;border:1px solid #bfd3cb;border-radius:12px;background:#fff}.processing-heading{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center}.processing-heading .eyebrow{margin-bottom:5px}.processing-heading h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:1.6rem}.processing-heading>strong{font-family:Georgia,"Times New Roman",serif;font-size:1.35rem;color:#216454}.spinner{width:38px;height:38px;border:4px solid #d5e3dd;border-top-color:#216454;border-radius:50%;animation:spin 1s linear infinite}.processing-track{height:8px;margin:24px 0 13px;overflow:hidden;border-radius:20px;background:#dce6e2}.processing-track span{display:block;width:18%;height:100%;border-radius:inherit;background:#216454;transition:width .45s ease}.processing-steps{display:flex;justify-content:space-between;gap:10px;color:#78888a;font-size:.73rem}.processing-steps .active{color:#216454;font-weight:850}@keyframes spin{to{transform:rotate(360deg)}}.results-section{padding:96px 0;background:#f8f5ed}.results-heading{display:flex;justify-content:space-between;gap:50px;align-items:end}.results-heading>div:first-child{max-width:790px}.result-summary{display:grid;min-width:150px;padding-left:24px;border-left:1px solid #cfd8d3}.result-summary strong{font-family:Georgia,"Times New Roman",serif;font-size:4rem;line-height:.9;color:#216454}.result-summary span{max-width:110px;margin-top:8px;color:#637476;font-size:.76rem}.summary-band{display:grid;grid-template-columns:repeat(3,1fr);margin:44px 0 28px;border:1px solid #d8ddd9;background:#fff}.summary-band>div{padding:21px 24px}.summary-band>div+div{border-left:1px solid #dfe3e0}.summary-band strong,.summary-band span{display:block}.summary-band strong{font-family:Georgia,"Times New Roman",serif;font-size:1.25rem}.summary-band span{margin-top:5px;color:#728083;font-size:.75rem}.summary-band .good strong{color:#17614f}.summary-band .attention strong{color:#8a5d12}.summary-band .neutral strong{color:#647175}.report-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.72fr);gap:28px;align-items:start}.full-checks{display:grid;gap:11px}.result-card{padding:22px 24px;border:1px solid #dce1dd;border-left:4px solid #7f8c8e;border-radius:7px;background:#fff}.result-card.confirmado{border-left-color:#2c7966}.result-card.por-confirmar{border-left-color:#c08b2c}.result-card.nao-verificavel{border-left-color:#8b9697}.result-card header{display:grid;grid-template-columns:38px 1fr;gap:13px;align-items:start}.result-number{font-family:Georgia,"Times New Roman",serif;font-size:1.25rem;color:#9aa5a4}.result-card header>div{display:flex;justify-content:space-between;gap:15px;align-items:center}.result-card h3{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:1.24rem}.result-card>p{margin:12px 0 0 51px;color:#5f7073;font-size:.86rem;line-height:1.55}.state-pill.nao-verificavel{background:#edf0ef;color:#5f6d6f}.next-step{display:grid;gap:4px;margin:16px 0 0 51px;padding:12px 14px;background:#fbf2df;color:#6f511e;font-size:.8rem}.next-step strong{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase}.evidence-column{position:sticky;top:20px;display:grid;gap:15px}.evidence-card{padding:23px;border:1px solid #d8ddd9;border-radius:8px;background:#fff}.evidence-card h3{margin:0 0 14px;font-family:Georgia,"Times New Roman",serif;font-size:1.45rem}.evidence-card>p:last-child{margin-bottom:0;color:#68787a;font-size:.8rem;line-height:1.55}.photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:9px}.photo-pair>div>span{display:block;margin-bottom:6px;color:#778587;font-size:.65rem;font-weight:800}.room-shape{position:relative;height:105px;overflow:hidden;border-radius:5px;background:linear-gradient(155deg,#d5c3a6 0 47%,#8eaa9f 48% 53%,#ebe3d5 54%)}.room-shape:before{content:"";position:absolute;left:13px;bottom:16px;width:72%;height:31px;background:#a37755;box-shadow:0 -14px 0 #f0e5d5}.room-shape i{position:absolute;right:12px;top:10px;width:28px;height:38px;background:#b9d5df}.room-shape b{position:absolute;left:10px;top:11px;width:24px;height:34px;background:#6e876e}.room-shape.alternate{filter:saturate(.75) brightness(.92)}.price-line{display:flex;justify-content:space-between;gap:15px;padding:11px 0;border-bottom:1px solid #e3e6e4;color:#6a797b;font-size:.78rem}.price-line strong{color:#17363a}.questions-card ol{padding-left:20px;color:#526467;font-size:.83rem;line-height:1.5}.questions-card li{padding:7px 0}.questions-card button{width:100%;margin-top:8px}.copy-status{display:block;min-height:1.2em;margin-top:8px;color:#216454;font-size:.72rem;text-align:center}.pricing-section{padding:88px 0;background:#17363a;color:#fff}.pricing-card{display:grid;grid-template-columns:1fr 320px;gap:70px;align-items:center}.pricing-card>div:first-child>p:last-child{max-width:700px;color:#c7d6d3;line-height:1.65}.pricing-card .eyebrow{color:#efd18d}.price-box{padding:28px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)}.price-box>span,.price-box>strong,.price-box>small{display:block}.price-box>span{color:#bfd0cc;font-size:.72rem;font-weight:800;text-transform:uppercase}.price-box>strong{margin:5px 0 17px;font-family:Georgia,"Times New Roman",serif;font-size:3.5rem;color:#efd18d}.price-box button{width:100%;background:#d5a94e;color:#17363a;cursor:not-allowed}.price-box small{margin-top:11px;color:#bfd0cc;text-align:center}.faq-section{padding:92px 0;background:#efe9db}.faq-wrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:75px}.faq-list details{border-bottom:1px solid #cfc9ba}.faq-list summary{padding:20px 0;color:#17363a;font-weight:900;cursor:pointer}.faq-list p{margin:0 0 20px;color:#617174;line-height:1.6}
+  @media(max-width:940px){.demo-grid,.report-layout,.pricing-card,.faq-wrap{grid-template-columns:1fr}.demo-copy,.evidence-column{position:static}.results-heading{align-items:start}.pricing-card{gap:35px}.price-box{max-width:440px}}
+  @media(max-width:620px){.upload-tips,.summary-band{grid-template-columns:1fr}.summary-band>div+div{border-left:0;border-top:1px solid #dfe3e0}.demo-section,.results-section,.pricing-section,.faq-section{padding:68px 0}.demo-actions,.results-heading{align-items:stretch;flex-direction:column}.processing-heading{grid-template-columns:auto 1fr}.processing-heading>strong{grid-column:2}.processing-steps{display:grid;grid-template-columns:1fr 1fr}.result-card header>div{align-items:flex-start;flex-direction:column}.result-card>p,.next-step{margin-left:0}.photo-pair{grid-template-columns:1fr 1fr}.pricing-card h2,.results-heading h2,.demo-copy h2,.faq-wrap h2{font-size:2.55rem}}
+  .hero{isolation:isolate;padding:84px 0 105px;background:linear-gradient(135deg,#062f2c 0%,#08453e 58%,#0d5d4f 100%);color:#fff}.hero:after{display:none}.hero-glow{position:absolute;z-index:-1;border-radius:50%;filter:blur(2px);pointer-events:none}.hero-glow-one{top:-240px;right:-120px;width:620px;height:620px;background:radial-gradient(circle,rgba(216,255,112,.22),transparent 66%)}.hero-glow-two{bottom:-250px;left:30%;width:520px;height:520px;background:radial-gradient(circle,rgba(255,107,53,.15),transparent 67%)}.hero-grid{grid-template-columns:.94fr 1.06fr;gap:82px}.hero .eyebrow{color:#d9ff72}.hero h1{max-width:690px;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:clamp(3.6rem,6.3vw,6.7rem);font-weight:950;line-height:.91;letter-spacing:-.065em;color:#fff}.hero h1 span{display:inline;color:#d9ff72}.lead{max-width:650px;color:#d8e8e4;font-size:1.17rem;line-height:1.6}.hero-offer{display:flex;gap:25px;align-items:center;margin-top:32px}.hero-price{display:grid;grid-template-columns:auto auto;gap:0 10px;align-items:end;min-width:150px}.hero-price .old-price{align-self:center;color:#a9c3be;font-size:.95rem;text-decoration:line-through;text-decoration-thickness:2px}.hero-price strong{color:#fff;font-size:2rem;line-height:1}.hero-price small{grid-column:1/-1;margin-top:5px;color:#d9ff72;font-size:.7rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.primary-action{min-height:61px;padding:0 25px;border-radius:10px;background:#d9ff72;color:#083a34;box-shadow:0 18px 45px rgba(0,0,0,.24);transition:transform .2s ease,box-shadow .2s ease}.primary-action:hover{background:#e5ff9a;transform:translateY(-2px);box-shadow:0 22px 50px rgba(0,0,0,.3)}.primary-action span{margin-left:12px;font-size:1.3rem}.trust-list{color:#c7dbd6}.trust-list li:before{color:#d9ff72}.product-visual{position:relative;padding:32px 22px 28px}.report-preview{position:relative;z-index:2;padding:29px;border:1px solid rgba(255,255,255,.42);border-radius:22px;background:rgba(255,255,255,.97);box-shadow:0 36px 90px rgba(0,20,18,.36);transform:rotate(1deg)}.floating-alert,.floating-proof{position:absolute;z-index:3;display:flex;gap:11px;align-items:center;padding:13px 16px;border-radius:13px;box-shadow:0 18px 44px rgba(0,20,18,.32);animation:float 4s ease-in-out infinite}.floating-alert{top:-5px;right:-18px;background:#ff7043;color:#fff}.floating-proof{left:-22px;bottom:0;background:#d9ff72;color:#083a34;animation-delay:-2s}.floating-alert>span,.floating-proof>span{display:grid;width:31px;height:31px;place-items:center;border-radius:50%;background:rgba(255,255,255,.2);font-weight:950}.floating-alert div,.floating-proof div{display:grid;gap:2px}.floating-alert small,.floating-proof small{font-size:.65rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;opacity:.8}.floating-alert strong,.floating-proof strong{font-size:.78rem}.report-top strong{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:900}.report-score{background:#0b4a41;color:#d9ff72;font-family:ui-sans-serif,system-ui,sans-serif}.report-progress span{background:linear-gradient(90deg,#13a77b,#9ddd5a)}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@media(max-width:940px){.hero-grid{grid-template-columns:1fr}.product-visual{max-width:720px;margin-top:5px}.hero h1{max-width:800px}}@media(max-width:620px){.hero{padding:62px 0 78px}.hero h1{font-size:clamp(3.1rem,16vw,4.8rem)}.hero-offer{align-items:stretch;flex-direction:column}.hero-price{min-width:0}.primary-action{justify-content:center}.product-visual{padding:36px 0 45px}.report-preview{padding:22px 16px;transform:none}.floating-alert{right:-7px}.floating-proof{left:-5px}.floating-alert strong,.floating-proof strong{font-size:.7rem}}
+  :global(body){overflow-x:hidden;background:#f7f5ed;color:#102f2a;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}.preview-ribbon{display:flex;justify-content:center;gap:18px;padding:10px 18px;background:#ffd65c;color:#14342e;font-size:.76rem}.preview-ribbon strong{font-weight:950}.preview-ribbon span{opacity:.72}.eyebrow{font-family:ui-sans-serif,system-ui,sans-serif}.intro-strip{padding:0;background:#062f2c}.intro-grid{position:relative;z-index:4;transform:translateY(-28px);border:0;border-radius:18px;background:#fff;box-shadow:0 24px 65px rgba(0,27,24,.18);overflow:hidden}.intro-grid>div{display:grid;grid-template-columns:auto 1fr;gap:0 17px;padding:28px 31px}.intro-grid>div+div{border-left:1px solid #e2e9e5}.intro-grid span{grid-row:1/3;margin:0;color:#0d8a68;font-family:ui-sans-serif,system-ui,sans-serif;font-size:3.1rem;font-weight:950;line-height:.9;letter-spacing:-.08em}.intro-grid strong{font-family:ui-sans-serif,system-ui,sans-serif;font-size:1rem;font-weight:950;color:#123a33}.intro-grid p{margin:5px 0 0;color:#637771;font-size:.76rem}.risk-section{padding:105px 0 112px;background:#f7f5ed}.section-heading{display:grid;grid-template-columns:1.08fr .72fr;gap:80px;align-items:end}.section-heading h2{max-width:820px;margin:0;font-size:clamp(2.7rem,5vw,5.1rem);font-weight:950;line-height:.96;letter-spacing:-.055em;color:#0a332e}.section-heading>p{margin:0;color:#5d716c;font-size:1rem;line-height:1.7}.risk-grid{display:grid;grid-template-columns:1.35fr .82fr;grid-template-areas:"visual price" "visual transfer";gap:18px;margin-top:54px}.risk-card{position:relative;overflow:hidden;padding:31px;border:1px solid #dce4df;border-radius:22px;background:#fff;box-shadow:0 14px 44px rgba(15,54,47,.07)}.risk-card h3{max-width:520px;margin:5px 0 12px;font-size:clamp(1.6rem,2.8vw,2.55rem);font-weight:950;line-height:1.03;letter-spacing:-.035em;color:#0a332e}.risk-card p:last-child{margin:0;color:#61746f;font-size:.85rem;line-height:1.6}.risk-number{position:absolute;top:24px;right:27px;color:#d4dfda;font-size:2.8rem;font-weight:950;letter-spacing:-.08em}.risk-label{margin:0;color:#0c8a67;font-size:.68rem;font-weight:950;letter-spacing:.13em;text-transform:uppercase}.risk-visual{grid-area:visual;display:grid;grid-template-rows:auto 1fr;min-height:550px;padding:38px;background:linear-gradient(150deg,#fff 0%,#eef8f3 100%)}.risk-visual .risk-card-copy>p:last-child{max-width:560px;color:#61746f;font-size:.9rem;line-height:1.6}.price-risk{grid-area:price;background:#d9ff72}.transfer-risk{grid-area:transfer;background:#ff7447;color:#fff}.price-risk .risk-label,.price-risk p:last-child{color:#315444}.transfer-risk .risk-label,.transfer-risk p:last-child{color:#ffe5db}.transfer-risk h3,.transfer-risk .risk-number{color:#fff}.match-visual{display:grid;grid-template-columns:1fr 46px 1fr;gap:10px;align-items:center;margin-top:36px}.mock-photo{position:relative;padding:10px;border-radius:14px;background:#fff;box-shadow:0 15px 35px rgba(9,54,45,.12)}.mock-photo>span{display:block;margin-bottom:8px;color:#70827c;font-size:.65rem;font-weight:850}.mock-room{position:relative;height:190px;overflow:hidden;border-radius:9px;background:linear-gradient(155deg,#dac6a7 0 48%,#82ab9d 49% 54%,#f2eadc 55%)}.mock-room:before{content:"";position:absolute;left:11%;bottom:15%;width:68%;height:32%;border-radius:3px;background:#a87655;box-shadow:0 -18px 0 #f5e9d8}.mock-room i{position:absolute;right:9%;top:11%;width:27%;height:40%;background:#b8d9e2}.mock-room b{position:absolute;left:8%;top:10%;width:17%;height:36%;background:#719172}.flagged{transform:rotate(2deg)}.flagged:after{content:"!";position:absolute;top:-11px;right:-9px;display:grid;width:34px;height:34px;place-items:center;border-radius:50%;background:#ff7043;color:#fff;font-weight:950;box-shadow:0 8px 18px rgba(255,112,67,.35)}.flagged>strong{display:block;margin-top:8px;color:#e55329;font-size:.69rem}.match-link{display:grid;width:42px;height:42px;place-items:center;border-radius:50%;background:#0b7059;color:#d9ff72;font-weight:950}.price-meter{position:relative;height:10px;margin:28px 0 10px;border-radius:30px;background:linear-gradient(90deg,#4fbf88,#ffd65c 55%,#ff7043)}.price-meter i{position:absolute;top:-8px;left:68%;width:5px;height:26px;border:3px solid #133e35;border-radius:8px;background:#fff}.meter-labels{display:flex;justify-content:space-between;color:#345347;font-size:.62rem}.meter-labels strong{color:#123d33}.question-stack{display:grid;gap:8px;margin:20px 0}.question-stack span{padding:10px 12px;border:1px solid rgba(255,255,255,.25);border-radius:9px;background:rgba(255,255,255,.12);font-size:.72rem;font-weight:850}.demo-section{padding:110px 0;background:linear-gradient(145deg,#052d2a,#073a35 60%,#0b4f45);color:#fff}.demo-grid{gap:82px}.demo-copy h2,.results-heading h2,.pricing-card h2,.faq-wrap h2{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:950;line-height:.96}.demo-copy .eyebrow{color:#d9ff72}.demo-copy>p:not(.eyebrow){color:#c9dcd7}.upload-tips{gap:11px}.upload-tips div{border:1px solid rgba(217,255,114,.22);border-radius:12px;background:rgba(255,255,255,.055)}.upload-tips span{color:#d9ff72;font-family:ui-sans-serif,system-ui,sans-serif;font-size:1.65rem;font-weight:950}.upload-card{padding:30px;border-radius:22px;background:#fff;box-shadow:0 30px 75px rgba(0,20,18,.34)}.upload-card-head strong{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:950}.upload-card-head>span{background:#d9ff72;color:#174b3f}.drop-zone{min-height:245px;border:2px dashed #74aa9c;border-radius:15px;background:#f0f9f5}.drop-zone:hover{background:#e7f7f0}.upload-mark{background:#0c8063;box-shadow:0 10px 24px rgba(12,128,99,.25)}.demo-actions button,.questions-card button,.price-box button{border-radius:10px;background:#0b7e61}.demo-actions button:not(:disabled):hover,.questions-card button:hover{background:#075d49}.processing-section{background:#d9ff72}.processing-card{border:0;border-radius:18px;box-shadow:0 18px 50px rgba(16,55,47,.12)}.results-section{padding:112px 0;background:#f7f5ed}.results-heading h2{max-width:800px}.result-summary strong{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:950}.summary-band{overflow:hidden;border:0;border-radius:16px;box-shadow:0 13px 40px rgba(15,54,47,.08)}.result-card{border:1px solid #e0e7e3;border-left-width:5px;border-radius:13px;box-shadow:0 8px 28px rgba(15,54,47,.045)}.result-card h3,.result-number,.evidence-card h3{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:900}.evidence-card{border:1px solid #dfe7e2;border-radius:15px;box-shadow:0 10px 32px rgba(15,54,47,.055)}.pricing-section{position:relative;overflow:hidden;padding:115px 0;background:linear-gradient(135deg,#ff7043 0%,#f45d31 48%,#d94728 100%)}.pricing-section:before{content:"";position:absolute;top:-250px;left:-130px;width:580px;height:580px;border:100px solid rgba(255,255,255,.055);border-radius:50%}.pricing-card{position:relative;z-index:1;grid-template-columns:1fr 390px;gap:90px}.pricing-card .eyebrow{color:#fff0ad}.pricing-copy>p:not(.eyebrow){max-width:680px;color:#ffe5db}.pricing-copy ul{display:flex;flex-wrap:wrap;gap:11px 22px;margin:25px 0 0;padding:0;list-style:none;color:#fff;font-size:.82rem;font-weight:800}.pricing-copy li:before{content:"✓";margin-right:7px;color:#fff0ad}.price-box{padding:32px;border:1px solid rgba(255,255,255,.35);border-radius:20px;background:#fff;color:#123a33;box-shadow:0 28px 70px rgba(113,25,8,.3);transform:rotate(1deg)}.price-box>span,.price-box>strong,.price-box>small{display:block}.price-box .offer-badge{display:inline-block;width:max-content;margin-bottom:18px;padding:7px 10px;border-radius:99px;background:#d9ff72;color:#103d34;font-size:.67rem;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.price-box .previous-price{color:#798b85;font-size:.9rem;text-decoration:line-through;text-decoration-thickness:2px;text-transform:none}.price-box>strong{margin:1px 0 0;color:#0b4a40;font-family:ui-sans-serif,system-ui,sans-serif;font-size:4.5rem;font-weight:950;line-height:1;letter-spacing:-.07em}.price-box .per-analysis{margin:6px 0 22px;color:#62756e;font-size:.75rem;text-transform:none}.price-box button{background:#0a7d60;color:#fff;cursor:not-allowed}.price-box small{color:#6f817b}.faq-section{padding:110px 0;background:#fff}.faq-wrap h2{color:#0b332d}.faq-list details{border-bottom:1px solid #dbe4df}.faq-list summary{padding:23px 0;font-size:1.03rem}.faq-list summary::marker{color:#0b8a68}.faq-list p{color:#63756f}.old-price,.previous-price{font-variant-numeric:tabular-nums}@media(max-width:940px){.intro-grid{grid-template-columns:1fr;transform:translateY(-18px}.intro-grid>div+div{border-left:0;border-top:1px solid #e2e9e5}.section-heading,.risk-grid{grid-template-columns:1fr}.section-heading{gap:24px}.risk-grid{grid-template-areas:"visual" "price" "transfer"}.risk-visual{min-height:0}.pricing-card{grid-template-columns:1fr;gap:45px}.price-box{max-width:430px}}@media(max-width:620px){.preview-ribbon{align-items:center;flex-direction:column;gap:2px}.intro-grid>div{padding:23px}.risk-section{padding:75px 0}.risk-grid{margin-top:35px}.risk-card,.risk-visual{padding:25px}.risk-visual h3{padding-right:35px}.match-visual{grid-template-columns:1fr 34px 1fr}.mock-room{height:118px}.match-link{width:34px;height:34px}.risk-number{top:20px;right:22px;font-size:2rem}.demo-section,.results-section,.pricing-section,.faq-section{padding:78px 0}.upload-card{padding:22px 17px}.pricing-card h2,.results-heading h2,.demo-copy h2,.faq-wrap h2,.section-heading h2{font-size:clamp(2.5rem,12vw,3.5rem)}.price-box{transform:none}.price-box>strong{font-size:4rem}}
+  .hero .report-preview{color:#17363a}
+  .pricing-card>*{min-width:0}.price-box{box-sizing:border-box;width:100%}
+  @media(max-width:940px){.intro-grid{grid-template-columns:1fr;transform:translateY(-18px)}.intro-grid>div+div{border-left:0;border-top:1px solid #e2e9e5}.section-heading,.risk-grid{grid-template-columns:minmax(0,1fr)}.section-heading{gap:24px}.risk-grid{grid-template-areas:"visual" "price" "transfer"}.risk-visual{min-height:0}.pricing-card{grid-template-columns:minmax(0,1fr);gap:45px}.price-box{max-width:430px}}
+  @media(max-width:620px){.preview-ribbon{align-items:center;flex-direction:column;gap:2px}.intro-grid>div{padding:23px}.risk-section{padding:75px 0}.risk-grid{margin-top:35px}.risk-card,.risk-visual{padding:25px}.risk-visual h3{padding-right:35px}.match-visual{grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr)}.mock-room{height:118px}.match-link{width:34px;height:34px}.risk-number{top:20px;right:22px;font-size:2rem}.demo-section,.results-section,.pricing-section,.faq-section{padding:78px 0}.upload-card{padding:22px 17px}.pricing-card h2,.results-heading h2,.demo-copy h2,.faq-wrap h2,.section-heading h2{font-size:clamp(2.5rem,12vw,3.5rem)}.price-box{max-width:none;transform:none}.price-box>strong{font-size:4rem}}
+</style>
+
+<style>
+  .hero .report-preview {
+    color: #17363a;
+  }
+
+  .pricing-card > * {
+    min-width: 0;
+  }
+
+  .price-box {
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  @media (max-width: 940px) {
+    .intro-grid {
+      grid-template-columns: 1fr;
+      transform: translateY(-18px);
+    }
+
+    .intro-grid > div + div {
+      border-top: 1px solid #e2e9e5;
+      border-left: 0;
+    }
+
+    .section-heading,
+    .risk-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .section-heading {
+      gap: 24px;
+    }
+
+    .risk-grid {
+      grid-template-areas: "visual" "price" "transfer";
+    }
+
+    .risk-visual {
+      min-height: 0;
+    }
+
+    .pricing-card {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 45px;
+    }
+
+    .price-box {
+      max-width: 430px;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .preview-ribbon {
+      align-items: center;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .intro-grid > div {
+      padding: 23px;
+    }
+
+    .risk-section {
+      padding: 75px 0;
+    }
+
+    .risk-grid {
+      margin-top: 35px;
+    }
+
+    .risk-card,
+    .risk-visual {
+      padding: 25px;
+    }
+
+    .risk-visual h3 {
+      padding-right: 35px;
+    }
+
+    .match-visual {
+      grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    }
+
+    .mock-room {
+      height: 118px;
+    }
+
+    .match-link {
+      width: 34px;
+      height: 34px;
+    }
+
+    .risk-number {
+      top: 20px;
+      right: 22px;
+      font-size: 2rem;
+    }
+
+    .demo-section,
+    .results-section,
+    .pricing-section,
+    .faq-section {
+      padding: 78px 0;
+    }
+
+    .upload-card {
+      padding: 22px 17px;
+    }
+
+    .pricing-card h2,
+    .results-heading h2,
+    .demo-copy h2,
+    .faq-wrap h2,
+    .section-heading h2 {
+      font-size: clamp(2.5rem, 12vw, 3.5rem);
+    }
+
+    .price-box {
+      max-width: none;
+      transform: none;
+    }
+
+    .price-box > strong {
+      font-size: 4rem;
+    }
+  }
+</style>

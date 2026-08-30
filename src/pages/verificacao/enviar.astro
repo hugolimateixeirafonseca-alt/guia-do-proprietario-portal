@@ -1,0 +1,200 @@
+---
+import Squeeze from "../../layouts/Squeeze.astro";
+---
+
+<Squeeze
+  titulo="Enviar anúncio para verificação | Guia do Proprietário"
+  descricao="Envie as capturas do anúncio comprado para iniciar a verificação."
+  imagemOg="/og/verificacao-anuncio/index.png"
+  robots="noindex,nofollow"
+>
+  <header class="topbar">
+    <a href="/verificacao-anuncio/" aria-label="Voltar à Verificação de Anúncio">
+      <span class="mark">GP</span>
+      <span>Verificação de Anúncio</span>
+    </a>
+    <span>Ligação privada</span>
+  </header>
+
+  <section class="page-shell">
+    <div class="intro">
+      <p class="eyebrow">Envio seguro</p>
+      <h1>Envie o anúncio.<br />Nós tratamos da investigação.</h1>
+      <p>Escolha as capturas que mostram o texto, o preço, as condições, a conversa relevante e as fotografias do imóvel.</p>
+
+      <div class="what-happens">
+        <article><span>01</span><div><strong>Separamos as fotografias</strong><p>Identificamos as imagens úteis dentro das capturas enviadas.</p></div></article>
+        <article><span>02</span><div><strong>Procuramos correspondências</strong><p>Pesquisamos as fotografias noutros sites públicos e validamos o contexto.</p></div></article>
+        <article><span>03</span><div><strong>Cruzamos os detalhes</strong><p>Comparamos preço, localização, tipologia, condições e contradições.</p></div></article>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="card-heading">
+        <div><small>O seu pedido</small><strong>Capturas de ecrã (screenshot)</strong></div>
+        <span data-state-badge>A confirmar</span>
+      </div>
+
+      <div class="access-message" data-access-message aria-live="polite">
+        <span class="loader" aria-hidden="true"></span>
+        <div><strong>A confirmar a ligação privada</strong><p>Aguarde um momento.</p></div>
+      </div>
+
+      <form data-upload-form hidden>
+        <label class="drop-zone">
+          <input type="file" name="capturas" accept="image/jpeg,image/png,image/webp" multiple data-file-input />
+          <span class="upload-icon" aria-hidden="true">↑</span>
+          <strong>Escolher capturas de ecrã (screenshot)</strong>
+          <span>JPEG, PNG ou WebP. Adicione apenas as capturas necessárias.</span>
+        </label>
+
+        <div class="selected" data-selected-files><p>Ainda não escolheu ficheiros.</p></div>
+
+        <label class="field">
+          <span>Cidade indicada no anúncio</span>
+          <input type="text" name="cidade" maxlength="100" autocomplete="address-level2" placeholder="Ex.: Lisboa" required />
+        </label>
+
+        <label class="privacy">
+          <input type="checkbox" name="confirmacao_privacidade" value="sim" required />
+          <span>Confirmo que estas capturas pertencem ao anúncio que pretendo verificar e autorizo o seu tratamento para produzir o relatório. As imagens são apagadas após o processamento, de acordo com a política de retenção.</span>
+        </label>
+
+        <p class="form-status" data-form-status aria-live="polite">Selecione as capturas que contêm a informação mais importante.</p>
+        <button type="submit" data-submit disabled>Iniciar a verificação</button>
+      </form>
+
+      <div class="processing" data-processing hidden>
+        <span class="processing-icon" aria-hidden="true">✓</span>
+        <p class="eyebrow">Recebido com segurança</p>
+        <h2>A verificação está em curso.</h2>
+        <p>Estamos a separar as fotografias, a procurar correspondências e a cruzar a informação do anúncio. Receberá o relatório no email usado no pagamento.</p>
+        <div class="progress"><span></span></div>
+        <small>Pode fechar esta página. O processamento continua.</small>
+      </div>
+    </div>
+  </section>
+</Squeeze>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("[data-upload-form]");
+  const input = document.querySelector<HTMLInputElement>("[data-file-input]");
+  const filesBox = document.querySelector<HTMLElement>("[data-selected-files]");
+  const status = document.querySelector<HTMLElement>("[data-form-status]");
+  const submit = document.querySelector<HTMLButtonElement>("[data-submit]");
+  const access = document.querySelector<HTMLElement>("[data-access-message]");
+  const badge = document.querySelector<HTMLElement>("[data-state-badge]");
+  const processing = document.querySelector<HTMLElement>("[data-processing]");
+  const token = new URLSearchParams(window.location.search).get("t") || "";
+  const endpoint = `/api/verificacao-anuncio/status?t=${encodeURIComponent(token)}`;
+
+  const messages: Record<string, string> = {
+    captures_required: "Escolha pelo menos uma captura.",
+    too_many_captures: "Escolha apenas as capturas essenciais. O limite técnico é de 8 ficheiros.",
+    capture_too_large: "Uma das capturas ultrapassa 10 MB.",
+    captures_too_large: "O conjunto de capturas é demasiado pesado.",
+    unsupported_capture_type: "Use apenas ficheiros JPEG, PNG ou WebP.",
+    capture_type_mismatch: "Um dos ficheiros não contém uma imagem válida.",
+    invalid_city: "Indique a cidade apresentada no anúncio.",
+    privacy_confirmation_required: "Confirme a autorização para tratar as capturas.",
+    upload_already_completed: "Estas capturas já foram enviadas e a análise está em curso.",
+    processing_unavailable: "Não foi possível iniciar a análise agora. Tente novamente dentro de alguns minutos.",
+    too_many_requests: "Foram feitas demasiadas tentativas. Aguarde alguns minutos.",
+    temporary_error: "Ocorreu uma falha temporária. Tente novamente."
+  };
+
+  const escapeHtml = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const showAccessError = (title: string, text: string) => {
+    if (badge) badge.textContent = "Acesso indisponível";
+    if (access) access.innerHTML = `<span class="error-icon" aria-hidden="true">!</span><div><strong>${title}</strong><p>${text}</p></div>`;
+  };
+
+  const showProcessing = () => {
+    if (badge) badge.textContent = "Em análise";
+    if (access) access.hidden = true;
+    if (form) form.hidden = true;
+    if (processing) processing.hidden = false;
+  };
+
+  const refresh = () => {
+    if (!input || !filesBox || !submit || !status || !form) return;
+    const files = Array.from(input.files || []);
+    filesBox.innerHTML = files.length
+      ? files.slice(0, 8).map((file, index) => `<div><span>${index + 1}</span><strong>${escapeHtml(file.name)}</strong><small>${Math.max(1, Math.round(file.size / 1024))} KB</small></div>`).join("")
+      : "<p>Ainda não escolheu ficheiros.</p>";
+    const city = form.elements.namedItem("cidade") as HTMLInputElement | null;
+    const privacy = form.elements.namedItem("confirmacao_privacidade") as HTMLInputElement | null;
+    const hasValidFiles = files.length >= 1 && files.length <= 8 && files.every((file) => file.size <= 10 * 1024 * 1024);
+    submit.disabled = !(hasValidFiles && city?.value.trim() && privacy?.checked);
+    status.textContent = files.length > 8
+      ? "Escolha apenas as capturas essenciais. O limite técnico é de 8 ficheiros."
+      : files.some((file) => file.size > 10 * 1024 * 1024)
+      ? "Uma das capturas ultrapassa 10 MB."
+      : files.length ? `${files.length} ${files.length === 1 ? "captura pronta" : "capturas prontas"} para enviar.`
+      : "Selecione as capturas que contêm a informação mais importante.";
+  };
+
+  input?.addEventListener("change", refresh);
+  form?.addEventListener("input", refresh);
+
+  const confirmAccess = async () => {
+    if (!/^[A-Za-z0-9_-]{43,128}$/.test(token)) {
+      showAccessError("Ligação inválida", "Abra a ligação privada enviada após o pagamento.");
+      return;
+    }
+    try {
+      const response = await fetch(endpoint, { headers: { Accept: "application/json" }, cache: "no-store" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "temporary_error");
+      if (result.etapa === "aguarda_upload") {
+        if (access) access.hidden = true;
+        if (form) form.hidden = false;
+        if (badge) badge.textContent = "Pronto para envio";
+        refresh();
+      } else if (result.etapa === "em_analise" || result.etapa === "entregue") {
+        if (result.etapa === "em_analise") {
+          await fetch(`/api/verificacao-anuncio/retry?t=${encodeURIComponent(token)}`, {
+            method: "POST",
+            headers: { Accept: "application/json" }
+          }).catch(() => null);
+        }
+        showProcessing();
+      } else {
+        showAccessError("Pedido indisponível", "Esta ligação já não aceita novas capturas.");
+      }
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "temporary_error";
+      showAccessError("Não foi possível abrir o pedido", messages[code] || "Confirme a ligação recebida por email ou tente novamente mais tarde.");
+    }
+  };
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!form || !submit || !status) return;
+    submit.disabled = true;
+    submit.textContent = "A enviar com segurança…";
+    status.textContent = "A validar e a guardar as capturas.";
+    try {
+      const response = await fetch(`/api/verificacao-anuncio/upload?t=${encodeURIComponent(token)}`, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" }
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "temporary_error");
+      showProcessing();
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "temporary_error";
+      status.textContent = messages[code] || "Não foi possível enviar as capturas. Tente novamente.";
+      submit.textContent = "Tentar novamente";
+      refresh();
+    }
+  });
+
+  confirmAccess();
+</script>
+
+<style>
+  :global(*){box-sizing:border-box}:global([hidden]){display:none!important}:global(body){margin:0;background:#f5f4ed;color:#123b34;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px max(24px,calc((100vw - 1180px)/2));border-bottom:1px solid #dce5df;background:#fff}.topbar a{display:flex;gap:11px;align-items:center;color:#123b34;text-decoration:none;font-weight:900}.topbar>span{color:#6e817a;font-size:.75rem;font-weight:800;text-transform:uppercase}.mark{display:grid;width:38px;height:38px;place-items:center;border-radius:10px;background:#0a7058;color:#d9ff72;font-size:.72rem}.page-shell{display:grid;grid-template-columns:.9fr 1.1fr;gap:80px;width:min(1180px,calc(100% - 40px));margin:0 auto;padding:85px 0 110px}.intro{padding-top:18px}.eyebrow{margin:0 0 15px;color:#0a7b60;font-size:.72rem;font-weight:950;letter-spacing:.16em;text-transform:uppercase}.intro h1{margin:0;font-size:clamp(3rem,5.2vw,5.2rem);line-height:.94;letter-spacing:-.065em}.intro>p:not(.eyebrow){max-width:590px;margin:25px 0 0;color:#587069;font-size:1.05rem;line-height:1.7}.what-happens{display:grid;gap:0;margin-top:42px;border-top:1px solid #d5dfd9}.what-happens article{display:grid;grid-template-columns:45px 1fr;gap:15px;padding:22px 0;border-bottom:1px solid #d5dfd9}.what-happens article>span{color:#0b8a68;font-weight:950}.what-happens strong{display:block}.what-happens p{margin:5px 0 0;color:#687b75;font-size:.8rem;line-height:1.5}.form-card{align-self:start;padding:32px;border-radius:24px;background:#fff;box-shadow:0 28px 80px rgba(15,54,47,.13)}.card-heading{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:23px}.card-heading>div{display:grid;gap:4px}.card-heading small{color:#768780;font-size:.67rem;font-weight:900;text-transform:uppercase}.card-heading strong{font-size:1.45rem}.card-heading>span{padding:7px 10px;border-radius:99px;background:#e5f0eb;color:#22624f;font-size:.7rem;font-weight:900}.access-message{display:flex;gap:15px;align-items:center;padding:22px;border-radius:14px;background:#f0f7f3}.access-message strong,.access-message p{display:block;margin:0}.access-message p{margin-top:4px;color:#687b75;font-size:.79rem}.loader{width:29px;height:29px;border:3px solid #c6d9d0;border-top-color:#0a7b60;border-radius:50%;animation:spin .8s linear infinite}.error-icon,.processing-icon{display:grid;width:32px;height:32px;flex:0 0 auto;place-items:center;border-radius:50%;background:#ffe7df;color:#c34c2d;font-weight:950}@keyframes spin{to{transform:rotate(360deg)}}.drop-zone{display:grid;min-height:230px;padding:28px;place-items:center;border:2px dashed #7fae9f;border-radius:16px;background:#f0f9f5;text-align:center;cursor:pointer}.drop-zone:hover{background:#e7f7f0}.drop-zone input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.drop-zone strong{font-size:1rem}.drop-zone>span:last-child{margin-top:7px;color:#70837c;font-size:.76rem}.upload-icon{display:grid;width:50px;height:50px;margin-bottom:13px;place-items:center;border-radius:50%;background:#0a7b60;color:#d9ff72;font-size:1.4rem;font-weight:950}.selected{display:grid;gap:7px;margin:15px 0}.selected>p{margin:0;padding:10px;color:#7b8c86;font-size:.76rem;text-align:center}.selected>div{display:grid;grid-template-columns:27px 1fr auto;gap:9px;align-items:center;padding:9px 10px;border:1px solid #e0e8e3;border-radius:8px}.selected>div span{display:grid;width:25px;height:25px;place-items:center;border-radius:5px;background:#e6f2ec;color:#0a7058;font-size:.68rem;font-weight:950}.selected strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem}.selected small{color:#74867f;font-size:.68rem}.field{display:grid;gap:7px;margin-top:18px}.field span{font-size:.78rem;font-weight:900}.field input{width:100%;padding:13px 14px;border:1px solid #b9cbc3;border-radius:9px;color:#123b34;font:inherit}.privacy{display:grid;grid-template-columns:18px 1fr;gap:10px;margin-top:20px;color:#687b75;font-size:.72rem;line-height:1.5}.privacy input{width:17px;height:17px;margin:2px 0 0;accent-color:#0a7b60}.form-status{min-height:1.3em;margin:15px 0 10px;color:#647871;font-size:.76rem}.form-card button{width:100%;min-height:52px;border:0;border-radius:11px;background:#0a7b60;color:#fff;font-weight:950;cursor:pointer}.form-card button:disabled{background:#a9bbb4;cursor:not-allowed}.processing{padding:30px 10px 10px;text-align:center}.processing-icon{width:54px;height:54px;margin:0 auto 20px;background:#d9ff72;color:#0a7058;font-size:1.4rem}.processing h2{margin:0;font-size:2rem;letter-spacing:-.04em}.processing>p:not(.eyebrow){color:#63766f;line-height:1.65}.progress{height:9px;margin:25px 0 13px;overflow:hidden;border-radius:20px;background:#e3ebe7}.progress span{display:block;width:35%;height:100%;border-radius:inherit;background:#0a7b60}.processing small{color:#75867f}@media(max-width:900px){.page-shell{grid-template-columns:1fr;gap:45px;padding-top:55px}.intro{padding-top:0}.what-happens{max-width:680px}.form-card{max-width:680px;width:100%}}@media(max-width:580px){.topbar{padding:14px}.topbar>span{display:none}.page-shell{width:calc(100% - 28px);padding:42px 0 70px}.intro h1{font-size:clamp(2.7rem,15vw,4rem)}.form-card{padding:23px 16px;border-radius:18px}.card-heading{align-items:flex-start}.card-heading>span{white-space:nowrap}.drop-zone{min-height:205px;padding:22px 15px}}
+</style>
