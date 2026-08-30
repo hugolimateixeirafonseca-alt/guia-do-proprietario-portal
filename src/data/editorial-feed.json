@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-30T11:39:17.692Z",
+  "generatedAt": "2026-08-30T11:58:43.783Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 86,
-    "newsOnline": 20
+    "published": 87,
+    "newsOnline": 21
   },
   "articles": [
     {
@@ -1152,14 +1152,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "camaras-em-casa-lei-custo.mdx",
       "arrivedAt": "2026-08-12T16:46:17+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-08-30T07:01:27Z",
+      "url": "https://guiadoproprietario.pt/casa/camaras-em-casa-lei-custo/"
     },
     {
       "id": "SC23",
@@ -1579,6 +1579,18 @@
     }
   ],
   "news": [
+    {
+      "slug": "2026-08-29-noticia-109",
+      "title": "Desequilíbrio entre oferta, preço e poder de compra quebra venda de casas em 2026",
+      "summary": "As vendas de casas em Portugal deverão cair entre 5% e 7% em 2026 face a 2025, segundo previsões de agentes imobiliários. As transações já recuaram 4,7% no último trimestre de 2025",
+      "pillar": "casa",
+      "publishedAt": "2026-08-30",
+      "url": "https://guiadoproprietario.pt/novidades/2026-08-29-noticia-109/",
+      "source": {
+        "name": "Dinheiro Vivo Imobiliário",
+        "url": "http://dinheirovivo.dn.pt/economia/desequilbrio-entre-oferta-preo-e-poder-de-compra-quebra-venda-de-casas-em-2026"
+      }
+    },
     {
       "slug": "2026-08-28-noticia-94",
       "title": "Habitação. Pacote fiscal ambicioso mas decisivo na execução",
