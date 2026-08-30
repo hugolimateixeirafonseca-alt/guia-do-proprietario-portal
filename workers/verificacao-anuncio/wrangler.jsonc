@@ -1,0 +1,41 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "guia-proprietario-verificacao-anuncio-worker",
+  "main": "index.ts",
+  "compatibility_date": "2026-08-20",
+  "vars": {
+    "SITE_URL": "https://guiadoproprietario.pt",
+    "SENDER_TRANSACTIONAL_FROM_EMAIL": "geral@guiadoproprietario.pt",
+    "SENDER_TRANSACTIONAL_FROM_NAME": "Guia do Proprietário",
+    "VERIFICACAO_EXTRACTION_MODEL": "gpt-5.4-mini",
+    "VERIFICACAO_CLASSIFICATION_MODEL": "gpt-5.4-mini"
+  },
+  "d1_databases": [
+    {
+      "binding": "VERIFICACAO_ANUNCIO_DB",
+      "database_name": "guia-proprietario-verificacao-anuncio",
+      "database_id": "d5428dbe-363f-4556-a7fe-4b7494be630f"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "VERIFICACAO_ANUNCIO_UPLOADS",
+      "bucket_name": "guia-proprietario-verificacao-anuncio"
+    }
+  ],
+  "queues": {
+    "consumers": [
+      {
+        "queue": "verificacao-anuncio",
+        "max_batch_size": 1,
+        "max_batch_timeout": 5,
+        "max_retries": 5,
+        "retry_delay": 300,
+        "dead_letter_queue": "verificacao-anuncio-dlq"
+      }
+    ]
+  },
+  "triggers": {
+    "crons": ["17 * * * *"]
+  }
+}

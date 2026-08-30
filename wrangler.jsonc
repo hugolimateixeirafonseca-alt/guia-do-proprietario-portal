@@ -8,6 +8,25 @@
       "binding": "KIT_ESTUDANTE_DB",
       "database_name": "guia-proprietario-kit-estudante",
       "database_id": "4a664d7b-760b-443f-8c8a-a40467474bdf"
+    },
+    {
+      "binding": "VERIFICACAO_ANUNCIO_DB",
+      "database_name": "guia-proprietario-verificacao-anuncio",
+      "database_id": "d5428dbe-363f-4556-a7fe-4b7494be630f"
     }
-  ]
+  ],
+  "r2_buckets": [
+    {
+      "binding": "VERIFICACAO_ANUNCIO_UPLOADS",
+      "bucket_name": "guia-proprietario-verificacao-anuncio"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "VERIFICACAO_ANUNCIO_QUEUE",
+        "queue": "verificacao-anuncio"
+      }
+    ]
+  }
 }

@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "reference_type": "arrendamento_habitacao_cidade",
+  "unit": "EUR/m2/mes",
+  "methodology": "Mediana dos preços pedidos nos anúncios de habitação para arrendamento publicados no idealista. A comparação só é feita quando o anúncio analisado contém preço mensal, cidade e área. O valor é uma referência de oferta, não uma avaliação do imóvel nem um preço de transação.",
+  "cities": [
+    { "city": "Aveiro", "status": "active", "euros_per_m2": 13.6, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/aveiro-provincias/aveiro/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Braga", "status": "active", "euros_per_m2": 10.8, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/braga-provincias/braga/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Coimbra", "status": "active", "euros_per_m2": 14.0, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/coimbra-provincias/coimbra/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Covilhã", "status": "active", "euros_per_m2": 9.0, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/castelo-branco-provincias/covilha/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Évora", "status": "active", "euros_per_m2": 12.0, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/evora-provincias/evora/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Faro", "status": "active", "euros_per_m2": 14.9, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/faro-provincias/faro/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Guimarães", "status": "active", "euros_per_m2": 10.9, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/braga-provincias/guimaraes/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Leiria", "status": "active", "euros_per_m2": 9.2, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/leiria-provincias/leiria/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Lisboa", "status": "active", "euros_per_m2": 23.5, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/lisboa-provincias/lisboa/", "observed_period": "2026-07", "valid_until": "2027-01-31" },
+    { "city": "Porto", "status": "active", "euros_per_m2": 18.1, "source_url": "https://www.idealista.pt/media/relatorios-preco-habitacao/arrendamento/porto-provincias/porto/", "observed_period": "2026-07", "valid_until": "2027-01-31" }
+  ]
+}
