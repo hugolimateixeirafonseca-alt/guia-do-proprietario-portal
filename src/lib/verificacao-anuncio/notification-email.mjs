@@ -34,9 +34,9 @@ function copyFor(type, { uploadUrl, reportUrl, deadline }) {
     relatorio: {
       subject: "O seu relatório da Verificação de Anúncio está pronto",
       eyebrow: "Análise concluída",
-      title: "Veja o que confirmar antes de transferir dinheiro.",
-      intro: "Organizámos as 12 verificações, a pesquisa pública de fotografias e os próximos passos num relatório privado.",
-      detail: "Abra o relatório para consultar os pontos confirmados, o que continua por confirmar e as ações recomendadas.",
+      title: "Veja a decisão antes de transferir dinheiro.",
+      intro: "O relatório privado destaca primeiro os sinais observados e o que deve fazer agora.",
+      detail: "Inclui a pesquisa das fotografias, as evidências analisadas e uma mensagem pronta para enviar ao anunciante.",
       actionUrl: reportUrl,
       actionLabel: "Ver relatório completo"
     },

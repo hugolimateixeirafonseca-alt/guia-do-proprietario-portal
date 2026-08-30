@@ -23,7 +23,7 @@ export const classification = (overrides = {}) => ({
     id: index + 1,
     estado: index === 10 ? "nao_verificavel" : "por_confirmar",
     leitura: "confirmar_na_conversa",
-    observacao: index === 10 ? "A V1 não analisa documentação." : "Falta informação explícita.",
+    observacao: index === 10 ? "As capturas não permitem confirmar a autorização documental." : "Falta informação explícita.",
     evidencia_ids: []
   })),
   ...overrides
