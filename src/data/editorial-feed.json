@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-08-30T11:12:03.771Z",
+  "generatedAt": "2026-08-30T11:39:17.692Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 87,
+    "published": 86,
     "newsOnline": 20
   },
   "articles": [
@@ -1152,14 +1152,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "published",
+      "status": "written",
       "planned": true,
       "written": true,
-      "published": true,
+      "published": false,
       "file": "camaras-em-casa-lei-custo.mdx",
       "arrivedAt": "2026-08-12T16:46:17+01:00",
-      "publishedAt": "2026-08-30T07:01:27Z",
-      "url": "https://guiadoproprietario.pt/casa/camaras-em-casa-lei-custo/"
+      "publishedAt": null,
+      "url": null
     },
     {
       "id": "SC23",
