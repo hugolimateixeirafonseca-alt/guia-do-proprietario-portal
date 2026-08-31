@@ -51,18 +51,18 @@ test("o relatório é uma entrega web sem ligação para PDF", () => {
   assert.match(html, /Relatório privado/u);
 });
 
-test("a pesquisa visual agrega resultados vazios e distingue pesquisas inconclusivas", () => {
+test("a pesquisa visual transforma os resultados num destaque claro e útil", () => {
   const photoReport = {
     ...report,
     reverseImageEvidence: [
-      ...Array.from({ length: 4 }, (_, index) => ({
+      ...Array.from({ length: 3 }, (_, index) => ({
         photo_id: `foto-${index + 1}`,
         state: "sem_correspondencia_encontrada",
         source_url: null,
         source_domain: null
       })),
       {
-        photo_id: "foto-5",
+        photo_id: "foto-4",
         state: "pesquisa_indisponivel",
         source_url: null,
         source_domain: null
@@ -74,9 +74,24 @@ test("a pesquisa visual agrega resultados vazios e distingue pesquisas inconclus
     createdAt: "2026-08-29T12:00:00.000Z",
     expiresAt: "2026-11-27T12:00:00.000Z"
   });
-  assert.equal((html.match(/4 fotografias pesquisadas sem correspondências públicas relevantes/gu) || []).length, 1);
-  assert.match(html, /1 pesquisa ficou inconclusiva/u);
-  assert.doesNotMatch(html, /<li class="photo-row/u);
+  assert.match(html, /Pesquisa visual das fotografias/u);
+  assert.match(html, /3 das 4 fotografias não aparecem noutros anúncios públicos/u);
+  assert.match(html, /É um sinal positivo porque reduz um padrão comum em anúncios fraudulentos/u);
+  assert.match(html, /1<\/b> fotografia sem resultado fiável/u);
+  assert.doesNotMatch(html, /correspondências públicas relevantes|pesquisa ficou inconclusiva/u);
+  assert.match(html, /<li class="photo-row talk/u);
+});
+
+test("uma fotografia encontrada noutro contexto recebe um alerta visual forte", () => {
+  const html = renderReportHtml({
+    report,
+    createdAt: "2026-08-29T12:00:00.000Z",
+    expiresAt: "2026-11-27T12:00:00.000Z"
+  });
+  assert.match(html, /Sinal de atenção nas fotografias/u);
+  assert.match(html, /Encontrámos 1 fotografia associada a outro anúncio ou contexto público/u);
+  assert.match(html, /Se a explicação não for clara, não pague/u);
+  assert.match(html, /photo-feature attention/u);
 });
 
 test("pagamento antes da visita domina o veredicto e linguagem interna antiga é ocultada", () => {
