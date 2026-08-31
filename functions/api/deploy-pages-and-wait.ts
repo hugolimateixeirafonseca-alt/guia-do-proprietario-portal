@@ -37,8 +37,12 @@ type PublicProbe = {
 // fetch the final page, the dedicated share page and the OG image without a
 // transient 404. This also keeps publication independent from Cloudflare API
 // deployment IDs/commit matching, which proved unnecessarily brittle.
-const WAIT_WINDOW_MS = 80_000;
+// Make aborta estes módulos aos 95 segundos. O gate termina a sua janela com
+// margem suficiente para serializar a resposta, mesmo quando um pedido ao site
+// público fica preso até ao timeout individual.
+const WAIT_WINDOW_MS = 70_000;
 const PUBLIC_PROBE_POLL_MS = 2_000;
+const PUBLIC_FETCH_TIMEOUT_MS = 8_000;
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEPLOYMENT_ID_PATTERN = /^[0-9a-f-]{20,80}$/i;
 const PUBLIC_ORIGIN = 'https://guiadoproprietario.pt';
@@ -150,24 +154,45 @@ function extractOgImage(html: string, pageUrl: string) {
   return '';
 }
 
-async function fetchAsFacebook(url: string, accept: string) {
+async function fetchAsFacebook(url: string, accept: string, readBody: boolean, deadline: number) {
+  const remaining = deadline - Date.now();
+  if (remaining <= 0) throw new Error('probe_deadline_exceeded');
+
   const target = new URL(url);
   target.searchParams.set('__pages_gate', `${Date.now()}`);
 
-  return fetch(target.toString(), {
-    method: 'GET',
-    redirect: 'follow',
-    headers: {
-      Accept: accept,
-      'Cache-Control': 'no-cache',
-      'User-Agent': FACEBOOK_CRAWLER_UA,
-    },
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    Math.max(1, Math.min(PUBLIC_FETCH_TIMEOUT_MS, remaining)),
+  );
+
+  try {
+    const response = await fetch(target.toString(), {
+      method: 'GET',
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: {
+        Accept: accept,
+        'Cache-Control': 'no-cache',
+        'User-Agent': FACEBOOK_CRAWLER_UA,
+      },
+    });
+    const body = readBody ? await response.text() : '';
+    return { response, body };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
-async function probeHtml(url: string, requireImage: boolean): Promise<HtmlProbe> {
+async function probeHtml(url: string, requireImage: boolean, deadline: number): Promise<HtmlProbe> {
   try {
-    const page = await fetchAsFacebook(url, 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5');
+    const { response: page, body: html } = await fetchAsFacebook(
+      url,
+      'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5',
+      true,
+      deadline,
+    );
     const status = page.status;
 
     if (status < 200 || status >= 300) {
@@ -179,7 +204,6 @@ async function probeHtml(url: string, requireImage: boolean): Promise<HtmlProbe>
       return { ready: false, status, imageUrl: '', imageStatus: null };
     }
 
-    const html = await page.text();
     const imageUrl = extractOgImage(html, url);
 
     if (!requireImage || !imageUrl) {
@@ -187,7 +211,12 @@ async function probeHtml(url: string, requireImage: boolean): Promise<HtmlProbe>
     }
 
     try {
-      const image = await fetchAsFacebook(imageUrl, 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8');
+      const { response: image } = await fetchAsFacebook(
+        imageUrl,
+        'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+        false,
+        deadline,
+      );
       const imageStatus = image.status;
       const imageType = image.headers.get('content-type') || '';
       const imageReady = imageStatus >= 200 && imageStatus < 300 && imageType.toLowerCase().startsWith('image/');
@@ -200,11 +229,11 @@ async function probeHtml(url: string, requireImage: boolean): Promise<HtmlProbe>
   }
 }
 
-async function probePublicReadiness(inputUrl: string): Promise<PublicProbe> {
+async function probePublicReadiness(inputUrl: string, deadline: number): Promise<PublicProbe> {
   const { siteUrl, shareUrl } = derivePublicationUrls(inputUrl);
 
   // The article URL proves the site deployment is live.
-  const site = await probeHtml(siteUrl, false);
+  const site = await probeHtml(siteUrl, false, deadline);
   if (!site.ready) {
     return {
       ready: false,
@@ -220,7 +249,7 @@ async function probePublicReadiness(inputUrl: string): Promise<PublicProbe> {
   // Facebook actually receives the dedicated /share/noticias/... URL in v13.0.
   // Therefore the gate must validate THAT URL, not only site_url_final.
   if (shareUrl) {
-    const share = await probeHtml(shareUrl, true);
+    const share = await probeHtml(shareUrl, true, deadline);
     return {
       ready: share.ready,
       siteUrl,
@@ -255,13 +284,41 @@ async function waitForPublicReadiness(url: string, deadline: number) {
   };
 
   while (Date.now() < deadline) {
-    probe = await probePublicReadiness(url);
+    probe = await probePublicReadiness(url, deadline);
     if (probe.ready) return probe;
-    if (Date.now() >= deadline) break;
-    await new Promise((resolve) => setTimeout(resolve, PUBLIC_PROBE_POLL_MS));
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
+    await new Promise((resolve) => setTimeout(resolve, Math.min(PUBLIC_PROBE_POLL_MS, remaining)));
   }
 
   return probe;
+}
+
+function pendingResponse(input: GateInput, probe: PublicProbe) {
+  const body = {
+    ok: false,
+    pending: true,
+    status: 'waiting_for_public_assets',
+    commit_sha: input.commitSha || null,
+    branch: input.branch || 'main',
+    deployment_id: input.deploymentId || null,
+    public_url_ready: false,
+    probe_status: probe.siteStatus,
+    site_url: probe.siteUrl,
+    site_status: probe.siteStatus,
+    share_url: probe.shareUrl || null,
+    share_status: probe.shareStatus,
+    og_image_url: probe.imageUrl || null,
+    og_image_status: probe.imageStatus,
+    error: input.requireSuccess
+      ? 'public_assets_not_ready_before_final_gate'
+      : 'public_assets_still_pending',
+  };
+
+  // As tentativas intermédias usam 202 para continuar a sondagem. A última
+  // tentativa exige sucesso real e não pode deixar o cenário avançar para uma
+  // validação que sabemos que devolverá 404.
+  return json(body, input.requireSuccess ? 504 : 202);
 }
 
 async function deployAndWaitWindow({ request, env }: RequestContext) {
@@ -312,28 +369,13 @@ async function deployAndWaitWindow({ request, env }: RequestContext) {
     });
   }
 
-  const body = {
-    ok: false,
-    pending: true,
-    status: 'waiting_for_public_assets',
-    commit_sha: input.commitSha || null,
-    branch: input.branch || 'main',
-    deployment_id: input.deploymentId || null,
-    public_url_ready: false,
-    probe_status: probe.siteStatus,
-    site_url: probe.siteUrl,
-    site_status: probe.siteStatus,
-    share_url: probe.shareUrl || null,
-    share_status: probe.shareStatus,
-    og_image_url: probe.imageUrl || null,
-    og_image_status: probe.imageStatus,
-    error: 'public_assets_still_pending',
-  };
-
-  // 202 is deliberate: transport succeeded but the public assets are not ready.
-  // Make can call the same gate again with the same payload. A transient delay no
-  // longer becomes a hard scenario failure merely because require_success=true.
-  return json(body, 202);
+  return pendingResponse(input, probe);
 }
 
 export const onRequestPost = deployAndWaitWindow;
+
+export const __test = {
+  limits: { waitWindowMs: WAIT_WINDOW_MS, fetchTimeoutMs: PUBLIC_FETCH_TIMEOUT_MS },
+  pendingResponse,
+  waitForPublicReadiness,
+};

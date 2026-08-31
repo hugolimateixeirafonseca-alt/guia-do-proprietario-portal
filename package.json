@@ -28,6 +28,7 @@
     "test:verificacao": "node --test tests/verificacao-anuncio/*.test.mjs",
     "test:radar": "node --test automation/editorial-radar/*.test.mjs",
     "test:renderer": "node --test tests/social-card-renderer.test.mjs tests/social-post-layout.test.mjs",
+    "test:pages-gate": "node --test tests/deploy-pages-and-wait.test.mjs",
     "fixtures:social-card": "node automation/social-card-renderer/generate-fixtures.mjs",
     "build:functions": "wrangler pages functions build --outdir .wrangler/functions-build",
     "build:verificacao-worker": "wrangler deploy --dry-run --config workers/verificacao-anuncio/wrangler.jsonc --outdir .wrangler/verificacao-worker-build",
