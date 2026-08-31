@@ -135,8 +135,17 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
       </div>
 
       <form class="upload-card" data-demo-form>
+        <div class="real-intake-card">
+          <div>
+            <small>Análise real sem pagamento inicial</small>
+            <strong>Quer verificar o seu anúncio?</strong>
+            <p>Envie as capturas no formulário seguro e receba primeiro a pré-verificação com IA.</p>
+          </div>
+          <a href="/verificacao/enviar/">Enviar capturas grátis <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="demo-divider"><span>Ou experimente primeiro a simulação</span></div>
         <div class="upload-card-head">
-          <div><small>Demonstração interativa</small><strong>Comece pelas capturas de ecrã (screenshot) do anúncio</strong></div>
+          <div><small>Demonstração local</small><strong>Veja como o relatório será organizado</strong><p>Os ficheiros escolhidos nesta demonstração não são enviados para análise.</p></div>
           <span data-file-count>0 adicionados</span>
         </div>
         <label class="drop-zone" for="ad-files">
@@ -351,6 +360,108 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
     min-width: 0;
   }
 
+  .section-heading {
+    width: 100%;
+    max-width: none;
+    grid-template-columns: minmax(0, 1.3fr) minmax(300px, .7fr);
+    gap: 64px;
+  }
+
+  .section-heading > p {
+    max-width: 390px;
+    justify-self: end;
+  }
+
+  .demo-grid {
+    grid-template-columns: minmax(0, .95fr) minmax(540px, 1.05fr);
+    gap: 60px;
+  }
+
+  .demo-copy h2 {
+    font-size: clamp(2.8rem, 3.6vw, 4.1rem);
+  }
+
+  .real-intake-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 22px;
+    align-items: center;
+    margin: -8px -8px 24px;
+    padding: 20px;
+    border-radius: 15px;
+    background: #0b4f45;
+    color: #fff;
+  }
+
+  .real-intake-card div {
+    display: grid;
+    gap: 4px;
+  }
+
+  .real-intake-card small {
+    color: #d9ff72;
+    font-size: .66rem;
+    font-weight: 950;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .real-intake-card strong {
+    font-size: 1.1rem;
+  }
+
+  .real-intake-card p {
+    margin: 0;
+    color: #d3e4df;
+    font-size: .76rem;
+    line-height: 1.45;
+  }
+
+  .real-intake-card a {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 17px;
+    border-radius: 10px;
+    background: #d9ff72;
+    color: #083a34;
+    font-size: .78rem;
+    font-weight: 950;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .real-intake-card a:hover {
+    background: #e6ff9e;
+  }
+
+  .demo-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 22px;
+    color: #7a8987;
+    font-size: .69rem;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  .demo-divider::before,
+  .demo-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: #dfe7e3;
+  }
+
+  .upload-card-head > div > p {
+    margin: 3px 0 0;
+    color: #71817f;
+    font-size: .72rem;
+    line-height: 1.4;
+  }
+
   .price-box {
     box-sizing: border-box;
     width: 100%;
@@ -374,6 +485,15 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
     .section-heading {
       gap: 24px;
+    }
+
+    .section-heading > p {
+      max-width: 680px;
+      justify-self: start;
+    }
+
+    .demo-grid {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .risk-grid {
@@ -450,6 +570,15 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
     .upload-card {
       padding: 22px 17px;
+    }
+
+    .real-intake-card {
+      grid-template-columns: minmax(0, 1fr);
+      margin: -5px -2px 22px;
+    }
+
+    .real-intake-card a {
+      width: 100%;
     }
 
     .pricing-card h2,
