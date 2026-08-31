@@ -75,6 +75,14 @@ test("o link do email transporta o token no caminho e redireciona para a página
   assert.match(source, /no-store/u);
 });
 
+test("a pré-verificação pública fica ativa sem ligar o checkout", async () => {
+  const wrangler = await readFile(new URL("../../wrangler.jsonc", import.meta.url), "utf8");
+  const workflow = await readFile(new URL("../../.github/workflows/deploy-pages-functions-direct.yml", import.meta.url), "utf8");
+  assert.match(wrangler, /"VERIFICACAO_PUBLIC_INTAKE_ENABLED": "true"/u);
+  assert.match(workflow, /VERIFICACAO_PUBLIC_INTAKE_ENABLED: \{ type: 'plain_text', value: 'true' \}/u);
+  assert.doesNotMatch(wrangler, /PUBLIC_VERIFICACAO_CHECKOUT_ENABLED[^\n]*true/u);
+});
+
 test("a recuperação tem um limite próprio e não colide com a consulta de estado", async () => {
   const source = await readFile(retryEndpointPath, "utf8");
   assert.match(source, /`\$\{config\.secret\}:retry`/u);
