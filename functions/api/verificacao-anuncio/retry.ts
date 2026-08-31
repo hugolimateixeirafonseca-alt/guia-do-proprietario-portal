@@ -17,7 +17,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     await checkRateLimit(request, config.db, `${config.secret}:retry`, 10);
     const token = readToken(request);
     const { row } = await findVerification(config.db, token);
-    if (row.estado !== "em_analise") throw new PublicVerificationError(409, "retry_not_available");
+    if (row.estado !== "em_analise" || row.pagamentoEstado !== "pago") throw new PublicVerificationError(409, "retry_not_available");
 
     const recentCutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString();
     const recent = await config.db.prepare(

@@ -3,11 +3,13 @@ import { createCandidateValidator } from "../../src/lib/verificacao-anuncio/cand
 import { createAnalysisEngine } from "../../src/lib/verificacao-anuncio/engine.mjs";
 import { createOpenAIResponsesAdapters } from "../../src/lib/verificacao-anuncio/openai-responses.mjs";
 import { createPriceReferenceProvider } from "../../src/lib/verificacao-anuncio/price-reference.mjs";
+import { buildPrecheckTeaser } from "../../src/lib/verificacao-anuncio/precheck.mjs";
 import { createGoogleVisionProvider } from "../../src/lib/verificacao-anuncio/reverse-provider.mjs";
 import { buildVerificationEmail } from "../../src/lib/verificacao-anuncio/notification-email.mjs";
 import { createSenderTransactionalClient } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
 import { createStripeRefund } from "../../src/lib/verificacao-anuncio/stripe-refund.mjs";
 import { createWorkerPhotoProcessor } from "../../src/lib/verificacao-anuncio/worker-images.mjs";
+import { normalizeExtractionGeometry, validateExtraction } from "../../src/lib/verificacao-anuncio/validate.mjs";
 import { decryptPrivateValue, type D1Database, type R2Bucket } from "../../functions/lib/verificacao-anuncio";
 
 interface QueueMessage<T> {
@@ -41,7 +43,7 @@ interface WorkerEnv {
 }
 
 type VerificationMessage = {
-  type: "verificacao_anuncio_pagamento_confirmado" | "verificacao_anuncio_analisar";
+  type: "verificacao_anuncio_pagamento_confirmado" | "verificacao_anuncio_precheck" | "verificacao_anuncio_analisar";
   verificacaoId: string;
 };
 
@@ -64,6 +66,9 @@ interface JobRow {
   accessTokenCipher: string;
   stripePaymentId: string | null;
   pdfKey: string | null;
+  precheckEstado: string;
+  precheckJson: string | null;
+  pagamentoEstado: string;
 }
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -94,7 +99,8 @@ async function loadJob(db: D1Database, id: string) {
       processamento_bloqueado_em AS processamentoBloqueadoEm, falha_em AS falhaEm,
       falha_motivo AS falhaMotivo, email_cipher AS emailCipher,
       access_token_cipher AS accessTokenCipher, stripe_payment_id AS stripePaymentId,
-      relatorio_pdf_key AS pdfKey
+      relatorio_pdf_key AS pdfKey, precheck_estado AS precheckEstado,
+      precheck_json AS precheckJson, pagamento_estado AS pagamentoEstado
      FROM verificacao_anuncio_jobs WHERE id = ? LIMIT 1`
   ).bind(id).first<JobRow>();
   if (!job) throw new Error("job_not_found");
@@ -207,7 +213,7 @@ async function analyzeJob(env: WorkerEnv, job: JobRow, attempts: number) {
     await refundJob(env, job, "falhou_reembolsado", job.falhaMotivo || "falha_tecnica_analise");
     return;
   }
-  if (job.estado !== "em_analise") return;
+  if (job.estado !== "em_analise" || job.pagamentoEstado !== "pago") return;
   const lock = await env.VERIFICACAO_ANUNCIO_DB.prepare(
     `UPDATE verificacao_anuncio_jobs SET processamento_bloqueado_em = ?
      WHERE id = ? AND estado = 'em_analise'
@@ -235,7 +241,9 @@ async function analyzeJob(env: WorkerEnv, job: JobRow, attempts: number) {
       priceReferenceProvider: createPriceReferenceProvider(priceDataset),
       classifier: ai.classifier
     });
-    const result = await engine.analyze({ images, city: job.cidade });
+    let precheckExtraction = null;
+    try { precheckExtraction = JSON.parse(job.precheckJson || "null")?.extraction || null; } catch { /* faz nova extração */ }
+    const result = await engine.analyze({ images, city: job.cidade, extraction: precheckExtraction });
     const deliveredAt = nowIso();
     const costRecord = { openai: usage, reverseSearches: result.photos.unique.length };
     const update = await env.VERIFICACAO_ANUNCIO_DB.prepare(
@@ -281,6 +289,50 @@ async function analyzeJob(env: WorkerEnv, job: JobRow, attempts: number) {
   }
 }
 
+async function precheckJob(env: WorkerEnv, job: JobRow, attempts: number) {
+  if (job.pagamentoEstado !== "pendente" || job.precheckEstado === "completed") return;
+  if (job.precheckEstado !== "processing") return;
+  try {
+    const images = await loadImages(env, job);
+    const usage: unknown[] = [];
+    const ai = createOpenAIResponsesAdapters({
+      apiKey: env.OPENAI_API_KEY,
+      extractionModel: env.VERIFICACAO_EXTRACTION_MODEL || "gpt-5.4-mini",
+      classificationModel: env.VERIFICACAO_CLASSIFICATION_MODEL || "gpt-5.4-mini",
+      onUsage: (record: unknown) => { usage.push(record); }
+    });
+    let extraction;
+    let lastError;
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      try {
+        extraction = validateExtraction(
+          normalizeExtractionGeometry(await ai.extractor.extract({ images, city: job.cidade, attempt })),
+          images.length
+        );
+        break;
+      } catch (error) { lastError = error; }
+    }
+    if (!extraction) throw lastError || new Error("precheck_extraction_failed");
+    const teaser = buildPrecheckTeaser(extraction, images.length);
+    await env.VERIFICACAO_ANUNCIO_DB.prepare(
+      `UPDATE verificacao_anuncio_jobs SET precheck_estado = 'completed', precheck_json = ?, custo_json = ?
+       WHERE id = ? AND precheck_estado = 'processing' AND pagamento_estado = 'pendente'`
+    ).bind(JSON.stringify({ teaser, extraction }), JSON.stringify({ precheckOpenai: usage }), job.id).run();
+    await event(env.VERIFICACAO_ANUNCIO_DB, job.id, "precheck_concluido", "success", {
+      factCount: teaser.factCount,
+      photoCount: teaser.photoCount,
+      useful: teaser.useful
+    });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message.slice(0, 100) : "unknown";
+    await event(env.VERIFICACAO_ANUNCIO_DB, job.id, "precheck_tentativa_falhou", "error", { attempts, reason });
+    if (attempts < 5) throw error;
+    await env.VERIFICACAO_ANUNCIO_DB.prepare(
+      "UPDATE verificacao_anuncio_jobs SET precheck_estado = 'failed', falha_em = ?, falha_motivo = ? WHERE id = ? AND pagamento_estado = 'pendente'"
+    ).bind(nowIso(), reason, job.id).run();
+  }
+}
+
 async function cleanUploadedImages(env: WorkerEnv, job: JobRow) {
   let files: Array<{ key?: string }> = [];
   try { files = JSON.parse(job.ficheirosJson || "[]"); } catch { /* o manifesto inválido não impede a marcação segura */ }
@@ -323,7 +375,7 @@ async function runScheduled(env: WorkerEnv) {
   }
 
   const failed = await env.VERIFICACAO_ANUNCIO_DB.prepare(
-    "SELECT id FROM verificacao_anuncio_jobs WHERE estado = 'em_analise' AND falha_em IS NOT NULL LIMIT 100"
+    "SELECT id FROM verificacao_anuncio_jobs WHERE estado = 'em_analise' AND pagamento_estado = 'pago' AND falha_em IS NOT NULL LIMIT 100"
   ).all<{ id: string }>();
   for (const item of failed.results) {
     try { await refundJob(env, await loadJob(env.VERIFICACAO_ANUNCIO_DB, item.id), "falhou_reembolsado", "falha_tecnica_analise"); }
@@ -352,6 +404,11 @@ async function runScheduled(env: WorkerEnv) {
     catch (error) { console.error("verification_scheduled_cleanup_failed", { jobId: item.id, error: error instanceof Error ? error.message.slice(0, 100) : "unknown" }); }
   }
 
+  await env.VERIFICACAO_ANUNCIO_DB.prepare(
+    `UPDATE verificacao_anuncio_jobs SET estado = 'expirado', precheck_json = NULL
+     WHERE pagamento_estado = 'pendente' AND upload_expira_em IS NOT NULL AND upload_expira_em <= ?`
+  ).bind(now).run();
+
   const expired = await env.VERIFICACAO_ANUNCIO_DB.prepare(
     "SELECT id FROM verificacao_anuncio_jobs WHERE estado = 'entregue' AND expira_em <= ? LIMIT 100"
   ).bind(now).all<{ id: string }>();
@@ -366,6 +423,10 @@ async function processMessage(env: WorkerEnv, message: VerificationMessage, atte
   const job = await loadJob(env.VERIFICACAO_ANUNCIO_DB, message.verificacaoId);
   if (message.type === "verificacao_anuncio_pagamento_confirmado") {
     await sendNotification(env, job, "recebida");
+    return;
+  }
+  if (message.type === "verificacao_anuncio_precheck") {
+    await precheckJob(env, job, attempts);
     return;
   }
   if (message.type !== "verificacao_anuncio_analisar") throw new Error("unknown_queue_message");

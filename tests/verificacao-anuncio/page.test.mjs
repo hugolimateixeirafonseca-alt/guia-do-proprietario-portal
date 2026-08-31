@@ -7,24 +7,27 @@ const uploadPagePath = new URL("../../src/pages/verificacao/enviar.astro", impor
 const uploadRedirectPath = new URL("../../functions/verificacao/enviar/[token].ts", import.meta.url);
 const retryEndpointPath = new URL("../../functions/api/verificacao-anuncio/retry.ts", import.meta.url);
 
-test("a landing apresenta upload, relatório e checkout protegido por configuração pública", async () => {
+test("a landing apresenta a pré-verificação antes do pagamento e o relatório", async () => {
   const source = await readFile(pagePath, "utf8");
   assert.match(source, /data-demo-form/u);
   assert.match(source, /data-results/u);
   assert.match(source, /Não transfira a caução/u);
   assert.match(source, /Antes 11,99 €/u);
-  assert.match(source, /Comprar análise por 7,99 €/u);
+  assert.match(source, /Enviar capturas antes de pagar/u);
   assert.match(source, /Pesquisa de fotografias noutros sites/u);
   assert.match(source, /Comparação do preço na cidade/u);
   assert.match(source, /capturas de ecrã \(screenshot\) do anúncio/iu);
   assert.doesNotMatch(source, /printscreen/iu);
-  assert.match(source, /Compra disponível na próxima fase/u);
+  assert.match(source, /Pré-verificação sem custo/u);
   assert.match(source, /Pagamento e análise ainda não estão ativos/u);
   assert.match(source, /files\.length >= 1/u);
   assert.doesNotMatch(source, /files\.length < 4/u);
-  assert.match(source, /data-checkout-button/u);
+  assert.match(source, /Sistema inteligente com IA/u);
+  assert.match(source, /Normalmente pronta em poucos minutos/u);
+  assert.match(source, /\/verificacao\/enviar\//u);
+  assert.doesNotMatch(source, /data-checkout-button/u);
   assert.match(source, /PUBLIC_VERIFICACAO_CHECKOUT_ENABLED/u);
-  assert.match(source, /\/api\/verificacao-anuncio\/checkout/u);
+  assert.doesNotMatch(source, /\/api\/verificacao-anuncio\/checkout/u);
 });
 
 test("a confirmação de pagamento não é indexada nem expõe o token privado", async () => {
@@ -42,6 +45,15 @@ test("a página privada liga o envio real ao estado do pedido", async () => {
   assert.match(source, /\/api\/verificacao-anuncio\/upload\?t=/u);
   assert.match(source, /\/api\/verificacao-anuncio\/retry\?t=/u);
   assert.match(source, /confirmacao_privacidade/u);
+  assert.match(source, /Fazer pré-verificação gratuita com IA/u);
+  assert.match(source, /Windows \+ Shift \+ S/u);
+  assert.match(source, /Android/u);
+  assert.match(source, /iPhone/u);
+  assert.match(source, /data-teaser/u);
+  assert.match(source, /Primeiro as capturas\. Só depois o pagamento/u);
+  const intakeScript = await readFile(new URL("../../public/scripts/verificacao-intake.js", import.meta.url), "utf8");
+  assert.match(intakeScript, /\/api\/verificacao-anuncio\/intake/u);
+  assert.match(intakeScript, /\/api\/verificacao-anuncio\/checkout/u);
   assert.match(source, /\[hidden\]\)\{display:none!important\}/u);
   assert.doesNotMatch(source, /printscreen/iu);
 });

@@ -38,16 +38,18 @@ export function createAnalysisEngine(dependencies) {
   } = dependencies;
 
   return {
-    async analyze({ images, city }) {
+    async analyze({ images, city, extraction: providedExtraction = null }) {
       if (!Array.isArray(images) || images.length < MIN_UPLOAD_FILES || images.length > MAX_UPLOAD_FILES) {
         throw new TypeError(`A análise requer entre ${MIN_UPLOAD_FILES} e ${MAX_UPLOAD_FILES} imagens.`);
       }
 
-      const extraction = await runValidatedWithRetry(
-        "extracao",
-        ({ attempt }) => extractor.extract({ images, city, attempt }),
-        (result) => validateExtraction(normalizeExtractionGeometry(result), images.length)
-      );
+      const extraction = providedExtraction
+        ? validateExtraction(normalizeExtractionGeometry(providedExtraction), images.length)
+        : await runValidatedWithRetry(
+          "extracao",
+          ({ attempt }) => extractor.extract({ images, city, attempt }),
+          (result) => validateExtraction(normalizeExtractionGeometry(result), images.length)
+        );
 
       const prepared = await photoProcessor.prepare({ images, regions: extraction.regioes_fotografias });
       const { unique, duplicates } = deduplicatePhotos(prepared);

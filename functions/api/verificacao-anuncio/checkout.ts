@@ -2,7 +2,9 @@ import { createStripeCheckoutSession, StripeIntegrationError } from "../../../sr
 import {
   PublicVerificationError,
   checkRateLimit,
+  decryptPrivateValue,
   ensureSameOrigin,
+  findVerification,
   json,
   requireConfiguration,
   safeError,
@@ -25,12 +27,27 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     let body: Record<string, unknown>;
     try { body = JSON.parse(await request.text()); } catch { throw new PublicVerificationError(400, "invalid_payload"); }
     if (typeof body.company === "string" && body.company.trim()) throw new PublicVerificationError(400, "invalid_payload");
+    const token = typeof body.token === "string" ? body.token : "";
+    const { row } = await findVerification(config.db, token);
+    if (row.precheckEstado !== "completed") throw new PublicVerificationError(409, "precheck_not_ready");
+    if (row.pagamentoEstado === "pago") throw new PublicVerificationError(409, "payment_already_completed");
+    let teaser: { useful?: boolean } = {};
+    try { teaser = JSON.parse(row.precheckJson || "{}")?.teaser || {}; } catch { /* validado abaixo */ }
+    if (!teaser.useful) throw new PublicVerificationError(409, "captures_not_sufficient");
+    const email = await decryptPrivateValue(row.emailCipher, config.secret);
     const session = await createStripeCheckoutSession({
       apiKey: env.STRIPE_SECRET_KEY,
       priceId: env.STRIPE_PRICE_ID,
       siteUrl: env.SITE_URL,
-      attemptId: body.attemptId
+      attemptId: body.attemptId,
+      verificationId: row.id,
+      customerEmail: email,
+      cancelToken: token
     });
+    await config.db.prepare(
+      `UPDATE verificacao_anuncio_jobs SET stripe_session_id = ?
+       WHERE id = ? AND pagamento_estado = 'pendente'`
+    ).bind(session.id, row.id).run();
     return json({ ok: true, url: session.url });
   } catch (error) {
     if (error instanceof StripeIntegrationError) {

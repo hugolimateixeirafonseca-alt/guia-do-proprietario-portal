@@ -22,6 +22,21 @@ test("cria um checkout único com o preço configurado e regressos no domínio o
   assert.equal(body.get("cancel_url"), "https://guiadoproprietario.pt/verificacao-anuncio/?pagamento=cancelado#comprar");
 });
 
+test("liga o pagamento ao pedido pré-verificado e regressa à ligação privada se for cancelado", () => {
+  const token = "a".repeat(43);
+  const body = buildCheckoutParameters({
+    priceId,
+    siteUrl: "https://guiadoproprietario.pt",
+    attemptId,
+    verificationId: attemptId,
+    customerEmail: "cliente@example.com",
+    cancelToken: token
+  });
+  assert.equal(body.get("metadata[verificacao_id]"), attemptId);
+  assert.equal(body.get("customer_email"), "cliente@example.com");
+  assert.equal(body.get("cancel_url"), `https://guiadoproprietario.pt/verificacao/enviar/?t=${token}&pagamento=cancelado`);
+});
+
 test("aceita apenas uma resposta de checkout alojada pela Stripe", async () => {
   const session = await createStripeCheckoutSession({
     apiKey,

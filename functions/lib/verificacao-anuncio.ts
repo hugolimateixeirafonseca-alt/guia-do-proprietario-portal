@@ -46,6 +46,7 @@ export interface VerificationEnv {
   SENDER_API_TOKEN?: string;
   SENDER_TRANSACTIONAL_FROM_EMAIL?: string;
   SENDER_TRANSACTIONAL_FROM_NAME?: string;
+  VERIFICACAO_PUBLIC_INTAKE_ENABLED?: string;
 }
 
 export interface RequestContext {
@@ -62,6 +63,12 @@ export interface VerificationRow {
   expiraEm: string;
   uploadExpiraEm: string | null;
   ficheirosJson: string | null;
+  precheckEstado: string;
+  precheckJson: string | null;
+  pagamentoEstado: string;
+  emailCipher: string;
+  accessTokenCipher: string | null;
+  stripeSessionId: string;
 }
 
 export class PublicVerificationError extends Error {
@@ -166,7 +173,10 @@ export async function findVerification(db: D1Database, token: string) {
   const row = await db.prepare(
     `SELECT id, estado, criado_em AS criadoEm, upload_em AS uploadEm,
       entregue_em AS entregueEm, expira_em AS expiraEm, upload_expira_em AS uploadExpiraEm,
-      ficheiros_json AS ficheirosJson
+      ficheiros_json AS ficheirosJson, precheck_estado AS precheckEstado,
+      precheck_json AS precheckJson, pagamento_estado AS pagamentoEstado,
+      email_cipher AS emailCipher, access_token_cipher AS accessTokenCipher,
+      stripe_session_id AS stripeSessionId
      FROM verificacao_anuncio_jobs WHERE access_token_hash = ? LIMIT 1`
   ).bind(tokenHash).first<VerificationRow>();
   if (!row) throw new PublicVerificationError(404, "verification_not_found");
@@ -187,7 +197,7 @@ export async function checkRateLimit(request: Request, db: D1Database, secret: s
   if ((row?.hits || 0) > limit) throw new PublicVerificationError(429, "too_many_requests");
 }
 
-export async function readUpload(request: Request) {
+export async function readUpload(request: Request, options: { requireEmail?: boolean } = {}) {
   const contentType = (request.headers.get("Content-Type") || "").toLowerCase();
   if (!contentType.startsWith("multipart/form-data")) {
     throw new PublicVerificationError(415, "multipart_form_required");
@@ -214,7 +224,11 @@ export async function readUpload(request: Request) {
   }
   const captures = form.getAll("capturas").filter((value): value is File => value instanceof File);
   try {
-    return { cidade, captures: await validateUploadFiles(captures) };
+    const email = String(form.get("email") || "").trim().toLowerCase();
+    if (options.requireEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/u.test(email)) {
+      throw new PublicVerificationError(400, "invalid_email");
+    }
+    return { cidade, email, captures: await validateUploadFiles(captures) };
   } catch (error) {
     if (error instanceof IntakeValidationError) throw new PublicVerificationError(error.status, error.code);
     throw error;

@@ -61,9 +61,11 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     const eventSessionId = String(event?.data?.object?.id || "");
     const session = await retrieveStripeCheckoutSession({ apiKey: env.STRIPE_SECRET_KEY, sessionId: eventSessionId });
     const paid = validatePaidVerificationSession(session, env.STRIPE_PRICE_ID);
+    const verificationId = String(session?.metadata?.verificacao_id || "");
     let job = await config.db.prepare(
-      "SELECT id FROM verificacao_anuncio_jobs WHERE stripe_session_id = ? LIMIT 1"
-    ).bind(session.id).first<{ id: string }>();
+      `SELECT id, precheck_estado AS precheckEstado, ficheiros_json AS ficheirosJson
+       FROM verificacao_anuncio_jobs WHERE stripe_session_id = ? OR id = ? LIMIT 1`
+    ).bind(session.id, verificationId).first<{ id: string; precheckEstado: string; ficheirosJson: string | null }>();
 
     if (!job) {
       const access = await createPrivateAccess(config.secret);
@@ -88,13 +90,25 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
         reportExpiresAt
       ).run();
       job = (inserted.meta?.changes || 0) === 1
-        ? { id: jobId }
-        : await config.db.prepare("SELECT id FROM verificacao_anuncio_jobs WHERE stripe_session_id = ? LIMIT 1")
-          .bind(session.id).first<{ id: string }>();
+        ? { id: jobId, precheckEstado: "nao_aplicavel", ficheirosJson: null }
+        : await config.db.prepare(
+          "SELECT id, precheck_estado AS precheckEstado, ficheiros_json AS ficheirosJson FROM verificacao_anuncio_jobs WHERE stripe_session_id = ? LIMIT 1"
+        ).bind(session.id).first<{ id: string; precheckEstado: string; ficheirosJson: string | null }>();
     }
     if (!job) throw new PublicVerificationError(500, "job_creation_failed");
 
-    await config.queue!.send({ type: "verificacao_anuncio_pagamento_confirmado", verificacaoId: job.id });
+    const isPrechecked = job.precheckEstado === "completed" && Boolean(job.ficheirosJson);
+    if (isPrechecked) {
+      await config.db.prepare(
+        `UPDATE verificacao_anuncio_jobs
+         SET stripe_session_id = ?, stripe_payment_id = ?, email_cipher = ?, pagamento_estado = 'pago',
+             falha_em = NULL, falha_motivo = NULL, processamento_bloqueado_em = NULL
+         WHERE id = ?`
+      ).bind(session.id, paid.paymentIntent, await encryptPrivateValue(paid.email, config.secret), job.id).run();
+      await config.queue!.send({ type: "verificacao_anuncio_analisar", verificacaoId: job.id });
+    } else {
+      await config.queue!.send({ type: "verificacao_anuncio_pagamento_confirmado", verificacaoId: job.id });
+    }
     await config.db.prepare(
       `INSERT INTO verificacao_anuncio_events (job_id, tipo, estado, criado_em)
        VALUES (?, 'pagamento_confirmado', 'success', ?)`

@@ -11,7 +11,7 @@ export const onRequestGet = async ({ request, env }: RequestContext) => {
     const row = await config.db.prepare(
       `SELECT id, resultado_json AS resultadoJson, criado_em AS criadoEm, entregue_em AS entregueEm,
         expira_em AS expiraEm, ficheiros_json AS ficheirosJson, imagens_apagadas AS imagensApagadas
-       FROM verificacao_anuncio_jobs WHERE access_token_hash = ? AND estado = 'entregue' LIMIT 1`
+       FROM verificacao_anuncio_jobs WHERE access_token_hash = ? AND estado = 'entregue' AND pagamento_estado = 'pago' LIMIT 1`
     ).bind(await sha256(token)).first<{ id: string; resultadoJson: string; criadoEm: string; entregueEm: string; expiraEm: string; ficheirosJson: string | null; imagensApagadas: number }>();
     if (!row || Date.parse(row.expiraEm) <= Date.now()) throw new PublicVerificationError(404, "report_not_found");
     let capturePreviews: Array<{ url: string; label: string }> = [];

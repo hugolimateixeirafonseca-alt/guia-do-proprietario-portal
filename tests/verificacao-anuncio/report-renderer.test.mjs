@@ -49,6 +49,8 @@ test("o relatório é uma entrega web sem ligação para PDF", () => {
   });
   assert.doesNotMatch(html, /Descarregar PDF|\/verificacao\/pdf\//u);
   assert.match(html, /Relatório privado/u);
+  assert.match(html, /sistema inteligente com IA/iu);
+  assert.match(html, /poucos minutos/u);
 });
 
 test("a pesquisa visual transforma os resultados num destaque claro e útil", () => {

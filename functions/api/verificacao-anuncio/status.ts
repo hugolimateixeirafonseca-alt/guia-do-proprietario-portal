@@ -23,9 +23,16 @@ export const onRequestGet = async ({ request, env }: RequestContext) => {
     await checkRateLimit(request, config.db, config.secret, 60);
     const token = readToken(request);
     const { row } = await findVerification(config.db, token);
-    const relevantDeadline = row.estado === "aguarda_upload" ? row.uploadExpiraEm || row.expiraEm : row.expiraEm;
+    const relevantDeadline = row.estado === "aguarda_upload" || row.pagamentoEstado === "pendente"
+      ? row.uploadExpiraEm || row.expiraEm
+      : row.expiraEm;
     const expired = Date.parse(relevantDeadline) <= Date.now() && row.estado !== "entregue";
-    const state = publicState(expired ? "expirado" : row.estado);
+    let state: { etapa: string; progresso: number } = publicState(expired ? "expirado" : row.estado);
+    if (!expired && row.pagamentoEstado === "pendente") {
+      if (row.precheckEstado === "processing") state = { etapa: "precheck_em_analise", progresso: 20 };
+      else if (row.precheckEstado === "completed") state = { etapa: "precheck_pronto", progresso: 45 };
+      else if (row.precheckEstado === "failed") state = { etapa: "precheck_falhou", progresso: 100 };
+    }
     let captures = 0;
     try {
       const files = JSON.parse(row.ficheirosJson || "[]");
@@ -33,13 +40,19 @@ export const onRequestGet = async ({ request, env }: RequestContext) => {
     } catch {
       captures = 0;
     }
+    let teaser = null;
+    if (state.etapa === "precheck_pronto") {
+      try { teaser = JSON.parse(row.precheckJson || "null")?.teaser || null; } catch { teaser = null; }
+    }
     return json({
       ok: true,
       ...state,
       capturas: captures,
       uploadEm: row.uploadEm,
       entregueEm: row.entregueEm,
-      relatorioDisponivel: row.estado === "entregue"
+      relatorioDisponivel: row.estado === "entregue",
+      pagamentoConfirmado: row.pagamentoEstado === "pago",
+      teaser
     });
   } catch (error) {
     return safeError(error);

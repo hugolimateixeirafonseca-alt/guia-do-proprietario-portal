@@ -36,20 +36,23 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
     <div class="shell hero-grid">
       <div class="hero-copy">
         <p class="eyebrow">Verificação de anúncio para arrendamento</p>
+        <div class="hero-ai"><span>IA</span><div><strong>Sistema inteligente com IA</strong><small>Análise automática. Normalmente pronta em poucos minutos.</small></div></div>
         <h1>Não transfira a caução <span>às cegas.</span></h1>
-        <p class="lead">Envie as capturas de ecrã do anúncio. Pesquisamos as fotografias noutros sites, cruzamos a informação e mostramos o que deve confirmar antes de pagar.</p>
+        <p class="lead">Envie as capturas de ecrã do anúncio. O sistema inteligente lê o texto, pesquisa as fotografias noutros sites e cruza a informação antes de qualquer pagamento.</p>
         <div class="hero-offer">
           <div class="hero-price">
             <span class="old-price">11,99 €</span>
             <strong>7,99 €</strong>
             <small>Preço de lançamento</small>
           </div>
-          <a class="primary-action" href="#experimentar">Analisar o meu anúncio <span aria-hidden="true">→</span></a>
+          <a class="primary-action" href="/verificacao/enviar/">Verificar capturas grátis <span aria-hidden="true">→</span></a>
         </div>
+        <p class="pay-later">Primeiro recebe uma pré-verificação e um teaser. Só depois decide se quer pagar 7,99 € pelo relatório completo.</p>
         <ul class="trust-list" aria-label="O que está incluído">
+          <li>Pré-verificação gratuita com IA</li>
           <li>Pesquisa de fotografias noutros sites</li>
           <li>Comparação do preço na cidade</li>
-          <li>Contradições e condições em falta</li>
+          <li>Relatório normalmente pronto em poucos minutos</li>
         </ul>
       </div>
 
@@ -229,8 +232,8 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
   <section class="pricing-section" id="comprar">
     <div class="shell pricing-card">
-      <div class="pricing-copy"><p class="eyebrow">Uma pequena verificação antes de uma grande transferência</p><h2>Pague pela análise. Não pela dúvida.</h2><p>Recebe por email uma ligação privada para o relatório, com uma decisão clara, pesquisa das fotografias, evidências e uma mensagem pronta para enviar.</p><ul><li>Uma única compra</li><li>Sem subscrição</li><li>Reembolso se a análise técnica falhar</li></ul></div>
-      <div class="price-box"><span class="offer-badge">Oferta de lançamento</span><span class="previous-price">Antes 11,99 €</span><strong>7,99 €</strong><span class="per-analysis">por anúncio analisado</span><button type="button" disabled={!checkoutEnabled} data-checkout-button>Comprar análise por 7,99 €</button><small data-checkout-status>{checkoutEnabled ? "Pagamento único e seguro através da Stripe" : "Compra disponível na próxima fase"}</small></div>
+      <div class="pricing-copy"><p class="eyebrow">Primeiro veja se as suas capturas servem</p><h2>Envie primeiro. Pague só depois do teaser.</h2><p>O sistema inteligente com IA confirma gratuitamente se o material é suficiente e mostra uma primeira leitura do seu anúncio. Só depois decide se quer desbloquear a pesquisa das fotografias, as 12 verificações e o relatório completo.</p><ul><li>Pré-verificação sem custo</li><li>Uma única compra</li><li>Sem subscrição</li><li>Normalmente pronto em poucos minutos</li></ul></div>
+      <div class="price-box"><span class="offer-badge">Oferta de lançamento</span><span class="previous-price">Antes 11,99 €</span><strong>7,99 €</strong><span class="per-analysis">apenas depois de aprovar as capturas</span><a class="intake-action" href="/verificacao/enviar/">Enviar capturas antes de pagar</a><small data-checkout-status>{checkoutEnabled ? "Pré-verificação gratuita. Pagamento seguro através da Stripe." : "Percurso em validação final. A compra pública continua desligada."}</small></div>
     </div>
   </section>
 
@@ -257,8 +260,6 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
   const showExample = document.querySelector<HTMLButtonElement>("[data-show-example]");
   const processing = document.querySelector<HTMLElement>("[data-processing]");
   const results = document.querySelector<HTMLElement>("[data-results]");
-  const checkoutButton = document.querySelector<HTMLButtonElement>("[data-checkout-button]");
-  const checkoutStatus = document.querySelector<HTMLElement>("[data-checkout-status]");
 
   const refreshFiles = () => {
     if (!fileInput || !selectedFiles || !fileCount || !runButton || !uploadStatus) return;
@@ -276,27 +277,6 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
   fileInput?.addEventListener("change", refreshFiles);
   citySelect?.addEventListener("change", refreshFiles);
-
-  checkoutButton?.addEventListener("click", async () => {
-    if (checkoutButton.disabled) return;
-    checkoutButton.disabled = true;
-    checkoutButton.textContent = "A preparar o pagamento…";
-    if (checkoutStatus) checkoutStatus.textContent = "Ligação segura à Stripe.";
-    try {
-      const response = await fetch("/api/verificacao-anuncio/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ attemptId: crypto.randomUUID(), company: "" })
-      });
-      const result = await response.json();
-      if (!response.ok || typeof result.url !== "string") throw new Error("checkout_unavailable");
-      window.location.assign(result.url);
-    } catch {
-      checkoutButton.disabled = false;
-      checkoutButton.textContent = "Tentar novamente";
-      if (checkoutStatus) checkoutStatus.textContent = "Não foi possível abrir o pagamento. Tente novamente dentro de alguns minutos.";
-    }
-  });
 
   const revealResults = () => {
     if (!results) return;
@@ -581,5 +561,70 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
     max-width: 130px;
     color: #8a3e29;
     font-weight: 900;
+  }
+
+  .hero-ai {
+    display: inline-flex;
+    gap: 11px;
+    align-items: center;
+    margin: 0 0 22px;
+    padding: 9px 13px 9px 9px;
+    border: 1px solid rgba(217, 255, 114, .3);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, .08);
+    box-shadow: 0 12px 34px rgba(0, 20, 18, .14);
+  }
+
+  .hero-ai > span {
+    display: grid;
+    width: 39px;
+    height: 39px;
+    place-items: center;
+    border-radius: 11px;
+    background: #d9ff72;
+    color: #083a34;
+    font-size: .73rem;
+    font-weight: 950;
+  }
+
+  .hero-ai > div {
+    display: grid;
+    gap: 2px;
+  }
+
+  .hero-ai strong {
+    color: #fff;
+    font-size: .8rem;
+  }
+
+  .hero-ai small {
+    color: #bdd2cc;
+    font-size: .66rem;
+  }
+
+  .pay-later {
+    max-width: 610px;
+    margin: 13px 0 0;
+    color: #bcd1cb;
+    font-size: .75rem;
+    line-height: 1.5;
+  }
+
+  .intake-action {
+    display: flex;
+    min-height: 52px;
+    padding: 0 17px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #0a7d60;
+    color: #fff;
+    font-weight: 950;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .intake-action:hover {
+    background: #075d49;
   }
 </style>

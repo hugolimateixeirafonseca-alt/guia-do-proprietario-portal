@@ -34,7 +34,7 @@ function trustedSiteUrl(value) {
   return url.origin;
 }
 
-export function buildCheckoutParameters({ priceId, siteUrl, attemptId }) {
+export function buildCheckoutParameters({ priceId, siteUrl, attemptId, verificationId = "", customerEmail = "", cancelToken = "" }) {
   if (!validPriceId(priceId)) throw new StripeIntegrationError("invalid_price_id");
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(clean(attemptId, 80))) {
     throw new StripeIntegrationError("invalid_checkout_attempt");
@@ -49,12 +49,24 @@ export function buildCheckoutParameters({ priceId, siteUrl, attemptId }) {
   body.set("client_reference_id", attemptId);
   body.set("metadata[produto]", STRIPE_PRODUCT_KEY);
   body.set("payment_intent_data[metadata][produto]", STRIPE_PRODUCT_KEY);
+  if (verificationId) {
+    if (!/^[0-9a-f-]{36}$/iu.test(clean(verificationId, 80))) throw new StripeIntegrationError("invalid_verification_id");
+    body.set("metadata[verificacao_id]", verificationId);
+    body.set("payment_intent_data[metadata][verificacao_id]", verificationId);
+  }
+  const email = clean(customerEmail, 254).toLowerCase();
+  if (email) {
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/u.test(email)) throw new StripeIntegrationError("invalid_customer_email");
+    body.set("customer_email", email);
+  }
   body.set("success_url", `${origin}/verificacao/confirmacao/?session_id={CHECKOUT_SESSION_ID}`);
-  body.set("cancel_url", `${origin}/verificacao-anuncio/?pagamento=cancelado#comprar`);
+  body.set("cancel_url", cancelToken
+    ? `${origin}/verificacao/enviar/?t=${encodeURIComponent(clean(cancelToken, 160))}&pagamento=cancelado`
+    : `${origin}/verificacao-anuncio/?pagamento=cancelado#comprar`);
   return body;
 }
 
-export async function createStripeCheckoutSession({ apiKey, priceId, siteUrl, attemptId, fetchImpl = fetch }) {
+export async function createStripeCheckoutSession({ apiKey, priceId, siteUrl, attemptId, verificationId, customerEmail, cancelToken, fetchImpl = fetch }) {
   if (!validSecretKey(apiKey)) throw new StripeIntegrationError("invalid_stripe_key");
   const response = await fetchImpl(`${STRIPE_API_BASE}/checkout/sessions`, {
     method: "POST",
@@ -63,7 +75,7 @@ export async function createStripeCheckoutSession({ apiKey, priceId, siteUrl, at
       Accept: "application/json",
       "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: buildCheckoutParameters({ priceId, siteUrl, attemptId }).toString(),
+    body: buildCheckoutParameters({ priceId, siteUrl, attemptId, verificationId, customerEmail, cancelToken }).toString(),
     signal: AbortSignal.timeout(8000)
   });
   if (!response.ok) throw new StripeIntegrationError(`checkout_${response.status}`, response.status);

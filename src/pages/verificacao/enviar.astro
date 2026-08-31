@@ -1,10 +1,11 @@
 ---
 import Squeeze from "../../layouts/Squeeze.astro";
+const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === "true";
 ---
 
 <Squeeze
   titulo="Enviar anúncio para verificação | Guia do Proprietário"
-  descricao="Envie as capturas do anúncio comprado para iniciar a verificação."
+  descricao="Envie as capturas do anúncio. O sistema inteligente com IA confirma primeiro se estão prontas para análise."
   imagemOg="/og/verificacao-anuncio/index.png"
   robots="noindex,nofollow"
 >
@@ -13,42 +14,60 @@ import Squeeze from "../../layouts/Squeeze.astro";
       <span class="mark">GP</span>
       <span>Verificação de Anúncio</span>
     </a>
-    <span>Ligação privada</span>
+    <div class="top-signals"><span class="ai-pill">IA</span><span>Sistema inteligente</span><span class="private-label">Ligação privada</span></div>
   </header>
 
   <section class="page-shell">
     <div class="intro">
-      <p class="eyebrow">Envio seguro</p>
-      <h1>Envie o anúncio.<br />Nós tratamos da investigação.</h1>
-      <p>Escolha as capturas que mostram o texto, o preço, as condições, a conversa relevante e as fotografias do imóvel.</p>
+      <div class="ai-signature"><span>IA</span><div><strong>Sistema inteligente com IA</strong><small>Pré-verificação automática antes do pagamento</small></div></div>
+      <p class="eyebrow">Primeiro as capturas. Só depois o pagamento.</p>
+      <h1>Envie o anúncio.<br />A IA confirma se está tudo pronto.</h1>
+      <p>Não precisa de pagar às cegas. Envie as capturas, receba uma primeira leitura real e decida se quer desbloquear a investigação completa por 7,99 €.</p>
+      <div class="time-promise"><span>⚡</span><div><strong>Normalmente pronto em poucos minutos</strong><p>O sistema lê o texto, identifica fotografias e prepara automaticamente o próximo passo.</p></div></div>
+
+      <details class="screenshot-guide">
+        <summary><span>?</span><div><strong>Não sabe fazer uma captura de ecrã?</strong><small>Veja como fazer no seu computador ou telemóvel</small></div><b>Ver instruções</b></summary>
+        <div class="guide-grid">
+          <article><span>⊞</span><div><strong>Windows</strong><p>Prima <b>Windows + Shift + S</b>, selecione a zona do anúncio e guarde a imagem.</p></div></article>
+          <article><span>⌘</span><div><strong>Mac</strong><p>Prima <b>Shift + Command + 4</b> para selecionar a zona, ou <b>Shift + Command + 5</b> para mais opções.</p></div></article>
+          <article><span>●</span><div><strong>Android</strong><p>Prima ao mesmo tempo os botões de <b>ligar e baixar o volume</b>. A imagem fica na galeria.</p></div></article>
+          <article><span>◉</span><div><strong>iPhone</strong><p>Com Face ID, prima o <b>botão lateral e aumentar volume</b>. Com botão principal, prima-o com o botão lateral.</p></div></article>
+        </div>
+        <div class="capture-checklist"><strong>O que deve aparecer</strong><span>Texto e localização</span><span>Preço e caução</span><span>Condições e conversa relevante</span><span>Fotografias do imóvel</span></div>
+      </details>
 
       <div class="what-happens">
-        <article><span>01</span><div><strong>Separamos as fotografias</strong><p>Identificamos as imagens úteis dentro das capturas enviadas.</p></div></article>
-        <article><span>02</span><div><strong>Procuramos correspondências</strong><p>Pesquisamos as fotografias noutros sites públicos e validamos o contexto.</p></div></article>
-        <article><span>03</span><div><strong>Cruzamos os detalhes</strong><p>Comparamos preço, localização, tipologia, condições e contradições.</p></div></article>
+        <article><span>01</span><div><strong>Confirmação gratuita com IA</strong><p>Verificamos se as capturas contêm material suficiente para uma análise útil.</p></div></article>
+        <article><span>02</span><div><strong>Teaser baseado no seu anúncio</strong><p>Mostramos o que já foi identificado e o que a investigação completa pode revelar.</p></div></article>
+        <article><span>03</span><div><strong>Só paga para desbloquear o relatório</strong><p>Após o pagamento, cruzamos fotografias, preço, condições e 12 pontos de decisão.</p></div></article>
       </div>
     </div>
 
-    <div class="form-card">
+    <div class="form-card" data-checkout-enabled={checkoutEnabled ? "true" : "false"}>
       <div class="card-heading">
-        <div><small>O seu pedido</small><strong>Capturas de ecrã (screenshot)</strong></div>
-        <span data-state-badge>A confirmar</span>
+        <div><small>Pré-verificação gratuita</small><strong>Capturas de ecrã (screenshot)</strong></div>
+        <span data-state-badge>Pronto para começar</span>
       </div>
 
-      <div class="access-message" data-access-message aria-live="polite">
+      <div class="access-message" data-access-message hidden aria-live="polite">
         <span class="loader" aria-hidden="true"></span>
         <div><strong>A confirmar a ligação privada</strong><p>Aguarde um momento.</p></div>
       </div>
 
-      <form data-upload-form hidden>
+      <form data-upload-form data-flow="prepay">
         <label class="drop-zone">
           <input type="file" name="capturas" accept="image/jpeg,image/png,image/webp" multiple data-file-input />
           <span class="upload-icon" aria-hidden="true">↑</span>
           <strong>Escolher capturas de ecrã (screenshot)</strong>
-          <span>JPEG, PNG ou WebP. Adicione apenas as capturas necessárias.</span>
+          <span>JPEG, PNG ou WebP. Pode enviar entre 1 e 8 capturas.</span>
         </label>
 
         <div class="selected" data-selected-files><p>Ainda não escolheu ficheiros.</p></div>
+
+        <label class="field email-field" data-email-field>
+          <span>Email onde receberá a ligação privada</span>
+          <input type="email" name="email" maxlength="254" autocomplete="email" placeholder="nome@email.pt" />
+        </label>
 
         <label class="field">
           <span>Cidade indicada no anúncio</span>
@@ -60,23 +79,36 @@ import Squeeze from "../../layouts/Squeeze.astro";
           <span>Confirmo que estas capturas pertencem ao anúncio que pretendo verificar e autorizo o seu tratamento para produzir o relatório. As imagens são apagadas após o processamento, de acordo com a política de retenção.</span>
         </label>
 
-        <p class="form-status" data-form-status aria-live="polite">Selecione as capturas que contêm a informação mais importante.</p>
-        <button type="submit" data-submit disabled>Iniciar a verificação</button>
+        <p class="form-status" data-form-status aria-live="polite">Adicione as capturas. A pré-verificação não tem custo.</p>
+        <button type="submit" data-submit disabled>Fazer pré-verificação gratuita com IA</button>
+        <small class="payment-note" data-payment-note>Nenhum pagamento será pedido nesta etapa.</small>
       </form>
 
       <div class="processing" data-processing hidden>
-        <span class="processing-icon" aria-hidden="true">✓</span>
-        <p class="eyebrow">Recebido com segurança</p>
-        <h2>A verificação está em curso.</h2>
-        <p>Estamos a separar as fotografias, a procurar correspondências e a cruzar a informação do anúncio. Receberá o relatório no email usado no pagamento.</p>
-        <div class="progress"><span></span></div>
-        <small>Pode fechar esta página. O processamento continua.</small>
+        <span class="processing-icon" aria-hidden="true">IA</span>
+        <p class="eyebrow">Análise automática</p>
+        <h2 data-processing-title>O sistema inteligente está a ler as capturas.</h2>
+        <p data-processing-copy>Estamos a confirmar o texto, as condições e as fotografias. Normalmente demora apenas alguns minutos.</p>
+        <div class="progress"><span data-progress-bar></span></div>
+        <small data-processing-note>Pode manter esta página aberta. O estado será atualizado automaticamente.</small>
       </div>
+
+      <section class="teaser" data-teaser hidden>
+        <div class="teaser-ready"><span>IA</span><div><small>Pré-verificação concluída</small><strong data-teaser-headline>As capturas estão prontas para análise.</strong></div></div>
+        <div class="teaser-metrics"><article><strong data-fact-count>0</strong><span>dados concretos identificados</span></article><article><strong data-photo-count>0</strong><span>fotografias prontas para pesquisa</span></article></div>
+        <div class="teaser-signal"><small>Primeira leitura do seu anúncio</small><strong data-teaser-signal></strong><p data-teaser-fields></p></div>
+        <div class="locked-report"><div class="locked-head"><span>O relatório completo vai revelar</span><b>Bloqueado</b></div><div class="locked-grid"><article><i>01</i><strong>Pesquisa das fotografias</strong><p>Correspondências noutros sites e contextos que merecem explicação.</p></article><article><i>02</i><strong>Decisão antes de pagar</strong><p>O sinal principal, o que significa e o que deve fazer agora.</p></article><article><i>03</i><strong>12 verificações cruzadas</strong><p>Preço, condições, visita, contrato, pagamentos e consistência.</p></article><article><i>04</i><strong>Mensagem pronta a enviar</strong><p>Perguntas concretas para copiar e enviar ao anunciante.</p></article></div></div>
+        <div class="unlock"><div><span><s>11,99 €</s> 7,99 €</span><small>Pagamento único. Sem subscrição.</small></div><button type="button" data-checkout>Desbloquear investigação completa →</button></div>
+        <p class="checkout-status" data-checkout-status></p>
+      </section>
+
+      <section class="not-ready" data-not-ready hidden><span>!</span><h2>Estas capturas ainda não chegam.</h2><p>A primeira leitura não encontrou informação suficiente. Volte ao anúncio e inclua texto, preço, condições ou fotografias antes de pagar.</p><button type="button" data-start-again>Escolher outras capturas</button></section>
     </div>
   </section>
 </Squeeze>
 
 <script>
+if (!document.querySelector("[data-flow='prepay']")) {
   const form = document.querySelector<HTMLFormElement>("[data-upload-form]");
   const input = document.querySelector<HTMLInputElement>("[data-file-input]");
   const filesBox = document.querySelector<HTMLElement>("[data-selected-files]");
@@ -193,8 +225,17 @@ import Squeeze from "../../layouts/Squeeze.astro";
   });
 
   confirmAccess();
+}
 </script>
+<script is:inline type="module" src="/scripts/verificacao-intake.js"></script>
 
 <style>
   :global(*){box-sizing:border-box}:global([hidden]){display:none!important}:global(body){margin:0;background:#f5f4ed;color:#123b34;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px max(24px,calc((100vw - 1180px)/2));border-bottom:1px solid #dce5df;background:#fff}.topbar a{display:flex;gap:11px;align-items:center;color:#123b34;text-decoration:none;font-weight:900}.topbar>span{color:#6e817a;font-size:.75rem;font-weight:800;text-transform:uppercase}.mark{display:grid;width:38px;height:38px;place-items:center;border-radius:10px;background:#0a7058;color:#d9ff72;font-size:.72rem}.page-shell{display:grid;grid-template-columns:.9fr 1.1fr;gap:80px;width:min(1180px,calc(100% - 40px));margin:0 auto;padding:85px 0 110px}.intro{padding-top:18px}.eyebrow{margin:0 0 15px;color:#0a7b60;font-size:.72rem;font-weight:950;letter-spacing:.16em;text-transform:uppercase}.intro h1{margin:0;font-size:clamp(3rem,5.2vw,5.2rem);line-height:.94;letter-spacing:-.065em}.intro>p:not(.eyebrow){max-width:590px;margin:25px 0 0;color:#587069;font-size:1.05rem;line-height:1.7}.what-happens{display:grid;gap:0;margin-top:42px;border-top:1px solid #d5dfd9}.what-happens article{display:grid;grid-template-columns:45px 1fr;gap:15px;padding:22px 0;border-bottom:1px solid #d5dfd9}.what-happens article>span{color:#0b8a68;font-weight:950}.what-happens strong{display:block}.what-happens p{margin:5px 0 0;color:#687b75;font-size:.8rem;line-height:1.5}.form-card{align-self:start;padding:32px;border-radius:24px;background:#fff;box-shadow:0 28px 80px rgba(15,54,47,.13)}.card-heading{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:23px}.card-heading>div{display:grid;gap:4px}.card-heading small{color:#768780;font-size:.67rem;font-weight:900;text-transform:uppercase}.card-heading strong{font-size:1.45rem}.card-heading>span{padding:7px 10px;border-radius:99px;background:#e5f0eb;color:#22624f;font-size:.7rem;font-weight:900}.access-message{display:flex;gap:15px;align-items:center;padding:22px;border-radius:14px;background:#f0f7f3}.access-message strong,.access-message p{display:block;margin:0}.access-message p{margin-top:4px;color:#687b75;font-size:.79rem}.loader{width:29px;height:29px;border:3px solid #c6d9d0;border-top-color:#0a7b60;border-radius:50%;animation:spin .8s linear infinite}.error-icon,.processing-icon{display:grid;width:32px;height:32px;flex:0 0 auto;place-items:center;border-radius:50%;background:#ffe7df;color:#c34c2d;font-weight:950}@keyframes spin{to{transform:rotate(360deg)}}.drop-zone{display:grid;min-height:230px;padding:28px;place-items:center;border:2px dashed #7fae9f;border-radius:16px;background:#f0f9f5;text-align:center;cursor:pointer}.drop-zone:hover{background:#e7f7f0}.drop-zone input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.drop-zone strong{font-size:1rem}.drop-zone>span:last-child{margin-top:7px;color:#70837c;font-size:.76rem}.upload-icon{display:grid;width:50px;height:50px;margin-bottom:13px;place-items:center;border-radius:50%;background:#0a7b60;color:#d9ff72;font-size:1.4rem;font-weight:950}.selected{display:grid;gap:7px;margin:15px 0}.selected>p{margin:0;padding:10px;color:#7b8c86;font-size:.76rem;text-align:center}.selected>div{display:grid;grid-template-columns:27px 1fr auto;gap:9px;align-items:center;padding:9px 10px;border:1px solid #e0e8e3;border-radius:8px}.selected>div span{display:grid;width:25px;height:25px;place-items:center;border-radius:5px;background:#e6f2ec;color:#0a7058;font-size:.68rem;font-weight:950}.selected strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem}.selected small{color:#74867f;font-size:.68rem}.field{display:grid;gap:7px;margin-top:18px}.field span{font-size:.78rem;font-weight:900}.field input{width:100%;padding:13px 14px;border:1px solid #b9cbc3;border-radius:9px;color:#123b34;font:inherit}.privacy{display:grid;grid-template-columns:18px 1fr;gap:10px;margin-top:20px;color:#687b75;font-size:.72rem;line-height:1.5}.privacy input{width:17px;height:17px;margin:2px 0 0;accent-color:#0a7b60}.form-status{min-height:1.3em;margin:15px 0 10px;color:#647871;font-size:.76rem}.form-card button{width:100%;min-height:52px;border:0;border-radius:11px;background:#0a7b60;color:#fff;font-weight:950;cursor:pointer}.form-card button:disabled{background:#a9bbb4;cursor:not-allowed}.processing{padding:30px 10px 10px;text-align:center}.processing-icon{width:54px;height:54px;margin:0 auto 20px;background:#d9ff72;color:#0a7058;font-size:1.4rem}.processing h2{margin:0;font-size:2rem;letter-spacing:-.04em}.processing>p:not(.eyebrow){color:#63766f;line-height:1.65}.progress{height:9px;margin:25px 0 13px;overflow:hidden;border-radius:20px;background:#e3ebe7}.progress span{display:block;width:35%;height:100%;border-radius:inherit;background:#0a7b60}.processing small{color:#75867f}@media(max-width:900px){.page-shell{grid-template-columns:1fr;gap:45px;padding-top:55px}.intro{padding-top:0}.what-happens{max-width:680px}.form-card{max-width:680px;width:100%}}@media(max-width:580px){.topbar{padding:14px}.topbar>span{display:none}.page-shell{width:calc(100% - 28px);padding:42px 0 70px}.intro h1{font-size:clamp(2.7rem,15vw,4rem)}.form-card{padding:23px 16px;border-radius:18px}.card-heading{align-items:flex-start}.card-heading>span{white-space:nowrap}.drop-zone{min-height:205px;padding:22px 15px}}
+  .top-signals{display:flex;gap:8px;align-items:center;color:#527067;font-size:.72rem;font-weight:850}.ai-pill{display:grid;width:29px;height:29px;place-items:center;border-radius:9px;background:#d9ff72;color:#153d34;font-weight:950}.private-label{margin-left:10px;padding-left:17px;border-left:1px solid #dce5df;text-transform:uppercase}
+  .ai-signature{display:inline-flex;gap:12px;align-items:center;margin-bottom:24px;padding:10px 14px 10px 10px;border:1px solid #c9e0cf;border-radius:14px;background:#fff;box-shadow:0 10px 30px rgba(15,54,47,.07)}.ai-signature>span{display:grid;width:39px;height:39px;place-items:center;border-radius:11px;background:linear-gradient(145deg,#0a7058,#123b34);color:#d9ff72;font-size:.75rem;font-weight:950}.ai-signature div{display:grid;gap:2px}.ai-signature strong{font-size:.83rem}.ai-signature small{color:#688078;font-size:.68rem}
+  .time-promise{display:flex;gap:13px;align-items:center;margin-top:24px;padding:17px 18px;border-radius:15px;background:#123b34;color:#fff}.time-promise>span{display:grid;width:40px;height:40px;place-items:center;border-radius:12px;background:#d9ff72;color:#123b34}.time-promise strong{display:block}.time-promise p{margin:4px 0 0;color:#bcd0ca;font-size:.76rem;line-height:1.45}
+  .screenshot-guide{margin-top:18px;border:1px solid #cddbd4;border-radius:17px;background:#fff;box-shadow:0 12px 35px rgba(15,54,47,.06)}.screenshot-guide summary{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;padding:17px;cursor:pointer;list-style:none}.screenshot-guide summary::-webkit-details-marker{display:none}.screenshot-guide summary>span{display:grid;width:38px;height:38px;place-items:center;border-radius:11px;background:#e9f4ed;color:#0a7058;font-weight:950}.screenshot-guide summary div{display:grid;gap:2px}.screenshot-guide summary small{color:#71837d;font-size:.68rem}.screenshot-guide summary>b{color:#0a7058;font-size:.72rem}.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 17px 17px}.guide-grid article{display:grid;grid-template-columns:32px 1fr;gap:10px;padding:13px;border-radius:12px;background:#f3f7f4}.guide-grid article>span{display:grid;width:30px;height:30px;place-items:center;border-radius:8px;background:#fff;color:#0a7058;font-weight:950}.guide-grid strong{font-size:.77rem}.guide-grid p{margin:4px 0 0;color:#61756e;font-size:.68rem;line-height:1.45}.capture-checklist{display:flex;flex-wrap:wrap;gap:7px;padding:16px 17px;border-top:1px solid #e1e9e4}.capture-checklist strong{width:100%;font-size:.73rem}.capture-checklist span{padding:6px 8px;border-radius:7px;background:#edfae0;color:#335c43;font-size:.65rem;font-weight:800}.payment-note{display:block;margin-top:9px;color:#71837d;font-size:.68rem;text-align:center}
+  .processing-icon{border-radius:18px;background:linear-gradient(145deg,#123b34,#0a7058);color:#d9ff72;font-size:.8rem}.processing :global(.report-link){display:inline-flex;padding:14px 19px;border-radius:10px;background:#0a7b60;color:#fff;text-decoration:none;font-weight:900}
+  .teaser{display:grid;gap:16px}.teaser-ready{display:flex;gap:13px;align-items:center;padding:17px;border-radius:14px;background:linear-gradient(145deg,#103f36,#0a7058);color:#fff}.teaser-ready>span{display:grid;width:45px;height:45px;place-items:center;border-radius:13px;background:#d9ff72;color:#153d34;font-weight:950}.teaser-ready div{display:grid;gap:4px}.teaser-ready small{color:#bcd4cc;font-size:.65rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase}.teaser-ready strong{font-size:.95rem}.teaser-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}.teaser-metrics article{display:grid;min-height:108px;padding:17px;border:1px solid #dce7e1;border-radius:14px;background:#f7faf8}.teaser-metrics strong{font-size:2.2rem;line-height:1}.teaser-metrics span{align-self:end;color:#63786f;font-size:.71rem;font-weight:800}.teaser-signal{padding:19px;border-left:5px solid #f17b50;border-radius:12px;background:#fff2ed}.teaser-signal small{display:block;color:#a64a31;font-size:.65rem;font-weight:950;text-transform:uppercase}.teaser-signal strong{display:block;margin-top:7px;font-size:1.02rem;line-height:1.35}.teaser-signal p{margin:8px 0 0;color:#725c54;font-size:.71rem}.locked-report{overflow:hidden;border:1px solid #d5e0da;border-radius:17px;background:#f7f8f5}.locked-head{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid #dce4df;font-size:.73rem;font-weight:900}.locked-head b{padding:5px 8px;border-radius:7px;background:#173e36;color:#d9ff72;font-size:.62rem;text-transform:uppercase}.locked-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#dce4df}.locked-grid article{min-height:133px;padding:16px;background:rgba(255,255,255,.91)}.locked-grid i{display:grid;width:27px;height:27px;place-items:center;border-radius:8px;background:#edf2ef;color:#547068;font-size:.61rem;font-style:normal;font-weight:950}.locked-grid strong{display:block;margin-top:10px;font-size:.78rem}.locked-grid p{margin:5px 0 0;color:#71817c;font-size:.66rem;line-height:1.4}.unlock{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:17px;border-radius:15px;background:#d9ff72}.unlock>div{display:grid;gap:3px}.unlock>div span{font-size:1.3rem;font-weight:950;white-space:nowrap}.unlock s{color:#657655;font-size:.7rem;font-weight:700}.unlock small{font-size:.61rem}.unlock button{background:#123b34}.checkout-status{min-height:1em;margin:0;color:#687b75;font-size:.7rem;text-align:center}.not-ready{padding:35px 15px;text-align:center}.not-ready>span{display:grid;width:55px;height:55px;margin:0 auto 18px;place-items:center;border-radius:50%;background:#fff0ea;color:#c15334;font-weight:950}.not-ready h2{margin:0;font-size:1.8rem}.not-ready p{color:#647871;line-height:1.55}
+  @media(max-width:580px){.private-label,.top-signals>span:not(.ai-pill){display:none}.guide-grid,.locked-grid{grid-template-columns:1fr}.screenshot-guide summary{grid-template-columns:38px 1fr}.screenshot-guide summary>b{display:none}.unlock{grid-template-columns:1fr}}
 </style>
