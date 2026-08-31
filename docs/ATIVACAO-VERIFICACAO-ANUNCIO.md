@@ -21,9 +21,8 @@ Este documento separa o que já existe no repositório do que ainda depende de r
 - compra protegida pela variável pública `PUBLIC_VERIFICACAO_CHECKOUT_ENABLED`, desligada por defeito.
 - consumidor dedicado da Queue com repetição controlada e fila de falhas;
 - duas passagens de análise com `gpt-5.4-mini`, imagens apenas na extração e `store=false`;
-- recorte privado, redução para 1280 px, SHA-256, pHash e dHash antes da pesquisa visual;
-- pesquisa visual por Google Cloud Vision Web Detection, limitada a seis fotografias únicas;
-- validação do contexto em páginas públicas, com bloqueio de destinos locais e privados;
+- leitura visual das próprias capturas pela IA, com coerência, características visíveis e confirmações a pedir;
+- nenhuma pesquisa inversa ou consulta externa das fotografias;
 - relatório web privado, sem indexação, com apresentação visual premium e plano de ação para todos os pontos em aberto;
 - seis eventos pela API transacional Sender.net: receção, relatório, falha, lembretes de 24 horas e 7 dias e reembolso;
 - idempotência dos emails, reembolsos e consumo da fila;
@@ -130,7 +129,7 @@ Em 30 de agosto de 2026 foi criada uma chave restrita Stripe exclusiva para o Wo
 
 As variáveis secretas do projeto Pages não são copiadas automaticamente para um Worker separado. `VERIFICACAO_ACCESS_SECRET` já foi gerado e guardado com o mesmo valor no Pages e no Worker, sem ser mostrado ou persistido localmente. `STRIPE_SECRET_KEY` também já está configurado no Worker através de uma chave restrita dedicada.
 
-Em 30 de agosto de 2026, a Cloud Vision API foi ativada no projeto Google Cloud `guia-proprietario-seo`. Foi criada uma chave dedicada, restringida exclusivamente a essa API, e transferida diretamente para o segredo `GOOGLE_CLOUD_VISION_API_KEY` do Worker. O valor não foi mostrado nem guardado no repositório.
+Em 31 de agosto de 2026, a pesquisa inversa foi retirada do produto. A chave anteriormente criada para Cloud Vision deixa de ser utilizada pelo Worker. O respetivo valor nunca foi mostrado nem guardado no repositório.
 
 `OPENAI_API_KEY` e `SENDER_API_TOKEN` já estão configuradas no Worker. O token Sender dedicado foi criado e transferido diretamente para o segredo Cloudflare através de um canal transitório em memória. Não foi impresso nem guardado num ficheiro. Não são necessários IDs de templates Sender. O produto envia as seis mensagens pela API transacional sem template, uma capacidade suportada oficialmente pelo fornecedor.
 
@@ -149,7 +148,7 @@ O teste remoto completo depende da criação dos recursos, da configuração dos
 ## Ainda não ativado
 
 - bindings do Pages e publicação desta versão do portal;
-- teste integrado remoto com Stripe, Sender, OpenAI e Google Vision;
+- teste integrado remoto com Stripe, Sender e OpenAI;
 - checkout público.
 
 Até estas dependências estarem concluídas e configuradas, a landing mantém a compra desativada.

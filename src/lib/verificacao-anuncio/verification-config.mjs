@@ -26,10 +26,10 @@ export const VERIFICATION_CONFIG = Object.freeze([
   {
     id: 4,
     key: "fotografias",
-    name: "Fotografias coerentes e correspondências externas relevantes",
-    minimumEvidence: "Coerência interna, pesquisa externa concluída e contexto das correspondências validado.",
-    action: "Peça esclarecimento sobre as diferenças encontradas nas fotografias ou no contexto das páginas correspondentes.",
-    question: "Pode esclarecer a origem das fotografias e a localização indicada nas páginas onde também aparecem?"
+    name: "Coerência visual e detalhes do imóvel a confirmar",
+    minimumEvidence: "Leituras visuais sustentadas nas capturas, com elementos coerentes ou um detalhe concreto a confirmar.",
+    action: "Peça uma visita ou videochamada em direto que mostre os detalhes visuais destacados no relatório.",
+    question: "Podemos fazer uma videochamada em direto para confirmar as divisões e os detalhes visuais destacados?"
   },
   {
     id: 5,

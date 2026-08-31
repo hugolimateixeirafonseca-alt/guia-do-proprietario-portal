@@ -4,8 +4,7 @@ import {
   FORBIDDEN_OUTPUT_PATTERNS,
   MAX_OBSERVATION_LENGTH,
   PII_PATTERNS,
-  REVERSE_IMAGE_STATES,
-  REVERSE_MATCH_TYPES,
+  VISUAL_READING_CATEGORIES,
   VERIFICATION_READINGS,
   VERIFICATION_STATES
 } from "./constants.mjs";
@@ -18,7 +17,6 @@ export class VerificationValidationError extends Error {
     this.issues = issues;
   }
 }
-
 const isPlainObject = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
 export function normalizeExtractionGeometry(output) {
@@ -42,11 +40,6 @@ export function normalizeExtractionGeometry(output) {
     })
   };
 }
-
-const normalizeForComparison = (value) => String(value ?? "")
-  .normalize("NFD")
-  .replace(/\p{Diacritic}/gu, "")
-  .toLowerCase();
 
 export function findDisallowedText(text) {
   const value = String(text ?? "");
@@ -124,10 +117,42 @@ export function validateExtraction(output, imageCount = 8) {
       issues.push("região de fotografia ultrapassa a imagem");
     }
   }
+  if (!Array.isArray(output.leituras_visuais) || output.leituras_visuais.length > 10) {
+    issues.push("leituras visuais inválidas");
+  }
+  const visualIds = new Set();
+  for (const reading of output.leituras_visuais ?? []) {
+    if (!isPlainObject(reading)) {
+      issues.push("leitura visual inválida");
+      continue;
+    }
+    if (!/^visual_[a-z0-9_]+$/u.test(reading.id ?? "")) issues.push("id de leitura visual inválido");
+    if (visualIds.has(reading.id)) issues.push(`leitura visual repetida: ${reading.id}`);
+    visualIds.add(reading.id);
+    if (!VISUAL_READING_CATEGORIES.includes(reading.categoria)) issues.push(`categoria visual inválida: ${reading.categoria}`);
+    for (const [field, value] of [["título", reading.titulo], ["observação", reading.observacao]]) {
+      if (typeof value !== "string" || !value.trim() || value.length > 220) issues.push(`${field} visual inválido em ${reading.id}`);
+      else {
+        const disallowed = findDisallowedText(value);
+        if (disallowed) issues.push(`${field} visual em ${reading.id} contém ${disallowed}`);
+      }
+    }
+    if (reading.confirmacao_recomendada !== null) {
+      if (typeof reading.confirmacao_recomendada !== "string" || !reading.confirmacao_recomendada.trim() || reading.confirmacao_recomendada.length > 260) {
+        issues.push(`confirmação visual inválida em ${reading.id}`);
+      } else {
+        const disallowed = findDisallowedText(reading.confirmacao_recomendada);
+        if (disallowed) issues.push(`confirmação visual em ${reading.id} contém ${disallowed}`);
+      }
+    }
+    if (!Array.isArray(reading.fontes_imagem) || reading.fontes_imagem.length === 0
+      || reading.fontes_imagem.some((source) => !Number.isInteger(source) || source < 1 || source > imageCount)) {
+      issues.push(`fonte inválida na leitura visual ${reading.id}`);
+    }
+  }
   if (issues.length) throw new VerificationValidationError(issues);
   return output;
 }
-
 export function validateClassification(output, availableEvidenceIds = []) {
   const issues = [];
   if (!isPlainObject(output)) throw new VerificationValidationError(["classificação não é um objeto"]);
@@ -181,36 +206,4 @@ export function validateClassification(output, availableEvidenceIds = []) {
   }
   if (issues.length) throw new VerificationValidationError(issues);
   return output;
-}
-
-export function validateReverseEvidence(evidence) {
-  const issues = [];
-  if (!isPlainObject(evidence)) throw new VerificationValidationError(["evidência visual inválida"]);
-  if (!/^imagem_[a-z0-9_]+$/u.test(evidence.id ?? "")) issues.push("id de evidência visual inválido");
-  if (!REVERSE_IMAGE_STATES.includes(evidence.state)) issues.push("estado visual inválido");
-  if (!REVERSE_MATCH_TYPES.includes(evidence.match_type)) issues.push("tipo de correspondência inválido");
-  if (evidence.source_url !== null) {
-    try {
-      const url = new URL(evidence.source_url);
-      if (url.protocol !== "https:") issues.push("origem externa não usa HTTPS");
-      if (url.hostname !== evidence.source_domain) issues.push("domínio externo não corresponde à URL");
-    } catch {
-      issues.push("URL externa inválida");
-    }
-  }
-  if (evidence.source_location) {
-    if (!evidence.context_verified || !evidence.context_excerpt) {
-      issues.push("localização externa sem contexto validado");
-    } else if (!normalizeForComparison(evidence.context_excerpt).includes(normalizeForComparison(evidence.source_location))) {
-      issues.push("localização externa não aparece no excerto validado");
-    }
-  }
-  if (evidence.source_date && (!evidence.context_verified || !evidence.context_excerpt)) {
-    issues.push("data externa sem contexto validado");
-  }
-  if (evidence.state === "correspondencia_contexto_diferente" && !evidence.context_verified) {
-    issues.push("contexto diferente sem validação secundária");
-  }
-  if (issues.length) throw new VerificationValidationError(issues);
-  return evidence;
 }

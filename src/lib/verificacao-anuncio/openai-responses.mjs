@@ -90,12 +90,12 @@ export function createOpenAIResponsesAdapters({
       }
     },
     classifier: {
-      async classify({ extraction, reverseResults, priceReference, attempt }) {
+      async classify({ extraction, priceReference, attempt }) {
         return request({
           model: classificationModel,
           input: [
             { role: "developer", content: CLASSIFICATION_PROMPT },
-            { role: "user", content: JSON.stringify({ extraction, reverseResults, priceReference, attempt }) }
+            { role: "user", content: JSON.stringify({ extraction, priceReference, attempt }) }
           ],
           text: { format: { type: "json_schema", name: "verificacao_anuncio_classificacao", strict: true, schema: CLASSIFICATION_SCHEMA } }
         });

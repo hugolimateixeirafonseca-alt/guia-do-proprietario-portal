@@ -1,5 +1,4 @@
-import { MAX_REVERSE_IMAGES, MAX_UPLOAD_FILES, MIN_UPLOAD_FILES } from "./constants.mjs";
-import { deduplicatePhotos } from "./perceptual-hash.mjs";
+import { MAX_UPLOAD_FILES, MIN_UPLOAD_FILES } from "./constants.mjs";
 import { buildReportModel } from "./report.mjs";
 import { normalizeExtractionGeometry, validateClassification, validateExtraction, VerificationValidationError } from "./validate.mjs";
 
@@ -30,9 +29,6 @@ async function runValidatedWithRetry(stage, operation, validate) {
 export function createAnalysisEngine(dependencies) {
   const {
     extractor,
-    photoProcessor,
-    reverseImageProvider,
-    candidateValidator,
     priceReferenceProvider,
     classifier
   } = dependencies;
@@ -51,81 +47,22 @@ export function createAnalysisEngine(dependencies) {
           (result) => validateExtraction(normalizeExtractionGeometry(result), images.length)
         );
 
-      const prepared = await photoProcessor.prepare({ images, regions: extraction.regioes_fotografias });
-      const { unique, duplicates } = deduplicatePhotos(prepared);
-      const searchable = unique.slice(0, MAX_REVERSE_IMAGES);
-      const reverseResults = [];
-      let technicalFailures = 0;
-      let lastTechnicalFailure;
-
-      for (const photo of searchable) {
-        try {
-          const candidates = await reverseImageProvider.search(photo);
-          if (!candidates.length) {
-            reverseResults.push({
-              id: `imagem_${photo.id}_sem_resultado`,
-              photo_id: photo.id,
-              provider: reverseImageProvider.name,
-              state: "sem_correspondencia_encontrada",
-              match_type: "similar",
-              source_url: null,
-              source_domain: null,
-              matched_image_url: null,
-              context_verified: false,
-              context_excerpt: null,
-              source_location: null,
-              source_date: null
-            });
-            continue;
-          }
-          for (const candidate of candidates) {
-            reverseResults.push(await candidateValidator.validate({ photo, candidate, city, extraction }));
-          }
-        } catch (error) {
-          technicalFailures += 1;
-          lastTechnicalFailure = error;
-          reverseResults.push({
-            id: `imagem_${photo.id}_indisponivel`,
-            photo_id: photo.id,
-            provider: reverseImageProvider.name,
-            state: "pesquisa_indisponivel",
-            match_type: "similar",
-            source_url: null,
-            source_domain: null,
-            matched_image_url: null,
-            context_verified: false,
-            context_excerpt: null,
-            source_location: null,
-            source_date: null
-          });
-        }
-      }
-
-      if (searchable.length > 0 && technicalFailures === searchable.length) {
-        throw new ClosedAnalysisError(
-          "pesquisa_visual",
-          lastTechnicalFailure instanceof Error ? lastTechnicalFailure : new Error("Nenhuma pesquisa visual foi concluída.")
-        );
-      }
-
       const priceReference = await priceReferenceProvider.lookup({ city, facts: extraction.factos });
       const evidence = [
         ...extraction.factos,
-        ...reverseResults,
+        ...(extraction.leituras_visuais ?? []),
         ...(priceReference ? [priceReference] : [])
       ];
       const evidenceIds = evidence.map((item) => item.id);
 
       const classification = await runValidatedWithRetry(
         "classificacao",
-        ({ attempt }) => classifier.classify({ extraction, reverseResults, priceReference, attempt }),
+        ({ attempt }) => classifier.classify({ extraction, priceReference, attempt }),
         (result) => validateClassification(result, evidenceIds)
       );
 
       return {
         extraction,
-        photos: { unique: searchable, duplicates },
-        reverseResults,
         priceReference,
         report: buildReportModel({ classification, evidence, priceReference })
       };

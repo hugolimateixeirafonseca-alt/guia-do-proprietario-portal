@@ -9,14 +9,20 @@ export const fact = (overrides = {}) => ({
   citacao: "Porto",
   ...overrides
 });
-
 export const extraction = (overrides = {}) => ({
   versao: ENGINE_VERSION,
   factos: [fact()],
   regioes_fotografias: [{ fonte_imagem: 1, x: 0, y: 0, largura: 500, altura: 500 }],
+  leituras_visuais: [{
+    id: "visual_coerencia_1",
+    categoria: "coerencia",
+    titulo: "Acabamentos coerentes",
+    observacao: "O pavimento e os rodapés são semelhantes nas capturas analisadas.",
+    confirmacao_recomendada: "Peça uma videochamada contínua entre as divisões.",
+    fontes_imagem: [1]
+  }],
   ...overrides
 });
-
 export const classification = (overrides = {}) => ({
   versao: ENGINE_VERSION,
   verificacoes: Array.from({ length: 12 }, (_, index) => ({
@@ -26,13 +32,5 @@ export const classification = (overrides = {}) => ({
     observacao: index === 10 ? "As capturas não permitem confirmar a autorização documental." : "Falta informação explícita.",
     evidencia_ids: []
   })),
-  ...overrides
-});
-
-export const photo = (id, overrides = {}) => ({
-  id,
-  sha256: `sha-${id}`,
-  phash: "0000000000000000",
-  dhash: "0000000000000000",
   ...overrides
 });

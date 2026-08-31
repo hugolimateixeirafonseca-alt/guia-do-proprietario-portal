@@ -1,5 +1,7 @@
 # BRIEFING — Verificação de Anúncio de Arrendamento
 
+> **Documento parcialmente substituído.** A partir de 31 de agosto de 2026, todas as instruções relativas a pesquisa inversa, pesquisa visual na Internet, Google Cloud Vision, TinEye, correspondências externas e originalidade das fotografias deixam de se aplicar. A decisão vigente está em `BRIEFING-VERIFICACAO-ANUNCIO-V1.4.md`.
+
 ## Produto pago automatizado no guiadoproprietario.pt
 
 **Versão 1.3 — agosto 2026**  

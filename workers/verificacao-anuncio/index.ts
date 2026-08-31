@@ -1,14 +1,11 @@
 import priceDataset from "../../src/data/verificacao-anuncio/precos-referencia.json";
-import { createCandidateValidator } from "../../src/lib/verificacao-anuncio/candidate-validator.mjs";
 import { createAnalysisEngine } from "../../src/lib/verificacao-anuncio/engine.mjs";
 import { createOpenAIResponsesAdapters } from "../../src/lib/verificacao-anuncio/openai-responses.mjs";
 import { createPriceReferenceProvider } from "../../src/lib/verificacao-anuncio/price-reference.mjs";
 import { buildPrecheckTeaser } from "../../src/lib/verificacao-anuncio/precheck.mjs";
-import { createGoogleVisionProvider } from "../../src/lib/verificacao-anuncio/reverse-provider.mjs";
 import { buildVerificationEmail } from "../../src/lib/verificacao-anuncio/notification-email.mjs";
 import { createSenderTransactionalClient } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
 import { createStripeRefund } from "../../src/lib/verificacao-anuncio/stripe-refund.mjs";
-import { createWorkerPhotoProcessor } from "../../src/lib/verificacao-anuncio/worker-images.mjs";
 import { normalizeExtractionGeometry, validateExtraction } from "../../src/lib/verificacao-anuncio/validate.mjs";
 import { decryptPrivateValue, type D1Database, type R2Bucket } from "../../functions/lib/verificacao-anuncio";
 
@@ -34,7 +31,6 @@ interface WorkerEnv {
   OPENAI_API_KEY: string;
   VERIFICACAO_EXTRACTION_MODEL?: string;
   VERIFICACAO_CLASSIFICATION_MODEL?: string;
-  GOOGLE_CLOUD_VISION_API_KEY: string;
   STRIPE_SECRET_KEY: string;
   SITE_URL: string;
   SENDER_API_TOKEN: string;
@@ -235,9 +231,6 @@ async function analyzeJob(env: WorkerEnv, job: JobRow, attempts: number) {
     });
     const engine = createAnalysisEngine({
       extractor: ai.extractor,
-      photoProcessor: createWorkerPhotoProcessor(),
-      reverseImageProvider: createGoogleVisionProvider({ apiKey: env.GOOGLE_CLOUD_VISION_API_KEY }),
-      candidateValidator: createCandidateValidator(),
       priceReferenceProvider: createPriceReferenceProvider(priceDataset),
       classifier: ai.classifier
     });
@@ -245,14 +238,14 @@ async function analyzeJob(env: WorkerEnv, job: JobRow, attempts: number) {
     try { precheckExtraction = JSON.parse(job.precheckJson || "null")?.extraction || null; } catch { /* faz nova extração */ }
     const result = await engine.analyze({ images, city: job.cidade, extraction: precheckExtraction });
     const deliveredAt = nowIso();
-    const costRecord = { openai: usage, reverseSearches: result.photos.unique.length };
+    const costRecord = { openai: usage };
     const update = await env.VERIFICACAO_ANUNCIO_DB.prepare(
       `UPDATE verificacao_anuncio_jobs SET estado = 'entregue', entregue_em = ?, resultado_json = ?,
-        pesquisa_visual_json = ?, versao_motor = ?, versao_pesquisa_visual = ?, relatorio_pdf_key = NULL,
+        pesquisa_visual_json = NULL, versao_motor = ?, versao_pesquisa_visual = NULL, relatorio_pdf_key = NULL,
         custo_json = ?, processamento_bloqueado_em = NULL
        WHERE id = ? AND estado = 'em_analise'`
-    ).bind(deliveredAt, JSON.stringify(result.report), JSON.stringify(result.reverseResults), result.report.version,
-      "google_cloud_vision_web_detection_v1", JSON.stringify(costRecord), job.id).run();
+    ).bind(deliveredAt, JSON.stringify(result.report), result.report.version,
+      JSON.stringify(costRecord), job.id).run();
     if ((update.meta?.changes || 0) !== 1) throw new Error("delivery_state_conflict");
     analysisDelivered = true;
     await event(env.VERIFICACAO_ANUNCIO_DB, job.id, "analise_concluida", "success", costRecord);

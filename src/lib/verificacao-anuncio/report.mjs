@@ -38,7 +38,15 @@ export function buildReportModel({ classification, evidence = [], priceReference
       verificationId: check.id,
       text: check.action
     })),
-    reverseImageEvidence: evidence.filter((item) => item.id.startsWith("imagem_")),
+    visualReadings: evidence
+      .filter((item) => item.id?.startsWith("visual_"))
+      .map((item) => ({
+        category: item.categoria,
+        title: item.titulo,
+        observation: item.observacao,
+        recommendedConfirmation: item.confirmacao_recomendada,
+        sourceImages: item.fontes_imagem
+      })),
     priceReference
   };
 }

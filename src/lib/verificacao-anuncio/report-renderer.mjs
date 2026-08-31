@@ -59,7 +59,7 @@ const buildContactMessage = (questions) => {
   ].join("\n");
 };
 
-const verdictFor = ({ attention, talk, differentContext }) => {
+const verdictFor = ({ attention, talk }) => {
   const payment = attention.find((check) => Number(check.id) === 6);
   const visit = attention.find((check) => Number(check.id) === 7);
   if (payment && /antes da visita|antes do contrato|pagamento antecipado|pagar antes/iu.test(customerObservationFor(payment))) {
@@ -76,14 +76,6 @@ const verdictFor = ({ attention, talk, differentContext }) => {
       label: "Pare antes de pagar",
       title: "A visita presencial não está a ser aceite.",
       text: "Não transfira qualquer valor enquanto não conseguir visitar o imóvel ou validar a situação por uma videochamada em direto."
-    };
-  }
-  if (differentContext.length) {
-    return {
-      tone: "danger",
-      label: "Não transfira dinheiro",
-      title: "Encontrámos uma fotografia associada a outro contexto público.",
-      text: "Peça uma explicação verificável e confirme o imóvel presencialmente antes de entregar qualquer valor."
     };
   }
   if (attention.length) {
@@ -110,15 +102,14 @@ const verdictFor = ({ attention, talk, differentContext }) => {
   };
 };
 
-const priorityOrder = [6, 7, 8, 10, 11, 5, 12, 9, 4, 2, 3, 1];
+const priorityOrder = [6, 7, 4, 8, 10, 11, 5, 12, 9, 2, 3, 1];
 
-const photoResultMeta = (state) => ({
-  correspondencia_mesmo_contexto: { label: "Encontrada no mesmo anúncio ou contexto", tone: "found", icon: "✓" },
-  correspondencia_contexto_diferente: { label: "Encontrada noutro anúncio ou contexto", tone: "attention", icon: "!" },
-  correspondencia_inconclusiva: { label: "Não foi possível confirmar esta fotografia", tone: "talk", icon: "?" },
-  sem_correspondencia_encontrada: { label: "Não encontrada noutros anúncios públicos", tone: "found", icon: "✓" },
-  pesquisa_indisponivel: { label: "Não foi possível pesquisar esta fotografia", tone: "talk", icon: "?" }
-}[state] || { label: "Pesquisa concluída", tone: "talk", icon: "·" });
+const visualMeta = (category) => ({
+  coerencia: { label: "Coerência observada", tone: "found", icon: "✓" },
+  caracteristica_visivel: { label: "Elemento visível", tone: "found", icon: "✓" },
+  ponto_a_confirmar: { label: "Confirmar em direto", tone: "attention", icon: "!" },
+  limitacao_da_captura: { label: "Pedir outra perspetiva", tone: "talk", icon: "→" }
+}[category] || { label: "Leitura visual", tone: "talk", icon: "→" });
 
 const factLabels = {
   cidade: "Cidade", zona: "Zona", morada: "Localização", preco_mensal: "Preço mensal",
@@ -141,14 +132,12 @@ export function renderReportHtml({ report, createdAt, expiresAt, capturePreviews
   const found = readings.filter((check) => check.reading === "informacao_encontrada");
   const talk = readings.filter((check) => check.reading === "confirmar_na_conversa");
   const attention = readings.filter((check) => check.reading === "sinal_atencao");
-  const reverseEvidence = report?.reverseImageEvidence ?? [];
-  const photoCount = new Set(reverseEvidence.map((item) => item.photo_id || item.image_id || item.id).filter(Boolean)).size || reverseEvidence.length;
-  const noMatches = reverseEvidence.filter((item) => item.state === "sem_correspondencia_encontrada");
-  const sameContext = reverseEvidence.filter((item) => item.state === "correspondencia_mesmo_contexto");
-  const differentContext = reverseEvidence.filter((item) => item.state === "correspondencia_contexto_diferente");
-  const inconclusive = reverseEvidence.filter((item) => item.state === "correspondencia_inconclusiva");
-  const unavailable = reverseEvidence.filter((item) => item.state === "pesquisa_indisponivel");
-  const signalCount = attention.length + (differentContext.length && !attention.some((check) => Number(check.id) === 4) ? differentContext.length : 0);
+  const visualReadings = report?.visualReadings ?? [];
+  const visualSourceCount = new Set(visualReadings.flatMap((item) => item.sourceImages ?? [])).size || capturePreviews.length;
+  const visualStrengths = visualReadings.filter((item) => ["coerencia", "caracteristica_visivel"].includes(item.category));
+  const visualConfirmations = visualReadings.filter((item) => item.category === "ponto_a_confirmar");
+  const visualLimitations = visualReadings.filter((item) => item.category === "limitacao_da_captura");
+  const signalCount = attention.length;
   const observedFacts = (report?.observedFacts ?? []).filter((item) => factLabels[item.field]).slice(0, 8);
 
   const questions = readings
@@ -156,81 +145,49 @@ export function renderReportHtml({ report, createdAt, expiresAt, capturePreviews
     .sort((a, b) => priorityOrder.indexOf(Number(a.id)) - priorityOrder.indexOf(Number(b.id)))
     .slice(0, 5);
   const contactMessage = buildContactMessage(questions);
-  const verdict = verdictFor({ attention, talk, differentContext });
+  const verdict = verdictFor({ attention, talk });
   const riskChecks = attention.slice().sort((a, b) => priorityOrder.indexOf(Number(a.id)) - priorityOrder.indexOf(Number(b.id))).slice(0, 4);
   const contractIds = new Set([5, 6, 8, 9, 10, 11, 12]);
   const contractChecks = readings.filter((check) => contractIds.has(Number(check.id)) && check.reading !== "informacao_encontrada").slice(0, 5);
-  const unresolvedPhotos = unavailable.length + inconclusive.length;
-  const photoFeature = differentContext.length
+  const visualFeature = visualConfirmations.length
     ? {
         tone: "attention",
-        label: "Sinal de atenção nas fotografias",
-        score: `${differentContext.length}/${photoCount || differentContext.length}`,
-        scoreLabel: "com sinal",
-        title: differentContext.length === 1
-          ? `Encontrámos 1 fotografia associada a outro anúncio ou contexto público.`
-          : `Encontrámos ${differentContext.length} fotografias associadas a outros anúncios ou contextos públicos.`,
-        text: "Este resultado merece uma explicação verificável do anunciante antes de avançar. Confirme o imóvel presencialmente e não transfira dinheiro apenas com base nas fotografias.",
-        meaningTitle: "O que fazer agora",
-        meaning: "Peça a origem das fotografias e faça uma videochamada em direto ou uma visita. Se a explicação não for clara, não pague."
+        label: "Detalhes visuais para confirmar",
+        score: String(visualConfirmations.length),
+        scoreLabel: visualConfirmations.length === 1 ? "ponto concreto" : "pontos concretos",
+        title: visualConfirmations.length === 1
+          ? "Há um detalhe nas fotografias que vale a pena confirmar em direto."
+          : `Há ${visualConfirmations.length} detalhes nas fotografias que vale a pena confirmar em direto.`,
+        text: "A IA assinalou apenas elementos visíveis nas capturas. Isto não é um diagnóstico do imóvel e não substitui uma visita.",
+        meaningTitle: "O que recebe aqui",
+        meaning: "Uma lista concreta do que deve pedir ao anunciante para mostrar durante a visita ou videochamada."
       }
-    : noMatches.length
-      ? {
-          tone: "positive",
-          label: unresolvedPhotos ? "Boa notícia nas pesquisas concluídas" : "Boa notícia na pesquisa visual",
-          score: `${noMatches.length}/${photoCount || noMatches.length}`,
-          scoreLabel: "sem cópia pública",
-          title: noMatches.length === 1
-            ? "A fotografia pesquisada não aparece noutros anúncios públicos."
-            : `${noMatches.length} das ${photoCount || noMatches.length} fotografias não aparecem noutros anúncios públicos.`,
-          text: noMatches.length === 1
-            ? "Não detetámos reutilização pública desta fotografia nas fontes consultadas."
-            : `Nas ${noMatches.length} pesquisas concluídas, não detetámos reutilização pública das fotografias nas fontes consultadas.`,
-          meaningTitle: "O que isto significa",
-          meaning: "É um sinal positivo porque reduz um padrão comum em anúncios fraudulentos: fotografias copiadas de outros imóveis. Não prova, por si só, que o anúncio ou o anunciante sejam autênticos."
-        }
-      : sameContext.length
-        ? {
-            tone: "neutral",
-            label: "Fotografias localizadas",
-            score: `${sameContext.length}/${photoCount || sameContext.length}`,
-            scoreLabel: "no mesmo contexto",
-            title: sameContext.length === 1
-              ? "Encontrámos a fotografia associada ao mesmo anúncio ou contexto."
-              : `Encontrámos ${sameContext.length} fotografias associadas ao mesmo anúncio ou contexto.`,
-            text: "As correspondências encontradas são coerentes com o contexto analisado.",
-            meaningTitle: "O que isto significa",
-            meaning: "Não detetámos nestas correspondências uma utilização pública das fotografias noutro imóvel ou localização."
-          }
-        : {
-            tone: "neutral",
-            label: "Pesquisa visual limitada",
-            score: photoCount ? `0/${photoCount}` : "0",
-            scoreLabel: "resultados fiáveis",
-            title: "Não foi possível obter uma resposta fiável para as fotografias.",
-            text: "Este resultado não é positivo nem negativo. Significa apenas que a pesquisa visual não conseguiu concluir a comparação.",
-            meaningTitle: "Como interpretar",
-            meaning: "Não use este ponto para decidir. Dê prioridade à visita, à identidade de quem arrenda e à minuta do contrato."
-          };
-  const photoProgressCount = differentContext.length || noMatches.length || sameContext.length;
-  const photoProgress = photoCount ? Math.min(100, Math.round((photoProgressCount / photoCount) * 100)) : 0;
-
-  const photoResultDots = [
-    ...noMatches.map(() => `<i class="photo-dot found" title="Não encontrada noutros anúncios públicos">✓</i>`),
-    ...sameContext.map(() => `<i class="photo-dot found" title="Encontrada no mesmo contexto">✓</i>`),
-    ...differentContext.map(() => `<i class="photo-dot attention" title="Encontrada noutro contexto">!</i>`),
-    ...Array.from({ length: unresolvedPhotos }, () => `<i class="photo-dot unresolved" title="Não foi possível concluir">?</i>`)
-  ].join("");
-  const photoResultLegend = [
-    noMatches.length ? `<span class="photo-legend found"><i></i><b>${noMatches.length}</b> ${noMatches.length === 1 ? "sem cópia pública encontrada" : "sem cópias públicas encontradas"}</span>` : "",
-    differentContext.length ? `<span class="photo-legend attention"><i></i><b>${differentContext.length}</b> ${differentContext.length === 1 ? "encontrada noutro contexto" : "encontradas noutros contextos"}</span>` : "",
-    unresolvedPhotos ? `<span class="photo-legend unresolved"><i></i><b>${unresolvedPhotos}</b> ${unresolvedPhotos === 1 ? "fotografia sem resultado fiável" : "fotografias sem resultado fiável"}</span>` : ""
+    : {
+        tone: "neutral",
+        label: "Leitura visual concluída",
+        score: String(visualReadings.length),
+        scoreLabel: visualReadings.length === 1 ? "leitura útil" : "leituras úteis",
+        title: visualReadings.length
+          ? "As fotografias foram transformadas em observações práticas."
+          : "As capturas não permitem retirar observações visuais específicas.",
+        text: visualReadings.length
+          ? "Veja o que é coerente, o que é visível e as perspetivas adicionais que deve pedir antes de avançar."
+          : "Peça uma visita ou videochamada em direto que mostre o imóvel sem cortes.",
+        meaningTitle: "Como usar esta leitura",
+        meaning: "Confirme em direto os elementos relevantes. Uma fotografia, por si só, não comprova o estado atual do imóvel."
+      };
+  const visualProgress = visualReadings.length ? 100 : 0;
+  const visualResultDots = visualReadings.map((item) => {
+    const meta = visualMeta(item.category);
+    return `<i class="photo-dot ${meta.tone === "attention" ? "attention" : "found"}" title="${escapeHtml(meta.label)}">${meta.icon}</i>`;
+  }).join("");
+  const visualResultLegend = [
+    visualStrengths.length ? `<span class="photo-legend found"><i></i><b>${visualStrengths.length}</b> ${visualStrengths.length === 1 ? "elemento observado" : "elementos observados"}</span>` : "",
+    visualConfirmations.length ? `<span class="photo-legend attention"><i></i><b>${visualConfirmations.length}</b> ${visualConfirmations.length === 1 ? "ponto a confirmar" : "pontos a confirmar"}</span>` : "",
+    visualLimitations.length ? `<span class="photo-legend unresolved"><i></i><b>${visualLimitations.length}</b> ${visualLimitations.length === 1 ? "perspetiva a pedir" : "perspetivas a pedir"}</span>` : ""
   ].filter(Boolean).join("");
 
   const riskCardParts = [];
-  if (differentContext.length && !riskChecks.some((check) => Number(check.id) === 4)) {
-    riskCardParts.push(`<article class="risk-item"><span>!</span><div><b>Fotografia associada a outro contexto público</b><p>${escapeHtml(photoFeature.title)}</p><small>Peça uma explicação verificável e confirme o imóvel presencialmente antes de pagar.</small></div></article>`);
-  }
   riskCardParts.push(...riskChecks.map((check) => `<article class="risk-item"><span>!</span><div><b>${escapeHtml(check.name)}</b><p>${escapeHtml(check.observation)}</p><small>${escapeHtml(actionFor(check))}</small></div></article>`));
   const riskCards = riskCardParts.length
     ? riskCardParts.slice(0, 4).join("")
@@ -252,13 +209,11 @@ export function renderReportHtml({ report, createdAt, expiresAt, capturePreviews
 
   const facts = observedFacts.length ? `<div class="facts">${observedFacts.map((item) => `<div><span>${escapeHtml(factLabels[item.field])}</span><b>${escapeHtml(item.value)}</b></div>`).join("")}</div>` : "";
 
-  const relevantPhotoEvidence = [...differentContext, ...sameContext, ...inconclusive, ...unavailable].slice(0, 4);
-  const photoRows = relevantPhotoEvidence.map((item, index) => {
-    const meta = photoResultMeta(item.state);
-    return `<li class="photo-row ${meta.tone}"><span>${meta.icon}</span><div><b>${escapeHtml(meta.label)}</b>${item.context_excerpt ? `<small>${escapeHtml(item.context_excerpt)}</small>` : ""}</div>${item.source_url ? `<a href="${escapeHtml(item.source_url)}" rel="nofollow noreferrer" target="_blank">Fonte ↗</a>` : ""}</li>`;
+  const visualRows = visualReadings.slice(0, 8).map((item) => {
+    const meta = visualMeta(item.category);
+    const sources = (item.sourceImages ?? []).map((source) => `Captura ${source}`).join(" · ");
+    return `<li class="photo-row ${meta.tone}"><span>${meta.icon}</span><div><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.observation)}</small>${item.recommendedConfirmation ? `<small><strong>Confirmar:</strong> ${escapeHtml(item.recommendedConfirmation)}</small>` : ""}</div><em>${escapeHtml(sources)}</em></li>`;
   }).join("");
-
-  const sources = relevantPhotoEvidence.filter((item) => item.source_url).map((item) => `<a href="${escapeHtml(item.source_url)}" rel="nofollow noreferrer" target="_blank">${escapeHtml(item.source_domain || "Fonte pública")} ↗</a>`).join("");
   const roomListing = observedFacts.some((item) => item.field === "tipologia" && /quarto|room/iu.test(String(item.value)));
   const priceReference = report?.priceReference;
   const priceCard = priceReference && !roomListing && Number.isFinite(Number(priceReference.listing_euros_per_m2)) && Number.isFinite(Number(priceReference.euros_per_m2))
@@ -274,7 +229,7 @@ export function renderReportHtml({ report, createdAt, expiresAt, capturePreviews
   .questions{margin:0;padding:0;list-style:none}.question{display:grid;grid-template-columns:35px 1fr;gap:13px;padding:17px 21px}.question+.question{border-top:1px solid var(--line)}.q-number{display:grid;width:29px;height:29px;place-items:center;border-radius:9px;background:var(--navy);color:#fff;font-size:11px;font-weight:900}.question.attention .q-number{background:var(--red)}.question b{font-size:13px}.question p{margin:4px 0 0;color:var(--grey);font-size:11px;line-height:1.45}
   .check-list{background:#fff}.check-row{border-bottom:1px solid var(--line)}.check-row:last-child{border:0}.check-row summary{display:grid;grid-template-columns:34px 32px 1fr auto 18px;gap:10px;min-height:69px;padding:11px 17px;align-items:center;cursor:pointer;list-style:none}.check-row summary::-webkit-details-marker{display:none}.check-number{display:grid;width:29px;height:29px;place-items:center;border:1px solid var(--line);border-radius:50%;font-size:10px;font-weight:850}.check-symbol{display:grid;width:29px;height:29px;place-items:center;border-radius:9px;background:var(--green2);color:var(--green);font-weight:900}.talk .check-symbol{background:var(--amber2);color:var(--amber);font-size:9px}.attention .check-symbol{background:var(--red2);color:var(--red)}.check-title b{display:block;font-size:12px}.check-title small{display:block;margin-top:3px;color:var(--grey);font-size:10px;line-height:1.35}.status{padding:6px 9px;border-radius:999px;background:var(--green2);color:#397551;font-size:9px;font-weight:850}.talk .status{background:var(--amber2);color:#9a5a14}.attention .status{background:var(--red2);color:#9e4935}.chevron{color:#80908b}.check-detail{margin:0 17px 15px 93px;padding:14px;border-radius:10px;background:#f3f6f4}.check-detail b{font-size:9px;text-transform:uppercase}.check-detail p{margin:5px 0 0;color:var(--grey);font-size:11px;line-height:1.5}
   .captures{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:13px}.capture{overflow:hidden;margin:0;border:1px solid var(--line);border-radius:10px;background:#fafafa}.capture img{display:block;width:100%;height:115px;object-fit:cover;object-position:top}.capture figcaption{display:flex;padding:8px;justify-content:space-between;color:var(--grey);font-size:8px}.capture figcaption b{color:var(--ink)}.captures-expired{grid-column:1/-1;padding:25px 17px;text-align:center}.captures-expired>span{display:grid;width:50px;height:50px;margin:0 auto 12px;place-items:center;border-radius:50%;background:var(--blue);color:var(--navy);font-weight:900}.captures-expired b{display:block;font-size:12px}.captures-expired p{margin:6px 0 0;color:var(--grey);font-size:10px;line-height:1.45}
-  .timeline{padding:19px 21px}.step{position:relative;display:grid;grid-template-columns:23px 1fr;gap:11px;padding-bottom:20px}.step:last-child{padding-bottom:0}.step:not(:last-child):after{content:"";position:absolute;left:10px;top:22px;bottom:0;width:2px;background:#c9ddd0}.step i{display:grid;width:22px;height:22px;place-items:center;border-radius:50%;background:var(--green);color:#fff;font-size:10px;font-style:normal}.step b{display:block;font-size:11px}.step span{display:block;margin-top:3px;color:var(--grey);font-size:9px}.photo-list{margin:0;padding:0;list-style:none}.photo-row{display:grid;grid-template-columns:27px 1fr auto;gap:10px;padding:14px 18px;align-items:center}.photo-row+.photo-row{border-top:1px solid var(--line)}.photo-row>span{display:grid;width:25px;height:25px;place-items:center;border-radius:7px;background:var(--green2);color:var(--green);font-size:9px;font-weight:900}.photo-row.attention>span{background:var(--red2);color:var(--red)}.photo-row b{display:block;font-size:10px}.photo-row small{display:block;margin-top:3px;color:var(--grey);font-size:9px;line-height:1.35}.photo-row a{color:var(--navy);font-size:9px;font-weight:850;text-decoration:none}.source-links{display:flex;flex-wrap:wrap;gap:7px;padding:0 18px 16px}.source-links a{padding:6px 8px;border-radius:7px;background:var(--blue);color:var(--navy);font-size:9px;font-weight:800;text-decoration:none}
+  .timeline{padding:19px 21px}.step{position:relative;display:grid;grid-template-columns:23px 1fr;gap:11px;padding-bottom:20px}.step:last-child{padding-bottom:0}.step:not(:last-child):after{content:"";position:absolute;left:10px;top:22px;bottom:0;width:2px;background:#c9ddd0}.step i{display:grid;width:22px;height:22px;place-items:center;border-radius:50%;background:var(--green);color:#fff;font-size:10px;font-style:normal}.step b{display:block;font-size:11px}.step span{display:block;margin-top:3px;color:var(--grey);font-size:9px}.photo-list{margin:0;padding:0;list-style:none}.photo-row{display:grid;grid-template-columns:27px 1fr auto;gap:10px;padding:14px 18px;align-items:center}.photo-row+.photo-row{border-top:1px solid var(--line)}.photo-row>span{display:grid;width:25px;height:25px;place-items:center;border-radius:7px;background:var(--green2);color:var(--green);font-size:9px;font-weight:900}.photo-row.attention>span{background:var(--red2);color:var(--red)}.photo-row b{display:block;font-size:10px}.photo-row small{display:block;margin-top:3px;color:var(--grey);font-size:9px;line-height:1.35}.photo-row>em{color:var(--green);font-size:8px;font-style:normal;font-weight:850;white-space:nowrap}.photo-row a{color:var(--navy);font-size:9px;font-weight:850;text-decoration:none}.source-links{display:flex;flex-wrap:wrap;gap:7px;padding:0 18px 16px}.source-links a{padding:6px 8px;border-radius:7px;background:var(--blue);color:var(--navy);font-size:9px;font-weight:800;text-decoration:none}
   .gates{display:grid;grid-template-columns:56px 1fr;gap:18px;padding:22px;background:linear-gradient(125deg,#123d49,#0c302a);color:#fff}.gate-icon{display:grid;width:54px;height:54px;place-items:center;border:1px solid #7fa1a5;border-radius:50%;font-size:22px}.gates h2{margin:0 0 13px;font-family:Georgia,serif;font-size:20px}.gate-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.gate{display:flex;gap:8px;color:#dce8e4;font-size:10px;line-height:1.4}.gate:before{content:"✓";color:#d9f76d;font-weight:900}.fine{padding:18px 0 35px;color:#71817c;font-size:9px;line-height:1.6}.footer{padding:25px 0;background:#0c302a;color:#b8cbc5}.footer .page{display:flex;justify-content:space-between;font-size:9px}.footer b{color:#fff}
   @media(max-width:950px){.summary{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.side{grid-template-columns:repeat(2,1fr)}.side .panel:first-child,.side .panel:last-child{grid-column:1/-1}}
   @media(max-width:680px){.page{width:min(100% - 22px,1240px)}.topbar .page{min-height:60px}.brand{font-size:13px}.private{font-size:8px}.report-head{padding:34px 0 20px}.head-grid{grid-template-columns:1fr}.head-note{display:none}.report-head h1{font-size:39px}.summary{grid-template-columns:1fr 1fr;gap:8px}.metric{grid-template-columns:36px 1fr;min-height:105px;padding:14px}.metric-icon{width:35px;height:35px}.metric strong{font-size:24px}.coverage{grid-column:1/-1}.lead{grid-template-columns:1fr;padding:18px}.lead-icon{display:none}.layout{gap:13px}.executive{grid-template-columns:1fr}.insight{min-height:auto}.insight+.insight{border-left:0;border-top:1px solid var(--line)}.facts{grid-template-columns:repeat(2,1fr)}.facts div:nth-child(odd){border-left:0}.facts div:nth-child(n+3){border-top:1px solid var(--line)}.check-row summary{grid-template-columns:29px 27px 1fr 17px;padding:10px}.status{grid-column:3;width:max-content}.chevron{grid-column:4;grid-row:1/3}.check-title small{display:none}.check-detail{margin:0 10px 10px}.side{grid-template-columns:1fr}.side .panel:first-child,.side .panel:last-child{grid-column:auto}.gate-grid{grid-template-columns:1fr}.gates{grid-template-columns:1fr}.gate-icon{display:none}.footer .page{gap:15px;flex-direction:column}}
@@ -288,7 +243,7 @@ export function renderReportHtml({ report, createdAt, expiresAt, capturePreviews
   <main class="page">
     <section class="decision ${escapeHtml(verdict.tone)}"><div class="decision-icon">${verdict.tone === "danger" ? "!" : verdict.tone === "caution" ? "→" : "✓"}</div><div><span class="decision-label">${escapeHtml(verdict.label)}</span><h2>${escapeHtml(verdict.title)}</h2><p>${escapeHtml(verdict.text)}</p><strong class="decision-rule">Regra prática: visita, identidade e minuta antes de qualquer transferência.</strong></div></section>
     <section class="summary"><article class="metric found"><span class="metric-icon">✓</span><div><strong>${found.length}</strong><b>informações encontradas</b><small>Sustentadas nas capturas analisadas</small></div></article><article class="metric attention"><span class="metric-icon">!</span><div><strong>${signalCount}</strong><b>sinais concretos</b><small>Não incluem simples omissões do anúncio</small></div></article><article class="metric talk"><span class="metric-icon">→</span><div><strong>${questions.length}</strong><b>perguntas preparadas</b><small>Prontas para enviar ao anunciante</small></div></article></section>
-    <section class="photo-feature ${escapeHtml(photoFeature.tone)}"><header class="photo-feature-head"><span class="photo-feature-kicker">Pesquisa visual das fotografias</span><span class="photo-feature-count">${photoCount} ${photoCount === 1 ? "fotografia analisada" : "fotografias analisadas"}</span></header><div class="photo-feature-body"><div class="photo-score" style="--photo-progress:${photoProgress}%"><strong>${escapeHtml(photoFeature.score)}</strong><span>${escapeHtml(photoFeature.scoreLabel)}</span></div><div class="photo-feature-copy"><span class="photo-feature-label">${escapeHtml(photoFeature.label)}</span><h2>${escapeHtml(photoFeature.title)}</h2><p>${escapeHtml(photoFeature.text)}</p><div class="photo-dots" aria-label="Resultado de cada fotografia">${photoResultDots}</div></div><aside class="photo-meaning"><b>${escapeHtml(photoFeature.meaningTitle)}</b><p>${escapeHtml(photoFeature.meaning)}</p></aside></div>${photoResultLegend ? `<div class="photo-legends">${photoResultLegend}</div>` : ""}${photoRows ? `<ul class="photo-list">${photoRows}</ul>` : ""}${sources ? `<div class="source-links">${sources}</div>` : ""}</section>
+    <section class="photo-feature ${escapeHtml(visualFeature.tone)}"><header class="photo-feature-head"><span class="photo-feature-kicker">O que as fotografias revelam</span><span class="photo-feature-count">${visualSourceCount} ${visualSourceCount === 1 ? "captura com elementos visuais" : "capturas com elementos visuais"}</span></header><div class="photo-feature-body"><div class="photo-score" style="--photo-progress:${visualProgress}%"><strong>${escapeHtml(visualFeature.score)}</strong><span>${escapeHtml(visualFeature.scoreLabel)}</span></div><div class="photo-feature-copy"><span class="photo-feature-label">${escapeHtml(visualFeature.label)}</span><h2>${escapeHtml(visualFeature.title)}</h2><p>${escapeHtml(visualFeature.text)}</p><div class="photo-dots" aria-label="Leituras visuais das capturas">${visualResultDots}</div></div><aside class="photo-meaning"><b>${escapeHtml(visualFeature.meaningTitle)}</b><p>${escapeHtml(visualFeature.meaning)}</p></aside></div>${visualResultLegend ? `<div class="photo-legends">${visualResultLegend}</div>` : ""}${visualRows ? `<ul class="photo-list">${visualRows}</ul>` : ""}</section>
     <div class="layout"><div class="main">
       <section class="panel"><header class="panel-head"><h2>Sinais relevantes antes de pagar</h2><span>${signalCount ? signalCount + (signalCount === 1 ? " sinal observado" : " sinais observados") : "nenhum sinal concreto"}</span></header><div class="risk-stack">${riskCards}</div>${facts}</section>
       ${priceCard}
@@ -298,9 +253,9 @@ export function renderReportHtml({ report, createdAt, expiresAt, capturePreviews
       <section class="gates"><span class="gate-icon">✓</span><div><h2>Antes de transferir dinheiro</h2><div class="gate-grid"><span class="gate">Visite o imóvel ou faça uma videochamada em direto.</span><span class="gate">Confirme quem pode legitimamente arrendar o imóvel.</span><span class="gate">Leia a minuta e valide todos os valores por escrito.</span><span class="gate">Pague apenas para um titular relacionado com o contrato.</span></div></div></section>
     </div><aside class="side">
       <section class="panel"><header class="panel-head"><h2>Capturas analisadas</h2><span>${capturePreviews.length ? `${capturePreviews.length} evidências` : "retidas durante 48 h"}</span></header><div class="captures">${previews}</div></section>
-      <section class="panel"><header class="panel-head"><h2>Como a IA analisou</h2><span>Sistema inteligente</span></header><div class="timeline"><div class="step"><i>✓</i><div><b>Capturas recebidas</b><span>Ligação privada e armazenamento temporário</span></div></div><div class="step"><i>✓</i><div><b>Informação extraída pela IA</b><span>Texto, condições e fotografias separados automaticamente</span></div></div><div class="step"><i>✓</i><div><b>Fotografias pesquisadas</b><span>${photoCount} ${photoCount === 1 ? "imagem comparada" : "imagens comparadas"} em fontes públicas</span></div></div><div class="step"><i>✓</i><div><b>12 pontos cruzados</b><span>Relatório inteligente concluído em ${escapeHtml(datePt(createdAt))}</span></div></div></div></section>
+      <section class="panel"><header class="panel-head"><h2>Como a IA analisou</h2><span>Sistema inteligente</span></header><div class="timeline"><div class="step"><i>✓</i><div><b>Capturas recebidas</b><span>Ligação privada e armazenamento temporário</span></div></div><div class="step"><i>✓</i><div><b>Informação extraída pela IA</b><span>Texto, condições e fotografias separados automaticamente</span></div></div><div class="step"><i>✓</i><div><b>Fotografias interpretadas</b><span>Coerência, elementos visíveis e confirmações a pedir</span></div></div><div class="step"><i>✓</i><div><b>12 pontos cruzados</b><span>Relatório inteligente concluído em ${escapeHtml(datePt(createdAt))}</span></div></div></div></section>
     </aside></div>
-    <p class="fine"><b>Como interpretar:</b> este relatório destaca sinais observáveis e prepara a validação antes do pagamento. Não certifica identidades, propriedade ou autenticidade do anúncio. Uma pesquisa sem correspondências também não prova que uma fotografia seja original.</p>
+    <p class="fine"><b>Como interpretar:</b> este relatório destaca sinais observáveis e prepara a validação antes do pagamento. A leitura das fotografias não é uma inspeção técnica e não certifica identidades, propriedade, estado do imóvel ou autenticidade do anúncio.</p>
   </main><footer class="footer"><div class="page"><b>Guia do Proprietário</b><span>Ligação privada disponível até ${escapeHtml(datePt(expiresAt))}</span></div></footer>
   </body></html>`;
 }

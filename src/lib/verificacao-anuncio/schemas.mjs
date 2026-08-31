@@ -1,15 +1,14 @@
 import {
   ENGINE_VERSION,
   EXTRACTION_FIELDS,
-  REVERSE_IMAGE_STATES,
-  REVERSE_MATCH_TYPES,
+  VISUAL_READING_CATEGORIES,
   VERIFICATION_READINGS,
   VERIFICATION_STATES
 } from "./constants.mjs";
 
 export const EXTRACTION_SCHEMA = Object.freeze({
   type: "object",
-  required: ["versao", "factos", "regioes_fotografias"],
+  required: ["versao", "factos", "regioes_fotografias", "leituras_visuais"],
   additionalProperties: false,
   properties: {
     versao: { type: "string", enum: [ENGINE_VERSION] },
@@ -51,10 +50,31 @@ export const EXTRACTION_SCHEMA = Object.freeze({
           altura: { type: "integer", minimum: 1, maximum: 1000 }
         }
       }
+    },
+    leituras_visuais: {
+      type: "array",
+      maxItems: 10,
+      items: {
+        type: "object",
+        required: ["id", "categoria", "titulo", "observacao", "confirmacao_recomendada", "fontes_imagem"],
+        additionalProperties: false,
+        properties: {
+          id: { type: "string", pattern: "^visual_[a-z0-9_]+$" },
+          categoria: { type: "string", enum: VISUAL_READING_CATEGORIES },
+          titulo: { type: "string" },
+          observacao: { type: "string" },
+          confirmacao_recomendada: { type: ["string", "null"] },
+          fontes_imagem: {
+            type: "array",
+            minItems: 1,
+            maxItems: 8,
+            items: { type: "integer", minimum: 1, maximum: 8 }
+          }
+        }
+      }
     }
   }
 });
-
 export const CLASSIFICATION_SCHEMA = Object.freeze({
   type: "object",
   required: ["versao", "verificacoes"],
@@ -82,34 +102,5 @@ export const CLASSIFICATION_SCHEMA = Object.freeze({
         }
       }
     }
-  }
-});
-
-export const REVERSE_EVIDENCE_SCHEMA = Object.freeze({
-  type: "object",
-  required: [
-    "id",
-    "photo_id",
-    "provider",
-    "state",
-    "match_type",
-    "source_url",
-    "source_domain",
-    "context_verified"
-  ],
-  additionalProperties: false,
-  properties: {
-    id: { type: "string", pattern: "^imagem_[a-z0-9_]+$" },
-    photo_id: { type: "string" },
-    provider: { type: "string" },
-    state: { type: "string", enum: REVERSE_IMAGE_STATES },
-    match_type: { type: "string", enum: REVERSE_MATCH_TYPES },
-    source_url: { type: ["string", "null"] },
-    source_domain: { type: ["string", "null"] },
-    matched_image_url: { type: ["string", "null"] },
-    context_verified: { type: "boolean" },
-    context_excerpt: { type: ["string", "null"], maxLength: 500 },
-    source_location: { type: ["string", "null"], maxLength: 120 },
-    source_date: { type: ["string", "null"], maxLength: 40 }
   }
 });

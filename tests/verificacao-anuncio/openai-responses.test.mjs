@@ -30,7 +30,7 @@ test("a Passagem B recebe apenas estruturas e nunca volta a enviar imagens", asy
       return new Response(JSON.stringify({ output_text: JSON.stringify(classification()) }), { status: 200 });
     }
   });
-  await adapters.classifier.classify({ extraction: extraction(), reverseResults: [], priceReference: null, attempt: 1 });
+  await adapters.classifier.classify({ extraction: extraction(), priceReference: null, attempt: 1 });
   assert.equal(serializedBody.includes("input_image"), false);
   assert.equal(JSON.parse(serializedBody).text.format.name, "verificacao_anuncio_classificacao");
 });

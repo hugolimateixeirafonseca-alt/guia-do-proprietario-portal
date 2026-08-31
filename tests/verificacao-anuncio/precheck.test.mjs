@@ -9,7 +9,12 @@ test("o teaser confirma utilidade sem oferecer a investigação completa", () =>
       { campo: "preco_mensal", presente: true, valor: "900 €" },
       { campo: "caucao", presente: true, valor: "900 €" }
     ],
-    regioes_fotografias: [{}, {}, {}]
+    regioes_fotografias: [{}, {}, {}],
+    leituras_visuais: [
+      { fontes_imagem: [1] },
+      { fontes_imagem: [2] },
+      { fontes_imagem: [3] }
+    ]
   }, 4);
   assert.equal(teaser.useful, true);
   assert.equal(teaser.factCount, 3);
@@ -19,7 +24,7 @@ test("o teaser confirma utilidade sem oferecer a investigação completa", () =>
 });
 
 test("o teaser pede melhores capturas quando não encontra material útil", () => {
-  const teaser = buildPrecheckTeaser({ factos: [], regioes_fotografias: [] }, 1);
+  const teaser = buildPrecheckTeaser({ factos: [], regioes_fotografias: [], leituras_visuais: [] }, 1);
   assert.equal(teaser.useful, false);
   assert.match(teaser.headline, /mais informação visível/u);
 });

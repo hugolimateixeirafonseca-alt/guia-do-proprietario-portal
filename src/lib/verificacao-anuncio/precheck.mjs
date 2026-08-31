@@ -19,7 +19,8 @@ export function buildPrecheckTeaser(extraction, captureCount) {
   const facts = Array.isArray(extraction?.factos) ? extraction.factos : [];
   const present = facts.filter((fact) => fact?.presente === true && LABELS[fact.campo]);
   const fields = [...new Set(present.map((fact) => LABELS[fact.campo]))].slice(0, 5);
-  const photoCount = Math.min(6, Array.isArray(extraction?.regioes_fotografias) ? extraction.regioes_fotografias.length : 0);
+  const visualReadings = Array.isArray(extraction?.leituras_visuais) ? extraction.leituras_visuais : [];
+  const photoCount = new Set(visualReadings.flatMap((item) => item?.fontes_imagem ?? [])).size;
   const paymentFields = new Set(["caucao", "sinal", "primeira_renda", "outros_pagamentos", "momento_pagamento"]);
   const hasPaymentConditions = present.some((fact) => paymentFields.has(fact.campo));
   const useful = present.length >= 2 || photoCount > 0;
@@ -35,6 +36,6 @@ export function buildPrecheckTeaser(extraction, captureCount) {
       : "Precisamos de mais informação visível para produzir uma análise útil.",
     signal: hasPaymentConditions
       ? "Detetámos condições de pagamento que merecem ser cruzadas antes de qualquer transferência."
-      : "A análise completa vai cruzar as condições, o contexto e as fotografias antes de qualquer transferência."
+      : "A análise completa vai cruzar as condições do anúncio com o que é visível nas fotografias antes de qualquer transferência."
   };
 }

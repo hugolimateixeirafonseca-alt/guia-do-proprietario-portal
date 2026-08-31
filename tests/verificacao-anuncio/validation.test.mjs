@@ -5,7 +5,6 @@ import {
   validateActionConfiguration,
   validateClassification,
   validateExtraction,
-  validateReverseEvidence,
   VerificationValidationError
 } from "../../src/lib/verificacao-anuncio/validate.mjs";
 import { classification, extraction } from "./fixtures.mjs";
@@ -34,21 +33,8 @@ test("a classificação bloqueia linguagem proibida, PII e confirmação da veri
   assert.throws(() => validateClassification(output, ["facto_cidade"]), VerificationValidationError);
 });
 
-test("uma localização externa só passa quando aparece no excerto validado", () => {
-  const base = {
-    id: "imagem_sala_google_1",
-    photo_id: "sala",
-    provider: "google_cloud_vision",
-    state: "correspondencia_contexto_diferente",
-    match_type: "near_exact",
-    source_url: "https://example.com/anuncio",
-    source_domain: "example.com",
-    matched_image_url: "https://example.com/foto.jpg",
-    context_verified: true,
-    context_excerpt: "Apartamento disponível em Madrid.",
-    source_location: "Madrid",
-    source_date: null
-  };
-  assert.equal(validateReverseEvidence(base).source_location, "Madrid");
-  assert.throws(() => validateReverseEvidence({ ...base, source_location: "Lisboa" }), VerificationValidationError);
+test("a leitura visual exige fonte e linguagem cautelosa", () => {
+  const invalid = extraction();
+  invalid.leituras_visuais[0].observacao = "Esta casa é segura.";
+  assert.throws(() => validateExtraction(invalid, 4), VerificationValidationError);
 });

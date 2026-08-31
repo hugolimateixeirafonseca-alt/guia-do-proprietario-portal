@@ -4,7 +4,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 const checks = [
   { id: 1, title: "Localização", state: "confirmado", label: "Confirmado" },
   { id: 3, title: "Tipologia e área", state: "confirmado", label: "Confirmado" },
-  { id: 4, title: "Fotografias", state: "por-confirmar", label: "Por confirmar" },
+  { id: 4, title: "Coerência visual", state: "confirmado", label: "Observado" },
   { id: 8, title: "Contrato escrito", state: "por-confirmar", label: "Por confirmar" }
 ];
 
@@ -12,9 +12,9 @@ const reportChecks = [
   { id: 1, title: "Morada ou zona identificável", state: "confirmado", label: "Confirmado", observation: "Lisboa e Arroios aparecem no texto enviado.", action: null },
   { id: 2, title: "Preço face à referência da zona", state: "nao-verificavel", label: "Não verificável", observation: "O preço está visível, mas falta uma área utilizável para comparar por metro quadrado.", action: null },
   { id: 3, title: "Tipologia e área coerentes", state: "confirmado", label: "Confirmado", observation: "A tipologia T1 aparece de forma consistente nas capturas de ecrã analisadas.", action: null },
-  { id: 4, title: "Fotografias e correspondências externas", state: "por-confirmar", label: "Por confirmar", observation: "Foi encontrada uma imagem correspondente numa página com outra localização.", action: "Peça esclarecimento sobre a origem da fotografia e a localização indicada na outra página." },
+  { id: 4, title: "Coerência visual e detalhes a confirmar", state: "por-confirmar", label: "Confirmar em direto", observation: "Os acabamentos parecem coerentes, mas a zona junto à janela só aparece parcialmente.", action: "Durante a videochamada, peça para mostrarem a parede junto à janela e a divisão sem cortes." },
   { id: 5, title: "Despesas incluídas", state: "por-confirmar", label: "Por confirmar", observation: "O anúncio não especifica quais as despesas incluídas no valor mensal.", action: "Confirme por escrito quais as despesas incluídas e quais serão pagas à parte." },
-  { id: 6, title: "Condições de pagamento", state: "confirmado", label: "Confirmado", observation: "O anúncio indica uma renda e uma caução antes da entrada.", action: null },
+  { id: 6, title: "Condições de pagamento", state: "por-confirmar", label: "Merece atenção", observation: "O anúncio pede uma caução para reservar antes da visita.", action: "Não transfira. Visite o imóvel, confirme quem arrenda e receba a minuta do contrato primeiro." },
   { id: 7, title: "Visita presencial", state: "confirmado", label: "Confirmado", observation: "Existe indicação de visitas presenciais por marcação.", action: null },
   { id: 8, title: "Contrato escrito", state: "por-confirmar", label: "Por confirmar", observation: "Não foi encontrada uma menção explícita a contrato escrito.", action: "Peça confirmação por escrito e solicite a minuta antes de transferir dinheiro." },
   { id: 9, title: "Recibos de renda", state: "por-confirmar", label: "Por confirmar", observation: "Não foi encontrada uma menção explícita à emissão de recibos.", action: "Confirme por escrito que serão emitidos os recibos aplicáveis." },
@@ -27,7 +27,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
 <BaseLayout
   titulo="Verificação de Anúncio"
-  descricao="Identificamos sinais observáveis, pesquisamos as fotografias e mostramos o que deve fazer antes de transferir dinheiro."
+  descricao="Identificamos sinais observáveis, interpretamos as fotografias e mostramos o que deve fazer antes de transferir dinheiro."
 >
   <div class="preview-ribbon"><strong>Oferta de lançamento: 7,99 €</strong><span>{checkoutEnabled ? "Pagamento seguro processado pela Stripe." : "Pré-visualização local. Pagamento e análise ainda não estão ativos."}</span></div>
   <section class="hero">
@@ -38,7 +38,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         <p class="eyebrow">Verificação de anúncio para arrendamento</p>
         <div class="hero-ai"><span>IA</span><div><strong>Sistema inteligente com IA</strong><small>Análise automática. Normalmente pronta em poucos minutos.</small></div></div>
         <h1>Não transfira a caução <span>às cegas.</span></h1>
-        <p class="lead">Envie as capturas de ecrã do anúncio. O sistema inteligente lê o texto, pesquisa as fotografias noutros sites e cruza a informação antes de qualquer pagamento.</p>
+        <p class="lead">Envie as capturas de ecrã do anúncio. O sistema inteligente lê o texto, interpreta o que é visível nas fotografias e cruza as condições antes de qualquer pagamento.</p>
         <div class="hero-offer">
           <div class="hero-price">
             <span class="old-price">11,99 €</span>
@@ -50,14 +50,14 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         <p class="pay-later">Primeiro recebe uma pré-verificação e um teaser. Só depois decide se quer pagar 7,99 € pelo relatório completo.</p>
         <ul class="trust-list" aria-label="O que está incluído">
           <li>Pré-verificação gratuita com IA</li>
-          <li>Pesquisa de fotografias noutros sites</li>
+          <li>Leitura inteligente das fotografias</li>
           <li>Comparação do preço na cidade</li>
           <li>Relatório normalmente pronto em poucos minutos</li>
         </ul>
       </div>
 
       <div class="product-visual">
-        <div class="floating-alert"><span>!</span><div><small>Sinal encontrado</small><strong>Fotografia noutra localização</strong></div></div>
+        <div class="floating-alert"><span>!</span><div><small>Detalhe a confirmar</small><strong>Parede junto à janela</strong></div></div>
         <div class="report-preview" aria-label="Exemplo resumido do relatório">
         <div class="report-top">
           <div>
@@ -66,7 +66,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
           </div>
           <span class="report-score report-verdict-pill">Não pague ainda</span>
         </div>
-        <div class="report-verdict-preview"><small>Sinal principal</small><strong>Uma fotografia aparece associada a outra localização.</strong><p>Peça uma explicação verificável e confirme o imóvel presencialmente antes de transferir.</p></div>
+        <div class="report-verdict-preview"><small>Sinal principal</small><strong>A caução é pedida antes da visita.</strong><p>Não transfira. Peça uma visita, confirme quem arrenda e receba a minuta do contrato primeiro.</p></div>
         <div class="check-list">
           {checks.map((check) => (
             <div class="check-row">
@@ -85,7 +85,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
   <section class="intro-strip" id="experimentar">
     <div class="shell intro-grid">
-      <div><span>6</span><strong>fotografias pesquisadas</strong><p>Procuramos correspondências noutros sites públicos.</p></div>
+      <div><span>IA</span><strong>fotografias interpretadas</strong><p>Destacamos coerência, detalhes visíveis e o que deve pedir para ver em direto.</p></div>
       <div><span>10</span><strong>cidades com referência</strong><p>Comparamos o preço quando existem dados suficientes.</p></div>
       <div><span>12</span><strong>pontos cruzados</strong><p>Detetamos omissões e preparamos perguntas concretas.</p></div>
     </div>
@@ -99,11 +99,11 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
       </div>
       <div class="risk-grid">
         <article class="risk-card risk-visual">
-          <div class="risk-card-copy"><span class="risk-number">01</span><p class="risk-label">Pesquisa visual</p><h3>Esta fotografia aparece noutro anúncio?</h3><p>Pesquisamos até 6 fotografias e destacamos correspondências que merecem uma explicação.</p></div>
+          <div class="risk-card-copy"><span class="risk-number">01</span><p class="risk-label">Leitura visual com IA</p><h3>O que revelam realmente estas fotografias?</h3><p>Analisamos coerência, elementos visíveis, possíveis distorções e detalhes que deve confirmar numa visita ou videochamada.</p></div>
           <div class="match-visual" aria-hidden="true">
-            <div class="mock-photo"><span>Imagem enviada</span><div class="mock-room"><i></i><b></b></div></div>
+            <div class="mock-photo"><span>Captura 1</span><div class="mock-room"><i></i><b></b></div></div>
             <div class="match-link">↔</div>
-            <div class="mock-photo flagged"><span>Outra página</span><div class="mock-room"><i></i><b></b></div><strong>Localização diferente</strong></div>
+            <div class="mock-photo flagged"><span>Captura 3</span><div class="mock-room"><i></i><b></b></div><strong>Acabamentos coerentes</strong></div>
           </div>
         </article>
         <article class="risk-card price-risk">
@@ -128,7 +128,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         <h2>Envie as capturas de ecrã. Nós fazemos o trabalho difícil.</h2>
         <p>Inclua o texto, o preço, as condições, a conversa relevante e as fotografias. A demonstração organiza tudo e mostra como será o relatório.</p>
         <div class="upload-tips">
-          <div><span>6</span><p><strong>Pesquisa visual</strong> noutros sites públicos.</p></div>
+          <div><span>IA</span><p><strong>Leitura visual</strong> das divisões e detalhes visíveis.</p></div>
           <div><span>10</span><p><strong>Referências locais</strong> para comparar o preço.</p></div>
           <div><span>12</span><p><strong>Pontos cruzados</strong> num relatório acionável.</p></div>
         </div>
@@ -168,7 +168,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
       <div class="processing-heading"><span class="spinner" aria-hidden="true"></span><div><p class="eyebrow">Análise em curso</p><h2 data-processing-title>A organizar a informação do anúncio</h2></div><strong data-processing-percent>18%</strong></div>
       <div class="processing-track"><span data-processing-bar></span></div>
       <div class="processing-steps">
-        <span class="active">Leitura das capturas</span><span>Recorte das fotografias</span><span>Pesquisa visual</span><span>Relatório</span>
+        <span class="active">Leitura das capturas</span><span>Interpretação das fotografias</span><span>Cruzamento das condições</span><span>Relatório</span>
       </div>
     </div>
   </section>
@@ -179,10 +179,10 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         <div><p class="eyebrow">Relatório de demonstração</p><h2>Primeiro a decisão. Depois, a prova.</h2></div>
         <div class="result-summary decision-demo"><strong>!</strong><span>Não pague ainda</span></div>
       </div>
-      <div class="demo-decision"><span>Sinal principal</span><h3>Encontrámos uma fotografia associada a outra localização.</h3><p>Antes de transferir, peça uma explicação verificável, marque a visita e confirme a minuta do contrato.</p></div>
+      <div class="demo-decision"><span>Sinal principal</span><h3>O anúncio pede caução antes da visita.</h3><p>Não transfira ainda. Marque a visita, confirme quem arrenda e receba a minuta do contrato primeiro.</p></div>
       <div class="summary-band">
-        <div class="attention"><strong>1 sinal concreto</strong><span>Baseado numa correspondência pública.</span></div>
-        <div class="good"><strong>4 fotografias pesquisadas</strong><span>Os resultados vazios são resumidos uma vez.</span></div>
+        <div class="attention"><strong>1 sinal concreto</strong><span>Baseado nas condições de pagamento.</span></div>
+        <div class="good"><strong>4 leituras visuais</strong><span>Coerência, elementos visíveis e provas a pedir.</span></div>
         <div class="neutral"><strong>5 perguntas prontas</strong><span>Para copiar e enviar ao anunciante.</span></div>
       </div>
 
@@ -202,10 +202,10 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
         <aside class="evidence-column">
           <section class="evidence-card visual-evidence">
-            <p class="eyebrow">Pesquisa de fotografias</p>
-            <h3>1 correspondência relevante</h3>
-            <div class="photo-pair"><div><span>Imagem enviada</span><div class="room-shape"><i></i><b></b></div></div><div><span>Página encontrada</span><div class="room-shape alternate"><i></i><b></b></div></div></div>
-            <p>A imagem apresenta uma correspondência forte, mas a página externa refere outra localização. A origem e o contexto devem ser esclarecidos.</p>
+            <p class="eyebrow">O que as fotografias revelam</p>
+            <h3>3 elementos coerentes e 1 detalhe a confirmar</h3>
+            <div class="photo-pair"><div><span>Captura 1</span><div class="room-shape"><i></i><b></b></div></div><div><span>Captura 3</span><div class="room-shape alternate"><i></i><b></b></div></div></div>
+            <p>O pavimento e os acabamentos são coerentes. A zona junto à janela aparece apenas parcialmente e deve ser mostrada em direto.</p>
           </section>
           <section class="evidence-card price-evidence">
             <p class="eyebrow">Preço</p>
@@ -232,7 +232,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
   <section class="pricing-section" id="comprar">
     <div class="shell pricing-card">
-      <div class="pricing-copy"><p class="eyebrow">Primeiro veja se as suas capturas servem</p><h2>Envie primeiro. Pague só depois do teaser.</h2><p>O sistema inteligente com IA confirma gratuitamente se o material é suficiente e mostra uma primeira leitura do seu anúncio. Só depois decide se quer desbloquear a pesquisa das fotografias, as 12 verificações e o relatório completo.</p><ul><li>Pré-verificação sem custo</li><li>Uma única compra</li><li>Sem subscrição</li><li>Normalmente pronto em poucos minutos</li></ul></div>
+      <div class="pricing-copy"><p class="eyebrow">Primeiro veja se as suas capturas servem</p><h2>Envie primeiro. Pague só depois do teaser.</h2><p>O sistema inteligente com IA confirma gratuitamente se o material é suficiente e mostra uma primeira leitura do seu anúncio. Só depois decide se quer desbloquear a leitura visual, as 12 verificações e o relatório completo.</p><ul><li>Pré-verificação sem custo</li><li>Uma única compra</li><li>Sem subscrição</li><li>Normalmente pronto em poucos minutos</li></ul></div>
       <div class="price-box"><span class="offer-badge">Oferta de lançamento</span><span class="previous-price">Antes 11,99 €</span><strong>7,99 €</strong><span class="per-analysis">apenas depois de aprovar as capturas</span><a class="intake-action" href="/verificacao/enviar/">Enviar capturas antes de pagar</a><small data-checkout-status>{checkoutEnabled ? "Pré-verificação gratuita. Pagamento seguro através da Stripe." : "Percurso em validação final. A compra pública continua desligada."}</small></div>
     </div>
   </section>
@@ -242,7 +242,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
       <div><p class="eyebrow">Sem letras pequenas</p><h2>Saiba exatamente o que recebe.</h2></div>
       <div class="faq-list">
         <details open><summary>A análise confirma quem está a arrendar o imóvel?</summary><p>Não. Organiza a informação disponível e indica os documentos ou confirmações que ainda deve pedir.</p></details>
-        <details><summary>O que significa não encontrar uma fotografia noutro site?</summary><p>Significa apenas que a pesquisa não devolveu uma correspondência suficiente. Não permite concluir onde a imagem apareceu primeiro.</p></details>
+        <details><summary>O que consegue a IA observar nas fotografias?</summary><p>Destaca coerência entre divisões, características visíveis, enquadramentos e detalhes que deve confirmar numa visita ou videochamada. Não substitui uma inspeção técnica.</p></details>
         <details><summary>Posso enviar uma ligação em vez de capturas de ecrã?</summary><p>O envio é feito através de capturas de ecrã que mostram o texto, o preço, as condições e as fotografias do anúncio.</p></details>
       </div>
     </div>
@@ -297,7 +297,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
     const stages = [
       { percent: 18, title: "A organizar a informação do anúncio" },
       { percent: 42, title: "A separar as fotografias do imóvel" },
-      { percent: 71, title: "A preparar a pesquisa visual" },
+      { percent: 71, title: "A interpretar os detalhes visíveis" },
       { percent: 93, title: "A construir as 12 verificações" },
       { percent: 100, title: "Relatório de demonstração concluído" }
     ];

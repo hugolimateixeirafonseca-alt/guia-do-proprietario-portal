@@ -14,7 +14,9 @@ test("a landing apresenta a pré-verificação antes do pagamento e o relatório
   assert.match(source, /Não transfira a caução/u);
   assert.match(source, /Antes 11,99 €/u);
   assert.match(source, /Enviar capturas antes de pagar/u);
-  assert.match(source, /Pesquisa de fotografias noutros sites/u);
+  assert.match(source, /Leitura inteligente das fotografias/u);
+  assert.match(source, /O que as fotografias revelam/u);
+  assert.doesNotMatch(source, /pesquisa inversa|fotografias noutros sites|correspondência pública/iu);
   assert.match(source, /Comparação do preço na cidade/u);
   assert.match(source, /capturas de ecrã \(screenshot\) do anúncio/iu);
   assert.doesNotMatch(source, /printscreen/iu);

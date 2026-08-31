@@ -45,7 +45,7 @@ function copyFor(type, { uploadUrl, reportUrl, deadline }) {
       eyebrow: "Análise concluída",
       title: "Veja a decisão antes de transferir dinheiro.",
       intro: "O relatório privado destaca primeiro os sinais observados e o que deve fazer agora.",
-      detail: "Inclui a pesquisa das fotografias, as evidências analisadas e uma mensagem pronta para enviar ao anunciante.",
+      detail: "Inclui a leitura visual das fotografias, as evidências analisadas e uma mensagem pronta para enviar ao anunciante.",
       actionUrl: reportUrl,
       actionLabel: "Ver relatório completo"
     },
