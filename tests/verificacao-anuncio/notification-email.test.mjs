@@ -9,13 +9,20 @@ const input = {
   city: "Lisboa"
 };
 
-test("gera as seis mensagens transacionais sem depender de templates Sender", () => {
-  for (const type of ["recebida", "relatorio", "falha", "lembrete_24h", "lembrete_7d", "reembolso"]) {
+test("gera as sete mensagens transacionais sem depender de templates Sender", () => {
+  for (const type of ["recebida", "precheck", "relatorio", "falha", "lembrete_24h", "lembrete_7d", "reembolso"]) {
     const message = buildVerificationEmail(type, input);
     assert.ok(message.subject.length > 10);
     assert.match(message.html, /Guia do Proprietário/);
     assert.match(message.text, /Verificação de Anúncio/);
   }
+});
+
+test("a pré-verificação envia uma ligação privada para retomar o teaser", () => {
+  const message = buildVerificationEmail("precheck", input);
+  assert.match(message.subject, /primeira leitura/i);
+  assert.match(message.html, /Ver a primeira leitura/);
+  assert.match(message.text, /https:\/\/guiadoproprietario\.pt\/verificacao\/enviar\/segredo\//);
 });
 
 test("usa a designação exigida no CTA de envio", () => {

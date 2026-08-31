@@ -1,4 +1,4 @@
-const TYPES = new Set(["recebida", "relatorio", "falha", "lembrete_24h", "lembrete_7d", "reembolso"]);
+const TYPES = new Set(["recebida", "precheck", "relatorio", "falha", "lembrete_24h", "lembrete_7d", "reembolso"]);
 
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -30,6 +30,15 @@ function copyFor(type, { uploadUrl, reportUrl, deadline }) {
       detail: deadlineText ? `Pode completar o envio até ${deadlineText}.` : "Pode completar o envio através do seu link privado.",
       actionUrl: uploadUrl,
       actionLabel: "Enviar capturas de ecrã (screenshot)"
+    },
+    precheck: {
+      subject: "A primeira leitura do anúncio está pronta",
+      eyebrow: "Pré-verificação concluída com IA",
+      title: "As suas capturas já foram verificadas.",
+      intro: "A primeira leitura encontrou informação suficiente para avançar. Veja o teaser preparado a partir do seu anúncio.",
+      detail: "A ligação é privada e permite voltar ao resultado, mesmo que tenha fechado a página por engano.",
+      actionUrl: uploadUrl,
+      actionLabel: "Ver a primeira leitura"
     },
     relatorio: {
       subject: "O seu relatório da Verificação de Anúncio está pronto",

@@ -47,7 +47,7 @@ type VerificationMessage = {
   verificacaoId: string;
 };
 
-type NotificationType = "recebida" | "relatorio" | "falha" | "lembrete_24h" | "lembrete_7d" | "reembolso";
+type NotificationType = "recebida" | "precheck" | "relatorio" | "falha" | "lembrete_24h" | "lembrete_7d" | "reembolso";
 
 interface JobRow {
   id: string;
@@ -290,7 +290,11 @@ async function analyzeJob(env: WorkerEnv, job: JobRow, attempts: number) {
 }
 
 async function precheckJob(env: WorkerEnv, job: JobRow, attempts: number) {
-  if (job.pagamentoEstado !== "pendente" || job.precheckEstado === "completed") return;
+  if (job.pagamentoEstado !== "pendente") return;
+  if (job.precheckEstado === "completed") {
+    await sendNotification(env, job, "precheck");
+    return;
+  }
   if (job.precheckEstado !== "processing") return;
   try {
     const images = await loadImages(env, job);
@@ -323,6 +327,7 @@ async function precheckJob(env: WorkerEnv, job: JobRow, attempts: number) {
       photoCount: teaser.photoCount,
       useful: teaser.useful
     });
+    await sendNotification(env, await loadJob(env.VERIFICACAO_ANUNCIO_DB, job.id), "precheck");
   } catch (error) {
     const reason = error instanceof Error ? error.message.slice(0, 100) : "unknown";
     await event(env.VERIFICACAO_ANUNCIO_DB, job.id, "precheck_tentativa_falhou", "error", { attempts, reason });
