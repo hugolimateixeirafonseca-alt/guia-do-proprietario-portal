@@ -15,7 +15,7 @@ Este documento separa o que já existe no repositório do que ainda depende de r
 - esquema D1 em `migrations/0002_verificacao_anuncio.sql`;
 - cliente transacional Sender.net e contratos dos templates;
 - criação segura de uma sessão Stripe Checkout para uma compra única;
-- validação do pagamento por webhook Stripe assinado, incluindo produto, preço de 7,99 €, moeda e estado pago;
+- validação do pagamento por webhook Stripe assinado, incluindo produto, preço de 3,90 €, moeda e estado pago;
 - criação idempotente do pedido e da ligação privada de upload após confirmação do pagamento;
 - página neutra de confirmação em `/verificacao/confirmacao/`, sem expor a ligação privada;
 - compra protegida pela variável pública `PUBLIC_VERIFICACAO_CHECKOUT_ENABLED`, desligada por defeito.
@@ -101,10 +101,10 @@ O binding existente `KIT_ESTUDANTE_DB` não deve ser reutilizado para este produ
 
 ## Stripe
 
-No painel Stripe, criar um produto com um preço único de `7,99 EUR`. Configurar na Cloudflare:
+No painel Stripe, manter o produto existente e criar um novo preço único de `3,90 EUR`. Os preços Stripe são imutáveis, por isso o preço anterior de 7,90 € não deve ser reutilizado. Configurar na Cloudflare:
 
 - `STRIPE_SECRET_KEY`, como segredo;
-- `STRIPE_PRICE_ID`, com o identificador `price_...` do preço de 7,99 €;
+- `STRIPE_PRICE_ID`, com o identificador `price_...` do preço de 3,90 €;
 - `SITE_URL=https://guiadoproprietario.pt`;
 - `STRIPE_WEBHOOK_SECRET`, como segredo obtido ao registar o endpoint abaixo.
 
@@ -119,9 +119,9 @@ Eventos necessários:
 - `checkout.session.completed`;
 - `checkout.session.async_payment_succeeded`.
 
-O endpoint volta a consultar a sessão à Stripe e rejeita pagamentos que não correspondam exatamente ao produto, ao preço configurado, a `799` cêntimos e a `EUR`. Só depois cria o pedido. Ativar `PUBLIC_VERIFICACAO_CHECKOUT_ENABLED=true` apenas quando o webhook, a fila e o email de acesso estiverem prontos.
+O endpoint volta a consultar a sessão à Stripe e rejeita pagamentos que não correspondam exatamente ao produto, ao preço configurado, a `390` cêntimos e a `EUR`. Só depois cria o pedido. Ativar `PUBLIC_VERIFICACAO_CHECKOUT_ENABLED=true` apenas quando o webhook, a fila e o email de acesso estiverem prontos e após autorização expressa do proprietário.
 
-O preço configurado para este produto é `price_1U9truFOwu52zlwGL2wlf4OX`. O Payment Link criado durante a preparação não faz parte do fluxo. O site cria sempre uma sessão Checkout programaticamente.
+O preço atual configurado para este produto é `price_1UAd4pFOwu52zlwGcPkTzJrr`, correspondente a 3,90 €. O Payment Link criado durante a preparação não faz parte do fluxo. O site cria sempre uma sessão Checkout programaticamente.
 
 Em 30 de agosto de 2026 foi criada uma chave restrita Stripe exclusiva para o Worker, limitada a escrita em cobranças e reembolsos. O valor foi transferido diretamente da área de transferência para o segredo `STRIPE_SECRET_KEY` do Worker e removido da área de transferência de seguida. Não foi mostrado nem guardado no repositório.
 

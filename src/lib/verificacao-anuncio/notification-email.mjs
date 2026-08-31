@@ -54,7 +54,7 @@ function copyFor(type, { uploadUrl, reportUrl, deadline }) {
       eyebrow: "Análise interrompida",
       title: "Não lhe vamos entregar um relatório incompleto.",
       intro: "O processamento não reuniu condições técnicas para produzir uma análise fiável.",
-      detail: "Encerrámos o pedido e iniciámos automaticamente o reembolso integral de 7,99 €.",
+      detail: "Encerrámos o pedido e iniciámos automaticamente o reembolso integral de 3,90 €.",
       actionUrl: null,
       actionLabel: null
     },
@@ -77,10 +77,10 @@ function copyFor(type, { uploadUrl, reportUrl, deadline }) {
       actionLabel: "Enviar capturas de ecrã (screenshot)"
     },
     reembolso: {
-      subject: "O reembolso de 7,99 € foi iniciado",
+      subject: "O reembolso de 3,90 € foi iniciado",
       eyebrow: "Reembolso confirmado",
       title: "A devolução integral já foi emitida.",
-      intro: "O pedido foi encerrado e enviámos a devolução de 7,99 € para o método de pagamento original.",
+      intro: "O pedido foi encerrado e enviámos a devolução de 3,90 € para o método de pagamento original.",
       detail: "O valor pode demorar alguns dias úteis a aparecer. O prazo final depende do banco ou emissor do cartão.",
       actionUrl: null,
       actionLabel: null

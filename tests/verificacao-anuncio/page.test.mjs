@@ -12,8 +12,11 @@ test("a landing apresenta a pré-verificação antes do pagamento e o relatório
   assert.match(source, /data-demo-form/u);
   assert.match(source, /data-results/u);
   assert.match(source, /Não transfira a caução/u);
-  assert.match(source, /Antes 11,99 €/u);
-  assert.match(source, /Enviar capturas antes de pagar/u);
+  assert.match(source, /Antes 7,90 €/u);
+  assert.match(source, /3,90 €/u);
+  assert.match(source, /poupa 4,00 €/iu);
+  assert.doesNotMatch(source, /7,99 €|11,99 €/u);
+  assert.match(source, /Analisar as minhas capturas grátis/u);
   assert.match(source, /Análise real sem pagamento inicial/u);
   assert.match(source, /Enviar capturas grátis/u);
   assert.match(source, /não são enviados para análise/u);
@@ -25,7 +28,7 @@ test("a landing apresenta a pré-verificação antes do pagamento e o relatório
   assert.match(source, /capturas de ecrã \(screenshot\) do anúncio/iu);
   assert.doesNotMatch(source, /printscreen/iu);
   assert.match(source, /Pré-verificação sem custo/u);
-  assert.match(source, /Pagamento e análise ainda não estão ativos/u);
+  assert.match(source, /A pré-verificação gratuita está ativa/u);
   assert.match(source, /files\.length >= 1/u);
   assert.doesNotMatch(source, /files\.length < 4/u);
   assert.match(source, /Sistema inteligente com IA/u);
@@ -56,6 +59,8 @@ test("a página privada liga o envio real ao estado do pedido", async () => {
   assert.match(source, /Android/u);
   assert.match(source, /iPhone/u);
   assert.match(source, /data-teaser/u);
+  assert.match(source, /<s>7,90 €<\/s> 3,90 €/u);
+  assert.doesNotMatch(source, /7,99 €|11,99 €/u);
   assert.match(source, /Primeiro as capturas\. Só depois o pagamento/u);
   const intakeScript = await readFile(new URL("../../public/scripts/verificacao-intake.js", import.meta.url), "utf8");
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/intake/u);

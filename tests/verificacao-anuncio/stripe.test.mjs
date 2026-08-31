@@ -63,6 +63,7 @@ test("aceita apenas uma resposta de checkout alojada pela Stripe", async () => {
 });
 
 test("confirma produto, estado, preço, moeda, email e pagamento antes de criar o pedido", () => {
+  assert.equal(VERIFICATION_PRICE_CENTS, 390);
   const paid = validatePaidVerificationSession({
     id: "cs_test_1234567890",
     metadata: { produto: "verificacao_anuncio_v1" },
@@ -77,13 +78,13 @@ test("confirma produto, estado, preço, moeda, email e pagamento antes de criar 
   assert.deepEqual(paid, { email: "cliente@example.com", paymentIntent: "pi_1234567890" });
 });
 
-test("recusa um pagamento com valor diferente da oferta de 7,99 €", () => {
+test("recusa um pagamento com valor diferente da oferta de 3,90 €", () => {
   assert.throws(() => validatePaidVerificationSession({
     metadata: { produto: "verificacao_anuncio_v1" },
     mode: "payment",
     payment_status: "paid",
     currency: "eur",
-    amount_total: 1199,
+    amount_total: 790,
     payment_intent: "pi_1234567890",
     customer_details: { email: "cliente@example.com" },
     line_items: { data: [{ quantity: 1, price: { id: priceId } }] }

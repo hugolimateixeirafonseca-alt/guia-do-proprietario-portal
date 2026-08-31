@@ -54,7 +54,7 @@ O envio aceita de uma a oito capturas. Uma captura é suficiente para iniciar o 
 Já existe no repositório, mas permanece desligado e não está ativo em produção:
 
 - criação do checkout Stripe e botão protegido por configuração;
-- webhook Stripe assinado, com confirmação do preço de 7,99 € e criação idempotente do pedido;
+- webhook Stripe assinado, com confirmação do preço de 3,90 € e criação idempotente do pedido;
 - página neutra de confirmação do pagamento;
 - upload privado e consulta do estado do pedido;
 - cliente transacional Sender.net.
@@ -110,7 +110,7 @@ O principal ponto de entrada será, numa fase posterior:
 
 ### Preço inicial
 
-**7,99 € — pagamento único.**
+**3,90 € — pagamento único. Preço anterior: 7,90 €.**
 
 É um preço de validação e poderá ser revisto depois de existirem dados reais de:
 
@@ -579,7 +579,7 @@ Exemplos:
 Landing /verificar-anuncio
         |
         v
-Stripe Checkout — 7,99 €
+Stripe Checkout — 3,90 €
         |
         +--> webhook cria registo + token
         |
@@ -1192,7 +1192,7 @@ estado = falhou_reembolsado
 
 Texto do email:
 
-> Não conseguimos concluir a análise. Devolvemos os 7,99 €.
+> Não conseguimos concluir a análise. Devolvemos os 3,90 €.
 
 Nunca entregar um relatório improvisado.
 
@@ -1204,7 +1204,7 @@ Nunca entregar um relatório improvisado.
 
 - Checkout;
 - modo `payment`;
-- preço 7,99 €;
+- preço 3,90 €;
 - cartão;
 - MB WAY, se disponível;
 - email obrigatório.
@@ -1623,7 +1623,7 @@ A pesquisa reversa de fotografias **está dentro da V1** e não deve ser removid
 
 > Em minutos recebe um relatório com o que foi possível confirmar, o que falta confirmar e as perguntas exatas a fazer antes de pagar.
 
-> **Verificar um anúncio — 7,99 €**
+> **Verificar um anúncio — 3,90 €**
 
 ### Pesquisa visual
 
@@ -1645,7 +1645,7 @@ Não usar:
 
 ### Garantia técnica
 
-> Se o sistema não conseguir produzir a análise, devolvemos automaticamente os 7,99 €.
+> Se o sistema não conseguir produzir a análise, devolvemos automaticamente os 3,90 €.
 
 ### Rodapé do relatório
 
@@ -1661,7 +1661,7 @@ Quando chegar o momento, a proposta poderá ser:
 
 > **Já encontrou um quarto?**  
 > Antes de transferir a caução, faça as 12 verificações.  
-> **Verificar um anúncio — 7,99 €**
+> **Verificar um anúncio — 3,90 €**
 
 Mas este bloco só será implementado depois de todo o produto estar funcional e após autorização expressa.
 
@@ -1829,7 +1829,7 @@ A V1 será um produto:
 
 O cliente:
 
-1. paga 7,99 €;
+1. paga 3,90 €;
 2. envia screenshots;
 3. o sistema extrai factos;
 4. identifica e deduplica fotografias;

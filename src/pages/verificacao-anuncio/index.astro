@@ -29,7 +29,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
   titulo="Verificação de Anúncio"
   descricao="Identificamos sinais observáveis, interpretamos as fotografias e mostramos o que deve fazer antes de transferir dinheiro."
 >
-  <div class="preview-ribbon"><strong>Oferta de lançamento: 7,99 €</strong><span>{checkoutEnabled ? "Pagamento seguro processado pela Stripe." : "Pré-visualização local. Pagamento e análise ainda não estão ativos."}</span></div>
+  <div class="preview-ribbon"><strong>Novo preço: 3,90 € por análise completa</strong><span>{checkoutEnabled ? "Pagamento único e seguro através da Stripe." : "A pré-verificação gratuita está ativa. A compra pública continua em validação."}</span></div>
   <section class="hero">
     <div class="hero-glow hero-glow-one" aria-hidden="true"></div>
     <div class="hero-glow hero-glow-two" aria-hidden="true"></div>
@@ -41,13 +41,13 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         <p class="lead">Envie as capturas de ecrã do anúncio. O sistema inteligente lê o texto, interpreta o que é visível nas fotografias e cruza as condições antes de qualquer pagamento.</p>
         <div class="hero-offer">
           <div class="hero-price">
-            <span class="old-price">11,99 €</span>
-            <strong>7,99 €</strong>
-            <small>Preço de lançamento</small>
+            <span class="old-price">Antes 7,90 €</span>
+            <strong>3,90 €</strong>
+            <small>Agora poupa 4,00 €</small>
           </div>
           <a class="primary-action" href="/verificacao/enviar/">Verificar capturas grátis <span aria-hidden="true">→</span></a>
         </div>
-        <p class="pay-later">Primeiro recebe uma pré-verificação e um teaser. Só depois decide se quer pagar 7,99 € pelo relatório completo.</p>
+        <p class="pay-later">Comece grátis. Veja primeiro o que a IA detetou e só pague 3,90 € se quiser desbloquear a decisão completa, as 12 verificações e a mensagem pronta a enviar.</p>
         <ul class="trust-list" aria-label="O que está incluído">
           <li>Pré-verificação gratuita com IA</li>
           <li>Leitura inteligente das fotografias</li>
@@ -241,8 +241,8 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
   <section class="pricing-section" id="comprar">
     <div class="shell pricing-card">
-      <div class="pricing-copy"><p class="eyebrow">Primeiro veja se as suas capturas servem</p><h2>Envie primeiro. Pague só depois do teaser.</h2><p>O sistema inteligente com IA confirma gratuitamente se o material é suficiente e mostra uma primeira leitura do seu anúncio. Só depois decide se quer desbloquear a leitura visual, as 12 verificações e o relatório completo.</p><ul><li>Pré-verificação sem custo</li><li>Uma única compra</li><li>Sem subscrição</li><li>Normalmente pronto em poucos minutos</li></ul></div>
-      <div class="price-box"><span class="offer-badge">Oferta de lançamento</span><span class="previous-price">Antes 11,99 €</span><strong>7,99 €</strong><span class="per-analysis">apenas depois de aprovar as capturas</span><a class="intake-action" href="/verificacao/enviar/">Enviar capturas antes de pagar</a><small data-checkout-status>{checkoutEnabled ? "Pré-verificação gratuita. Pagamento seguro através da Stripe." : "Percurso em validação final. A compra pública continua desligada."}</small></div>
+      <div class="pricing-copy"><p class="eyebrow">Primeiro veja se as suas capturas servem</p><h2>Comece grátis. Desbloqueie tudo por 3,90 €.</h2><p>O sistema inteligente com IA confirma gratuitamente se o material é suficiente e mostra uma primeira leitura real do seu anúncio. Se vir valor, desbloqueia a decisão antes de pagar, a leitura visual, as 12 verificações e a mensagem pronta a enviar.</p><ul><li>Pré-verificação sem custo</li><li>Poupa 4,00 € face ao preço anterior</li><li>Pagamento único, sem subscrição</li><li>Normalmente pronto em poucos minutos</li></ul></div>
+      <div class="price-box"><span class="offer-badge">Novo preço</span><span class="previous-price">Antes 7,90 €</span><strong>3,90 €</strong><span class="per-analysis">pagamento único, apenas depois do teaser</span><a class="intake-action" href="/verificacao/enviar/">Analisar as minhas capturas grátis</a><small data-checkout-status>{checkoutEnabled ? "Pré-verificação gratuita. Pagamento seguro através da Stripe." : "A pré-verificação gratuita está disponível. A compra pública continua desligada durante a validação final."}</small></div>
     </div>
   </section>
 

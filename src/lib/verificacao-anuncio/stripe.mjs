@@ -1,6 +1,6 @@
 const STRIPE_API_BASE = "https://api.stripe.com/v1";
 export const STRIPE_PRODUCT_KEY = "verificacao_anuncio_v1";
-export const VERIFICATION_PRICE_CENTS = 799;
+export const VERIFICATION_PRICE_CENTS = 390;
 
 export class StripeIntegrationError extends Error {
   constructor(code, status = 0) {
