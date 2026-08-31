@@ -24,6 +24,8 @@ const messages = {
   captures_too_large: "O conjunto de capturas é demasiado pesado.", unsupported_capture_type: "Use apenas ficheiros JPEG, PNG ou WebP.",
   capture_type_mismatch: "Um dos ficheiros não contém uma imagem válida.", invalid_city: "Indique a cidade apresentada no anúncio.",
   privacy_confirmation_required: "Confirme a autorização para tratar as capturas.", intake_not_available: "A pré-verificação pública ainda não está disponível.",
+  service_not_configured: "A pré-verificação ainda não está configurada. Tente novamente dentro de alguns minutos.",
+  upload_not_configured: "O envio seguro das capturas ainda não está disponível. Tente novamente dentro de alguns minutos.",
   processing_unavailable: "Não foi possível iniciar a análise agora. Tente novamente dentro de alguns minutos.",
   too_many_requests: "Foram feitas demasiadas tentativas. Aguarde alguns minutos.", temporary_error: "Ocorreu uma falha temporária. Tente novamente."
 };
@@ -54,6 +56,8 @@ function showProcessing(paid = false) {
 
 function refresh() {
   if (!input || !filesBox || !submit || !formStatus || !form) return;
+  formStatus.classList.remove("is-error");
+  if (badge) badge.textContent = "Pronto para envio";
   const files = Array.from(input.files || []);
   filesBox.innerHTML = files.length
     ? files.slice(0, 8).map((file, index) => `<div><span>${index + 1}</span><strong>${escapeHtml(file.name)}</strong><small>${Math.max(1, Math.round(file.size / 1024))} KB</small></div>`).join("")
@@ -149,9 +153,11 @@ form?.addEventListener("submit", async (event) => {
     pollTimer = window.setTimeout(readState, 3000);
   } catch (error) {
     const code = error instanceof Error ? error.message : "temporary_error";
-    formStatus.textContent = messages[code] || "Não foi possível enviar as capturas. Tente novamente.";
     submit.textContent = isPrivate ? "Tentar novamente" : "Fazer pré-verificação gratuita com IA";
     refresh();
+    formStatus.textContent = messages[code] || "Não foi possível enviar as capturas. Tente novamente.";
+    formStatus.classList.add("is-error");
+    if (badge) badge.textContent = "Envio não concluído";
   }
 });
 

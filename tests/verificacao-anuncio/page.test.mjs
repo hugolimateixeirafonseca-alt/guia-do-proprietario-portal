@@ -60,6 +60,9 @@ test("a página privada liga o envio real ao estado do pedido", async () => {
   const intakeScript = await readFile(new URL("../../public/scripts/verificacao-intake.js", import.meta.url), "utf8");
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/intake/u);
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/checkout/u);
+  assert.match(intakeScript, /refresh\(\);\s*formStatus\.textContent = messages\[code\]/u);
+  assert.match(intakeScript, /formStatus\.classList\.add\("is-error"\)/u);
+  assert.match(source, /\.form-status\.is-error/u);
   assert.match(source, /\[hidden\]\)\{display:none!important\}/u);
   assert.doesNotMatch(source, /printscreen/iu);
 });
