@@ -109,6 +109,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     } else {
       await config.queue!.send({ type: "verificacao_anuncio_pagamento_confirmado", verificacaoId: job.id });
     }
+    await config.queue!.send({ type: "verificacao_anuncio_meta_purchase", verificacaoId: job.id });
     await config.db.prepare(
       `INSERT INTO verificacao_anuncio_events (job_id, tipo, estado, criado_em)
        VALUES (?, 'pagamento_confirmado', 'success', ?)`

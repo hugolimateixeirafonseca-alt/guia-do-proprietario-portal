@@ -24,11 +24,17 @@ import {
   upsertLead,
   type RequestContext
 } from "../../lib/kit-estudante";
+import {
+  OFFICIAL_META_DATASET_ID,
+  hasMetaMeasurementConsent,
+  sendMetaConversion
+} from "../../../src/lib/meta-conversions.mjs";
 
 const STUDENT_SENDER_GROUP_ID = "b4wZA2";
 const NEWSLETTER_SENDER_GROUP_ID = "egK8WG";
 
-export const onRequestPost = async ({ request, env }: RequestContext) => {
+export const onRequestPost = async (context: RequestContext) => {
+  const { request, env } = context;
   const reqId = requestId(request);
   let db: ReturnType<typeof requireConfiguration>["db"] | undefined;
   let source = "direto";
@@ -142,6 +148,59 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     });
 
     await cleanupExpiredSessions(db);
+    if (body.metaMeasurement === true && hasMetaMeasurementConsent(request)) {
+      let eventSourceUrl = new URL(request.url).origin;
+      try {
+        const declaredUrl = new URL(cleanText(body.eventSourceUrl, 1000));
+        if (declaredUrl.origin === new URL(request.url).origin) eventSourceUrl = declaredUrl.toString();
+      } catch { /* mantém apenas a origem segura */ }
+      const metaTask = (async () => {
+        try {
+          const conversion = await sendMetaConversion({
+            accessToken: env.META_CAPI_ACCESS_TOKEN,
+            datasetId: env.META_DATASET_ID || OFFICIAL_META_DATASET_ID,
+            graphVersion: env.META_GRAPH_VERSION,
+            testEventCode: env.META_TEST_EVENT_CODE,
+            eventName: "Lead",
+            eventId: eventRef,
+            eventSourceUrl,
+            email,
+            externalId: `kit-lead-${leadId}`,
+            fbp: cleanText(body.metaFbp, 240),
+            fbc: cleanText(body.metaFbc, 240),
+            clientIpAddress: cleanText(request.headers.get("CF-Connecting-IP"), 80),
+            clientUserAgent: cleanText(request.headers.get("User-Agent"), 500),
+            customData: {
+              content_name: "kit_estudante_2026",
+              content_category: "lead_magnet"
+            }
+          });
+          await logEvent(db, {
+            leadId,
+            source,
+            event: "meta_lead_conversion",
+            status: conversion.sent ? "success" : "ignored",
+            error: conversion.sent ? undefined : conversion.reason,
+            consentVersion,
+            requestId: eventRef,
+            ipHash
+          });
+        } catch (error) {
+          await logEvent(db, {
+            leadId,
+            source,
+            event: "meta_lead_conversion",
+            status: "error",
+            error: error instanceof Error ? error.message.slice(0, 100) : "unknown",
+            consentVersion,
+            requestId: eventRef,
+            ipHash
+          }).catch(() => undefined);
+        }
+      })();
+      if (context.waitUntil) context.waitUntil(metaTask);
+      else await metaTask;
+    }
     return json({ ok: true, redirect: "/kit-estudante/obrigado/" }, 200, {
       "Set-Cookie": sessionCookie(session.token)
     });

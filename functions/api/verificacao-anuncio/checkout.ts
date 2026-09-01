@@ -12,10 +12,45 @@ import {
   json,
   requireConfiguration,
   safeError,
+  sendVerificationMetaConversion,
   type RequestContext
 } from "../../lib/verificacao-anuncio";
 
-export const onRequestPost = async ({ request, env }: RequestContext) => {
+async function trackCheckout(
+  request: Request,
+  env: RequestContext["env"],
+  db: ReturnType<typeof requireConfiguration>["db"],
+  row: Awaited<ReturnType<typeof findVerification>>["row"],
+  sessionId: string
+) {
+  try {
+    const result = await sendVerificationMetaConversion(env, row, {
+      eventName: "InitiateCheckout",
+      eventId: `checkout-${sessionId}`,
+      request,
+      customData: {
+        currency: "EUR",
+        value: 3.9,
+        content_name: "Verificação de Anúncio",
+        content_ids: ["verificacao-anuncio"],
+        content_type: "product",
+        num_items: 1
+      }
+    });
+    await db.prepare(
+      `INSERT INTO verificacao_anuncio_events (job_id, tipo, estado, detalhe, criado_em)
+       VALUES (?, 'meta_initiate_checkout', ?, ?, ?)`
+    ).bind(row.id, result.sent ? "success" : "ignored", JSON.stringify(result), new Date().toISOString()).run();
+  } catch (error) {
+    await db.prepare(
+      `INSERT INTO verificacao_anuncio_events (job_id, tipo, estado, detalhe, criado_em)
+       VALUES (?, 'meta_initiate_checkout', 'error', ?, ?)`
+    ).bind(row.id, JSON.stringify({ reason: error instanceof Error ? error.message.slice(0, 100) : "unknown" }), new Date().toISOString()).run().catch(() => undefined);
+  }
+}
+
+export const onRequestPost = async (context: RequestContext) => {
+  const { request, env } = context;
   try {
     ensureSameOrigin(request);
     const config = requireConfiguration(env);
@@ -47,6 +82,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
         });
         const existingUrl = new URL(String(existingSession?.url || ""));
         if (existingSession?.status === "open" && existingUrl.protocol === "https:" && existingUrl.hostname === "checkout.stripe.com") {
+          const trackTask = trackCheckout(request, env, config.db, row, row.stripeSessionId);
+          if (context.waitUntil) context.waitUntil(trackTask); else await trackTask;
           return json({ ok: true, url: existingUrl.toString(), reused: true });
         }
       } catch (error) {
@@ -66,6 +103,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       `UPDATE verificacao_anuncio_jobs SET stripe_session_id = ?
        WHERE id = ? AND pagamento_estado = 'pendente'`
     ).bind(session.id, row.id).run();
+    const trackTask = trackCheckout(request, env, config.db, row, session.id);
+    if (context.waitUntil) context.waitUntil(trackTask); else await trackTask;
     return json({ ok: true, url: session.url });
   } catch (error) {
     if (error instanceof StripeIntegrationError) {

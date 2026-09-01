@@ -5,6 +5,12 @@ import {
   validateCity,
   validateUploadFiles
 } from "../../src/lib/verificacao-anuncio/intake.mjs";
+import {
+  OFFICIAL_META_DATASET_ID,
+  buildMetaAttribution,
+  parseMetaAttribution,
+  sendMetaConversion
+} from "../../src/lib/meta-conversions.mjs";
 
 export interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
@@ -47,11 +53,16 @@ export interface VerificationEnv {
   SENDER_TRANSACTIONAL_FROM_EMAIL?: string;
   SENDER_TRANSACTIONAL_FROM_NAME?: string;
   VERIFICACAO_PUBLIC_INTAKE_ENABLED?: string;
+  META_CAPI_ACCESS_TOKEN?: string;
+  META_DATASET_ID?: string;
+  META_GRAPH_VERSION?: string;
+  META_TEST_EVENT_CODE?: string;
 }
 
 export interface RequestContext {
   request: Request;
   env: VerificationEnv;
+  waitUntil?(promise: Promise<unknown>): void;
 }
 
 export interface VerificationRow {
@@ -69,6 +80,7 @@ export interface VerificationRow {
   emailCipher: string;
   accessTokenCipher: string | null;
   stripeSessionId: string;
+  metaAttributionCipher: string | null;
 }
 
 export class PublicVerificationError extends Error {
@@ -176,11 +188,48 @@ export async function findVerification(db: D1Database, token: string) {
       ficheiros_json AS ficheirosJson, precheck_estado AS precheckEstado,
       precheck_json AS precheckJson, pagamento_estado AS pagamentoEstado,
       email_cipher AS emailCipher, access_token_cipher AS accessTokenCipher,
-      stripe_session_id AS stripeSessionId
+      stripe_session_id AS stripeSessionId, meta_attribution_cipher AS metaAttributionCipher
      FROM verificacao_anuncio_jobs WHERE access_token_hash = ? LIMIT 1`
   ).bind(tokenHash).first<VerificationRow>();
   if (!row) throw new PublicVerificationError(404, "verification_not_found");
   return { row, tokenHash };
+}
+
+export async function sendVerificationMetaConversion(
+  env: VerificationEnv,
+  row: { id: string; emailCipher: string; metaAttributionCipher?: string | null },
+  options: {
+    eventName: string;
+    eventId: string;
+    eventTime?: number;
+    customData?: Record<string, unknown>;
+    request?: Request;
+  }
+) {
+  if (!env.META_CAPI_ACCESS_TOKEN || !row.metaAttributionCipher || !env.VERIFICACAO_ACCESS_SECRET) {
+    return { sent: false, reason: "not_configured" };
+  }
+  const attribution = parseMetaAttribution(await decryptPrivateValue(row.metaAttributionCipher, env.VERIFICACAO_ACCESS_SECRET));
+  if (!attribution) return { sent: false, reason: "no_consent" };
+  const email = await decryptPrivateValue(row.emailCipher, env.VERIFICACAO_ACCESS_SECRET);
+  const request = options.request;
+  return sendMetaConversion({
+    accessToken: env.META_CAPI_ACCESS_TOKEN,
+    datasetId: env.META_DATASET_ID || OFFICIAL_META_DATASET_ID,
+    graphVersion: env.META_GRAPH_VERSION,
+    testEventCode: env.META_TEST_EVENT_CODE,
+    eventName: options.eventName,
+    eventId: options.eventId,
+    eventTime: options.eventTime,
+    eventSourceUrl: attribution.eventSourceUrl,
+    email,
+    externalId: row.id,
+    fbp: attribution.fbp,
+    fbc: attribution.fbc,
+    clientIpAddress: request?.headers.get("CF-Connecting-IP") || attribution.clientIpAddress,
+    clientUserAgent: request?.headers.get("User-Agent") || attribution.clientUserAgent,
+    customData: options.customData || {}
+  });
 }
 
 export async function checkRateLimit(request: Request, db: D1Database, secret: string, limit: number) {
@@ -228,7 +277,10 @@ export async function readUpload(request: Request, options: { requireEmail?: boo
     if (options.requireEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/u.test(email)) {
       throw new PublicVerificationError(400, "invalid_email");
     }
-    return { cidade, email, captures: await validateUploadFiles(captures) };
+    const metaAttribution = form.get("meta_consent") === "sim"
+      ? buildMetaAttribution(request, { fbp: form.get("meta_fbp"), fbc: form.get("meta_fbc") })
+      : null;
+    return { cidade, email, captures: await validateUploadFiles(captures), metaAttribution };
   } catch (error) {
     if (error instanceof IntakeValidationError) throw new PublicVerificationError(error.status, error.code);
     throw error;

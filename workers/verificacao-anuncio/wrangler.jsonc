@@ -8,7 +8,9 @@
     "SENDER_TRANSACTIONAL_FROM_EMAIL": "geral@guiadoproprietario.pt",
     "SENDER_TRANSACTIONAL_FROM_NAME": "Guia do Proprietário",
     "VERIFICACAO_EXTRACTION_MODEL": "gpt-5.4-mini",
-    "VERIFICACAO_CLASSIFICATION_MODEL": "gpt-5.4-mini"
+    "VERIFICACAO_CLASSIFICATION_MODEL": "gpt-5.4-mini",
+    "META_DATASET_ID": "1394294186173855",
+    "META_GRAPH_VERSION": "v25.0"
   },
   "d1_databases": [
     {

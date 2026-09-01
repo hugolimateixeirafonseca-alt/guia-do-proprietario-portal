@@ -19,7 +19,7 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
       <span class="cookie-always">Sempre ativos</span>
     </div>
     <label class="cookie-option">
-      <div><strong>Medição</strong><span>Mede visitas e resultados de campanhas através do Meta Pixel, quando estiver ativo.</span></div>
+      <div><strong>Medição</strong><span>Mede visitas e resultados de campanhas através do Meta Pixel e da API de Conversões, quando estiverem ativos.</span></div>
       <input id="cookie-measurement" type="checkbox" />
     </label>
   </div>
@@ -35,7 +35,7 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
 <script is:inline define:vars={{ metaPixelId }}>
   (() => {
     const COOKIE_NAME = "gp_cookie_preferences";
-    const COOKIE_VERSION = "2026-08-05-1";
+    const COOKIE_VERSION = "2026-09-01-1";
     const banner = document.getElementById("cookie-banner");
     const options = document.getElementById("cookie-options");
     const measurement = document.getElementById("cookie-measurement");

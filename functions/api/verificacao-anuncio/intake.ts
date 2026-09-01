@@ -39,18 +39,22 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     const createdAt = new Date();
     const precheckExpiresAt = new Date(createdAt.getTime() + 48 * 60 * 60 * 1000).toISOString();
     const reportExpiresAt = new Date(createdAt.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString();
+    const metaAttributionCipher = upload.metaAttribution
+      ? await encryptPrivateValue(JSON.stringify(upload.metaAttribution), config.secret)
+      : null;
     await config.db.prepare(
       `INSERT INTO verificacao_anuncio_jobs
-        (id, access_token_hash, access_token_cipher, stripe_session_id, email_cipher, estado,
+        (id, access_token_hash, access_token_cipher, stripe_session_id, email_cipher, meta_attribution_cipher, estado,
          cidade, ficheiros_json, criado_em, upload_em, upload_expira_em, expira_em,
          imagens_apagar_em, precheck_estado, pagamento_estado)
-       VALUES (?, ?, ?, ?, ?, 'em_analise', ?, ?, ?, ?, ?, ?, ?, 'processing', 'pendente')`
+       VALUES (?, ?, ?, ?, ?, ?, 'em_analise', ?, ?, ?, ?, ?, ?, ?, 'processing', 'pendente')`
     ).bind(
       jobId,
       access.tokenHash,
       access.tokenCipher,
       `pre_${jobId}`,
       await encryptPrivateValue(upload.email, config.secret),
+      metaAttributionCipher,
       upload.cidade,
       JSON.stringify(files),
       createdAt.toISOString(),

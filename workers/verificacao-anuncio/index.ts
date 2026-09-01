@@ -7,7 +7,12 @@ import { buildVerificationEmail } from "../../src/lib/verificacao-anuncio/notifi
 import { createSenderTransactionalClient } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
 import { createStripeRefund } from "../../src/lib/verificacao-anuncio/stripe-refund.mjs";
 import { normalizeExtractionGeometry, validateExtraction } from "../../src/lib/verificacao-anuncio/validate.mjs";
-import { decryptPrivateValue, type D1Database, type R2Bucket } from "../../functions/lib/verificacao-anuncio";
+import {
+  decryptPrivateValue,
+  sendVerificationMetaConversion,
+  type D1Database,
+  type R2Bucket
+} from "../../functions/lib/verificacao-anuncio";
 
 interface QueueMessage<T> {
   body: T;
@@ -36,10 +41,14 @@ interface WorkerEnv {
   SENDER_API_TOKEN: string;
   SENDER_TRANSACTIONAL_FROM_EMAIL?: string;
   SENDER_TRANSACTIONAL_FROM_NAME?: string;
+  META_CAPI_ACCESS_TOKEN?: string;
+  META_DATASET_ID?: string;
+  META_GRAPH_VERSION?: string;
+  META_TEST_EVENT_CODE?: string;
 }
 
 type VerificationMessage = {
-  type: "verificacao_anuncio_pagamento_confirmado" | "verificacao_anuncio_precheck" | "verificacao_anuncio_analisar";
+  type: "verificacao_anuncio_pagamento_confirmado" | "verificacao_anuncio_precheck" | "verificacao_anuncio_analisar" | "verificacao_anuncio_meta_purchase";
   verificacaoId: string;
 };
 
@@ -65,6 +74,7 @@ interface JobRow {
   precheckEstado: string;
   precheckJson: string | null;
   pagamentoEstado: string;
+  metaAttributionCipher: string | null;
 }
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -96,7 +106,8 @@ async function loadJob(db: D1Database, id: string) {
       falha_motivo AS falhaMotivo, email_cipher AS emailCipher,
       access_token_cipher AS accessTokenCipher, stripe_payment_id AS stripePaymentId,
       relatorio_pdf_key AS pdfKey, precheck_estado AS precheckEstado,
-      precheck_json AS precheckJson, pagamento_estado AS pagamentoEstado
+      precheck_json AS precheckJson, pagamento_estado AS pagamentoEstado,
+      meta_attribution_cipher AS metaAttributionCipher
      FROM verificacao_anuncio_jobs WHERE id = ? LIMIT 1`
   ).bind(id).first<JobRow>();
   if (!job) throw new Error("job_not_found");
@@ -109,6 +120,32 @@ async function event(db: D1Database, jobId: string, type: string, state: "succes
     `INSERT INTO verificacao_anuncio_events (job_id, tipo, estado, detalhe, criado_em)
      VALUES (?, ?, ?, ?, ?)`
   ).bind(jobId, type, state, safeDetail, nowIso()).run();
+}
+
+async function trackMetaConversion(
+  env: WorkerEnv,
+  job: JobRow,
+  eventName: string,
+  eventId: string,
+  customData: Record<string, unknown>,
+  retryOnFailure = false
+) {
+  try {
+    const result = await sendVerificationMetaConversion(env, job, { eventName, eventId, customData });
+    await event(
+      env.VERIFICACAO_ANUNCIO_DB,
+      job.id,
+      `meta_${eventName.toLowerCase()}`,
+      result.sent ? "success" : "error",
+      result.sent ? undefined : { state: "ignored", reason: result.reason }
+    );
+    return result;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message.slice(0, 100) : "unknown";
+    await event(env.VERIFICACAO_ANUNCIO_DB, job.id, `meta_${eventName.toLowerCase()}`, "error", { reason });
+    if (retryOnFailure) throw error;
+    return { sent: false, reason };
+  }
 }
 
 async function acquireNotification(db: D1Database, jobId: string, type: NotificationType) {
@@ -285,6 +322,10 @@ async function analyzeJob(env: WorkerEnv, job: JobRow, attempts: number) {
 async function precheckJob(env: WorkerEnv, job: JobRow, attempts: number) {
   if (job.pagamentoEstado !== "pendente") return;
   if (job.precheckEstado === "completed") {
+    await trackMetaConversion(env, job, "PreVerificationComplete", `precheck-${job.id}`, {
+      content_name: "Pré-verificação de anúncio",
+      content_category: "verificacao_anuncio"
+    });
     await sendNotification(env, job, "precheck");
     return;
   }
@@ -320,7 +361,12 @@ async function precheckJob(env: WorkerEnv, job: JobRow, attempts: number) {
       photoCount: teaser.photoCount,
       useful: teaser.useful
     });
-    await sendNotification(env, await loadJob(env.VERIFICACAO_ANUNCIO_DB, job.id), "precheck");
+    const completedJob = await loadJob(env.VERIFICACAO_ANUNCIO_DB, job.id);
+    await trackMetaConversion(env, completedJob, "PreVerificationComplete", `precheck-${job.id}`, {
+      content_name: "Pré-verificação de anúncio",
+      content_category: "verificacao_anuncio"
+    });
+    await sendNotification(env, completedJob, "precheck");
   } catch (error) {
     const reason = error instanceof Error ? error.message.slice(0, 100) : "unknown";
     await event(env.VERIFICACAO_ANUNCIO_DB, job.id, "precheck_tentativa_falhou", "error", { attempts, reason });
@@ -425,6 +471,17 @@ async function processMessage(env: WorkerEnv, message: VerificationMessage, atte
   }
   if (message.type === "verificacao_anuncio_precheck") {
     await precheckJob(env, job, attempts);
+    return;
+  }
+  if (message.type === "verificacao_anuncio_meta_purchase") {
+    await trackMetaConversion(env, job, "Purchase", `purchase-${job.stripePaymentId || job.id}`, {
+      currency: "EUR",
+      value: 3.9,
+      content_name: "Verificação de Anúncio",
+      content_ids: ["verificacao-anuncio"],
+      content_type: "product",
+      num_items: 1
+    }, true);
     return;
   }
   if (message.type !== "verificacao_anuncio_analisar") throw new Error("unknown_queue_message");

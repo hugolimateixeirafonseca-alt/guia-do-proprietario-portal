@@ -35,6 +35,23 @@ const escapeHtml = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;")
 const hideAll = () => [form, access, processing, teaserBox, notReady].forEach((element) => { if (element) element.hidden = true; });
 const setText = (selector, value) => { const element = document.querySelector(selector); if (element) element.textContent = value; };
 
+function cookieValue(name) {
+  const entry = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${name}=`));
+  if (!entry) return "";
+  try { return decodeURIComponent(entry.slice(name.length + 1)); } catch { return ""; }
+}
+
+function metaAttribution() {
+  try {
+    const preferences = JSON.parse(cookieValue("gp_cookie_preferences") || "{}");
+    if (preferences.measurement !== true) return null;
+  } catch { return null; }
+  let fbc = cookieValue("_fbc");
+  const fbclid = new URLSearchParams(window.location.search).get("fbclid") || "";
+  if (!fbc && /^[A-Za-z0-9_.:-]{8,240}$/.test(fbclid)) fbc = `fb.1.${Date.now()}.${fbclid}`;
+  return { fbp: cookieValue("_fbp"), fbc };
+}
+
 function showAccessError(title, text) {
   hideAll();
   if (badge) badge.textContent = "Acesso indisponível";
@@ -156,8 +173,15 @@ form?.addEventListener("submit", async (event) => {
   submit.textContent = "A enviar com segurança…";
   formStatus.textContent = "A validar e a guardar as capturas.";
   try {
+    const body = new FormData(form);
+    const attribution = metaAttribution();
+    if (!isPrivate && attribution) {
+      body.set("meta_consent", "sim");
+      body.set("meta_fbp", attribution.fbp);
+      body.set("meta_fbc", attribution.fbc);
+    }
     const response = await fetch(isPrivate ? `/api/verificacao-anuncio/upload?t=${encodeURIComponent(token)}` : "/api/verificacao-anuncio/intake", {
-      method: "POST", body: new FormData(form), headers: { Accept: "application/json" }
+      method: "POST", body, headers: { Accept: "application/json" }
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "temporary_error");

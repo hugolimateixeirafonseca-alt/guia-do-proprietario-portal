@@ -221,6 +221,20 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
     try { return JSON.parse(decodeURIComponent(item.split("=").slice(1).join("="))).measurement === true; } catch { return false; }
   };
 
+  const cookieValue = (name: string) => {
+    const item = document.cookie.split(";").map((value) => value.trim()).find((value) => value.startsWith(`${name}=`));
+    if (!item) return "";
+    try { return decodeURIComponent(item.slice(name.length + 1)); } catch { return ""; }
+  };
+
+  const metaIdentifiers = () => {
+    if (!measurementAllowed()) return { measurement: false, fbp: "", fbc: "" };
+    let fbc = cookieValue("_fbc");
+    const fbclid = params.get("fbclid") || "";
+    if (!fbc && /^[A-Za-z0-9_.:-]{8,240}$/.test(fbclid)) fbc = `fb.1.${Date.now()}.${fbclid}`;
+    return { measurement: true, fbp: cookieValue("_fbp"), fbc };
+  };
+
   document.querySelectorAll<HTMLFormElement>(".lead-form").forEach((form) => {
     const relationInputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="relacao"]'));
     const formFields = form.querySelector<HTMLElement>("[data-form-fields]")!;
@@ -302,6 +316,7 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
       button.textContent = "A enviar…";
       status.textContent = "";
       const eventId = crypto.randomUUID();
+      const meta = metaIdentifiers();
 
       try {
         const response = await fetch("/api/kit-estudante/lead", {
@@ -316,7 +331,11 @@ import { KIT_ESTUDANTE_CONSENT_TEXT, KIT_ESTUDANTE_CONSENT_VERSION } from "../..
             cidade: city.value,
             fase: phase.value,
             company: honeypot.value,
-            eventId
+            eventId,
+            metaMeasurement: meta.measurement,
+            metaFbp: meta.fbp,
+            metaFbc: meta.fbc,
+            eventSourceUrl: location.href
           })
         });
         const result = await response.json();

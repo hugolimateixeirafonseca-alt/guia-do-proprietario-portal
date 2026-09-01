@@ -29,6 +29,9 @@ export interface KitEnv {
   META_PAGE_ACCESS_TOKEN?: string;
   META_VERIFY_TOKEN?: string;
   META_GRAPH_VERSION?: string;
+  META_CAPI_ACCESS_TOKEN?: string;
+  META_DATASET_ID?: string;
+  META_TEST_EVENT_CODE?: string;
   META_FORM_ADMIN_SECRET?: string;
   MAKE_META_LEADS_SECRET?: string;
   CLOUDFLARE_API_TOKEN?: string;
@@ -37,6 +40,7 @@ export interface KitEnv {
 export interface RequestContext {
   request: Request;
   env: KitEnv;
+  waitUntil?(promise: Promise<unknown>): void;
 }
 
 export class PublicError extends Error {
