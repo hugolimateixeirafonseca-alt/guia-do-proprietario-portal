@@ -17,6 +17,7 @@ const checkoutStatus = document.querySelector("[data-checkout-status]");
 const token = new URLSearchParams(window.location.search).get("t") || "";
 const isPrivate = /^[A-Za-z0-9_-]{43,128}$/.test(token);
 let pollTimer = 0;
+let recoveryRequested = false;
 
 const messages = {
   invalid_email: "Indique um email válido.", captures_required: "Escolha pelo menos uma captura.",
@@ -124,7 +125,18 @@ async function readState() {
     if (result.etapa === "aguarda_upload") showUpload(true);
     else if (result.etapa === "precheck_em_analise") { showProcessing(false); pollTimer = window.setTimeout(readState, 3000); }
     else if (result.etapa === "precheck_pronto") showTeaser(result.teaser);
-    else if (result.etapa === "em_analise") { showProcessing(true); pollTimer = window.setTimeout(readState, 4000); }
+    else if (result.etapa === "em_analise") {
+      showProcessing(true);
+      if (!recoveryRequested) {
+        recoveryRequested = true;
+        const retryResponse = await fetch(`/api/verificacao-anuncio/retry?t=${encodeURIComponent(token)}`, {
+          method: "POST",
+          headers: { Accept: "application/json" }
+        }).catch(() => null);
+        if (!retryResponse?.ok && retryResponse?.status !== 409) recoveryRequested = false;
+      }
+      pollTimer = window.setTimeout(readState, 4000);
+    }
     else if (result.etapa === "entregue") showDelivered();
     else if (result.etapa === "precheck_falhou") showAccessError("A pré-verificação não ficou concluída", "Tente novamente mais tarde. Não foi efetuado qualquer pagamento.");
     else showAccessError("Pedido indisponível", "Esta ligação já não está disponível.");

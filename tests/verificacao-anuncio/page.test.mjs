@@ -6,6 +6,7 @@ const pagePath = new URL("../../src/pages/verificacao-anuncio/index.astro", impo
 const uploadPagePath = new URL("../../src/pages/verificacao/enviar.astro", import.meta.url);
 const uploadRedirectPath = new URL("../../functions/verificacao/enviar/[token].ts", import.meta.url);
 const retryEndpointPath = new URL("../../functions/api/verificacao-anuncio/retry.ts", import.meta.url);
+const intakeScriptPath = new URL("../../public/scripts/verificacao-intake.js", import.meta.url);
 
 test("a landing apresenta a pré-verificação antes do pagamento e o relatório", async () => {
   const source = await readFile(pagePath, "utf8");
@@ -91,6 +92,13 @@ test("a recuperação tem um limite próprio e não colide com a consulta de est
   const source = await readFile(retryEndpointPath, "utf8");
   assert.match(source, /`\$\{config\.secret\}:retry`/u);
   assert.match(source, /analise_recuperacao_solicitada/u);
+});
+
+test("o fluxo gratuito relança a análise depois da autorização do teste", async () => {
+  const source = await readFile(intakeScriptPath, "utf8");
+  assert.match(source, /result\.etapa === "em_analise"/u);
+  assert.match(source, /\/api\/verificacao-anuncio\/retry\?t=/u);
+  assert.match(source, /recoveryRequested/u);
 });
 
 test("o relatório visual contém exatamente as 12 verificações", async () => {
