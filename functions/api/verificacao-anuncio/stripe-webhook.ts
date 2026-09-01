@@ -76,8 +76,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       const inserted = await config.db.prepare(
         `INSERT OR IGNORE INTO verificacao_anuncio_jobs
           (id, access_token_hash, access_token_cipher, stripe_session_id, stripe_payment_id,
-           email_cipher, estado, criado_em, upload_expira_em, expira_em)
-         VALUES (?, ?, ?, ?, ?, ?, 'aguarda_upload', ?, ?, ?)`
+           email_cipher, estado, criado_em, upload_expira_em, expira_em, valor_pago_centimos, moeda_pagamento)
+         VALUES (?, ?, ?, ?, ?, ?, 'aguarda_upload', ?, ?, ?, ?, ?)`
       ).bind(
         jobId,
         access.tokenHash,
@@ -87,7 +87,9 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
         await encryptPrivateValue(paid.email, config.secret),
         createdAt.toISOString(),
         uploadExpiresAt,
-        reportExpiresAt
+        reportExpiresAt,
+        Number(session.amount_total),
+        String(session.currency).toUpperCase()
       ).run();
       job = (inserted.meta?.changes || 0) === 1
         ? { id: jobId, precheckEstado: "nao_aplicavel", ficheirosJson: null }
@@ -102,9 +104,17 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       await config.db.prepare(
         `UPDATE verificacao_anuncio_jobs
          SET stripe_session_id = ?, stripe_payment_id = ?, email_cipher = ?, pagamento_estado = 'pago',
+             valor_pago_centimos = ?, moeda_pagamento = ?,
              falha_em = NULL, falha_motivo = NULL, processamento_bloqueado_em = NULL
          WHERE id = ?`
-      ).bind(session.id, paid.paymentIntent, await encryptPrivateValue(paid.email, config.secret), job.id).run();
+      ).bind(
+        session.id,
+        paid.paymentIntent,
+        await encryptPrivateValue(paid.email, config.secret),
+        Number(session.amount_total),
+        String(session.currency).toUpperCase(),
+        job.id
+      ).run();
       await config.queue!.send({ type: "verificacao_anuncio_analisar", verificacaoId: job.id });
     } else {
       await config.queue!.send({ type: "verificacao_anuncio_pagamento_confirmado", verificacaoId: job.id });

@@ -11,6 +11,7 @@ import {
   parseMetaAttribution,
   sendMetaConversion
 } from "../../src/lib/meta-conversions.mjs";
+import { normalizeVerificationAttribution } from "../../src/lib/verificacao-anuncio/attribution.mjs";
 
 export interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
@@ -280,7 +281,13 @@ export async function readUpload(request: Request, options: { requireEmail?: boo
     const metaAttribution = form.get("meta_consent") === "sim"
       ? buildMetaAttribution(request, { fbp: form.get("meta_fbp"), fbc: form.get("meta_fbc") })
       : null;
-    return { cidade, email, captures: await validateUploadFiles(captures), metaAttribution };
+    const marketingAttribution = normalizeVerificationAttribution({
+      source: form.get("utm_source"),
+      medium: form.get("utm_medium"),
+      campaign: form.get("utm_campaign"),
+      content: form.get("utm_content")
+    });
+    return { cidade, email, captures: await validateUploadFiles(captures), metaAttribution, marketingAttribution };
   } catch (error) {
     if (error instanceof IntakeValidationError) throw new PublicVerificationError(error.status, error.code);
     throw error;

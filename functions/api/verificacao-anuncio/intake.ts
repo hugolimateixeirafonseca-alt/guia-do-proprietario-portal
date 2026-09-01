@@ -42,12 +42,14 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     const metaAttributionCipher = upload.metaAttribution
       ? await encryptPrivateValue(JSON.stringify(upload.metaAttribution), config.secret)
       : null;
+    const attribution = upload.marketingAttribution;
     await config.db.prepare(
       `INSERT INTO verificacao_anuncio_jobs
         (id, access_token_hash, access_token_cipher, stripe_session_id, email_cipher, meta_attribution_cipher, estado,
          cidade, ficheiros_json, criado_em, upload_em, upload_expira_em, expira_em,
-         imagens_apagar_em, precheck_estado, pagamento_estado)
-       VALUES (?, ?, ?, ?, ?, ?, 'em_analise', ?, ?, ?, ?, ?, ?, ?, 'processing', 'pendente')`
+         imagens_apagar_em, precheck_estado, pagamento_estado, source_channel,
+         utm_source, utm_medium, utm_campaign, utm_content)
+       VALUES (?, ?, ?, ?, ?, ?, 'em_analise', ?, ?, ?, ?, ?, ?, ?, 'processing', 'pendente', ?, ?, ?, ?, ?)`
     ).bind(
       jobId,
       access.tokenHash,
@@ -61,7 +63,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       createdAt.toISOString(),
       precheckExpiresAt,
       reportExpiresAt,
-      precheckExpiresAt
+      precheckExpiresAt,
+      attribution.channel,
+      attribution.source || null,
+      attribution.medium || null,
+      attribution.campaign || null,
+      attribution.content || null
     ).run();
 
     await config.queue!.send({ type: "verificacao_anuncio_precheck", verificacaoId: jobId });

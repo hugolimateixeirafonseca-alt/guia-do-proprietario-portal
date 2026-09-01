@@ -174,6 +174,11 @@ form?.addEventListener("submit", async (event) => {
   formStatus.textContent = "A validar e a guardar as capturas.";
   try {
     const body = new FormData(form);
+    const query = new URLSearchParams(window.location.search);
+    for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content"]) {
+      const value = query.get(key);
+      if (value) body.set(key, value);
+    }
     const attribution = metaAttribution();
     if (!isPrivate && attribution) {
       body.set("meta_consent", "sim");
