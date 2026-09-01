@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-01T08:52:48.581Z",
+  "generatedAt": "2026-09-01T09:20:14.877Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
@@ -1584,7 +1584,7 @@
       "title": "Desequilíbrio entre oferta, preço e poder de compra quebra venda de casas em 2026",
       "summary": "As vendas de casas em Portugal deverão cair entre 5% e 7% em 2026 face a 2025, segundo previsões de agentes imobiliários. As transações já recuaram 4,7% no último trimestre de 2025",
       "pillar": "casa",
-      "publishedAt": "2026-08-31",
+      "publishedAt": "2026-09-01",
       "url": "https://guiadoproprietario.pt/novidades/2026-08-29-noticia-109/",
       "source": {
         "name": "Dinheiro Vivo Imobiliário",
