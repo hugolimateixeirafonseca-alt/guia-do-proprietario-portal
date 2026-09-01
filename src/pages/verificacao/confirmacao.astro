@@ -12,10 +12,10 @@ import Squeeze from "../../layouts/Squeeze.astro";
     <div class="card">
       <span class="success" aria-hidden="true">✓</span>
       <p class="eyebrow">Pagamento recebido</p>
-      <h1>A investigação inteligente vai continuar.</h1>
-      <p>Estamos a confirmar o pagamento e a devolver-lhe à ligação privada. A análise automática com IA fica normalmente pronta em poucos minutos.</p>
-      <div class="notice" data-confirmation-status><strong>A confirmar o pagamento seguro.</strong><span>Aguarde um momento. Esta página será atualizada automaticamente.</span></div>
-      <a href="/verificacao-anuncio/">Voltar à Verificação de Anúncio</a>
+      <h1>O relatório completo vai chegar ao seu email.</h1>
+      <p>A investigação inteligente com IA já está em curso e fica normalmente pronta em poucos minutos.</p>
+      <div class="notice" data-confirmation-status><strong>Estamos a preparar o seu relatório.</strong><span>Pode fechar esta página. Enviaremos por email a ligação privada assim que terminar. Verifique também o spam e as promoções.</span></div>
+      <p class="stay-open">Se mantiver esta página aberta, será encaminhado automaticamente quando o relatório estiver pronto.</p>
     </div>
   </section>
 </Squeeze>
@@ -31,13 +31,13 @@ import Squeeze from "../../layouts/Squeeze.astro";
       const result = await response.json();
       if (result.ready && result.nextUrl) { window.location.replace(result.nextUrl); return; }
       if (!response.ok) throw new Error(result.error || "temporary_error");
-    } catch { if (attempts > 12 && notice) notice.innerHTML = "<strong>O pagamento foi recebido.</strong><span>Receberá também a ligação privada no seu email.</span>"; }
+    } catch { if (attempts > 12 && notice) notice.innerHTML = "<strong>O pagamento foi recebido.</strong><span>Enviaremos por email a ligação privada para o relatório completo assim que a análise terminar. Verifique também o spam e as promoções.</span>"; }
     if (attempts <= 12) window.setTimeout(check, 2500);
   };
   if (/^cs_(test|live)_[A-Za-z0-9_]+$/.test(sessionId)) check();
 </script>
 
 <style>
-  :global(*){box-sizing:border-box}:global(body){margin:0;background:linear-gradient(145deg,#062f2c,#0a5146);color:#123b34;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}.confirmation{display:grid;min-height:100vh;padding:32px;place-items:center}.card{width:min(640px,100%);padding:55px;border-radius:25px;background:#fff;box-shadow:0 35px 100px rgba(0,20,18,.35);text-align:center}.success{display:grid;width:68px;height:68px;margin:0 auto 24px;place-items:center;border-radius:50%;background:#d9ff72;color:#087058;font-size:1.7rem;font-weight:950}.eyebrow{margin:0 0 12px;color:#0a7c61;font-size:.72rem;font-weight:950;letter-spacing:.16em;text-transform:uppercase}.card h1{margin:0;font-size:clamp(2.3rem,6vw,4rem);line-height:.98;letter-spacing:-.055em}.card>p:not(.eyebrow){margin:24px auto 0;color:#60766f;font-size:1rem;line-height:1.65}.notice{display:grid;gap:5px;margin:30px 0;padding:18px;border-radius:13px;background:#f0f7f3}.notice span{color:#667a73;font-size:.78rem;line-height:1.5}.card a{display:inline-flex;min-height:50px;padding:0 20px;align-items:center;border-radius:10px;background:#0a7b60;color:#fff;text-decoration:none;font-weight:900}@media(max-width:580px){.confirmation{padding:18px}.card{padding:38px 22px}.card h1{font-size:2.7rem}}
+  :global(*){box-sizing:border-box}:global(body){margin:0;background:linear-gradient(145deg,#062f2c,#0a5146);color:#123b34;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}.confirmation{display:grid;min-height:100vh;padding:32px;place-items:center}.card{width:min(680px,100%);padding:55px;border-radius:25px;background:#fff;box-shadow:0 35px 100px rgba(0,20,18,.35);text-align:center}.success{display:grid;width:68px;height:68px;margin:0 auto 24px;place-items:center;border-radius:50%;background:#d9ff72;color:#087058;font-size:1.7rem;font-weight:950}.eyebrow{margin:0 0 12px;color:#0a7c61;font-size:.72rem;font-weight:950;letter-spacing:.16em;text-transform:uppercase}.card h1{margin:0;font-size:clamp(2.3rem,6vw,3.8rem);line-height:.98;letter-spacing:-.055em}.card>p:not(.eyebrow){margin:24px auto 0;color:#60766f;font-size:1rem;line-height:1.65}.notice{display:grid;gap:7px;margin:30px 0 18px;padding:21px;border-radius:13px;background:#f0f7f3}.notice span{color:#667a73;font-size:.82rem;line-height:1.55}.card .stay-open{max-width:520px;margin-top:0;font-size:.78rem;color:#71827c}@media(max-width:580px){.confirmation{padding:18px}.card{padding:38px 22px}.card h1{font-size:2.55rem}}
 </style>
 

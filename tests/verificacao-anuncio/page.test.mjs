@@ -6,6 +6,7 @@ const pagePath = new URL("../../src/pages/verificacao-anuncio/index.astro", impo
 const uploadPagePath = new URL("../../src/pages/verificacao/enviar.astro", import.meta.url);
 const uploadRedirectPath = new URL("../../functions/verificacao/enviar/[token].ts", import.meta.url);
 const retryEndpointPath = new URL("../../functions/api/verificacao-anuncio/retry.ts", import.meta.url);
+const confirmationEndpointPath = new URL("../../functions/api/verificacao-anuncio/confirmation.ts", import.meta.url);
 const intakeScriptPath = new URL("../../public/scripts/verificacao-intake.js", import.meta.url);
 
 test("a landing apresenta a pré-verificação antes do pagamento e o relatório", async () => {
@@ -44,6 +45,22 @@ test("a confirmação de pagamento não é indexada nem expõe o token privado",
   assert.match(source, /noindex/u);
   assert.doesNotMatch(source, /access_token|accessToken|\?t=/u);
   assert.match(source, /email/u);
+  assert.match(source, /O relatório completo vai chegar ao seu email\./u);
+  assert.match(source, /Pode fechar esta página\./u);
+  assert.match(source, /spam e as promoções/u);
+  assert.doesNotMatch(source, /Voltar à Verificação de Anúncio/u);
+  assert.doesNotMatch(source, /href="\/verificacao-anuncio\/"/u);
+});
+
+test("a confirmação recupera um pagamento pago quando o webhook não chega", async () => {
+  const source = await readFile(confirmationEndpointPath, "utf8");
+  assert.match(source, /validatePaidVerificationSession/u);
+  assert.match(source, /pagamento_estado = 'pago'/u);
+  assert.match(source, /AND pagamento_estado = 'pendente'/u);
+  assert.match(source, /pagamento_confirmado_recuperado/u);
+  assert.match(source, /verificacao_anuncio_analisar/u);
+  assert.match(source, /VERIFICACAO_ANUNCIO_QUEUE/u);
+  assert.match(source, /SET pagamento_estado = 'pendente', stripe_payment_id = NULL/u);
 });
 
 test("a página privada liga o envio real ao estado do pedido", async () => {
