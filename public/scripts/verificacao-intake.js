@@ -1,6 +1,7 @@
 const card = document.querySelector(".form-card");
 const form = document.querySelector("[data-upload-form]");
 const input = document.querySelector("[data-file-input]");
+const dropZone = document.querySelector(".drop-zone");
 const filesBox = document.querySelector("[data-selected-files]");
 const formStatus = document.querySelector("[data-form-status]");
 const submit = document.querySelector("[data-submit]");
@@ -19,6 +20,7 @@ const token = new URLSearchParams(window.location.search).get("t") || "";
 const isPrivate = /^[A-Za-z0-9_-]{43,128}$/.test(token);
 let pollTimer = 0;
 let recoveryRequested = false;
+let legacyUpload = false;
 
 const messages = {
   invalid_email: "Indique um email válido.", captures_required: "Escolha pelo menos uma captura.",
@@ -76,8 +78,8 @@ function showProcessing(paid = false) {
 function refresh() {
   if (!input || !filesBox || !submit || !formStatus || !form) return;
   formStatus.classList.remove("is-error");
-  if (badge) badge.textContent = "Pronto para envio";
   const files = Array.from(input.files || []);
+  if (badge) badge.textContent = legacyUpload ? "Pagamento confirmado" : files.length ? "Pronto para analisar" : "Sem pagamento";
   filesBox.innerHTML = files.length
     ? files.slice(0, 8).map((file, index) => `<div><span>${index + 1}</span><strong>${escapeHtml(file.name)}</strong><small>${Math.max(1, Math.round(file.size / 1024))} KB</small></div>`).join("")
     : "<p>Ainda não escolheu ficheiros.</p>";
@@ -89,16 +91,17 @@ function refresh() {
   formStatus.textContent = files.length > 8 ? "Escolha no máximo 8 capturas."
     : files.some((file) => file.size > 10 * 1024 * 1024) ? "Uma das capturas ultrapassa 10 MB."
     : files.length ? `${files.length} ${files.length === 1 ? "captura pronta" : "capturas prontas"} para a pré-verificação.`
-    : "Adicione as capturas. A pré-verificação não tem custo.";
+    : "Adicione as capturas para iniciar a primeira leitura gratuita.";
 }
 
 function showUpload(legacy = false) {
   hideAll();
+  legacyUpload = legacy;
   if (form) form.hidden = false;
   if (emailField) emailField.hidden = legacy;
   if (emailInput) emailInput.required = !legacy;
-  if (paymentNote) paymentNote.textContent = legacy ? "O pagamento deste pedido já foi confirmado." : "Nenhum pagamento será pedido nesta etapa.";
-  if (submit) submit.textContent = legacy ? "Iniciar análise com IA" : "Fazer pré-verificação gratuita com IA";
+  if (paymentNote) paymentNote.textContent = legacy ? "O pagamento deste pedido já foi confirmado." : "Primeiro vê o resultado inicial. Só depois decide se quer a análise completa.";
+  if (submit) submit.textContent = legacy ? "Iniciar análise com IA" : "Analisar o meu anúncio gratuitamente →";
   if (badge) badge.textContent = "Pronto para envio";
   refresh();
 }
@@ -165,6 +168,19 @@ async function readState() {
 }
 
 input?.addEventListener("change", refresh);
+for (const eventName of ["dragenter", "dragover", "dragleave", "drop"]) {
+  dropZone?.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+}
+for (const eventName of ["dragenter", "dragover"]) dropZone?.addEventListener(eventName, () => dropZone.classList.add("is-dragging"));
+for (const eventName of ["dragleave", "drop"]) dropZone?.addEventListener(eventName, () => dropZone.classList.remove("is-dragging"));
+dropZone?.addEventListener("drop", (event) => {
+  if (!input || !(event instanceof DragEvent) || !event.dataTransfer?.files.length) return;
+  input.files = event.dataTransfer.files;
+  refresh();
+});
 form?.addEventListener("input", refresh);
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -195,7 +211,7 @@ form?.addEventListener("submit", async (event) => {
     pollTimer = window.setTimeout(readState, 3000);
   } catch (error) {
     const code = error instanceof Error ? error.message : "temporary_error";
-    submit.textContent = isPrivate ? "Tentar novamente" : "Fazer pré-verificação gratuita com IA";
+    submit.textContent = isPrivate ? "Tentar novamente" : "Analisar o meu anúncio gratuitamente →";
     refresh();
     formStatus.textContent = messages[code] || "Não foi possível enviar as capturas. Tente novamente.";
     formStatus.classList.add("is-error");

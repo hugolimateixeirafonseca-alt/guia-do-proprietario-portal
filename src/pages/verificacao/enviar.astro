@@ -19,11 +19,21 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 
   <section class="page-shell">
     <div class="intro">
-      <div class="ai-signature"><span>IA</span><div><strong>Sistema inteligente com IA</strong><small>Pré-verificação automática antes do pagamento</small></div></div>
-      <p class="eyebrow">Primeiro as capturas. Só depois o pagamento.</p>
-      <h1>Envie o anúncio.<br />A IA confirma se está tudo pronto.</h1>
-      <p>Não precisa de pagar às cegas. Envie as capturas, receba uma primeira leitura real e decida se quer desbloquear a investigação completa por apenas 3,90 €.</p>
-      <div class="time-promise"><span>⚡</span><div><strong>Normalmente pronto em poucos minutos</strong><p>O sistema lê o texto, identifica fotografias e prepara automaticamente o próximo passo.</p></div></div>
+      <div class="ai-signature"><span>IA</span><div><strong>Análise inteligente do anúncio</strong><small>Primeira leitura gratuita e sem compromisso</small></div></div>
+      <p class="eyebrow">Antes de enviar caução ou renda</p>
+      <h1>Descubra o que o anúncio <em>não lhe está a dizer.</em></h1>
+      <p class="intro-lead">Envie as capturas do anúncio. Em poucos minutos, a IA organiza a informação, identifica condições que merecem atenção e mostra-lhe o que deve esclarecer antes de transferir dinheiro.</p>
+
+      <div class="value-preview">
+        <div class="value-preview-head"><div><small>A sua primeira leitura</small><strong>Uma decisão mais informada começa aqui</strong></div><b>Grátis</b></div>
+        <div class="value-grid">
+          <article><span>01</span><div><strong>O que já está confirmado</strong><p>Preço, localização, condições e dados concretos encontrados nas capturas.</p></div></article>
+          <article><span>02</span><div><strong>O que merece atenção</strong><p>Pedidos de dinheiro, contradições e pontos que deve esclarecer primeiro.</p></div></article>
+          <article><span>03</span><div><strong>O próximo passo certo</strong><p>Perceba se deve avançar e que perguntas fazer ao anunciante.</p></div></article>
+        </div>
+      </div>
+
+      <div class="assurance-strip"><span><b>⚡</b> Poucos minutos</span><span><b>✓</b> Sem pagamento agora</span><span><b>⌁</b> Ligação privada por email</span></div>
 
       <details class="screenshot-guide">
         <summary><span>?</span><div><strong>Não sabe fazer uma captura de ecrã?</strong><small>Veja como fazer no seu computador ou telemóvel</small></div><b>Ver instruções</b></summary>
@@ -36,17 +46,12 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         <div class="capture-checklist"><strong>O que deve aparecer</strong><span>Texto e localização</span><span>Preço e caução</span><span>Condições e conversa relevante</span><span>Fotografias do imóvel</span></div>
       </details>
 
-      <div class="what-happens">
-        <article><span>01</span><div><strong>Confirmação gratuita com IA</strong><p>Verificamos se as capturas contêm material suficiente para uma análise útil.</p></div></article>
-        <article><span>02</span><div><strong>Teaser baseado no seu anúncio</strong><p>Mostramos o que já foi identificado e o que a investigação completa pode revelar.</p></div></article>
-        <article><span>03</span><div><strong>Só paga para desbloquear o relatório</strong><p>Após o pagamento, cruzamos a leitura visual, o preço, as condições e 12 pontos de decisão.</p></div></article>
-      </div>
     </div>
 
     <div class="form-card" data-checkout-enabled={checkoutEnabled ? "true" : "false"}>
       <div class="card-heading">
-        <div><small>Pré-verificação gratuita</small><strong>Capturas de ecrã (screenshot)</strong></div>
-        <span data-state-badge>Pronto para começar</span>
+        <div><small>Passo único. Primeira leitura gratuita.</small><strong>Mostre-nos o anúncio</strong><p>Inclua os ecrãs onde aparecem o preço, as condições e as fotografias.</p></div>
+        <span data-state-badge>Sem pagamento</span>
       </div>
 
       <div class="access-message" data-access-message hidden aria-live="polite">
@@ -58,30 +63,34 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         <label class="drop-zone">
           <input type="file" name="capturas" accept="image/jpeg,image/png,image/webp" multiple data-file-input />
           <span class="upload-icon" aria-hidden="true">↑</span>
-          <strong>Escolher capturas de ecrã (screenshot)</strong>
-          <span>JPEG, PNG ou WebP. Pode enviar entre 1 e 8 capturas.</span>
+          <strong>Clique para adicionar capturas de ecrã (screenshot)</strong>
+          <span>Escolha entre 1 e 8 imagens do anúncio. Também pode arrastá-las para esta área.</span>
         </label>
+
+        <div class="capture-hints" aria-label="Informação recomendada"><span>Texto do anúncio</span><span>Preço e caução</span><span>Condições</span><span>Fotografias</span></div>
 
         <div class="selected" data-selected-files><p>Ainda não escolheu ficheiros.</p></div>
 
-        <label class="field email-field" data-email-field>
-          <span>Email onde receberá a ligação privada</span>
-          <input type="email" name="email" maxlength="254" autocomplete="email" placeholder="nome@email.pt" />
-        </label>
+        <div class="field-grid">
+          <label class="field email-field" data-email-field>
+            <span>Onde enviamos a ligação privada?</span>
+            <input type="email" name="email" maxlength="254" autocomplete="email" placeholder="O seu email" />
+          </label>
 
-        <label class="field">
-          <span>Cidade indicada no anúncio</span>
-          <input type="text" name="cidade" maxlength="100" autocomplete="address-level2" placeholder="Ex.: Lisboa" required />
-        </label>
+          <label class="field">
+            <span>Em que cidade fica o imóvel?</span>
+            <input type="text" name="cidade" maxlength="100" autocomplete="address-level2" placeholder="Ex.: Lisboa" required />
+          </label>
+        </div>
 
         <label class="privacy">
           <input type="checkbox" name="confirmacao_privacidade" value="sim" required />
           <span>Confirmo que estas capturas pertencem ao anúncio que pretendo verificar e autorizo o seu tratamento para produzir o relatório. As imagens são apagadas após o processamento, de acordo com a política de retenção.</span>
         </label>
 
-        <p class="form-status" data-form-status aria-live="polite">Adicione as capturas. A pré-verificação não tem custo.</p>
-        <button type="submit" data-submit disabled>Fazer pré-verificação gratuita com IA</button>
-        <small class="payment-note" data-payment-note>Nenhum pagamento será pedido nesta etapa.</small>
+        <p class="form-status" data-form-status aria-live="polite">Adicione as capturas para iniciar a primeira leitura gratuita.</p>
+        <button type="submit" data-submit disabled>Analisar o meu anúncio gratuitamente →</button>
+        <small class="payment-note" data-payment-note>Primeiro vê o resultado inicial. Só depois decide se quer a análise completa.</small>
       </form>
 
       <div class="processing" data-processing hidden>
@@ -240,4 +249,31 @@ if (!document.querySelector("[data-flow='prepay']")) {
   .processing-icon{border-radius:18px;background:linear-gradient(145deg,#123b34,#0a7058);color:#d9ff72;font-size:.8rem}.processing :global(.report-link){display:inline-flex;padding:14px 19px;border-radius:10px;background:#0a7b60;color:#fff;text-decoration:none;font-weight:900}
   .teaser{display:grid;gap:16px}.teaser-ready{display:flex;gap:13px;align-items:center;padding:17px;border-radius:14px;background:linear-gradient(145deg,#103f36,#0a7058);color:#fff}.teaser-ready>span{display:grid;width:45px;height:45px;place-items:center;border-radius:13px;background:#d9ff72;color:#153d34;font-weight:950}.teaser-ready div{display:grid;gap:4px}.teaser-ready small{color:#bcd4cc;font-size:.65rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase}.teaser-ready strong{font-size:.95rem}.teaser-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px}.teaser-metrics article{display:grid;min-height:108px;padding:17px;border:1px solid #dce7e1;border-radius:14px;background:#f7faf8}.teaser-metrics strong{font-size:2.2rem;line-height:1}.teaser-metrics span{align-self:end;color:#63786f;font-size:.71rem;font-weight:800}.teaser-signal{padding:19px;border-left:5px solid #f17b50;border-radius:12px;background:#fff2ed}.teaser-signal small{display:block;color:#a64a31;font-size:.65rem;font-weight:950;text-transform:uppercase}.teaser-signal strong{display:block;margin-top:7px;font-size:1.02rem;line-height:1.35}.teaser-signal p{margin:8px 0 0;color:#725c54;font-size:.71rem}.locked-report{overflow:hidden;border:1px solid #d5e0da;border-radius:17px;background:#f7f8f5}.locked-head{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid #dce4df;font-size:.73rem;font-weight:900}.locked-head b{padding:5px 8px;border-radius:7px;background:#173e36;color:#d9ff72;font-size:.62rem;text-transform:uppercase}.locked-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#dce4df}.locked-grid article{min-height:133px;padding:16px;background:rgba(255,255,255,.91)}.locked-grid i{display:grid;width:27px;height:27px;place-items:center;border-radius:8px;background:#edf2ef;color:#547068;font-size:.61rem;font-style:normal;font-weight:950}.locked-grid strong{display:block;margin-top:10px;font-size:.78rem}.locked-grid p{margin:5px 0 0;color:#71817c;font-size:.66rem;line-height:1.4}.unlock{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:17px;border-radius:15px;background:#d9ff72}.unlock>div{display:grid;gap:3px}.unlock>div span{font-size:1.3rem;font-weight:950;white-space:nowrap}.unlock s{color:#657655;font-size:.7rem;font-weight:700}.unlock small{font-size:.61rem}.unlock button{background:#123b34}.checkout-status{min-height:1em;margin:0;color:#687b75;font-size:.7rem;text-align:center}.checkout-fallback{justify-self:center;padding:11px 18px;border:2px solid #123b34;border-radius:10px;color:#123b34;font-size:.78rem;font-weight:950;text-decoration:none}.checkout-fallback:hover{background:#123b34;color:#fff}.not-ready{padding:35px 15px;text-align:center}.not-ready>span{display:grid;width:55px;height:55px;margin:0 auto 18px;place-items:center;border-radius:50%;background:#fff0ea;color:#c15334;font-weight:950}.not-ready h2{margin:0;font-size:1.8rem}.not-ready p{color:#647871;line-height:1.55}
   @media(max-width:580px){.private-label,.top-signals>span:not(.ai-pill){display:none}.guide-grid,.locked-grid{grid-template-columns:1fr}.screenshot-guide summary{grid-template-columns:38px 1fr}.screenshot-guide summary>b{display:none}.unlock{grid-template-columns:1fr}}
+</style>
+
+<style>
+  :global(body){background:#103b34;color:#123b34}
+  .topbar{position:relative;z-index:2;border-bottom:1px solid rgba(217,255,114,.16);background:#103b34;color:#fff}
+  .topbar a{color:#fff}.mark{background:#d9ff72;color:#123b34}.top-signals{color:#c4d8d1}.private-label{border-color:rgba(255,255,255,.18)}
+  .page-shell{position:relative;grid-template-columns:minmax(0,.94fr) minmax(520px,1.06fr);gap:clamp(42px,6vw,82px);width:100%;min-height:calc(100vh - 75px);margin:0;padding:64px max(24px,calc((100vw - 1260px)/2)) 96px;background:
+    radial-gradient(circle at 10% 8%,rgba(217,255,114,.13),transparent 28%),
+    radial-gradient(circle at 88% 22%,rgba(71,154,124,.2),transparent 32%),
+    linear-gradient(145deg,#0b302a 0%,#123f36 62%,#174b3f 100%)}
+  .intro{position:relative;padding-top:4px;color:#fff}.eyebrow{color:#d9ff72}.intro h1{max-width:760px;color:#fff;font-size:clamp(3.35rem,5vw,5.45rem);line-height:.91;letter-spacing:-.07em}.intro h1 em{display:block;color:#d9ff72;font-style:normal}.intro>.intro-lead{max-width:650px;margin-top:25px;color:#d2e0dc;font-size:1.08rem;line-height:1.65}
+  .ai-signature{margin-bottom:26px;border-color:rgba(217,255,114,.27);background:rgba(255,255,255,.09);box-shadow:none;backdrop-filter:blur(10px)}.ai-signature>span{background:#d9ff72;color:#123b34}.ai-signature strong{color:#fff}.ai-signature small{color:#bcd1ca}
+  .value-preview{overflow:hidden;margin-top:32px;border:1px solid rgba(255,255,255,.18);border-radius:22px;background:rgba(255,255,255,.08);box-shadow:0 24px 70px rgba(0,0,0,.12);backdrop-filter:blur(14px)}
+  .value-preview-head{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.15)}.value-preview-head div{display:grid;gap:4px}.value-preview-head small{color:#9fc0b6;font-size:.64rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.value-preview-head strong{color:#fff;font-size:.95rem}.value-preview-head b{padding:7px 11px;border-radius:999px;background:#d9ff72;color:#123b34;font-size:.67rem;text-transform:uppercase}
+  .value-grid{display:grid;grid-template-columns:repeat(3,1fr)}.value-grid article{min-height:165px;padding:20px;border-right:1px solid rgba(255,255,255,.13)}.value-grid article:last-child{border-right:0}.value-grid article>span{display:grid;width:29px;height:29px;place-items:center;border-radius:9px;background:rgba(217,255,114,.14);color:#d9ff72;font-size:.65rem;font-weight:950}.value-grid strong{display:block;margin-top:14px;color:#fff;font-size:.79rem;line-height:1.35}.value-grid p{margin:7px 0 0;color:#b9cec7;font-size:.69rem;line-height:1.5}
+  .assurance-strip{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}.assurance-strip span{padding:8px 10px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:rgba(255,255,255,.06);color:#d5e2de;font-size:.67rem;font-weight:800}.assurance-strip b{color:#d9ff72}
+  .screenshot-guide{border-color:rgba(255,255,255,.17);background:rgba(255,255,255,.08);box-shadow:none;color:#fff}.screenshot-guide summary>span{background:#d9ff72;color:#123b34}.screenshot-guide summary small,.screenshot-guide summary>b{color:#bcd1ca}.guide-grid article{background:rgba(255,255,255,.08)}.guide-grid article>span{background:rgba(255,255,255,.12);color:#d9ff72}.guide-grid p{color:#bdd0ca}.capture-checklist{border-color:rgba(255,255,255,.14)}.capture-checklist span{background:rgba(217,255,114,.13);color:#e4ff9b}
+  .form-card{position:sticky;top:20px;align-self:start;padding:26px;border:1px solid rgba(255,255,255,.55);border-radius:28px;background:#fff;box-shadow:0 38px 100px rgba(0,0,0,.28)}
+  .card-heading{align-items:flex-start;margin:-4px -4px 23px;padding:4px 4px 20px;border-bottom:1px solid #dde7e2}.card-heading>div{gap:5px}.card-heading small{color:#0a7b60;letter-spacing:.08em}.card-heading strong{font-size:2rem;line-height:1.05;letter-spacing:-.045em}.card-heading p{max-width:420px;margin:2px 0 0;color:#677a73;font-size:.72rem;line-height:1.45}.card-heading>span{flex:0 0 auto;background:#e9ffd0;color:#23543e}
+  .drop-zone{position:relative;min-height:220px;padding:28px;border:2px solid #87bda8;border-radius:20px;background:linear-gradient(145deg,#f3fbf7,#e7f7ee);transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease}.drop-zone:hover,.drop-zone.is-dragging{border-color:#0a7b60;background:linear-gradient(145deg,#effbf5,#def4e9);box-shadow:0 15px 35px rgba(10,123,96,.1);transform:translateY(-2px)}.drop-zone.is-dragging{outline:3px solid #d9ff72;outline-offset:3px}.drop-zone:focus-within{outline:3px solid #d9ff72;outline-offset:3px}.drop-zone strong{font-size:1.08rem}.drop-zone>span:last-child{max-width:390px;color:#62776f;line-height:1.5}.upload-icon{width:58px;height:58px;margin-bottom:15px;background:linear-gradient(145deg,#0a7b60,#123b34);box-shadow:0 12px 25px rgba(10,123,96,.22);font-size:1.65rem}
+  .capture-hints{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:-13px 16px 0;position:relative;z-index:1}.capture-hints span{padding:6px 9px;border:1px solid #d6e6de;border-radius:999px;background:#fff;color:#41665a;font-size:.63rem;font-weight:850;box-shadow:0 5px 14px rgba(15,54,47,.07)}
+  .selected{margin:15px 0 3px}.selected>p{padding:9px;color:#6c8078}.field-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:17px}.field-grid .field{margin-top:0}.field span{font-size:.74rem}.field input{min-height:50px;border-color:#b8cdc3;border-radius:12px;background:#fbfdfc}.field input:focus{outline:3px solid rgba(10,123,96,.14);border-color:#0a7b60}
+  .privacy{margin-top:17px;padding:12px 13px;border-radius:12px;background:#f5f8f6;font-size:.66rem}.form-status{margin:13px 0 9px;font-weight:750}.form-card button{min-height:58px;border-radius:14px;background:linear-gradient(135deg,#0a7b60,#123b34);box-shadow:0 14px 30px rgba(10,123,96,.22);font-size:.9rem;letter-spacing:.01em;transition:transform .2s ease,box-shadow .2s ease}.form-card button:not(:disabled):hover{box-shadow:0 18px 34px rgba(10,123,96,.3);transform:translateY(-2px)}.form-card button:focus-visible{outline:3px solid #d9ff72;outline-offset:3px}.form-card button:disabled{background:#b2c2bc;box-shadow:none}.payment-note{margin-top:10px;color:#647870;font-weight:750}
+  .access-message{border:1px solid #d9e7e0}.processing h2{font-size:2.15rem}.teaser-ready{border-radius:17px}.locked-report{border-radius:17px}.unlock{border-radius:17px}
+  @media(max-width:1050px){.page-shell{grid-template-columns:minmax(0,.9fr) minmax(470px,1.1fr);gap:34px}.intro h1{font-size:clamp(3rem,5vw,4.5rem)}.value-grid article{padding:16px}.form-card{padding:22px}}
+  @media(max-width:900px){.page-shell{grid-template-columns:1fr;width:100%;gap:38px;padding:46px max(20px,calc((100vw - 700px)/2)) 80px}.intro{max-width:700px}.intro h1{font-size:clamp(3.2rem,10vw,5.2rem)}.form-card{position:static;max-width:700px}.value-grid article{min-height:145px}}
+  @media(max-width:580px){.page-shell{padding:34px 14px 65px}.intro h1{font-size:clamp(3rem,15vw,4.2rem)}.intro>.intro-lead{font-size:.98rem}.value-preview{border-radius:18px}.value-preview-head{align-items:flex-start}.value-grid{grid-template-columns:1fr}.value-grid article{display:grid;grid-template-columns:32px 1fr;gap:10px;min-height:0;border-right:0;border-bottom:1px solid rgba(255,255,255,.13)}.value-grid article:last-child{border-bottom:0}.value-grid strong{margin-top:0}.value-grid p{grid-column:2}.assurance-strip{display:grid;grid-template-columns:1fr 1fr}.assurance-strip span:last-child{grid-column:1/-1}.form-card{padding:20px 15px;border-radius:22px}.card-heading{display:grid}.card-heading>span{justify-self:start}.card-heading strong{font-size:1.7rem}.field-grid{grid-template-columns:1fr}.capture-hints{margin:-12px 6px 0}.drop-zone{min-height:210px;padding:22px 14px}}
 </style>

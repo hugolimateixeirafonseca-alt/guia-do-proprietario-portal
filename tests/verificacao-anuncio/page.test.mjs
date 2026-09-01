@@ -66,19 +66,21 @@ test("a confirmação recupera um pagamento pago quando o webhook não chega", a
 test("a página privada liga o envio real ao estado do pedido", async () => {
   const source = await readFile(uploadPagePath, "utf8");
   assert.match(source, /robots="noindex,nofollow"/u);
-  assert.match(source, /Capturas de ecrã \(screenshot\)/u);
+  assert.match(source, /capturas de ecrã \(screenshot\)/iu);
   assert.match(source, /\/api\/verificacao-anuncio\/status\?t=/u);
   assert.match(source, /\/api\/verificacao-anuncio\/upload\?t=/u);
   assert.match(source, /\/api\/verificacao-anuncio\/retry\?t=/u);
   assert.match(source, /confirmacao_privacidade/u);
-  assert.match(source, /Fazer pré-verificação gratuita com IA/u);
+  assert.match(source, /Analisar o meu anúncio gratuitamente/u);
   assert.match(source, /Windows \+ Shift \+ S/u);
   assert.match(source, /Android/u);
   assert.match(source, /iPhone/u);
   assert.match(source, /data-teaser/u);
   assert.match(source, /<s>7,90 €<\/s> 3,90 €/u);
   assert.doesNotMatch(source, /7,99 €|11,99 €/u);
-  assert.match(source, /Primeiro as capturas\. Só depois o pagamento/u);
+  assert.match(source, /Descubra o que o anúncio/u);
+  assert.match(source, /Sem pagamento agora/u);
+  assert.match(source, /Uma decisão mais informada começa aqui/u);
   const intakeScript = await readFile(new URL("../../public/scripts/verificacao-intake.js", import.meta.url), "utf8");
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/intake/u);
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/checkout/u);
@@ -89,6 +91,7 @@ test("a página privada liga o envio real ao estado do pedido", async () => {
   assert.match(checkoutEndpoint, /retrieveStripeCheckoutSession/u);
   assert.match(checkoutEndpoint, /reused: true/u);
   assert.match(intakeScript, /refresh\(\);\s*formStatus\.textContent = messages\[code\]/u);
+  assert.match(intakeScript, /dataTransfer\.files/u);
   assert.match(intakeScript, /formStatus\.classList\.add\("is-error"\)/u);
   assert.match(source, /\.form-status\.is-error/u);
   assert.match(source, /\[hidden\]\)\{display:none!important\}/u);
