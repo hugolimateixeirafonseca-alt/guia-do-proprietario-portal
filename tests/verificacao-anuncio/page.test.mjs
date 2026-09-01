@@ -9,7 +9,7 @@ const retryEndpointPath = new URL("../../functions/api/verificacao-anuncio/retry
 
 test("a landing apresenta a pré-verificação antes do pagamento e o relatório", async () => {
   const source = await readFile(pagePath, "utf8");
-  assert.match(source, /data-demo-form/u);
+  assert.doesNotMatch(source, /data-demo-form|data-run-demo|data-file-input/u);
   assert.match(source, /data-results/u);
   assert.match(source, /Não transfira a caução/u);
   assert.match(source, /Antes 7,90 €/u);
@@ -17,9 +17,9 @@ test("a landing apresenta a pré-verificação antes do pagamento e o relatório
   assert.match(source, /poupa 4,00 €/iu);
   assert.doesNotMatch(source, /7,99 €|11,99 €/u);
   assert.match(source, /Analisar as minhas capturas grátis/u);
-  assert.match(source, /Análise real sem pagamento inicial/u);
-  assert.match(source, /Enviar capturas grátis/u);
-  assert.match(source, /não são enviados para análise/u);
+  assert.match(source, /Começar a análise real grátis/u);
+  assert.match(source, /Não é pedido qualquer pagamento nesta fase/u);
+  assert.match(source, /href="\/verificacao\/enviar\/"/u);
   assert.match(source, /\.section-heading\s*\{[\s\S]*?max-width:\s*none/u);
   assert.match(source, /Leitura inteligente das fotografias/u);
   assert.match(source, /O que as fotografias revelam/u);
@@ -29,8 +29,7 @@ test("a landing apresenta a pré-verificação antes do pagamento e o relatório
   assert.doesNotMatch(source, /printscreen/iu);
   assert.match(source, /Pré-verificação sem custo/u);
   assert.match(source, /A pré-verificação gratuita está ativa/u);
-  assert.match(source, /files\.length >= 1/u);
-  assert.doesNotMatch(source, /files\.length < 4/u);
+  assert.doesNotMatch(source, /files\.length/u);
   assert.match(source, /Sistema inteligente com IA/u);
   assert.match(source, /Normalmente pronta em poucos minutos/u);
   assert.match(source, /\/verificacao\/enviar\//u);

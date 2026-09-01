@@ -124,7 +124,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
   <section class="demo-section">
     <div class="shell demo-grid">
       <div class="demo-copy">
-        <p class="eyebrow">Veja a análise em ação</p>
+        <p class="eyebrow">Comece com o seu anúncio</p>
         <h2>Envie as capturas de ecrã. Nós fazemos o trabalho difícil.</h2>
         <p>Inclua o texto, o preço, as condições, a conversa relevante e as fotografias. A demonstração organiza tudo e mostra como será o relatório.</p>
         <div class="upload-tips">
@@ -134,50 +134,17 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
         </div>
       </div>
 
-      <form class="upload-card" data-demo-form>
-        <div class="real-intake-card">
-          <div>
-            <small>Análise real sem pagamento inicial</small>
-            <strong>Quer verificar o seu anúncio?</strong>
-            <p>Envie as capturas no formulário seguro e receba primeiro a pré-verificação com IA.</p>
-          </div>
-          <a href="/verificacao/enviar/">Enviar capturas grátis <span aria-hidden="true">→</span></a>
+      <div class="upload-card start-card">
+        <div class="start-badge"><span>IA</span><div><small>Pré-verificação gratuita</small><strong>Comece pelo seu anúncio real</strong></div></div>
+        <h3>Envie as capturas uma única vez.</h3>
+        <p>No formulário seguro, escolhe as capturas de ecrã (screenshot) do anúncio, indica a cidade e recebe a primeira leitura com IA. Não é pedido qualquer pagamento nesta fase.</p>
+        <div class="start-steps" aria-label="Como começar">
+          <div><span>01</span><strong>Enviar capturas</strong><small>Texto, preço, condições e fotografias.</small></div>
+          <div><span>02</span><strong>Receber o teaser</strong><small>Veja primeiro o que a IA conseguiu identificar.</small></div>
+          <div><span>03</span><strong>Decidir se desbloqueia</strong><small>Só depois escolhe se quer pagar 3,90 €.</small></div>
         </div>
-        <div class="demo-divider"><span>Ou experimente primeiro a simulação</span></div>
-        <div class="upload-card-head">
-          <div><small>Demonstração local</small><strong>Veja como o relatório será organizado</strong><p>Os ficheiros escolhidos nesta demonstração não são enviados para análise.</p></div>
-          <span data-file-count>0 adicionados</span>
-        </div>
-        <label class="drop-zone" for="ad-files">
-          <span class="upload-mark" aria-hidden="true">↑</span>
-          <strong>Adicione as capturas de ecrã (screenshot) do anúncio</strong>
-          <span>Texto, preço, condições e fotografias. Pode enviar até 8 ficheiros.</span>
-          <input id="ad-files" type="file" accept="image/png,image/jpeg,image/webp" multiple data-file-input />
-        </label>
-        <div class="selected-files" data-selected-files aria-live="polite">
-          <p>Ainda não escolheu ficheiros.</p>
-        </div>
-        <label class="city-field" for="ad-city"><span>Cidade indicada no anúncio</span>
-          <select id="ad-city" data-city-select>
-            <option value="">Escolha a cidade</option>
-            <option>Aveiro</option><option>Braga</option><option>Coimbra</option><option>Covilhã</option><option>Évora</option><option>Faro</option><option>Guimarães</option><option>Leiria</option><option>Lisboa</option><option>Porto</option><option>Outra</option>
-          </select>
-        </label>
-        <p class="upload-status" data-upload-status>Comece pelas capturas de ecrã que mostram o texto, o preço e as fotografias.</p>
-        <div class="demo-actions">
-          <button type="submit" disabled data-run-demo>Ver a análise em ação</button>
-          <button type="button" class="text-button" data-show-example>Ver relatório de exemplo</button>
-        </div>
-      </form>
-    </div>
-  </section>
-
-  <section class="processing-section" data-processing hidden>
-    <div class="shell processing-card">
-      <div class="processing-heading"><span class="spinner" aria-hidden="true"></span><div><p class="eyebrow">Análise em curso</p><h2 data-processing-title>A organizar a informação do anúncio</h2></div><strong data-processing-percent>18%</strong></div>
-      <div class="processing-track"><span data-processing-bar></span></div>
-      <div class="processing-steps">
-        <span class="active">Leitura das capturas</span><span>Interpretação das fotografias</span><span>Cruzamento das condições</span><span>Relatório</span>
+        <a class="start-real-action" href="/verificacao/enviar/">Começar a análise real grátis <span aria-hidden="true">→</span></a>
+        <button type="button" class="example-action" data-show-example>Ver primeiro um relatório de exemplo</button>
       </div>
     </div>
   </section>
@@ -259,33 +226,8 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
 </BaseLayout>
 
 <script>
-  const form = document.querySelector<HTMLFormElement>("[data-demo-form]");
-  const fileInput = document.querySelector<HTMLInputElement>("[data-file-input]");
-  const citySelect = document.querySelector<HTMLSelectElement>("[data-city-select]");
-  const fileCount = document.querySelector<HTMLElement>("[data-file-count]");
-  const selectedFiles = document.querySelector<HTMLElement>("[data-selected-files]");
-  const uploadStatus = document.querySelector<HTMLElement>("[data-upload-status]");
-  const runButton = document.querySelector<HTMLButtonElement>("[data-run-demo]");
   const showExample = document.querySelector<HTMLButtonElement>("[data-show-example]");
-  const processing = document.querySelector<HTMLElement>("[data-processing]");
   const results = document.querySelector<HTMLElement>("[data-results]");
-
-  const refreshFiles = () => {
-    if (!fileInput || !selectedFiles || !fileCount || !runButton || !uploadStatus) return;
-    const files = Array.from(fileInput.files || []).slice(0, 8);
-    fileCount.textContent = `${files.length} ${files.length === 1 ? "adicionado" : "adicionados"}`;
-    selectedFiles.innerHTML = files.length
-      ? files.map((file, index) => `<div><span>${index + 1}</span><strong>${file.name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</strong><small>${Math.max(1, Math.round(file.size / 1024))} KB</small></div>`).join("")
-      : "<p>Ainda não escolheu ficheiros.</p>";
-    const ready = files.length >= 1 && files.length <= 8 && Boolean(citySelect?.value);
-    runButton.disabled = !ready;
-    uploadStatus.textContent = files.length === 0
-      ? "Comece pelas capturas de ecrã que mostram o texto, o preço e as fotografias."
-      : !citySelect?.value ? "Escolha a cidade indicada no anúncio." : "Tudo pronto para a demonstração.";
-  };
-
-  fileInput?.addEventListener("change", refreshFiles);
-  citySelect?.addEventListener("change", refreshFiles);
 
   const revealResults = () => {
     if (!results) return;
@@ -294,37 +236,6 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
   };
 
   showExample?.addEventListener("click", revealResults);
-
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (!processing || !results || !runButton) return;
-    processing.hidden = false;
-    results.hidden = true;
-    processing.scrollIntoView({ behavior: "smooth", block: "center" });
-    runButton.disabled = true;
-
-    const stages = [
-      { percent: 18, title: "A organizar a informação do anúncio" },
-      { percent: 42, title: "A separar as fotografias do imóvel" },
-      { percent: 71, title: "A interpretar os detalhes visíveis" },
-      { percent: 93, title: "A construir as 12 verificações" },
-      { percent: 100, title: "Relatório de demonstração concluído" }
-    ];
-    let index = 0;
-    const tick = () => {
-      const stage = stages[index];
-      const bar = processing.querySelector<HTMLElement>("[data-processing-bar]");
-      const percent = processing.querySelector<HTMLElement>("[data-processing-percent]");
-      const title = processing.querySelector<HTMLElement>("[data-processing-title]");
-      if (bar) bar.style.width = `${stage.percent}%`;
-      if (percent) percent.textContent = `${stage.percent}%`;
-      if (title) title.textContent = stage.title;
-      index += 1;
-      if (index < stages.length) window.setTimeout(tick, 520);
-      else window.setTimeout(() => { processing.hidden = true; revealResults(); refreshFiles(); }, 550);
-    };
-    tick();
-  });
 
   document.querySelector<HTMLButtonElement>("[data-copy-questions]")?.addEventListener("click", async () => {
     const questions = "1. Pode confirmar quais as despesas incluídas?\n2. Pode enviar a minuta do contrato?\n3. Em nome de quem será feita a transferência?";
@@ -349,6 +260,151 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
   .pricing-card>*{min-width:0}.price-box{box-sizing:border-box;width:100%}
   @media(max-width:940px){.intro-grid{grid-template-columns:1fr;transform:translateY(-18px)}.intro-grid>div+div{border-left:0;border-top:1px solid #e2e9e5}.section-heading,.risk-grid{grid-template-columns:minmax(0,1fr)}.section-heading{gap:24px}.risk-grid{grid-template-areas:"visual" "price" "transfer"}.risk-visual{min-height:0}.pricing-card{grid-template-columns:minmax(0,1fr);gap:45px}.price-box{max-width:430px}}
   @media(max-width:620px){.preview-ribbon{align-items:center;flex-direction:column;gap:2px}.intro-grid>div{padding:23px}.risk-section{padding:75px 0}.risk-grid{margin-top:35px}.risk-card,.risk-visual{padding:25px}.risk-visual h3{padding-right:35px}.match-visual{grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr)}.mock-room{height:118px}.match-link{width:34px;height:34px}.risk-number{top:20px;right:22px;font-size:2rem}.demo-section,.results-section,.pricing-section,.faq-section{padding:78px 0}.upload-card{padding:22px 17px}.pricing-card h2,.results-heading h2,.demo-copy h2,.faq-wrap h2,.section-heading h2{font-size:clamp(2.5rem,12vw,3.5rem)}.price-box{max-width:none;transform:none}.price-box>strong{font-size:4rem}}
+</style>
+
+<style>
+  .start-card {
+    display: grid;
+    gap: 22px;
+    padding: 38px;
+  }
+
+  .start-badge {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+  }
+
+  .start-badge > span {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 14px;
+    background: #d9ff72;
+    color: #123b34;
+    font-weight: 950;
+  }
+
+  .start-badge div {
+    display: grid;
+    gap: 3px;
+  }
+
+  .start-badge small {
+    color: #0b7e61;
+    font-size: .67rem;
+    font-weight: 950;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .start-badge strong {
+    font-size: 1rem;
+  }
+
+  .start-card h3 {
+    max-width: 520px;
+    margin: 2px 0 -7px;
+    color: #0a332e;
+    font-size: clamp(2.15rem, 3.3vw, 3.25rem);
+    font-weight: 950;
+    line-height: 1;
+    letter-spacing: -.045em;
+  }
+
+  .start-card > p {
+    max-width: 570px;
+    margin: 0;
+    color: #60756e;
+    line-height: 1.65;
+  }
+
+  .start-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .start-steps div {
+    display: grid;
+    align-content: start;
+    min-height: 135px;
+    padding: 16px;
+    border: 1px solid #dce7e1;
+    border-radius: 13px;
+    background: #f5f9f6;
+  }
+
+  .start-steps span {
+    color: #0b8a68;
+    font-size: .68rem;
+    font-weight: 950;
+  }
+
+  .start-steps strong {
+    margin-top: 14px;
+    color: #123b34;
+    font-size: .82rem;
+  }
+
+  .start-steps small {
+    margin-top: 6px;
+    color: #6d8079;
+    font-size: .68rem;
+    line-height: 1.45;
+  }
+
+  .start-real-action {
+    display: flex;
+    min-height: 59px;
+    justify-content: center;
+    align-items: center;
+    padding: 0 22px;
+    border-radius: 11px;
+    background: #d9ff72;
+    color: #0a3b33;
+    font-size: 1rem;
+    font-weight: 950;
+    text-decoration: none;
+    box-shadow: 0 16px 35px rgba(12, 91, 72, .18);
+  }
+
+  .start-real-action:hover {
+    background: #e5ff9a;
+    transform: translateY(-1px);
+  }
+
+  .start-real-action span {
+    margin-left: 10px;
+    font-size: 1.25rem;
+  }
+
+  .example-action {
+    min-height: 44px;
+    border: 0;
+    background: transparent;
+    color: #0b7059;
+    font-weight: 900;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 620px) {
+    .start-card {
+      padding: 27px 20px;
+    }
+
+    .start-steps {
+      grid-template-columns: 1fr;
+    }
+
+    .start-steps div {
+      min-height: 0;
+    }
+  }
 </style>
 
 <style>
