@@ -28,7 +28,9 @@ permissions:
 
 concurrency:
   group: pages-social-functions-production
-  cancel-in-progress: true
+  # A compilacao completa demora varios minutos. Cancelar aqui pode impedir
+  # indefinidamente a publicacao quando chegam imagens sociais entretanto.
+  cancel-in-progress: false
 
 jobs:
   deploy:
