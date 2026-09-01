@@ -14,6 +14,7 @@ const emailInput = form?.elements.namedItem("email");
 const paymentNote = document.querySelector("[data-payment-note]");
 const checkoutButton = document.querySelector("[data-checkout]");
 const checkoutStatus = document.querySelector("[data-checkout-status]");
+const checkoutFallback = document.querySelector("[data-checkout-fallback]");
 const token = new URLSearchParams(window.location.search).get("t") || "";
 const isPrivate = /^[A-Za-z0-9_-]{43,128}$/.test(token);
 let pollTimer = 0;
@@ -178,6 +179,7 @@ checkoutButton?.addEventListener("click", async () => {
   checkoutButton.disabled = true;
   checkoutButton.textContent = "A preparar pagamento seguro…";
   checkoutStatus.textContent = "A abrir o pagamento Stripe.";
+  if (checkoutFallback) checkoutFallback.hidden = true;
   try {
     const response = await fetch("/api/verificacao-anuncio/checkout", {
       method: "POST", headers: { Accept: "application/json", "Content-Type": "application/json" },
@@ -185,9 +187,19 @@ checkoutButton?.addEventListener("click", async () => {
     });
     const result = await response.json();
     if (!response.ok || !result.url) throw new Error(result.error || "checkout_unavailable");
+    if (checkoutFallback) {
+      checkoutFallback.href = result.url;
+      checkoutFallback.hidden = false;
+    }
+    checkoutStatus.textContent = "Pagamento preparado. A abrir a página segura da Stripe.";
     window.location.assign(result.url);
+    window.setTimeout(() => {
+      checkoutStatus.textContent = "O pagamento está pronto. Se não abriu automaticamente, clique em «Abrir pagamento seguro».";
+    }, 1200);
   } catch {
-    checkoutStatus.textContent = "Não foi possível abrir o pagamento. Tente novamente.";
+    checkoutStatus.textContent = checkoutFallback && !checkoutFallback.hidden
+      ? "O pagamento está pronto. Clique em «Abrir pagamento seguro»."
+      : "Não foi possível preparar o pagamento. Tente novamente.";
     checkoutButton.disabled = false;
     checkoutButton.textContent = "Desbloquear investigação completa →";
   }

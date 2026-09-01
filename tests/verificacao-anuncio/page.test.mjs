@@ -65,6 +65,12 @@ test("a página privada liga o envio real ao estado do pedido", async () => {
   const intakeScript = await readFile(new URL("../../public/scripts/verificacao-intake.js", import.meta.url), "utf8");
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/intake/u);
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/checkout/u);
+  assert.match(source, /data-checkout-fallback/u);
+  assert.match(intakeScript, /Pagamento preparado\. A abrir a página segura da Stripe\./u);
+  assert.match(intakeScript, /Se não abriu automaticamente/u);
+  const checkoutEndpoint = await readFile(new URL("../../functions/api/verificacao-anuncio/checkout.ts", import.meta.url), "utf8");
+  assert.match(checkoutEndpoint, /retrieveStripeCheckoutSession/u);
+  assert.match(checkoutEndpoint, /reused: true/u);
   assert.match(intakeScript, /refresh\(\);\s*formStatus\.textContent = messages\[code\]/u);
   assert.match(intakeScript, /formStatus\.classList\.add\("is-error"\)/u);
   assert.match(source, /\.form-status\.is-error/u);

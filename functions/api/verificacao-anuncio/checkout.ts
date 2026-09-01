@@ -1,4 +1,8 @@
-import { createStripeCheckoutSession, StripeIntegrationError } from "../../../src/lib/verificacao-anuncio/stripe.mjs";
+import {
+  createStripeCheckoutSession,
+  retrieveStripeCheckoutSession,
+  StripeIntegrationError
+} from "../../../src/lib/verificacao-anuncio/stripe.mjs";
 import {
   PublicVerificationError,
   checkRateLimit,
@@ -35,6 +39,20 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     try { teaser = JSON.parse(row.precheckJson || "{}")?.teaser || {}; } catch { /* validado abaixo */ }
     if (!teaser.useful) throw new PublicVerificationError(409, "captures_not_sufficient");
     const email = await decryptPrivateValue(row.emailCipher, config.secret);
+    if (row.stripeSessionId) {
+      try {
+        const existingSession = await retrieveStripeCheckoutSession({
+          apiKey: env.STRIPE_SECRET_KEY,
+          sessionId: row.stripeSessionId
+        });
+        const existingUrl = new URL(String(existingSession?.url || ""));
+        if (existingSession?.status === "open" && existingUrl.protocol === "https:" && existingUrl.hostname === "checkout.stripe.com") {
+          return json({ ok: true, url: existingUrl.toString(), reused: true });
+        }
+      } catch (error) {
+        if (!(error instanceof StripeIntegrationError)) throw error;
+      }
+    }
     const session = await createStripeCheckoutSession({
       apiKey: env.STRIPE_SECRET_KEY,
       priceId: env.STRIPE_PRICE_ID,
