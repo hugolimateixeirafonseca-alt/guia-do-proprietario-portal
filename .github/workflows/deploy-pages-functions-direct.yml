@@ -128,7 +128,33 @@ jobs:
             if (persistedValue !== 'true') throw new Error('VERIFICACAO_PUBLIC_INTAKE_ENABLED was not persisted in Pages production');
             console.log('Enabled public verification intake in Pages production.');
           }
-          await appendFile(process.env.GITHUB_ENV, `PUBLIC_META_PIXEL_ID=${configuredPixelId}\n`, 'utf8');
+          let publicCheckoutEnabled = payload.result?.deployment_configs?.production?.env_vars?.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED?.value;
+          if (publicCheckoutEnabled !== 'true') {
+            const updateResponse = await fetch(endpoint, {
+              method: 'PATCH',
+              headers: {
+                Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                deployment_configs: {
+                  production: {
+                    env_vars: {
+                      PUBLIC_VERIFICACAO_CHECKOUT_ENABLED: { type: 'plain_text', value: 'true' }
+                    }
+                  }
+                }
+              })
+            });
+            const updatePayload = await updateResponse.json();
+            if (!updateResponse.ok || !updatePayload.success) {
+              throw new Error(`PUBLIC_VERIFICACAO_CHECKOUT_ENABLED update failed with ${updateResponse.status}`);
+            }
+            publicCheckoutEnabled = updatePayload.result?.deployment_configs?.production?.env_vars?.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED?.value;
+            if (publicCheckoutEnabled !== 'true') throw new Error('PUBLIC_VERIFICACAO_CHECKOUT_ENABLED was not persisted in Pages production');
+            console.log('Enabled public verification checkout in Pages production.');
+          }
+          await appendFile(process.env.GITHUB_ENV, `PUBLIC_META_PIXEL_ID=${configuredPixelId}\nPUBLIC_VERIFICACAO_CHECKOUT_ENABLED=${publicCheckoutEnabled}\n`, 'utf8');
           NODE
 
       - name: Install dependencies
@@ -137,6 +163,7 @@ jobs:
       - name: Build production site
         run: |
           test -n "$PUBLIC_META_PIXEL_ID" || { echo 'Missing PUBLIC_META_PIXEL_ID'; exit 1; }
+          test "$PUBLIC_VERIFICACAO_CHECKOUT_ENABLED" = "true" || { echo 'Verification checkout is not enabled'; exit 1; }
           npm run build
 
       - name: Deploy actual build to Cloudflare Pages

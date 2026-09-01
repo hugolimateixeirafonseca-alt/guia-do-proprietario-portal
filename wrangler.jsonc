@@ -4,7 +4,8 @@
   "pages_build_output_dir": "dist",
   "compatibility_date": "2026-08-20",
   "vars": {
-    "VERIFICACAO_PUBLIC_INTAKE_ENABLED": "true"
+    "VERIFICACAO_PUBLIC_INTAKE_ENABLED": "true",
+    "PUBLIC_VERIFICACAO_CHECKOUT_ENABLED": "true"
   },
   "d1_databases": [
     {

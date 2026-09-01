@@ -299,6 +299,13 @@ test("mantém os modos de email e sessão separados sem repetir perguntas no agr
   assert.match(thankYouSource, /Se não os encontrar, verifique a pasta de spam ou promoções/);
   assert.match(thankYouSource, /não receba o email dentro de 30 minutos, contacte-nos/);
   assert.doesNotMatch(thankYouSource, /procurar-quarto-olx-grupos-facebook/);
+  assert.match(thankYouSource, /id="verification-offer"/);
+  assert.match(thankYouSource, /Fazer a primeira verificação grátis/);
+  assert.match(thankYouSource, /href="\/verificacao\/enviar\/"/);
+  assert.match(thankYouSource, /Sem pagamento nesta etapa/);
+  assert.match(thankYouSource, /showLandingMode[\s\S]*?verificationOffer\.hidden = false/);
+  assert.match(thankYouSource, /showNoSessionMode[\s\S]*?verificationOffer\.hidden = false/);
+  assert.match(thankYouSource, /showEmailMode[\s\S]*?verificationOffer\.hidden = true/);
 });
 
 test("mantém o Meta Pixel na landing e nos builds diretos", () => {
