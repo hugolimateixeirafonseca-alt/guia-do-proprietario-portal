@@ -10,8 +10,13 @@ import {
   safeError,
   type RequestContext
 } from "../../lib/verificacao-anuncio";
+import { onRequestPost as subscribeMarketingEmail } from "../subscribe";
+import { VERIFICACAO_DIRECT_CONSENT_VERSION } from "../../../src/data/consent";
 
-export const onRequestPost = async ({ request, env }: RequestContext) => {
+export const handleVerificationIntake = async (
+  { request, env }: RequestContext,
+  options: { requireMarketingConsent?: boolean } = {}
+) => {
   const storedKeys: string[] = [];
   let jobId = "";
   try {
@@ -21,7 +26,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     }
     const config = requireConfiguration(env, true);
     await checkRateLimit(request, config.db, `${config.secret}:intake`, 4);
-    const upload = await readUpload(request, { requireEmail: true });
+    const upload = await readUpload(request, {
+      requireEmail: true,
+      requireMarketingConsentVersion: options.requireMarketingConsent
+        ? VERIFICACAO_DIRECT_CONSENT_VERSION
+        : undefined
+    });
     const access = await createPrivateAccess(config.secret);
     jobId = crypto.randomUUID();
 
@@ -71,6 +81,31 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       attribution.content || null
     ).run();
 
+    if (options.requireMarketingConsent) {
+      const subscriptionResponse = await subscribeMarketingEmail({
+        request: new Request(new URL("/api/subscribe", request.url), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "CF-Connecting-IP": request.headers.get("CF-Connecting-IP") || ""
+          },
+          body: JSON.stringify({
+            email: upload.email,
+            consent1: true,
+            consent2: false,
+            consentVersion: upload.consentVersion,
+            source: "verificacao-anuncio-direct",
+            pageUrl: new URL("/verificacao/enviar-direto/", request.url).toString(),
+            eventId: jobId
+          })
+        }),
+        env
+      });
+      if (!subscriptionResponse.ok) {
+        throw new PublicVerificationError(502, "marketing_subscription_unavailable");
+      }
+    }
+
     await config.queue!.send({ type: "verificacao_anuncio_precheck", verificacaoId: jobId });
     await config.db.prepare(
       `INSERT INTO verificacao_anuncio_events (job_id, tipo, estado, criado_em)
@@ -94,3 +129,5 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     return safeError(error);
   }
 };
+
+export const onRequestPost = (context: RequestContext) => handleVerificationIntake(context);

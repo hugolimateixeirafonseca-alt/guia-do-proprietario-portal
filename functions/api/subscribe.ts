@@ -1,4 +1,8 @@
-import { CONSENT_TEXT, type ConsentVersion } from "../../src/data/consent";
+import {
+  CONSENT_TEXT,
+  VERIFICACAO_DIRECT_CONSENT_VERSION,
+  type ConsentVersion
+} from "../../src/data/consent";
 
 interface Env {
   SENDER_API_TOKEN?: string;
@@ -322,7 +326,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   const consentVersion = cleanText(body.consentVersion, 64);
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
-  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" || body.source === "valor-liquido-venda-direct" || body.source === "guia_limpeza_preco_disponibilidade" || body.source === "guia_limpeza_alojamento_local" ? body.source : "";
+  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" || body.source === "valor-liquido-venda-direct" || body.source === "guia_limpeza_preco_disponibilidade" || body.source === "guia_limpeza_alojamento_local" || body.source === "verificacao-anuncio-direct" ? body.source : "";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
   const isDirectValueLead = source === "valor-liquido-venda-direct";
   const isCleaningAlLead = source === "guia_limpeza_alojamento_local";
@@ -330,6 +334,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const isQualifiedLead = isPartnerFollowup || isDirectValueLead || isCleaningLead;
   const expectedVersion = source === "newsletter"
     ? "newsletter-2026-08-c"
+    : source === "verificacao-anuncio-direct"
+      ? VERIFICACAO_DIRECT_CONSENT_VERSION
     : isDirectValueLead
       ? "valor-liquido-2026-08-a"
       : isCleaningLead

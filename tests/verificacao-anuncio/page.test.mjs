@@ -4,6 +4,9 @@ import test from "node:test";
 
 const pagePath = new URL("../../src/pages/verificacao-anuncio/index.astro", import.meta.url);
 const uploadPagePath = new URL("../../src/pages/verificacao/enviar.astro", import.meta.url);
+const directUploadPagePath = new URL("../../src/pages/verificacao/enviar-direto.astro", import.meta.url);
+const directIntakeEndpointPath = new URL("../../functions/api/verificacao-anuncio/intake-direct.ts", import.meta.url);
+const intakeEndpointPath = new URL("../../functions/api/verificacao-anuncio/intake.ts", import.meta.url);
 const uploadRedirectPath = new URL("../../functions/verificacao/enviar/[token].ts", import.meta.url);
 const retryEndpointPath = new URL("../../functions/api/verificacao-anuncio/retry.ts", import.meta.url);
 const confirmationEndpointPath = new URL("../../functions/api/verificacao-anuncio/confirmation.ts", import.meta.url);
@@ -21,7 +24,7 @@ test("a landing apresenta a pré-verificação antes do pagamento e o relatório
   assert.match(source, /Analisar as minhas capturas grátis/u);
   assert.match(source, /Começar a análise real grátis/u);
   assert.match(source, /Não é pedido qualquer pagamento nesta fase/u);
-  assert.match(source, /href="\/verificacao\/enviar\/"/u);
+  assert.match(source, /href="\/verificacao\/enviar-direto\/"/u);
   assert.match(source, /\.section-heading\s*\{[\s\S]*?max-width:\s*none/u);
   assert.match(source, /Leitura inteligente das fotografias/u);
   assert.match(source, /O que as fotografias revelam/u);
@@ -34,7 +37,7 @@ test("a landing apresenta a pré-verificação antes do pagamento e o relatório
   assert.doesNotMatch(source, /files\.length/u);
   assert.match(source, /Sistema inteligente com IA/u);
   assert.match(source, /Normalmente pronta em poucos minutos/u);
-  assert.match(source, /\/verificacao\/enviar\//u);
+  assert.match(source, /\/verificacao\/enviar-direto\//u);
   assert.doesNotMatch(source, /data-checkout-button/u);
   assert.match(source, /PUBLIC_VERIFICACAO_CHECKOUT_ENABLED/u);
   assert.doesNotMatch(source, /\/api\/verificacao-anuncio\/checkout/u);
@@ -82,6 +85,8 @@ test("a página privada liga o envio real ao estado do pedido", async () => {
   assert.match(source, /Descubra o que o anúncio/u);
   assert.match(source, /Sem pagamento agora/u);
   assert.match(source, /Uma decisão mais informada começa aqui/u);
+  assert.match(source, /urgency-eyebrow/u);
+  assert.match(source, /font-size:clamp\(\.98rem,1\.35vw,1\.16rem\)/u);
   const intakeScript = await readFile(new URL("../../public/scripts/verificacao-intake.js", import.meta.url), "utf8");
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/intake/u);
   assert.match(intakeScript, /\/api\/verificacao-anuncio\/checkout/u);
@@ -97,6 +102,25 @@ test("a página privada liga o envio real ao estado do pedido", async () => {
   assert.match(source, /\.form-status\.is-error/u);
   assert.match(source, /\[hidden\]\)\{display:none!important\}/u);
   assert.doesNotMatch(source, /printscreen/iu);
+});
+
+test("a landing direta exige o consentimento normal de email e usa o intake dedicado", async () => {
+  const [sharedPage, directPage, intakeScript, directIntake, intake] = await Promise.all([
+    readFile(uploadPagePath, "utf8"),
+    readFile(directUploadPagePath, "utf8"),
+    readFile(intakeScriptPath, "utf8"),
+    readFile(directIntakeEndpointPath, "utf8"),
+    readFile(intakeEndpointPath, "utf8")
+  ]);
+  assert.match(directPage, /EnviarLanding/u);
+  assert.match(sharedPage, /Astro\.url\.pathname === "\/verificacao\/enviar-direto\/"/u);
+  assert.match(sharedPage, /name="consentimento_email"[\s\S]*?required/u);
+  assert.match(sharedPage, /Aceito receber por email conselhos, novidades e comunicações comerciais/u);
+  assert.match(sharedPage, /VERIFICACAO_DIRECT_CONSENT_VERSION/u);
+  assert.match(intakeScript, /\/api\/verificacao-anuncio\/intake-direct/u);
+  assert.match(directIntake, /requireMarketingConsent: true/u);
+  assert.match(intake, /requireMarketingConsentVersion/u);
+  assert.match(intake, /source: "verificacao-anuncio-direct"/u);
 });
 
 test("o link do email transporta o token no caminho e redireciona para a página privada", async () => {

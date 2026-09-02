@@ -45,7 +45,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
             <strong>3,90 €</strong>
             <small>Agora poupa 4,00 €</small>
           </div>
-          <a class="primary-action" href="/verificacao/enviar/">Verificar capturas grátis <span aria-hidden="true">→</span></a>
+          <a class="primary-action" href="/verificacao/enviar-direto/">Verificar capturas grátis <span aria-hidden="true">→</span></a>
         </div>
         <p class="pay-later">Comece grátis. Veja primeiro o que a IA detetou e só pague 3,90 € se quiser desbloquear a decisão completa, as 12 verificações e a mensagem pronta a enviar.</p>
         <ul class="trust-list" aria-label="O que está incluído">
@@ -143,7 +143,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
           <div><span>02</span><strong>Receber o teaser</strong><small>Veja primeiro o que a IA conseguiu identificar.</small></div>
           <div><span>03</span><strong>Decidir se desbloqueia</strong><small>Só depois escolhe se quer pagar 3,90 €.</small></div>
         </div>
-        <a class="start-real-action" href="/verificacao/enviar/">Começar a análise real grátis <span aria-hidden="true">→</span></a>
+        <a class="start-real-action" href="/verificacao/enviar-direto/">Começar a análise real grátis <span aria-hidden="true">→</span></a>
         <button type="button" class="example-action" data-show-example>Ver primeiro um relatório de exemplo</button>
       </div>
     </div>
@@ -209,7 +209,7 @@ const checkoutEnabled = import.meta.env.PUBLIC_VERIFICACAO_CHECKOUT_ENABLED === 
   <section class="pricing-section" id="comprar">
     <div class="shell pricing-card">
       <div class="pricing-copy"><p class="eyebrow">Primeiro veja se as suas capturas servem</p><h2>Comece grátis. Desbloqueie tudo por 3,90 €.</h2><p>O sistema inteligente com IA confirma gratuitamente se o material é suficiente e mostra uma primeira leitura real do seu anúncio. Se vir valor, desbloqueia a decisão antes de pagar, a leitura visual, as 12 verificações e a mensagem pronta a enviar.</p><ul><li>Pré-verificação sem custo</li><li>Poupa 4,00 € face ao preço anterior</li><li>Pagamento único, sem subscrição</li><li>Normalmente pronto em poucos minutos</li></ul></div>
-      <div class="price-box"><span class="offer-badge">Novo preço</span><span class="previous-price">Antes 7,90 €</span><strong>3,90 €</strong><span class="per-analysis">pagamento único, apenas depois do teaser</span><a class="intake-action" href="/verificacao/enviar/">Analisar as minhas capturas grátis</a><small data-checkout-status>{checkoutEnabled ? "Pré-verificação gratuita. Pagamento seguro através da Stripe." : "A pré-verificação gratuita está disponível. A compra pública continua desligada durante a validação final."}</small></div>
+      <div class="price-box"><span class="offer-badge">Novo preço</span><span class="previous-price">Antes 7,90 €</span><strong>3,90 €</strong><span class="per-analysis">pagamento único, apenas depois do teaser</span><a class="intake-action" href="/verificacao/enviar-direto/">Analisar as minhas capturas grátis</a><small data-checkout-status>{checkoutEnabled ? "Pré-verificação gratuita. Pagamento seguro através da Stripe." : "A pré-verificação gratuita está disponível. A compra pública continua desligada durante a validação final."}</small></div>
     </div>
   </section>
 

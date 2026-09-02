@@ -652,6 +652,36 @@ test("cria uma subscrição nova da newsletter diretamente no grupo ativo", asyn
   assert.equal(createBody.trigger_automation, false);
 });
 
+test("guarda o consentimento da landing direta de verificação no grupo de marketing", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      email: "verificacao@exemplo.pt",
+      consent1: true,
+      consent2: false,
+      consentVersion: "verificacao-direto-2026-09-a",
+      source: "verificacao-anuncio-direct",
+      pageUrl: "https://guiadoproprietario.pt/verificacao/enviar-direto/",
+      eventId: "verificacao-direta-123"
+    }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  const createBody = JSON.parse(calls[1].init.body);
+  assert.deepEqual(createBody.groups, ["egK8WG"]);
+  assert.equal(createBody.fields["{$CONSENT_MARKETING}"], "true");
+  assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "false");
+  assert.equal(createBody.fields["{$CONSENT_VERSAO}"], "verificacao-direto-2026-09-a");
+  assert.equal(createBody.fields["{$LEAD_SOURCE}"], "verificacao-anuncio-direct");
+  assert.equal(createBody.trigger_automation, false);
+});
+
 test("não apresenta sucesso quando o Sender falha", async () => {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });

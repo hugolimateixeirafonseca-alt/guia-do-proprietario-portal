@@ -18,12 +18,15 @@ const checkoutStatus = document.querySelector("[data-checkout-status]");
 const checkoutFallback = document.querySelector("[data-checkout-fallback]");
 const token = new URLSearchParams(window.location.search).get("t") || "";
 const isPrivate = /^[A-Za-z0-9_-]{43,128}$/.test(token);
+const isDirectLanding = card?.dataset.directLanding === "true";
 let pollTimer = 0;
 let recoveryRequested = false;
 let legacyUpload = false;
 
 const messages = {
-  invalid_email: "Indique um email válido.", captures_required: "Escolha pelo menos uma captura.",
+  invalid_email: "Indique um email válido.", invalid_consent: "Aceite o consentimento de email para continuar.",
+  marketing_subscription_unavailable: "Não foi possível guardar o consentimento de email. Tente novamente.",
+  captures_required: "Escolha pelo menos uma captura.",
   too_many_captures: "Escolha no máximo 8 capturas.", capture_too_large: "Uma das capturas ultrapassa 10 MB.",
   captures_too_large: "O conjunto de capturas é demasiado pesado.", unsupported_capture_type: "Use apenas ficheiros JPEG, PNG ou WebP.",
   capture_type_mismatch: "Um dos ficheiros não contém uma imagem válida.", invalid_city: "Indique a cidade apresentada no anúncio.",
@@ -85,9 +88,11 @@ function refresh() {
     : "<p>Ainda não escolheu ficheiros.</p>";
   const city = form.elements.namedItem("cidade");
   const privacy = form.elements.namedItem("confirmacao_privacidade");
+  const emailConsent = form.elements.namedItem("consentimento_email");
   const emailOk = isPrivate || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(emailInput?.value.trim() || "");
+  const emailConsentOk = !isDirectLanding || emailConsent?.checked;
   const filesOk = files.length >= 1 && files.length <= 8 && files.every((file) => file.size <= 10 * 1024 * 1024);
-  submit.disabled = !(filesOk && city?.value.trim() && privacy?.checked && emailOk);
+  submit.disabled = !(filesOk && city?.value.trim() && privacy?.checked && emailConsentOk && emailOk);
   formStatus.textContent = files.length > 8 ? "Escolha no máximo 8 capturas."
     : files.some((file) => file.size > 10 * 1024 * 1024) ? "Uma das capturas ultrapassa 10 MB."
     : files.length ? `${files.length} ${files.length === 1 ? "captura pronta" : "capturas prontas"} para a pré-verificação.`
@@ -201,7 +206,10 @@ form?.addEventListener("submit", async (event) => {
       body.set("meta_fbp", attribution.fbp);
       body.set("meta_fbc", attribution.fbc);
     }
-    const response = await fetch(isPrivate ? `/api/verificacao-anuncio/upload?t=${encodeURIComponent(token)}` : "/api/verificacao-anuncio/intake", {
+    const publicEndpoint = isDirectLanding
+      ? "/api/verificacao-anuncio/intake-direct"
+      : "/api/verificacao-anuncio/intake";
+    const response = await fetch(isPrivate ? `/api/verificacao-anuncio/upload?t=${encodeURIComponent(token)}` : publicEndpoint, {
       method: "POST", body, headers: { Accept: "application/json" }
     });
     const result = await response.json();
@@ -250,5 +258,13 @@ checkoutButton?.addEventListener("click", async () => {
   }
 });
 
-document.querySelector("[data-start-again]")?.addEventListener("click", () => window.location.assign("/verificacao/enviar/"));
-if (isPrivate) { hideAll(); if (access) access.hidden = false; readState(); } else showUpload(false);
+document.querySelector("[data-start-again]")?.addEventListener("click", () => window.location.assign("/verificacao/enviar-direto/"));
+if (isPrivate && isDirectLanding) {
+  window.location.replace(`/verificacao/enviar/${window.location.search}`);
+} else if (isPrivate) {
+  hideAll();
+  if (access) access.hidden = false;
+  readState();
+} else {
+  showUpload(false);
+}

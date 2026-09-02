@@ -15,6 +15,8 @@ on:
       - 'public/scripts/landings/alojamento-local-cleaning.js'
       - 'public/scripts/verificacao-intake.js'
       - 'src/pages/verificacao/enviar.astro'
+      - 'src/pages/verificacao/enviar-direto.astro'
+      - 'src/data/consent.ts'
       - 'wrangler.jsonc'
       - 'src/pages/social-feed.json.ts'
       - 'scripts/converter-imagens.mjs'

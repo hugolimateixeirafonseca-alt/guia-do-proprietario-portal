@@ -51,6 +51,9 @@ export interface VerificationEnv {
   STRIPE_PRICE_ID?: string;
   SITE_URL?: string;
   SENDER_API_TOKEN?: string;
+  SENDER_GROUP_MARKETING?: string;
+  SENDER_GROUP_GUIA_VENDER_CASA?: string;
+  SENDER_GROUP_GUIA_PARCEIROS?: string;
   SENDER_TRANSACTIONAL_FROM_EMAIL?: string;
   SENDER_TRANSACTIONAL_FROM_NAME?: string;
   VERIFICACAO_PUBLIC_INTAKE_ENABLED?: string;
@@ -247,7 +250,10 @@ export async function checkRateLimit(request: Request, db: D1Database, secret: s
   if ((row?.hits || 0) > limit) throw new PublicVerificationError(429, "too_many_requests");
 }
 
-export async function readUpload(request: Request, options: { requireEmail?: boolean } = {}) {
+export async function readUpload(
+  request: Request,
+  options: { requireEmail?: boolean; requireMarketingConsentVersion?: string } = {}
+) {
   const contentType = (request.headers.get("Content-Type") || "").toLowerCase();
   if (!contentType.startsWith("multipart/form-data")) {
     throw new PublicVerificationError(415, "multipart_form_required");
@@ -278,6 +284,11 @@ export async function readUpload(request: Request, options: { requireEmail?: boo
     if (options.requireEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/u.test(email)) {
       throw new PublicVerificationError(400, "invalid_email");
     }
+    const consentVersion = String(form.get("consent_version") || "").trim();
+    if (options.requireMarketingConsentVersion
+      && (form.get("consentimento_email") !== "sim" || consentVersion !== options.requireMarketingConsentVersion)) {
+      throw new PublicVerificationError(400, "invalid_consent");
+    }
     const metaAttribution = form.get("meta_consent") === "sim"
       ? buildMetaAttribution(request, { fbp: form.get("meta_fbp"), fbc: form.get("meta_fbc") })
       : null;
@@ -287,7 +298,14 @@ export async function readUpload(request: Request, options: { requireEmail?: boo
       campaign: form.get("utm_campaign"),
       content: form.get("utm_content")
     });
-    return { cidade, email, captures: await validateUploadFiles(captures), metaAttribution, marketingAttribution };
+    return {
+      cidade,
+      email,
+      captures: await validateUploadFiles(captures),
+      metaAttribution,
+      marketingAttribution,
+      consentVersion: options.requireMarketingConsentVersion ? consentVersion : ""
+    };
   } catch (error) {
     if (error instanceof IntakeValidationError) throw new PublicVerificationError(error.status, error.code);
     throw error;

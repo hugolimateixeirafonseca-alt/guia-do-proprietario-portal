@@ -3,6 +3,7 @@ export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-08-c";
 export const VALOR_LIQUIDO_CONSENT_VERSION = "valor-liquido-2026-08-a";
 export const LIMPEZA_CONSENT_VERSION = "limpeza-2026-08-b";
 export const ALOJAMENTO_LOCAL_CONSENT_VERSION = "alojamento-local-2026-08-a";
+export const VERIFICACAO_DIRECT_CONSENT_VERSION = "verificacao-direto-2026-09-a";
 
 export const CONSENT_TEXT = {
   "2026-08-b": {
@@ -70,6 +71,10 @@ export const CONSENT_TEXT = {
     c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário sobre gestão de imóveis e alojamento local, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
   },
   "newsletter-2026-08-c": {
+    c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",
+    c2: ""
+  },
+  "verificacao-direto-2026-09-a": {
     c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",
     c2: ""
   }
