@@ -101,7 +101,7 @@ function showUpload(legacy = false) {
   if (emailField) emailField.hidden = legacy;
   if (emailInput) emailInput.required = !legacy;
   if (paymentNote) paymentNote.textContent = legacy ? "O pagamento deste pedido já foi confirmado." : "Primeiro vê o resultado inicial. Só depois decide se quer a análise completa.";
-  if (submit) submit.textContent = legacy ? "Iniciar análise com IA" : "Analisar o meu anúncio gratuitamente →";
+  if (submit) submit.textContent = legacy ? "Iniciar análise com IA" : "Analisar o meu anúncio";
   if (badge) badge.textContent = "Pronto para envio";
   refresh();
 }
@@ -211,7 +211,7 @@ form?.addEventListener("submit", async (event) => {
     pollTimer = window.setTimeout(readState, 3000);
   } catch (error) {
     const code = error instanceof Error ? error.message : "temporary_error";
-    submit.textContent = isPrivate ? "Tentar novamente" : "Analisar o meu anúncio gratuitamente →";
+    submit.textContent = isPrivate ? "Tentar novamente" : "Analisar o meu anúncio";
     refresh();
     formStatus.textContent = messages[code] || "Não foi possível enviar as capturas. Tente novamente.";
     formStatus.classList.add("is-error");

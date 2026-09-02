@@ -71,7 +71,8 @@ test("a página privada liga o envio real ao estado do pedido", async () => {
   assert.match(source, /\/api\/verificacao-anuncio\/upload\?t=/u);
   assert.match(source, /\/api\/verificacao-anuncio\/retry\?t=/u);
   assert.match(source, /confirmacao_privacidade/u);
-  assert.match(source, /Analisar o meu anúncio gratuitamente/u);
+  assert.match(source, /Analisar o meu anúncio/u);
+  assert.doesNotMatch(source, /Analisar o meu anúncio gratuitamente/u);
   assert.match(source, /Windows \+ Shift \+ S/u);
   assert.match(source, /Android/u);
   assert.match(source, /iPhone/u);
