@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
@@ -63,38 +64,252 @@ def _paste_card(image: Image.Image, content: Image.Image, xy: tuple[int, int], r
     image.paste(content, xy, mask)
 
 
-def _fit_text(draw: ImageDraw.ImageDraw, text: str, box: tuple[int, int, int, int], maximum: int, minimum: int, bold: bool = True, spacing: int = 8) -> tuple[object, str]:
+def _normalise_text(text: str) -> str:
+    return "\n".join(" ".join(paragraph.split()) for paragraph in text.splitlines())
+
+
+def _balanced_wrap(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    candidate_font: object,
+    width: int,
+    max_lines: int | None = None,
+) -> str | None:
+    """Wrap whole words and favour visually balanced lines over greedy wrapping."""
+    wrapped_paragraphs: list[str] = []
+    remaining_lines = max_lines
+    for paragraph in text.split("\n"):
+        words = paragraph.split()
+        if not words:
+            wrapped_paragraphs.append("")
+            if remaining_lines is not None:
+                remaining_lines -= 1
+            continue
+
+        widths = [draw.textlength(word, font=candidate_font) for word in words]
+        if any(word_width > width for word_width in widths):
+            return None
+        space_width = draw.textlength(" ", font=candidate_font)
+
+        @lru_cache(maxsize=None)
+        def best(start: int, lines_left: int) -> tuple[float, tuple[str, ...]] | None:
+            if start == len(words):
+                return 0.0, ()
+            if lines_left == 0:
+                return None
+
+            best_result: tuple[float, tuple[str, ...]] | None = None
+            line_width = 0.0
+            for end in range(start, len(words)):
+                line_width += widths[end] + (space_width if end > start else 0)
+                if line_width > width:
+                    break
+                tail = best(end + 1, lines_left - 1)
+                if tail is None:
+                    continue
+                is_last = end == len(words) - 1
+                raggedness = ((width - line_width) / width) ** 2 * (0.2 if is_last else 1.0)
+                # Evita uma última linha com uma única palavra muito curta.
+                orphan_penalty = 0.35 if is_last and start > 0 and line_width < width * 0.28 else 0.0
+                score = raggedness + orphan_penalty + tail[0]
+                result = score, (" ".join(words[start : end + 1]), *tail[1])
+                if best_result is None or result[0] < best_result[0]:
+                    best_result = result
+            return best_result
+
+        available = remaining_lines if remaining_lines is not None else len(words)
+        result = best(0, available)
+        if result is None:
+            return None
+        lines = list(result[1])
+        wrapped_paragraphs.extend(lines)
+        if remaining_lines is not None:
+            remaining_lines -= len(lines)
+            if remaining_lines < 0:
+                return None
+
+    return "\n".join(wrapped_paragraphs)
+
+
+def _greedy_wrap(draw: ImageDraw.ImageDraw, text: str, candidate_font: object, width: int) -> str:
+    """Keep the established body-copy wrapping; title composition is handled separately."""
+    lines: list[str] = []
+    for paragraph in text.split("\n"):
+        current = ""
+        for word in paragraph.split():
+            attempt = f"{current} {word}".strip()
+            if draw.textbbox((0, 0), attempt, font=candidate_font)[2] <= width or not current:
+                current = attempt
+            else:
+                lines.append(current)
+                current = word
+        lines.append(current)
+    return "\n".join(lines)
+
+
+def _title_size_cap(text: str, maximum: int, minimum: int) -> int:
+    """Reduce long titles gradually before layout fitting, without abrupt jumps."""
+    character_count = len(" ".join(text.split()))
+    reduction = max(0, (character_count - 24 + 11) // 12) * 2
+    return max(minimum, maximum - reduction)
+
+
+def _multiline_metrics(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    candidate_font: object,
+    spacing: int,
+) -> tuple[int, int, tuple[int, int, int, int]]:
+    bbox = draw.multiline_textbbox((0, 0), text, font=candidate_font, spacing=spacing)
+    return bbox[2] - bbox[0], bbox[3] - bbox[1], bbox
+
+
+def _draw_intro_headline(
+    image: Image.Image,
+    title: str,
+    accent: str,
+    box: tuple[int, int, int, int],
+    maximum: int = 64,
+    minimum: int = 42,
+    gap: int = 24,
+) -> tuple[tuple[int, int, int, int], tuple[int, int, int, int]]:
+    """Lay out title and accent as one block so their lines can never collide."""
+    draw = ImageDraw.Draw(image)
+    title = _normalise_text(title).upper()
+    accent = _normalise_text(accent).upper()
     width = box[2] - box[0]
     height = box[3] - box[1]
-    paragraphs = text.split("\n")
-    for size in range(maximum, minimum - 1, -2):
+    size_cap = _title_size_cap(f"{title} {accent}", maximum, minimum)
+
+    for size in range(size_cap, minimum - 1, -2):
+        candidate_font = font(size, True)
+        spacing = max(13, round(size * 0.28))
+        wrapped_title = _balanced_wrap(draw, title, candidate_font, width, 3)
+        wrapped_accent = _balanced_wrap(draw, accent, candidate_font, width, 3)
+        if wrapped_title is None or wrapped_accent is None:
+            continue
+        if len(wrapped_title.splitlines()) + len(wrapped_accent.splitlines()) > 4:
+            continue
+
+        title_width, title_height, title_font_bbox = _multiline_metrics(draw, wrapped_title, candidate_font, spacing)
+        accent_width, accent_height, accent_font_bbox = _multiline_metrics(draw, wrapped_accent, candidate_font, spacing)
+        if title_width > width or accent_width > width or title_height + gap + accent_height > height:
+            continue
+
+        title_top = box[1]
+        accent_top = title_top + title_height + gap
+        draw.multiline_text(
+            (box[0] - title_font_bbox[0], title_top - title_font_bbox[1]),
+            wrapped_title,
+            font=candidate_font,
+            fill=INK,
+            spacing=spacing,
+        )
+        draw.multiline_text(
+            (box[0] - accent_font_bbox[0], accent_top - accent_font_bbox[1]),
+            wrapped_accent,
+            font=candidate_font,
+            fill=GREEN,
+            spacing=spacing,
+        )
+        return (
+            (box[0], title_top, box[0] + title_width, title_top + title_height),
+            (box[0], accent_top, box[0] + accent_width, accent_top + accent_height),
+        )
+
+    raise ValueError(f"O título de introdução não cabe no layout: {title} / {accent}")
+
+
+def _draw_label_chip(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    xy: tuple[int, int],
+    max_right: int,
+    maximum: int = 22,
+    minimum: int = 16,
+) -> tuple[int, int, int, int]:
+    """Size the image label from its content while keeping it inside the safe margin."""
+    text = " ".join(text.split())
+    x, y = xy
+    padding_x = 24
+    padding_y = 12
+    available_text_width = max_right - x - padding_x * 2
+    for size in range(maximum, minimum - 1, -1):
+        candidate_font = font(size, True)
+        bbox = draw.textbbox((0, 0), text, font=candidate_font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        if text_width <= available_text_width:
+            chip = (x, y, x + text_width + padding_x * 2, y + text_height + padding_y * 2)
+            draw.rounded_rectangle(chip, radius=8, fill=PAPER)
+            draw.text(
+                (x + padding_x - bbox[0], y + padding_y - bbox[1]),
+                text,
+                font=candidate_font,
+                fill=GREEN_DARK,
+            )
+            return chip
+    raise ValueError(f"A etiqueta não cabe dentro das margens: {text}")
+
+
+def _fit_text(
+    draw: ImageDraw.ImageDraw,
+    text: str,
+    box: tuple[int, int, int, int],
+    maximum: int,
+    minimum: int,
+    bold: bool = True,
+    spacing: int = 8,
+    *,
+    title: bool = False,
+    max_lines: int | None = None,
+) -> tuple[object, str, int]:
+    width = box[2] - box[0]
+    height = box[3] - box[1]
+    text = _normalise_text(text)
+    size_cap = _title_size_cap(text, maximum, minimum) if title else maximum
+    for size in range(size_cap, minimum - 1, -2):
         candidate_font = font(size, bold)
-        lines: list[str] = []
-        for paragraph in paragraphs:
-            words = paragraph.split()
-            current = ""
-            for word in words:
-                attempt = f"{current} {word}".strip()
-                if draw.textbbox((0, 0), attempt, font=candidate_font)[2] <= width or not current:
-                    current = attempt
-                else:
-                    lines.append(current)
-                    current = word
-            lines.append(current)
-        wrapped = "\n".join(lines)
-        bbox = draw.multiline_textbbox((0, 0), wrapped, font=candidate_font, spacing=spacing)
-        if bbox[3] - bbox[1] <= height:
-            return candidate_font, wrapped
+        wrapped = _balanced_wrap(draw, text, candidate_font, width, max_lines) if title else _greedy_wrap(draw, text, candidate_font, width)
+        if wrapped is None:
+            continue
+        line_spacing = max(spacing, round(size * 0.28)) if title else spacing
+        bbox = draw.multiline_textbbox((0, 0), wrapped, font=candidate_font, spacing=line_spacing)
+        if bbox[2] - bbox[0] <= width and bbox[3] - bbox[1] <= height:
+            return candidate_font, wrapped, line_spacing
     raise ValueError(f"O texto não cabe no layout: {text}")
 
 
-def _text_box(image: Image.Image, text: str, box: tuple[int, int, int, int], maximum: int, minimum: int = 28, fill: str = INK, bold: bool = True, spacing: int = 8, centered: bool = False) -> None:
+def _text_box(
+    image: Image.Image,
+    text: str,
+    box: tuple[int, int, int, int],
+    maximum: int,
+    minimum: int = 28,
+    fill: str = INK,
+    bold: bool = True,
+    spacing: int = 8,
+    centered: bool = False,
+    *,
+    title: bool = False,
+    max_lines: int | None = None,
+) -> None:
     draw = ImageDraw.Draw(image)
-    chosen_font, wrapped = _fit_text(draw, text, box, maximum, minimum, bold, spacing)
+    chosen_font, wrapped, chosen_spacing = _fit_text(
+        draw,
+        text,
+        box,
+        maximum,
+        minimum,
+        bold,
+        spacing,
+        title=title,
+        max_lines=max_lines,
+    )
     if centered:
-        draw.multiline_text(((box[0] + box[2]) // 2, box[1]), wrapped, font=chosen_font, fill=fill, spacing=spacing, align="center", anchor="ma")
+        draw.multiline_text(((box[0] + box[2]) // 2, box[1]), wrapped, font=chosen_font, fill=fill, spacing=chosen_spacing, align="center", anchor="ma")
     else:
-        draw.multiline_text((box[0], box[1]), wrapped, font=chosen_font, fill=fill, spacing=spacing)
+        draw.multiline_text((box[0], box[1]), wrapped, font=chosen_font, fill=fill, spacing=chosen_spacing)
 
 
 def _eyebrow(draw: ImageDraw.ImageDraw, text: str, xy: tuple[int, int]) -> None:
@@ -119,12 +334,15 @@ def render_intro(data: dict) -> Image.Image:
     draw = ImageDraw.Draw(image)
     hero = _cover(data["_hero_path"], (896, 610), 0.45)
     _paste_card(image, hero, (MARGIN, CONTENT_TOP), radius=20)
-    draw.rounded_rectangle((MARGIN + 32, 885, MARGIN + 342, 945), radius=8, fill=PAPER)
-    draw.text((MARGIN + 56, 903), data["intro"]["label"], font=font(22, True), fill=GREEN_DARK)
-    _text_box(image, data["intro"]["title"].upper(), (MARGIN, 1030, WIDTH - MARGIN, 1155), 78, 60)
-    _text_box(image, data["intro"]["accent"].upper(), (MARGIN, 1155, WIDTH - MARGIN, 1270), 78, 60, GREEN)
-    draw.line((MARGIN, 1328, MARGIN + 86, 1328), fill=SAND, width=8)
-    _text_box(image, data["intro"]["subtitle"], (MARGIN, 1380, WIDTH - MARGIN, 1515), 35, 29, MUTED, False, 8)
+    _draw_label_chip(draw, data["intro"]["label"], (MARGIN + 32, 885), WIDTH - MARGIN)
+    _draw_intro_headline(
+        image,
+        data["intro"]["title"].upper(),
+        data["intro"]["accent"].upper(),
+        (MARGIN, 1030, WIDTH - MARGIN, 1305),
+    )
+    draw.line((MARGIN, 1340, MARGIN + 86, 1340), fill=SAND, width=8)
+    _text_box(image, data["intro"]["subtitle"], (MARGIN, 1390, WIDTH - MARGIN, 1535), 35, 29, MUTED, False, 8)
     return image
 
 
@@ -142,7 +360,7 @@ def render_steps(data: dict, visible: int) -> Image.Image:
     image = _canvas(data["category"], f"02  •  {visible} DE {len(data['steps'])} {item_label}")
     draw = ImageDraw.Draw(image)
     _eyebrow(draw, eyebrow, (MARGIN, 358))
-    _text_box(image, title, (MARGIN, 420, WIDTH - MARGIN, 610), 68, 54, INK, True, 4)
+    _text_box(image, title, (MARGIN, 420, WIDTH - MARGIN, 610), 64, 48, INK, True, 8, title=True, max_lines=3)
 
     start_y = 672
     row_height = 166
@@ -152,7 +370,7 @@ def render_steps(data: dict, visible: int) -> Image.Image:
             draw.line((MARGIN + 48, y - 74, MARGIN + 48, y - 20), fill="#abc3b9", width=4)
         draw.ellipse((MARGIN, y - 8, MARGIN + 96, y + 88), fill=GREEN)
         draw.text((MARGIN + 48, y + 40), str(step["number"]), font=font(39, True), fill=PAPER, anchor="mm")
-        _text_box(image, step["title"], (MARGIN + 140, y - 3, WIDTH - MARGIN, y + 96), 40, 31)
+        _text_box(image, step["title"], (MARGIN + 140, y - 3, WIDTH - MARGIN, y + 96), 38, 29, title=True, max_lines=2)
         draw.line((MARGIN + 140, y + 112, WIDTH - MARGIN, y + 112), fill=LINE, width=2)
     return image
 
@@ -164,7 +382,7 @@ def _render_cost_steps(data: dict, visible: int) -> Image.Image:
     _text_box(image, data["highlight"]["amount"], (MARGIN, 410, WIDTH - MARGIN, 565), 112, 82, GREEN, True, 4)
     _text_box(image, data["highlight"]["caption"], (MARGIN, 575, WIDTH - MARGIN, 650), 34, 29, MUTED, False)
     draw.line((MARGIN, 700, WIDTH - MARGIN, 700), fill=LINE, width=2)
-    _text_box(image, data["progress"]["title"], (MARGIN, 760, WIDTH - MARGIN, 900), 52, 42, INK, True, 4)
+    _text_box(image, data["progress"]["title"], (MARGIN, 760, WIDTH - MARGIN, 900), 49, 38, INK, True, 8, title=True, max_lines=2)
 
     start_y = 980
     row_height = 178
@@ -172,7 +390,7 @@ def _render_cost_steps(data: dict, visible: int) -> Image.Image:
         y = start_y + index * row_height
         draw.rounded_rectangle((MARGIN, y, MARGIN + 82, y + 82), radius=12, fill=GREEN)
         draw.text((MARGIN + 41, y + 41), str(step["number"]), font=font(34, True), fill=PAPER, anchor="mm")
-        _text_box(image, step["title"], (MARGIN + 125, y - 1, WIDTH - MARGIN, y + 92), 39, 31)
+        _text_box(image, step["title"], (MARGIN + 125, y - 1, WIDTH - MARGIN, y + 92), 37, 29, title=True, max_lines=2)
         if index < visible - 1:
             draw.line((MARGIN + 125, y + 116, WIDTH - MARGIN, y + 116), fill=LINE, width=2)
     return image
@@ -185,7 +403,7 @@ def render_warning(data: dict) -> Image.Image:
     _paste_card(image, hero, (MARGIN, 370), radius=18)
     draw.rectangle((MARGIN + 405, 370, MARGIN + 423, 850), fill=SAND)
     _eyebrow(draw, data["warning"]["eyebrow"], (MARGIN + 470, 405))
-    _text_box(image, data["warning"]["title"], (MARGIN + 470, 480, WIDTH - MARGIN, 720), 61, 45)
+    _text_box(image, data["warning"]["title"], (MARGIN + 470, 480, WIDTH - MARGIN, 720), 57, 40, title=True, max_lines=4)
 
     draw.rounded_rectangle((MARGIN, 960, WIDTH - MARGIN, 1190), radius=18, fill=GREEN_SOFT)
     draw.ellipse((MARGIN + 40, 1015, MARGIN + 112, 1087), fill=GREEN)
@@ -201,7 +419,7 @@ def render_outro(data: dict) -> Image.Image:
     draw = ImageDraw.Draw(image)
     draw.ellipse((WIDTH // 2 - 170, 365, WIDTH // 2 + 170, 705), fill=GREEN_SOFT)
     draw_mark(image, (WIDTH // 2 - 78, 458), 156)
-    _text_box(image, data["outro"]["title"], (MARGIN, 810, WIDTH - MARGIN, 1055), 68, 48, INK, True, 8, True)
+    _text_box(image, data["outro"]["title"], (MARGIN, 810, WIDTH - MARGIN, 1055), 64, 44, INK, True, 8, True, title=True, max_lines=4)
     draw.line((WIDTH // 2 - 70, 1130, WIDTH // 2 + 70, 1130), fill=SAND, width=7)
     draw.text((WIDTH // 2, 1215), data["outro"]["label"], font=font(28), fill=MUTED, anchor="ma")
     draw.text((WIDTH // 2, 1300), data["outro"]["brand"], font=font(46, True), fill=INK, anchor="ma")
