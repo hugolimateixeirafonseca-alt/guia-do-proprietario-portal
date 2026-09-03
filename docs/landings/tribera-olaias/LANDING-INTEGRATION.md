@@ -19,7 +19,7 @@ Evento de conversão pretendido: nenhum evento Lead ou Contact. Recomenda-se med
 Grupo do Sender pretendido, se já estiver decidido: Não aplicável
 Necessita de código postal e localidade: não
 Necessita de envio para parceiro: não, porque o utilizador segue diretamente para a Tribera
-Parâmetros de campanha esperados: o link outbound usa `utm_source=guiadoproprietario`, `utm_medium=referral`, `utm_campaign=tribera_olaias`. UTMs de entrada são preservados com prefixo `gp_` no destino. O promocode `GUIAPRO_D2027` deve ser introduzido no campo de código promocional no processo de reserva da Tribera.
+Parâmetros de campanha esperados: todos os CTAs de reserva apontam para `https://triberaliving.com/pt-pt/lisbon/lisbon-olaias-student-accommodation/` com `utm_source=guiadoproprietario`, `utm_medium=referral`, `utm_campaign=tribera_olaias`. UTMs de entrada são preservados com prefixo `gp_` no destino. O promocode `GUIAPRO_D2027` deve ser introduzido no campo de código promocional no processo de reserva da Tribera.
 Mensagem de sucesso: Não aplicável
 Mensagem de erro técnico: Não aplicável
 
