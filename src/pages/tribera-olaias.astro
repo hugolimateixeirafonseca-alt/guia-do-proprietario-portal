@@ -7,6 +7,7 @@ const triberaPage = "https://triberaliving.com/pt-pt/lisbon/lisbon-olaias-studen
 const pageTitle = "Residência de estudantes nas Olaias, Lisboa | Guia do Proprietário";
 const pageDescription = "Conheça a Tribera Lisbon Olaias: quartos e estúdios mobilados, despesas incluídas, piscina no rooftop, ginásio 24/7 e metro à porta.";
 const canonical = "https://guiadoproprietario.pt/tribera-olaias/";
+const promoCode = "GUIAPRO_D2027";
 
 const benefits = [
   { icon: "wallet", title: "Contas incluídas", text: "Eletricidade, água, aquecimento e Wi-Fi incluídos no valor mensal." },
@@ -44,6 +45,7 @@ const gallery = [
     <title>{pageTitle}</title>
   </head>
   <body class="tribera-landing">
+    <div class="promo-strip"><strong>VANTAGEM GUIA:</strong> em vez de pagar inicialmente 230,00 € pela reserva, paga apenas 80,00 € com o promocode <span>{promoCode}</span>.</div>
     <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
 
     <header class="landing-header">
@@ -52,7 +54,7 @@ const gallery = [
         <span>Guia do Proprietário</span>
       </a>
       <div class="header-partner"><span>ALOJAMENTO PARCEIRO</span><strong>Tribera · Olaias</strong></div>
-      <a class="header-cta" href={bookingUrl} data-booking>Ver disponibilidade</a>
+      <a class="header-cta" href={bookingUrl} data-booking>Reservar com {promoCode}</a>
     </header>
 
     <main id="conteudo">
@@ -74,7 +76,8 @@ const gallery = [
               <div class="partner-benefit">
                 <span>VANTAGEM GUIA</span>
                 <strong>80 € na reserva</strong>
-                <small>em vez de 230 €*</small>
+                <small>em vez de 230,00 €</small>
+                <code>{promoCode}</code>
               </div>
             </div>
 
@@ -85,7 +88,7 @@ const gallery = [
               </a>
               <a class="cta-link" href="#quartos">Comparar opções</a>
             </div>
-            <p class="microcopy"><span aria-hidden="true">✓</span> Reserva concluída diretamente na Tribera. Consulta disponibilidade e preço final antes de pagar.</p>
+            <p class="microcopy"><span aria-hidden="true">✓</span> Usa o promocode <strong>{promoCode}</strong> no momento da reserva para pagar apenas 80,00 € em vez dos 230,00 € iniciais.</p>
           </div>
         </div>
       </section>
@@ -195,7 +198,7 @@ const gallery = [
       <section class="gallery-section" aria-labelledby="galeria-title">
         <div class="landing-container">
           <div class="gallery-heading">
-            <div><span class="eyebrow">VÊ ANTES DE DECIDIR</span><h2 id="galeria-title">É mesmo assim.</h2></div>
+            <div><span class="eyebrow">VÊ ANTES DE DECIDIR</span><h2 id="galeria-title">Conheça alguns espaços da residência.</h2></div>
             <p>Fotografias da Tribera Lisbon Olaias.</p>
           </div>
           <div class="gallery-grid">
@@ -267,7 +270,7 @@ const gallery = [
             </details>
             <details>
               <summary>Como funciona a vantagem dos 80 €?</summary>
-              <p>Para utilizadores encaminhados pelo Guia do Proprietário, a vantagem acordada com a Tribera reduz o valor exigido no momento da reserva de 230 € para 80 €. As restantes condições e pagamentos da estadia são confirmados pela Tribera durante a reserva.</p>
+              <p>No momento da reserva, introduz o promocode <strong>{promoCode}</strong>. Em vez de pagar inicialmente 230,00 € pela reserva, pagas apenas 80,00 €. As restantes condições e pagamentos da estadia são confirmados diretamente pela Tribera.</p>
             </details>
             <details>
               <summary>Os preços desta página são garantidos?</summary>
@@ -289,7 +292,8 @@ const gallery = [
           <p>Vê as datas disponíveis, confirma o preço para a tua estadia e decide com toda a informação à frente.</p>
           <div class="final-price"><span>Preços base desde</span><strong>819 €<small>/mês</small></strong><em>+ despesas incluídas</em></div>
           <a class="cta-primary large" href={bookingUrl} data-booking>Ver disponibilidade e reservar <span>→</span></a>
-          <p class="final-note">*Vantagem de 80 € no momento da reserva aplicável a utilizadores identificados através da parceria Guia do Proprietário × Tribera. Confirma as condições finais antes do pagamento.</p>
+          <div class="final-promocode"><span>PROMOCODE</span><strong>{promoCode}</strong><small>230,00 € → 80,00 € no valor inicial da reserva</small></div>
+          <p class="final-note">*Introduz o promocode <strong>{promoCode}</strong> no momento da reserva. Confirma as condições finais antes do pagamento.</p>
         </div>
       </section>
 
@@ -303,8 +307,8 @@ const gallery = [
     </main>
 
     <div class="mobile-sticky" aria-label="Ação de reserva">
-      <div><span>Desde</span><strong>819 €<small>/mês</small></strong></div>
-      <a href={bookingUrl} data-booking>Ver disponibilidade</a>
+      <div><span>Desde</span><strong>819 €<small>/mês</small></strong><em>GUIAPRO_D2027 · reserva 80 €</em></div>
+      <a href={bookingUrl} data-booking>Reservar</a>
     </div>
 
     <CookieConsent />
@@ -335,6 +339,9 @@ const gallery = [
       :global(.tribera-landing *) { box-sizing: border-box; }
       :global(.tribera-landing a) { color: inherit; }
       .landing-container { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+      .promo-strip { background: #f2bd57; color: #102f33; padding: 10px 20px; text-align: center; font-size: 13px; line-height: 1.45; position: relative; z-index: 30; }
+      .promo-strip strong { font-weight: 900; }
+      .promo-strip span { display: inline-block; margin-left: 6px; padding: 4px 9px; border-radius: 7px; background: #102f33; color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight: 900; letter-spacing: .04em; }
       .landing-header { height: 76px; padding: 0 max(24px, calc((100vw - 1180px) / 2)); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; background: rgba(247, 244, 237, .96); border-bottom: 1px solid rgba(21, 45, 49, .12); position: relative; z-index: 20; }
       .landing-brand { display: inline-flex; align-items: center; gap: 11px; font-weight: 750; text-decoration: none; letter-spacing: -.02em; width: max-content; }
       .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: #153e43; color: #fff; font-family: Georgia, serif; font-weight: 800; }
@@ -365,6 +372,7 @@ const gallery = [
       .partner-benefit span { font-size: 10px; letter-spacing: .14em; font-weight: 900; }
       .partner-benefit strong { font-size: 22px; line-height: 1.2; }
       .partner-benefit small { font-size: 13px; }
+      .partner-benefit code { margin-top: 8px; width: max-content; max-width: 100%; padding: 7px 9px; border: 1px dashed rgba(17,47,51,.45); border-radius: 7px; background: rgba(255,255,255,.48); color: #112f33; font-size: 12px; font-weight: 900; letter-spacing: .04em; overflow-wrap: anywhere; }
       .hero-actions { display: flex; align-items: center; gap: 20px; }
       .cta-primary { display: inline-flex; align-items: center; justify-content: center; gap: 14px; padding: 17px 23px; border-radius: 12px; background: #f47b48; color: #112f33 !important; text-decoration: none; font-weight: 850; box-shadow: 0 10px 32px rgba(0,0,0,.14); transition: transform .2s ease, box-shadow .2s ease; }
       .cta-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 38px rgba(0,0,0,.22); }
@@ -491,6 +499,10 @@ const gallery = [
       .final-price strong small { font-size: 13px; margin-left: 2px; }
       .final-price em { font-style: normal; font-size: 12px; color: rgba(255,255,255,.62); }
       .cta-primary.large { font-size: 16px; padding: 18px 25px; }
+      .final-promocode { width: max-content; max-width: 100%; margin: 0 auto 22px; padding: 14px 18px; border-radius: 14px; background: #ffd2b9; color: #102f33; display: grid; gap: 3px; }
+      .final-promocode span { font-size: 9px; font-weight: 900; letter-spacing: .14em; }
+      .final-promocode strong { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 20px; letter-spacing: .04em; overflow-wrap: anywhere; }
+      .final-promocode small { font-size: 11px; font-weight: 750; }
       .final-cta-content .final-note { margin-top: 18px; font-size: 10px; color: rgba(255,255,255,.46); }
 
       .disclosure-section { background: #0b2528; color: rgba(255,255,255,.66); padding: 36px 0 100px; }
@@ -572,6 +584,7 @@ const gallery = [
         .mobile-sticky > div > span { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: #6e7b79; }
         .mobile-sticky strong { font-size: 19px; }
         .mobile-sticky strong small { font-size: 9px; }
+        .mobile-sticky em { margin-top: 3px; font-size: 8px; font-style: normal; font-weight: 800; color: #bd5e38; }
         .mobile-sticky a { background: #f47b48; color: #102f33 !important; text-decoration: none; padding: 12px 14px; border-radius: 9px; font-size: 12px; font-weight: 900; }
       }
 
