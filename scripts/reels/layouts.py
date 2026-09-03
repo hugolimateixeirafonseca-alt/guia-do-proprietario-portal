@@ -169,9 +169,9 @@ def _draw_intro_headline(
     title: str,
     accent: str,
     box: tuple[int, int, int, int],
-    maximum: int = 68,
-    minimum: int = 44,
-    gap: int = 20,
+    maximum: int = 64,
+    minimum: int = 42,
+    gap: int = 24,
 ) -> tuple[tuple[int, int, int, int], tuple[int, int, int, int]]:
     """Lay out title and accent as one block so their lines can never collide."""
     draw = ImageDraw.Draw(image)
@@ -183,7 +183,7 @@ def _draw_intro_headline(
 
     for size in range(size_cap, minimum - 1, -2):
         candidate_font = font(size, True)
-        spacing = max(12, round(size * 0.24))
+        spacing = max(13, round(size * 0.28))
         wrapped_title = _balanced_wrap(draw, title, candidate_font, width, 3)
         wrapped_accent = _balanced_wrap(draw, accent, candidate_font, width, 3)
         if wrapped_title is None or wrapped_accent is None:
@@ -273,7 +273,7 @@ def _fit_text(
         wrapped = _balanced_wrap(draw, text, candidate_font, width, max_lines) if title else _greedy_wrap(draw, text, candidate_font, width)
         if wrapped is None:
             continue
-        line_spacing = max(spacing, round(size * 0.22)) if title else spacing
+        line_spacing = max(spacing, round(size * 0.28)) if title else spacing
         bbox = draw.multiline_textbbox((0, 0), wrapped, font=candidate_font, spacing=line_spacing)
         if bbox[2] - bbox[0] <= width and bbox[3] - bbox[1] <= height:
             return candidate_font, wrapped, line_spacing

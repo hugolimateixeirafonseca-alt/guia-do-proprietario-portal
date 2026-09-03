@@ -44,6 +44,27 @@ class ReelTitleTypographyTests(unittest.TestCase):
         self.assertGreater(chip[2], MARGIN + 342)
         self.assertLessEqual(chip[2], WIDTH - MARGIN)
 
+    def test_reel_de_humidade_mantem_etiqueta_e_titulo_dentro_dos_limites(self):
+        chip = _draw_label_chip(
+            self.draw,
+            "Ventilar, comprar ou reparar",
+            (MARGIN + 32, 885),
+            WIDTH - MARGIN,
+        )
+        title_bbox, accent_bbox = _draw_intro_headline(
+            self.image,
+            "Humidade: escolha certa",
+            "Desumidificador ou obra",
+            (MARGIN, 1030, WIDTH - MARGIN, 1305),
+        )
+
+        self.assertGreater(chip[2], MARGIN + 342)
+        self.assertLessEqual(chip[2], WIDTH - MARGIN)
+        self.assertGreaterEqual(accent_bbox[1] - title_bbox[3], 24)
+        self.assertLessEqual(title_bbox[2], WIDTH - MARGIN)
+        self.assertLessEqual(accent_bbox[2], WIDTH - MARGIN)
+        self.assertLessEqual(accent_bbox[3], 1305)
+
     def test_tamanho_reduz_gradualmente_com_o_comprimento(self):
         short = _title_size_cap("Título curto", 64, 40)
         medium = _title_size_cap("Um título principal um pouco mais comprido", 64, 40)
@@ -68,7 +89,7 @@ class ReelTitleTypographyTests(unittest.TestCase):
 
         self.assertEqual(wrapped.replace("\n", " "), _normalise_text(text))
         self.assertLessEqual(len(wrapped.splitlines()), 4)
-        self.assertGreaterEqual(spacing, round(chosen_font.size * 0.22))
+        self.assertGreaterEqual(spacing, round(chosen_font.size * 0.28))
 
     def test_wrapping_nunca_hifeniza_nem_parte_palavras(self):
         text = "Documentação indispensável para vender sem bloqueios"
