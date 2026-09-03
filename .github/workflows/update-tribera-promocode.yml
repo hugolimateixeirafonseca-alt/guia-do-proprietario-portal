@@ -1,0 +1,108 @@
+name: Update Tribera promocode
+
+on:
+  push:
+    branches:
+      - landing-tribera-olaias
+    paths:
+      - .github/workflows/update-tribera-promocode.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: landing-tribera-olaias
+          fetch-depth: 0
+
+      - name: Apply promocode to Tribera landing
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/pages/tribera-olaias.astro')
+          text = path.read_text(encoding='utf-8')
+
+          replacements = [
+            (
+              'const canonical = "https://guiadoproprietario.pt/tribera-olaias/";\n',
+              'const canonical = "https://guiadoproprietario.pt/tribera-olaias/";\nconst promoCode = "GUIAPRO_D2027";\n'
+            ),
+            (
+              '<a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>',
+              '<div class="promo-strip"><strong>VANTAGEM GUIA:</strong> em vez de pagar inicialmente 230,00 € pela reserva, paga apenas 80,00 € com o promocode <span>{promoCode}</span>.</div>\n    <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>'
+            ),
+            (
+              '<a class="header-cta" href={bookingUrl} data-booking>Ver disponibilidade</a>',
+              '<a class="header-cta" href={bookingUrl} data-booking>Reservar com {promoCode}</a>'
+            ),
+            (
+              '<div class="partner-benefit">\n                <span>VANTAGEM GUIA</span>\n                <strong>80 € na reserva</strong>\n                <small>em vez de 230 €*</small>\n              </div>',
+              '<div class="partner-benefit">\n                <span>VANTAGEM GUIA</span>\n                <strong>80 € na reserva</strong>\n                <small>em vez de 230,00 €</small>\n                <code>{promoCode}</code>\n              </div>'
+            ),
+            (
+              '<p class="microcopy"><span aria-hidden="true">✓</span> Reserva concluída diretamente na Tribera. Consulta disponibilidade e preço final antes de pagar.</p>',
+              '<p class="microcopy"><span aria-hidden="true">✓</span> Usa o promocode <strong>{promoCode}</strong> no momento da reserva para pagar apenas 80,00 € em vez dos 230,00 € iniciais.</p>'
+            ),
+            (
+              '<h2 id="galeria-title">É mesmo assim.</h2>',
+              '<h2 id="galeria-title">Conheça alguns espaços da residência.</h2>'
+            ),
+            (
+              '<summary>Como funciona a vantagem dos 80 €?</summary>\n              <p>Para utilizadores encaminhados pelo Guia do Proprietário, a vantagem acordada com a Tribera reduz o valor exigido no momento da reserva de 230 € para 80 €. As restantes condições e pagamentos da estadia são confirmados pela Tribera durante a reserva.</p>',
+              '<summary>Como funciona a vantagem dos 80 €?</summary>\n              <p>No momento da reserva, introduz o promocode <strong>{promoCode}</strong>. Em vez de pagar inicialmente 230,00 € pela reserva, pagas apenas 80,00 €. As restantes condições e pagamentos da estadia são confirmados diretamente pela Tribera.</p>'
+            ),
+            (
+              '<p class="final-note">*Vantagem de 80 € no momento da reserva aplicável a utilizadores identificados através da parceria Guia do Proprietário × Tribera. Confirma as condições finais antes do pagamento.</p>',
+              '<div class="final-promocode"><span>PROMOCODE</span><strong>{promoCode}</strong><small>230,00 € → 80,00 € no valor inicial da reserva</small></div>\n          <p class="final-note">*Introduz o promocode <strong>{promoCode}</strong> no momento da reserva. Confirma as condições finais antes do pagamento.</p>'
+            ),
+            (
+              '<div><span>Desde</span><strong>819 €<small>/mês</small></strong></div>\n      <a href={bookingUrl} data-booking>Ver disponibilidade</a>',
+              '<div><span>Desde</span><strong>819 €<small>/mês</small></strong><em>GUIAPRO_D2027 · reserva 80 €</em></div>\n      <a href={bookingUrl} data-booking>Reservar</a>'
+            ),
+          ]
+
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'Expected snippet not found: {old[:90]!r}')
+              text = text.replace(old, new, 1)
+
+          css_anchor = '      .landing-container { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }\n'
+          css_insert = '''      .promo-strip { background: #f2bd57; color: #102f33; padding: 10px 20px; text-align: center; font-size: 13px; line-height: 1.45; position: relative; z-index: 30; }\n      .promo-strip strong { font-weight: 900; }\n      .promo-strip span { display: inline-block; margin-left: 6px; padding: 4px 9px; border-radius: 7px; background: #102f33; color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight: 900; letter-spacing: .04em; }\n'''
+          if css_anchor not in text:
+              raise SystemExit('CSS anchor not found')
+          text = text.replace(css_anchor, css_anchor + css_insert, 1)
+
+          css_anchor2 = '      .partner-benefit small { font-size: 13px; }\n'
+          css_insert2 = '''      .partner-benefit code { margin-top: 8px; width: max-content; max-width: 100%; padding: 7px 9px; border: 1px dashed rgba(17,47,51,.45); border-radius: 7px; background: rgba(255,255,255,.48); color: #112f33; font-size: 12px; font-weight: 900; letter-spacing: .04em; overflow-wrap: anywhere; }\n'''
+          if css_anchor2 not in text:
+              raise SystemExit('Partner benefit CSS anchor not found')
+          text = text.replace(css_anchor2, css_anchor2 + css_insert2, 1)
+
+          css_anchor3 = '      .final-cta-content .final-note { margin-top: 18px; font-size: 10px; color: rgba(255,255,255,.46); }\n'
+          css_insert3 = '''      .final-promocode { width: max-content; max-width: 100%; margin: 0 auto 22px; padding: 14px 18px; border-radius: 14px; background: #ffd2b9; color: #102f33; display: grid; gap: 3px; }\n      .final-promocode span { font-size: 9px; font-weight: 900; letter-spacing: .14em; }\n      .final-promocode strong { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 20px; letter-spacing: .04em; overflow-wrap: anywhere; }\n      .final-promocode small { font-size: 11px; font-weight: 750; }\n'''
+          if css_anchor3 not in text:
+              raise SystemExit('Final CTA CSS anchor not found')
+          text = text.replace(css_anchor3, css_insert3 + css_anchor3, 1)
+
+          css_anchor4 = '        .mobile-sticky strong small { font-size: 9px; }\n'
+          css_insert4 = '        .mobile-sticky em { margin-top: 3px; font-size: 8px; font-style: normal; font-weight: 800; color: #bd5e38; }\n'
+          if css_anchor4 not in text:
+              raise SystemExit('Mobile sticky CSS anchor not found')
+          text = text.replace(css_anchor4, css_anchor4 + css_insert4, 1)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Remove one-shot workflow and commit
+        run: |
+          rm .github/workflows/update-tribera-promocode.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/tribera-olaias.astro .github/workflows/update-tribera-promocode.yml
+          git commit -m "Atualiza promocode Tribera para GUIAPRO_D2027"
+          git push origin HEAD:landing-tribera-olaias
