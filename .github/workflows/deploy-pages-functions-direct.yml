@@ -9,6 +9,7 @@ on:
       - 'src/components/CookieConsent.astro'
       - 'src/layouts/KitEstudanteLayout.astro'
       - 'src/pages/kit-estudante/**'
+      - 'src/pages/tribera-olaias.astro'
       - 'tests/kit-estudante.test.mjs'
       - 'public/social/**'
       - 'public/scripts/landings/limpezas.js'
