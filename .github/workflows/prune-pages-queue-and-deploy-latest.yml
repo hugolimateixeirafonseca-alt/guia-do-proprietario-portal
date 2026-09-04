@@ -126,6 +126,7 @@ jobs:
 
           if (!current?.id) throw new Error('Target deployment id missing.');
           const deploymentId = current.id;
+          const observedAt = Date.now();
           let lastStatus = '';
 
           while (true) {
@@ -139,6 +140,18 @@ jobs:
               break;
             }
             if (status === 'failure' || status === 'canceled') {
+              const elapsedSeconds = Math.round((Date.now() - observedAt) / 1000);
+              console.log(JSON.stringify({
+                ok: false,
+                deployment_id: deploymentId,
+                commit,
+                status,
+                elapsed_seconds_observed: elapsedSeconds,
+                latest_stage: current?.latest_stage || null,
+              }, null, 2));
+              if (status === 'failure' && elapsedSeconds >= 19 * 60) {
+                console.log('::warning::O deployment falhou perto do limite de 20 minutos do Cloudflare Pages; verificar timeout de build.');
+              }
               throw new Error(`Target deployment ${status}.`);
             }
             if (Date.now() >= deadline) throw new Error('Timed out waiting for target Pages deployment.');
