@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-04T07:22:24.673Z",
+  "generatedAt": "2026-09-04T12:32:52.964Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 98,
-    "published": 90,
+    "published": 91,
     "newsOnline": 21
   },
   "articles": [
@@ -1344,14 +1344,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "eletrodomesticos-etiqueta-energetica.mdx",
       "arrivedAt": "2026-08-12T16:46:17+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-04T07:08:34Z",
+      "url": "https://guiadoproprietario.pt/casa/eletrodomesticos-etiqueta-energetica/"
     },
     {
       "id": "EXTRA-004",
