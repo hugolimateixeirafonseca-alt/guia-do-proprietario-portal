@@ -1,5 +1,5 @@
 export const CONSENT_VERSION = "2026-08-k";
-export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-08-c";
+export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-09-a";
 export const VALOR_LIQUIDO_CONSENT_VERSION = "valor-liquido-2026-08-a";
 export const LIMPEZA_CONSENT_VERSION = "limpeza-2026-08-b";
 export const ALOJAMENTO_LOCAL_CONSENT_VERSION = "alojamento-local-2026-08-a";
@@ -73,6 +73,10 @@ export const CONSENT_TEXT = {
   "newsletter-2026-08-c": {
     c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",
     c2: ""
+  },
+  "newsletter-2026-09-a": {
+    c1: "Quero receber por email a newsletter do Guia do Proprietário, com guias, prazos importantes, novidades e conselhos práticos sobre casa. Posso cancelar a qualquer momento. Li a Política de Privacidade.",
+    c2: "Quero também receber por email publicidade, ofertas e conteúdos patrocinados de empresas terceiras selecionadas pelo Guia do Proprietário. As comunicações são enviadas pelo Guia e o meu email não é partilhado com os anunciantes. Este consentimento é opcional e pode ser retirado a qualquer momento."
   },
   "verificacao-direto-2026-09-a": {
     c1: "Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na Política de Privacidade. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.",

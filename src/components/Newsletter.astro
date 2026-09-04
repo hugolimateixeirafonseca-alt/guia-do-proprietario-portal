@@ -14,12 +14,16 @@ import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
       <input id="newsletter-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="nome@email.pt" required />
       <button type="submit">Subscrever</button>
     </div>
-    <label class="newsletter-consent">
-      <input type="checkbox" name="consent" />
-      <span>Aceito receber por email conselhos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas de empresas terceiras das categorias indicadas na <a href="/privacidade/">Política de Privacidade</a>. O meu email não é partilhado com essas empresas. Posso cancelar a qualquer momento.</span>
+    <label class="newsletter-consent newsletter-consent-required">
+      <input type="checkbox" name="newsletter_consent" required aria-describedby="newsletter-consent-error" />
+      <span><strong>Newsletter do Guia</strong> Quero receber por email guias, prazos importantes, novidades e conselhos práticos sobre casa. Li a <a href="/privacidade/">Política de Privacidade</a> e posso cancelar a qualquer momento.</span>
     </label>
-    <p class="newsletter-error" hidden>É preciso aceitar para subscrever.</p>
-    <small>Pode cancelar a subscrição num clique.</small>
+    <p class="newsletter-error" id="newsletter-consent-error" hidden>É preciso aceitar a newsletter para subscrever.</p>
+    <label class="newsletter-consent newsletter-consent-optional">
+      <input type="checkbox" name="advertising_consent" />
+      <span><strong>Publicidade e ofertas <em>Opcional</em></strong> Quero também receber publicidade, ofertas e conteúdos patrocinados de empresas terceiras selecionadas pelo Guia do Proprietário. As mensagens são enviadas pelo Guia e o meu email não é partilhado com os anunciantes.</span>
+    </label>
+    <small>As duas escolhas são independentes e podem ser retiradas a qualquer momento.</small>
     <p class="newsletter-status" role="status" aria-live="polite"></p>
   </form>
 </section>
@@ -27,14 +31,15 @@ import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
 <script is:inline define:vars={{ NEWSLETTER_CONSENT_VERSION }}>
   document.querySelectorAll(".newsletter-form").forEach((form) => {
     const email = form.querySelector('input[type="email"]');
-    const consent = form.querySelector('input[name="consent"]');
-    const consentLabel = form.querySelector(".newsletter-consent");
+    const newsletterConsent = form.querySelector('input[name="newsletter_consent"]');
+    const advertisingConsent = form.querySelector('input[name="advertising_consent"]');
+    const consentLabel = form.querySelector(".newsletter-consent-required");
     const error = form.querySelector(".newsletter-error");
     const status = form.querySelector(".newsletter-status");
     const button = form.querySelector('button[type="submit"]');
 
-    consent.addEventListener("change", () => {
-      if (consent.checked) {
+    newsletterConsent.addEventListener("change", () => {
+      if (newsletterConsent.checked) {
         consentLabel.classList.remove("erro");
         error.hidden = true;
       }
@@ -44,10 +49,10 @@ import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
       event.preventDefault();
       status.textContent = "";
 
-      if (!consent.checked) {
+      if (!newsletterConsent.checked) {
         consentLabel.classList.add("erro");
         error.hidden = false;
-        consent.focus();
+        newsletterConsent.focus();
         return;
       }
       if (!email.checkValidity()) {
@@ -66,7 +71,7 @@ import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
           body: JSON.stringify({
             email: email.value.trim(),
             consent1: true,
-            consent2: false,
+            consent2: advertisingConsent.checked,
             consentVersion: NEWSLETTER_CONSENT_VERSION,
             source: "newsletter",
             pageUrl: location.href,

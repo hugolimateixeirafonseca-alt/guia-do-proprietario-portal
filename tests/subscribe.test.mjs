@@ -12,6 +12,7 @@ const originalFetch = globalThis.fetch;
 
 const env = {
   SENDER_API_TOKEN: "token-de-teste",
+  SENDER_GROUP_NEWSLETTER: "eEvG4m",
   SENDER_GROUP_MARKETING: "egK8WG",
   SENDER_GROUP_GUIA_VENDER_CASA: "dJAl59",
   SENDER_GROUP_GUIA_PARCEIROS: "aKBm4l",
@@ -120,6 +121,14 @@ test("recusa pedidos sem o consentimento obrigatório", async () => {
   assert.equal(response.status, 400);
 });
 
+test("o formulário separa a newsletter obrigatória da publicidade opcional", async () => {
+  const newsletterSource = await readFile(path.resolve("src/components/Newsletter.astro"), "utf8");
+  assert.match(newsletterSource, /name="newsletter_consent"[^>]*required/u);
+  assert.match(newsletterSource, /name="advertising_consent"/u);
+  assert.match(newsletterSource, /Publicidade e ofertas[\s\S]*Opcional/u);
+  assert.match(newsletterSource, /consent2: advertisingConsent\.checked/u);
+});
+
 test("mantém a recolha desligada quando falta o token", async () => {
   globalThis.fetch = async () => {
     throw new Error("A API não deveria ser chamada");
@@ -151,12 +160,14 @@ test("usa os grupos confirmados mesmo sem variáveis adicionais na Cloudflare", 
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-c"
+      consentVersion: "newsletter-2026-09-a"
     }),
     env: { SENDER_API_TOKEN: "token-de-teste" }
   });
   assert.equal(response.status, 200);
-  assert.match(calls.at(-1).url, /subscribers\/groups\/egK8WG$/);
+  assert.match(calls[2].url, /subscribers\/groups\/eEvG4m$/);
+  assert.equal(calls[3].init.method, "DELETE");
+  assert.match(calls[3].url, /subscribers\/groups\/egK8WG$/);
 });
 
 test("atualiza um subscritor e adiciona uma newsletter single opt-in ao grupo ativo", async () => {
@@ -169,19 +180,24 @@ test("atualiza um subscritor e adiciona uma newsletter single opt-in ao grupo at
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-c"
+      consentVersion: "newsletter-2026-09-a"
     }),
     env
   });
 
   assert.equal(response.status, 200);
-  assert.equal(calls.length, 3);
+  assert.equal(calls.length, 4);
   assert.equal(calls[0].init.method, "GET");
   assert.equal(calls[1].init.method, "PATCH");
-  assert.match(calls[2].url, /subscribers\/groups\/egK8WG$/);
+  assert.match(calls[2].url, /subscribers\/groups\/eEvG4m$/);
   assert.deepEqual(JSON.parse(calls[2].init.body), {
     subscribers: ["pessoa@exemplo.pt"],
     trigger_automation: false
+  });
+  assert.equal(calls[3].init.method, "DELETE");
+  assert.match(calls[3].url, /subscribers\/groups\/egK8WG$/);
+  assert.deepEqual(JSON.parse(calls[3].init.body), {
+    subscribers: ["pessoa@exemplo.pt"]
   });
 });
 
@@ -640,7 +656,7 @@ test("cria uma subscrição nova da newsletter diretamente no grupo ativo", asyn
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-08-c"
+      consentVersion: "newsletter-2026-09-a"
     }),
     env
   });
@@ -648,8 +664,34 @@ test("cria uma subscrição nova da newsletter diretamente no grupo ativo", asyn
   assert.equal(response.status, 200);
   assert.equal(calls.length, 2);
   const createBody = JSON.parse(calls[1].init.body);
-  assert.deepEqual(createBody.groups, ["egK8WG"]);
+  assert.deepEqual(createBody.groups, ["eEvG4m"]);
+  assert.equal(createBody.fields["{$CONSENT_PUBLICIDADE}"], "false");
+  assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "false");
   assert.equal(createBody.trigger_automation, false);
+});
+
+test("adiciona publicidade apenas quando o segundo consentimento é dado", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    const status = init.method === "GET" ? 404 : 201;
+    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
+  };
+
+  const response = await onRequestPost({
+    request: requestFor({
+      ...ebookBody,
+      consent2: true,
+      source: "newsletter",
+      consentVersion: "newsletter-2026-09-a"
+    }),
+    env
+  });
+
+  assert.equal(response.status, 200);
+  const createBody = JSON.parse(calls[1].init.body);
+  assert.deepEqual(createBody.groups, ["eEvG4m", "egK8WG"]);
+  assert.equal(createBody.fields["{$CONSENT_PUBLICIDADE}"], "true");
+  assert.equal(createBody.fields["{$CONSENT_PARCEIROS}"], "false");
 });
 
 test("guarda o consentimento da landing direta de verificação no grupo de marketing", async () => {

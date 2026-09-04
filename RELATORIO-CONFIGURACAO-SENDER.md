@@ -2,7 +2,7 @@
 
 ## Guia do Proprietário
 
-**Data:** 4 de agosto de 2026  
+**Data:** 4 de setembro de 2026
 **Domínio:** `guiadoproprietario.pt`  
 **Fornecedor de email:** Sender  
 **Email oficial:** `geral@guiadoproprietario.pt`
@@ -82,16 +82,17 @@ Em `Subscribers → Groups`, criar:
 | Grupo | ID | Função |
 |---|---|---|
 | Test group (geral@guiadoproprietario.pt) | `dPlrkn` | Testes manuais. Nunca recebe subscrições reais automaticamente |
+| Newsletter - Ativa | `eEvG4m` | Recebe todas as novas subscrições editoriais |
 | Newsletter - Ofertas de terceiros | `egK8WG` | Recebe imediatamente todas as novas subscrições de marketing |
 | Guia - Vender Casa | `dJAl59` | Identifica quem pediu o e-book e aciona a entrega automática |
 | Guia - Vender Casa - Parceiros | `aKBm4l` | Contém apenas quem autorizou expressamente a partilha |
 | Vender Contacto Parceiros - LIMP | `bWv1LJ` | Pedidos de preço e disponibilidade para serviços de limpeza |
 
-O grupo `Newsletter - Ativa` (`eEvG4m`) fica apenas como histórico e não recebe novas subscrições.
-
 ### Regras de utilização
 
-- uma nova subscrição entra diretamente em `Newsletter - Ofertas de terceiros`;
+- uma nova subscrição entra diretamente em `Newsletter - Ativa`;
+- só entra também em `Newsletter - Ofertas de terceiros` quando a autorização opcional de publicidade estiver marcada;
+- uma nova submissão sem autorização publicitária retira um contacto existente do grupo de ofertas, mantendo-o na newsletter editorial;
 - não é enviado qualquer email de confirmação da subscrição;
 - o pedido do e-book entra em `Guia - Vender Casa`;
 - o grupo `Guia - Vender Casa - Parceiros` só recebe quem marcou a autorização opcional;
@@ -108,6 +109,7 @@ Em `Subscribers → Fields` ou `Custom fields`, criar os seguintes campos:
 | `CONSENT_IP` | Texto | Endereço IP associado ao pedido |
 | `CONSENT_VERSAO` | Texto | Versão do texto aceite |
 | `CONSENT_MARKETING` | Texto | `true` ou `false` |
+| `CONSENT_PUBLICIDADE` | Texto | `true` ou `false` para a autorização opcional de publicidade na newsletter |
 | `CONSENT_PARCEIROS` | Texto | `true` ou `false` |
 | `ORIGEM` | Texto | URL onde ocorreu a subscrição |
 | `LEAD_SOURCE` | Texto | Origem do formulário, incluindo `newsletter`, `ebook-vender-casa`, `ebook-vender-casa-partner` ou `valor-liquido-venda-direct` |
@@ -156,17 +158,18 @@ Se estes campos ainda não existirem, a integração faz uma segunda tentativa s
 
 ## 6. Single opt-in da newsletter
 
-O formulário utiliza single opt-in. Depois de a pessoa preencher o email e aceitar o consentimento obrigatório, o contacto fica imediatamente ativo.
+O formulário utiliza single opt-in. Depois de a pessoa preencher o email e aceitar o consentimento editorial obrigatório, o contacto fica imediatamente ativo. A autorização para publicidade de terceiros é apresentada numa segunda caixa, opcional e independente.
 
 Fluxo a configurar:
 
 1. O portal valida o email e o consentimento obrigatório.
 2. O contacto é criado ou atualizado no Sender.
-3. O contacto entra diretamente em `Newsletter - Ofertas de terceiros` com estado ativo.
-4. Os campos de consentimento, origem e data ficam registados.
-5. O contacto pode receber a newsletter sem confirmação adicional por email.
+3. O contacto entra diretamente em `Newsletter - Ativa` com estado ativo.
+4. Se aceitar publicidade, entra também em `Newsletter - Ofertas de terceiros`.
+5. Os campos de consentimento, origem e data ficam registados.
+6. O contacto pode receber a newsletter sem confirmação adicional por email.
 
-O texto do formulário deve indicar claramente que a pessoa aceita receber o guia, conselhos e novidades por email. O registo da versão desse texto é a prova do consentimento.
+O texto do formulário deve distinguir claramente a newsletter editorial da publicidade de terceiros. O registo da versão e das duas escolhas é a prova de cada consentimento.
 
 ## 7. Entrega automática do e-book
 
@@ -234,6 +237,7 @@ A integração utilizará:
 Depois da configuração do Sender, recolher:
 
 - identificador de `Newsletter - Ofertas de terceiros`: `egK8WG`;
+- identificador de `Newsletter - Ativa`: `eEvG4m`;
 - identificador de `Guia - Vender Casa`: `dJAl59`;
 - identificador de `Guia - Vender Casa - Parceiros`: `aKBm4l`;
 - identificador do grupo de teste: `dPlrkn`;
@@ -249,7 +253,9 @@ Antes de abrir os formulários ao público:
 
 - [ ] SPF, DKIM e DMARC apresentam validação positiva.
 - [ ] O remetente é `Guia do Proprietário <geral@guiadoproprietario.pt>`.
-- [ ] Uma subscrição entra diretamente em `Newsletter - Ofertas de terceiros`.
+- [ ] Uma subscrição editorial entra diretamente em `Newsletter - Ativa`.
+- [ ] Sem autorização publicitária, o contacto não entra em `Newsletter - Ofertas de terceiros`.
+- [ ] Com autorização publicitária, o contacto entra também em `Newsletter - Ofertas de terceiros`.
 - [ ] O contacto fica ativo sem receber um pedido de confirmação.
 - [ ] O pedido do e-book entra em `Guia - Vender Casa`.
 - [ ] O email do guia chega e o botão abre o PDF.

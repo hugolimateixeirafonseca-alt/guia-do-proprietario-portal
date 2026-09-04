@@ -1,11 +1,13 @@
 import {
   CONSENT_TEXT,
+  NEWSLETTER_CONSENT_VERSION,
   VERIFICACAO_DIRECT_CONSENT_VERSION,
   type ConsentVersion
 } from "../../src/data/consent";
 
 interface Env {
   SENDER_API_TOKEN?: string;
+  SENDER_GROUP_NEWSLETTER?: string;
   SENDER_GROUP_MARKETING?: string;
   SENDER_GROUP_GUIA_VENDER_CASA?: string;
   SENDER_GROUP_GUIA_PARCEIROS?: string;
@@ -50,7 +52,8 @@ interface RequestContext {
 const SENDER_API = "https://api.sender.net/v2";
 const GEO_API = "https://json.geoapi.pt/codigo_postal";
 const DEFAULT_GROUPS = {
-  newsletter: "egK8WG",
+  newsletter: "eEvG4m",
+  marketing: "egK8WG",
   guiaVenderCasa: "dJAl59",
   guiaParceiros: "aKBm4l"
 } as const;
@@ -239,6 +242,7 @@ async function createOrUpdateSubscriber(
   firstname = ""
 ) {
   const optionalProfileFields = [
+    "{$CONSENT_PUBLICIDADE}",
     "{$CODIGO_POSTAL}", "{$LOCALIDADE}", "{$PRAZO_VENDA}", "{$LIMPEZA_SERVICO}",
     "{$LIMPEZA_ESPACO}", "{$LIMPEZA_DIMENSAO}", "{$LIMPEZA_FREQUENCIA}",
     "{$LIMPEZA_QUANDO}", "{$LIMPEZA_DATA}", "{$LIMPEZA_DIA}",
@@ -314,6 +318,14 @@ async function addSubscriberToGroup(env: Env, groupId: string, email: string, tr
   if (!response.ok) throw new SenderError(`group_${response.status}`);
 }
 
+async function removeSubscriberFromGroup(env: Env, groupId: string, email: string) {
+  const response = await senderRequest(env, `/subscribers/groups/${encodeURIComponent(groupId)}`, {
+    method: "DELETE",
+    body: JSON.stringify({ subscribers: [email] })
+  });
+  if (!response.ok) throw new SenderError(`group_remove_${response.status}`);
+}
+
 export const onRequestPost = async ({ request, env }: RequestContext) => {
   let body: SubscribeBody;
   try {
@@ -327,13 +339,14 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const consentVersion = cleanText(body.consentVersion, 64);
   const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
   const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" || body.source === "valor-liquido-venda-direct" || body.source === "guia_limpeza_preco_disponibilidade" || body.source === "guia_limpeza_alojamento_local" || body.source === "verificacao-anuncio-direct" ? body.source : "";
+  const isNewsletter = source === "newsletter";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
   const isDirectValueLead = source === "valor-liquido-venda-direct";
   const isCleaningAlLead = source === "guia_limpeza_alojamento_local";
   const isCleaningLead = source === "guia_limpeza_preco_disponibilidade" || isCleaningAlLead;
   const isQualifiedLead = isPartnerFollowup || isDirectValueLead || isCleaningLead;
-  const expectedVersion = source === "newsletter"
-    ? "newsletter-2026-08-c"
+  const expectedVersion = isNewsletter
+    ? NEWSLETTER_CONSENT_VERSION
     : source === "verificacao-anuncio-direct"
       ? VERIFICACAO_DIRECT_CONSENT_VERSION
     : isDirectValueLead
@@ -354,8 +367,9 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   const nameOk = firstname.length >= 2 && /^[\p{L}\p{M}]+(?:[ '\u2019-][\p{L}\p{M}]+)*$/u.test(firstname);
   const saleTimelineCode = cleanText(body.saleTimeline, 32) as keyof typeof SALE_TIMELINES;
   const saleTimeline = SALE_TIMELINES[saleTimelineCode] || "";
-  const partnerConsent = isDirectValueLead || isCleaningLead ? body.consent1 === true : body.consent2 === true;
+  const partnerConsent = isDirectValueLead || isCleaningLead ? body.consent1 === true : !isNewsletter && body.consent2 === true;
   const marketingConsent = isDirectValueLead || isCleaningLead ? body.consent2 === true : body.consent1 === true;
+  const advertisingConsent = isNewsletter && body.consent2 === true;
   const serviceTypeCode = cleanText(body.serviceType, 32) as keyof typeof CLEANING_LABELS.serviceType;
   const spaceTypeCode = cleanText(body.spaceType, 32) as keyof typeof CLEANING_LABELS.spaceType;
   const spaceSizeCode = cleanText(body.spaceSize, 32) as keyof typeof CLEANING_LABELS.spaceSize;
@@ -421,7 +435,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   }
 
   const groups = {
-    newsletter: env.SENDER_GROUP_MARKETING || DEFAULT_GROUPS.newsletter,
+    newsletter: env.SENDER_GROUP_NEWSLETTER || DEFAULT_GROUPS.newsletter,
+    marketing: env.SENDER_GROUP_MARKETING || DEFAULT_GROUPS.marketing,
     guiaVenderCasa: env.SENDER_GROUP_GUIA_VENDER_CASA || DEFAULT_GROUPS.guiaVenderCasa,
     guiaParceiros: env.SENDER_GROUP_GUIA_PARCEIROS || DEFAULT_GROUPS.guiaParceiros
   };
@@ -464,6 +479,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     "{$CONSENT_IP}": cleanText(request.headers.get("CF-Connecting-IP"), 64),
     "{$CONSENT_VERSAO}": consentVersion,
     ...(!isDirectValueLead && !isCleaningLead || marketingConsent ? { "{$CONSENT_MARKETING}": marketingConsent ? "true" : "false" } : {}),
+    ...(isNewsletter ? { "{$CONSENT_PUBLICIDADE}": advertisingConsent ? "true" : "false" } : {}),
     ...(!isCleaningLead ? { "{$CONSENT_PARCEIROS}": partnerConsent ? "true" : "false" } : {}),
     "{$ORIGEM}": cleanText(body.pageUrl, 2048),
     "{$LEAD_SOURCE}": source,
@@ -486,7 +502,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
   try {
     const subscriberGroups = [
-      ...(!isDirectValueLead && !isCleaningLead || marketingConsent ? [groups.newsletter] : []),
+      ...(isNewsletter
+        ? [groups.newsletter]
+        : (!isDirectValueLead && !isCleaningLead) || marketingConsent
+          ? [groups.marketing]
+          : []),
+      ...(advertisingConsent ? [groups.marketing] : []),
       ...(partnerConsent && !isCleaningLead ? [groups.guiaParceiros] : []),
       ...(source === "ebook-vender-casa" ? [groups.guiaVenderCasa] : [])
     ];
@@ -508,8 +529,16 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       }, 200);
     }
 
-    if (!isDirectValueLead && !isCleaningLead || marketingConsent) {
+    if (isNewsletter) {
       await addSubscriberToGroup(env, groups.newsletter, email, false);
+    } else if (!isDirectValueLead && !isCleaningLead || marketingConsent) {
+      await addSubscriberToGroup(env, groups.marketing, email, false);
+    }
+
+    if (advertisingConsent) {
+      await addSubscriberToGroup(env, groups.marketing, email, false);
+    } else if (isNewsletter) {
+      await removeSubscriberFromGroup(env, groups.marketing, email);
     }
 
     if (partnerConsent && !isCleaningLead) {

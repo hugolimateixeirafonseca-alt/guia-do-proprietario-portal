@@ -156,6 +156,9 @@ h3 { font-size: 21px; }
 .newsletter-consent { margin-top: 12px; display: grid; grid-template-columns: 18px 1fr; gap: 9px; align-items: start; color: rgba(255,255,255,.82); font-size: 11px; line-height: 1.45; cursor: pointer; }
 .newsletter-consent input { width: 17px; height: 17px; margin: 1px 0 0; accent-color: var(--green); }
 .newsletter-consent a { color: white; }
+.newsletter-consent strong { display: block; margin-bottom: 2px; color: white; font-size: 12px; }
+.newsletter-consent strong em { margin-left: 5px; color: rgba(255,255,255,.65); font-size: 10px; font-style: normal; font-weight: 700; text-transform: uppercase; }
+.newsletter-consent-optional { margin-top: 9px; }
 .newsletter-consent.erro { color: #ffb4ad; }
 .newsletter-error { margin-top: 7px !important; color: #ffb4ad !important; font-size: 11px; font-weight: 800; }
 .newsletter small { display: block; margin-top: 8px; color: rgba(255,255,255,.55); }
