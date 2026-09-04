@@ -50,7 +50,7 @@ jobs:
           done < <(
             git log --since='48 hours ago' \
               --format='%H%x09%s' \
-              -- src/content/artigos
+              -- content
           )
 
           if [[ -z "$LATEST_SHA" ]]; then

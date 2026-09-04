@@ -11,7 +11,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping
+from typing import Callable, Mapping
 
 
 SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
@@ -84,7 +84,9 @@ def fetch_production_deployments(
     O portal tem muitos deployments. Limitar a pesquisa à primeira página fazia
     uma reconciliação antiga esperar até ao timeout mesmo quando o deployment
     existia. Paramos logo que encontramos o SHA e impomos um teto para evitar
-    uma varredura ilimitada da API.
+    uma varredura ilimitada da API. As páginas já recolhidas incluem deployments
+    mais recentes, que podem ser descendentes do SHA publicado e também provar
+    que esse conteúdo chegou a Production.
     """
     if not SHA_PATTERN.fullmatch(target_sha):
         raise ValueError("O SHA alvo da pesquisa Pages é inválido.")
@@ -142,6 +144,48 @@ def validate_production_deployment(deployment: dict, *, sha: str, project_name: 
         raise ValueError("O deployment não corresponde ao SHA publicado.")
 
 
+def _deployment_sha(deployment: dict) -> str:
+    value = deployment.get("deployment_trigger", {}).get("metadata", {}).get("commit_hash", "")
+    return value if isinstance(value, str) else ""
+
+
+def _is_main_production_deployment(deployment: dict, *, project_name: str) -> bool:
+    metadata = deployment.get("deployment_trigger", {}).get("metadata", {})
+    source = deployment.get("source", {}).get("config", {})
+    return (
+        deployment.get("project_name") == project_name
+        and deployment.get("environment") == "production"
+        and metadata.get("branch") == "main"
+        and source.get("production_branch") == "main"
+    )
+
+
+def _deployment_covers_publication(
+    deployment: dict,
+    *,
+    publication_sha: str,
+    project_name: str,
+    repository: Path,
+    ancestor_checker: Callable[[Path, str, str], bool],
+) -> bool:
+    """Aceita o SHA exato ou um deployment main posterior que o contenha.
+
+    Um build Pages do commit editorial pode falhar ou ser ultrapassado por um
+    commit posterior. Se esse commit posterior é descendente do SHA publicado e
+    chegou a Production em main, o artigo também chegou a Production. Isto torna
+    a reconciliação de Reels resistente a builds intermédios falhados sem aceitar
+    branches ou históricos não relacionados.
+    """
+    if not _is_main_production_deployment(deployment, project_name=project_name):
+        return False
+    deployed_sha = _deployment_sha(deployment)
+    if not SHA_PATTERN.fullmatch(deployed_sha):
+        return False
+    if deployed_sha == publication_sha:
+        return True
+    return ancestor_checker(repository, publication_sha, deployed_sha)
+
+
 def wait_for_production_deployment(
     config: PagesReadConfig,
     *,
@@ -151,27 +195,61 @@ def wait_for_production_deployment(
     fetcher=fetch_production_deployments,
     sleeper=time.sleep,
     monotonic=time.monotonic,
+    repository: Path | None = None,
+    ancestor_checker: Callable[[Path, str, str], bool] | None = None,
 ) -> dict:
     deadline = monotonic() + timeout_seconds
+    repository = (repository or Path.cwd()).resolve()
+    ancestor_checker = ancestor_checker or _is_ancestor
+
     while True:
         deployments = fetcher(config, sha)
         matching = [
-            item for item in deployments
-            if item.get("deployment_trigger", {}).get("metadata", {}).get("commit_hash") == sha
-            and item.get("environment") == "production"
+            item
+            for item in deployments
+            if _deployment_covers_publication(
+                item,
+                publication_sha=sha,
+                project_name=config.project_name,
+                repository=repository,
+                ancestor_checker=ancestor_checker,
+            )
         ]
-        if matching:
-            deployment = matching[0]
-            if deployment.get("project_name") != config.project_name:
-                raise ValueError("O deployment pertence a outro projeto Pages.")
-            if deployment.get("is_skipped"):
-                raise ValueError("O deployment Production foi ignorado.")
-            status = str(deployment.get("latest_stage", {}).get("status", "")).lower()
-            if status == "success":
+
+        # Cloudflare devolve os deployments mais recentes primeiro. Um success
+        # descendente é suficiente, mesmo que o build exato do artigo tenha
+        # falhado antes dele.
+        successful = [
+            item
+            for item in matching
+            if not item.get("is_skipped")
+            and str(item.get("latest_stage", {}).get("status", "")).lower() == "success"
+        ]
+        if successful:
+            deployment = successful[0]
+            deployed_sha = _deployment_sha(deployment)
+            if deployed_sha == sha:
                 validate_production_deployment(deployment, sha=sha, project_name=config.project_name)
-                return deployment
+            print(
+                "Deployment Production confirmado para o SHA publicado"
+                + ("." if deployed_sha == sha else f" através do descendente {deployed_sha}.")
+            )
+            return deployment
+
+        pending = [
+            item
+            for item in matching
+            if not item.get("is_skipped")
+            and str(item.get("latest_stage", {}).get("status", "")).lower() not in TERMINAL_FAILURE_STATES
+        ]
+        if not pending and matching:
+            exact = next((item for item in matching if _deployment_sha(item) == sha), matching[0])
+            if exact.get("is_skipped"):
+                raise ValueError("O deployment Production foi ignorado.")
+            status = str(exact.get("latest_stage", {}).get("status", "")).lower()
             if status in TERMINAL_FAILURE_STATES:
                 raise ValueError(f"O deployment Production terminou no estado {status}.")
+
         if monotonic() >= deadline:
             raise RuntimeError(f"Timeout à espera do deployment Production para {sha}.")
         sleeper(poll_interval_seconds)
@@ -205,8 +283,9 @@ def main() -> int:
     payload = json.loads(args.event.read_text(encoding="utf-8"))
     sha = extract_candidate_sha(payload, args.event_name)
     config = PagesReadConfig.from_env()
-    validate_sha(args.repository.resolve(), sha=sha, activation_sha=args.activation_sha)
-    deployment = wait_for_production_deployment(config, sha=sha)
+    repository = args.repository.resolve()
+    validate_sha(repository, sha=sha, activation_sha=args.activation_sha)
+    deployment = wait_for_production_deployment(config, sha=sha, repository=repository)
     deployment_id = deployment.get("id", "")
 
     print(f"Deployment Production confirmado para {sha}.")

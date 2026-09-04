@@ -121,6 +121,46 @@ class PublishCheckTests(unittest.TestCase):
         result = wait_with([[deployment(sha=OTHER_SHA)], [deployment()]])
         self.assertEqual(result["id"], DEPLOYMENT_ID)
 
+    def test_deployment_descendente_success_recupera_publicacao(self):
+        result = wait_for_production_deployment(
+            CONFIG,
+            sha=SHA,
+            timeout_seconds=10,
+            poll_interval_seconds=0,
+            fetcher=lambda _config, _sha: [
+                deployment(status="failure", sha=SHA),
+                deployment(status="success", sha=OTHER_SHA),
+            ],
+            sleeper=lambda _seconds: None,
+            monotonic=lambda: 0,
+            ancestor_checker=lambda _repo, ancestor, descendant: ancestor == SHA and descendant == OTHER_SHA,
+        )
+        self.assertEqual(
+            result["deployment_trigger"]["metadata"]["commit_hash"],
+            OTHER_SHA,
+        )
+
+    def test_deployment_descendente_active_impede_falha_prematura(self):
+        responses = iter([
+            [deployment(status="failure", sha=SHA), deployment(status="active", sha=OTHER_SHA)],
+            [deployment(status="failure", sha=SHA), deployment(status="success", sha=OTHER_SHA)],
+        ])
+        ticks = iter([0, 1, 2])
+        result = wait_for_production_deployment(
+            CONFIG,
+            sha=SHA,
+            timeout_seconds=10,
+            poll_interval_seconds=0,
+            fetcher=lambda _config, _sha: next(responses),
+            sleeper=lambda _seconds: None,
+            monotonic=lambda: next(ticks),
+            ancestor_checker=lambda _repo, ancestor, descendant: ancestor == SHA and descendant == OTHER_SHA,
+        )
+        self.assertEqual(
+            result["deployment_trigger"]["metadata"]["commit_hash"],
+            OTHER_SHA,
+        )
+
     def test_pages_paginadas_encontram_sha_na_segunda_pagina(self):
         calls: list[int] = []
 
