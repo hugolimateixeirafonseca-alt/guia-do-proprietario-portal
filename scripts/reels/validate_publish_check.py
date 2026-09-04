@@ -197,10 +197,12 @@ def wait_for_production_deployment(
     monotonic=time.monotonic,
     repository: Path | None = None,
     ancestor_checker: Callable[[Path, str, str], bool] | None = None,
+    wait_after_terminal_failure: bool = False,
 ) -> dict:
     deadline = monotonic() + timeout_seconds
     repository = (repository or Path.cwd()).resolve()
     ancestor_checker = ancestor_checker or _is_ancestor
+    last_terminal_reason: str | None = None
 
     while True:
         deployments = fetcher(config, sha)
@@ -242,16 +244,24 @@ def wait_for_production_deployment(
             if not item.get("is_skipped")
             and str(item.get("latest_stage", {}).get("status", "")).lower() not in TERMINAL_FAILURE_STATES
         ]
-        if not pending and matching:
+        if pending:
+            last_terminal_reason = None
+        elif matching:
             exact = next((item for item in matching if _deployment_sha(item) == sha), matching[0])
             if exact.get("is_skipped"):
-                raise ValueError("O deployment Production foi ignorado.")
-            status = str(exact.get("latest_stage", {}).get("status", "")).lower()
-            if status in TERMINAL_FAILURE_STATES:
-                raise ValueError(f"O deployment Production terminou no estado {status}.")
+                last_terminal_reason = "O deployment Production foi ignorado."
+                if not wait_after_terminal_failure:
+                    raise ValueError(last_terminal_reason)
+            else:
+                status = str(exact.get("latest_stage", {}).get("status", "")).lower()
+                if status in TERMINAL_FAILURE_STATES:
+                    last_terminal_reason = f"O deployment Production terminou no estado {status}."
+                    if not wait_after_terminal_failure:
+                        raise ValueError(last_terminal_reason)
 
         if monotonic() >= deadline:
-            raise RuntimeError(f"Timeout à espera do deployment Production para {sha}.")
+            detail = f" Último estado terminal observado: {last_terminal_reason}" if last_terminal_reason else ""
+            raise RuntimeError(f"Timeout à espera do deployment Production para {sha}.{detail}")
         sleeper(poll_interval_seconds)
 
 
@@ -285,7 +295,12 @@ def main() -> int:
     config = PagesReadConfig.from_env()
     repository = args.repository.resolve()
     validate_sha(repository, sha=sha, activation_sha=args.activation_sha)
-    deployment = wait_for_production_deployment(config, sha=sha, repository=repository)
+    deployment = wait_for_production_deployment(
+        config,
+        sha=sha,
+        repository=repository,
+        wait_after_terminal_failure=True,
+    )
     deployment_id = deployment.get("id", "")
 
     print(f"Deployment Production confirmado para {sha}.")
