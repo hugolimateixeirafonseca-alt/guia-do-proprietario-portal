@@ -1,0 +1,41 @@
+name: Fix Tribera copy once
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/fix-tribera-copy-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Replace forbidden dash characters
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/pages/tribera-olaias.astro')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('—', '-').replace('–', '-')
+          p.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Remove one-shot workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/fix-tribera-copy-once.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/tribera-olaias.astro .github/workflows/fix-tribera-copy-once.yml
+          git commit -m "fix: normalizar copy da landing Tribera"
+          git push origin HEAD:main
