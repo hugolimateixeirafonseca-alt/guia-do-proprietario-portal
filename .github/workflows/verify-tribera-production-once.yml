@@ -1,0 +1,37 @@
+name: Verify Tribera production once
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/verify-tribera-production-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify custom domain landing
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://guiadoproprietario.pt/tribera-olaias/"
+          for attempt in $(seq 1 12); do
+            status=$(curl -L -sS -o /tmp/tribera.html -w '%{http_code}' --connect-timeout 10 --max-time 30 "$URL" || true)
+            echo "Attempt ${attempt}: HTTP ${status}"
+            if [ "$status" = "200" ] \
+              && grep -Fq 'GUIAPRO_D2027' /tmp/tribera.html \
+              && grep -Fq 'utm_source=guiadoproprietario' /tmp/tribera.html \
+              && grep -Fq 'utm_campaign=tribera_olaias' /tmp/tribera.html; then
+              echo 'PRODUCTION_VERIFIED=true'
+              echo 'Landing responds on the custom domain with the expected promocode and UTMs.'
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'PRODUCTION_VERIFIED=false'
+          exit 1
