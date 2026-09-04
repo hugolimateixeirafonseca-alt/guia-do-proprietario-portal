@@ -1,0 +1,31 @@
+name: Reels pipeline tests
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/reconcile-reels.yml'
+      - '.github/workflows/generate-reel-on-publish.yml'
+      - 'scripts/reels/validate_publish_check.py'
+      - 'scripts/reels/tests/test_publish_check.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/reels-pipeline-tests.yml'
+      - '.github/workflows/reconcile-reels.yml'
+      - '.github/workflows/generate-reel-on-publish.yml'
+      - 'scripts/reels/validate_publish_check.py'
+      - 'scripts/reels/tests/test_publish_check.py'
+
+permissions:
+  contents: read
+
+jobs:
+  publish-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Testar validação de publicação dos Reels
+        run: python -m unittest scripts.reels.tests.test_publish_check
