@@ -111,12 +111,16 @@ async function renderCard(page, target) {
     card = card.composite([{ input: motif, left: 920, top: 35 }]);
   }
   await fs.mkdir(path.dirname(target), { recursive: true });
-  await card.png({ compressionLevel: 9 }).toFile(target);
+  await card.png({ compressionLevel: 6 }).toFile(target);
 }
 
-for (const page of pages) {
-  const target = path.join(outputDir, page.route.replace(/^\/|\/$/g, ""), "index.png");
-  await renderCard(page, target);
+const ogRenderConcurrency = Math.max(1, Number.parseInt(process.env.OG_RENDER_CONCURRENCY || "4", 10) || 4);
+for (let index = 0; index < pages.length; index += ogRenderConcurrency) {
+  const batch = pages.slice(index, index + ogRenderConcurrency);
+  await Promise.all(batch.map((page) => {
+    const target = path.join(outputDir, page.route.replace(/^\/|\/$/g, ""), "index.png");
+    return renderCard(page, target);
+  }));
 }
 
 await renderCard(
