@@ -26,6 +26,7 @@ on:
       - '.github/workflows/deploy-pages-functions-direct.yml'
   workflow_dispatch:
 
+# Inclui a landing Tribera no deploy direto de produção.
 permissions:
   contents: read
 
