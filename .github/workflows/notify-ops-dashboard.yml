@@ -1,6 +1,7 @@
 name: Avisar dashboard operacional
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
