@@ -19,7 +19,7 @@ Preparada em 7 de setembro de 2026. Fonte de verdade da implementação e das de
 | SC36 | Seguro de vida no banco? Descubra se pode pagar menos fora. | /casa/mudar-seguro-vida-credito-habitacao-banco/ |
 | SC37 | Paga o seguro de vida todos os meses. Está a comprar a proteção certa? | /casa/comparar-seguro-vida-credito-habitacao/ |
 | Landing | Está a pagar demasiado pelo seguro de vida? | /seguro-vida-credito-habitacao/ |
-| Variante visual próprio | O seu seguro de vida pode custar menos. | /seguro-vida-simulacao/ |
+| Variante visual próprio | Poupe até 60% no seguro de vida do crédito habitação. | /seguro-vida-simulacao/ |
 
 ## Destinos fornecidos pelo utilizador
 
@@ -32,7 +32,7 @@ Os endereços são usados exatamente como fornecidos. Não são acrescentadas UT
 
 - Português de Portugal, sem nome ou logótipo do cliente. Primeira landing com identidade do Guia; segunda com visual próprio, mantendo a identificação do promotor no rodapé.
 - Disclosure comercial e ligações marcadas como `sponsored`.
-- Nenhuma reprodução das alegações de poupança de 60% ou 20.000 €, nem de testemunhos do cliente.
+- Os três artigos e a primeira landing não reproduzem percentagens de poupança. Na segunda variante, a pedido do utilizador, o máximo de 60% anunciado pelo parceiro é o destaque principal, com atribuição e condições junto da oferta. Sem reprodução de 20.000 € ou de testemunhos.
 - Exemplos claramente hipotéticos. A comparação inclui proteção e efeito no crédito.
 - Pedido de simulação apresentado como pedido que permite contacto telefónico, sem promessa de cotação imediata.
 - Fontes oficiais específicas do Banco de Portugal e da ASF identificadas nos artigos e na landing.

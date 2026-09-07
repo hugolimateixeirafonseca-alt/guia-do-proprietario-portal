@@ -27,7 +27,7 @@ const set = (n, name, value) => { const a = n.attrs.find((a) => a.name === name)
 const remove = (n) => { if (n.parentNode) n.parentNode.childNodes = n.parentNode.childNodes.filter((c) => c !== n); };
 const nodes = [...walk(dom)];
 const copy = nodes.filter((n) => n.nodeName === "#text" && !["script", "style"].includes(n.parentNode?.tagName)).map((n) => n.value).join(" ");
-assert(!/certezza|60%|20.000/u.test(copy), "Marca ou alegações não reproduzidas");
+assert(!/certezza|20.000|pagar por hábito/u.test(copy), "Marca, alegações ou expressão removida");
 assert.equal(nodes.filter((n) => n.tagName === "h1").length, 1);
 assert.equal(nodes.filter((n) => n.tagName === "form").length, 0);
 assert.equal(nodes.filter((n) => n.tagName === "details").length, 4);

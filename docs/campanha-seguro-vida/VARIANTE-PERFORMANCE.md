@@ -4,7 +4,7 @@ Preparada localmente em 7 de setembro de 2026, como alternativa adicional. Não 
 
 - Rota prevista: `/seguro-vida-simulacao/`.
 - Revisão autónoma: `relatorios/campanha-seguro-vida/landing-performance.html`.
-- Headline: «O seu seguro de vida pode custar menos.»
+- Headline: «Poupe até 60% no seguro de vida do crédito habitação.» A percentagem é o elemento de maior destaque visual, em desktop e mobile.
 - Ação única: «Pedir simulação gratuita», para o link de afiliado da pré-landing, exatamente como fornecido.
 - Azul escuro e branco, CTA laranja, tipografia sem serifa, fotografia doméstica própria e botão fixo em mobile. Sem cabeçalho, menu, logótipo ou estilo editorial do Guia. A responsabilidade pela promoção mantém-se identificada discretamente no rodapé.
 - Sem formulário duplicado. O pedido é feito no destino e inclui contacto telefónico. As quatro posições do CTA usam o mesmo link e abrem na mesma janela.
@@ -14,7 +14,7 @@ Preparada localmente em 7 de setembro de 2026, como alternativa adicional. Não 
 
 A [landing indicada pelo utilizador](https://seguro-vida-habitacao.com/simulador-poupanca/?v=1&adsid=_42408088000736273) foi lida no browser em 7 de setembro de 2026, sem preencher dados nem abrir o afiliado. Mantém a oferta da referência anterior: pedido gratuito e sem compromisso, contacto telefónico, várias seguradoras e alternativa ao seguro do banco.
 
-Foram adaptadas essas ideias para uma pré-landing curta. «0 €» refere-se exclusivamente ao pedido da simulação. As alegações «até 60%» e «até 20.000 €», as comparações individuais e os testemunhos não foram reproduzidos: não estão acompanhados nessa página por condições suficientes para generalizar o resultado. Também não se afirma que o prémio ou o spread ficam garantidamente iguais após a mudança.
+Foram adaptadas essas ideias para uma pré-landing curta. «0 €» refere-se exclusivamente ao pedido da simulação. Na revisão pedida pelo utilizador, «Poupe até 60%» passa a ser o destaque principal, limitado expressamente ao seguro de vida do crédito habitação. Uma nota junto da oferta atribui o máximo anunciado ao parceiro e esclarece que depende do perfil, das coberturas e das condições da proposta. A percentagem está presente na referência lida, mas não foi validada como resultado independente desta campanha. A frase «Não continue a pagar por hábito» foi retirada. «Até 20.000 €», comparações individuais e testemunhos não são reproduzidos. Também não se afirma que o prémio ou o spread ficam garantidamente iguais após a mudança.
 
 ## Evidência que orienta o desenho
 

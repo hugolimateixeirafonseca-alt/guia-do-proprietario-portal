@@ -3,8 +3,8 @@ import CookieConsent from "../../components/CookieConsent.astro";
 import { SEGURO_VIDA_DESTINOS } from "../../data/seguro-vida";
 import "../../styles/seguro-vida-performance.css";
 const destino = SEGURO_VIDA_DESTINOS.landing;
-const titulo = "O seu seguro de vida pode custar menos. Peça uma simulação gratuita.";
-const descricao = "Tem crédito habitação? Descubra se pode pagar menos pelo seguro de vida. Peça uma simulação gratuita e sem compromisso no site do parceiro.";
+const titulo = "Poupe até 60% no seguro de vida do crédito habitação.";
+const descricao = "O parceiro anuncia poupanças até 60% no seguro de vida do crédito habitação. Peça uma simulação gratuita e descubra quanto pode poupar no seu caso.";
 ---
 <!doctype html>
 <html lang="pt-PT">
@@ -29,12 +29,13 @@ const descricao = "Tem crédito habitação? Descubra se pode pagar menos pelo s
       <section class="hero wrap" aria-labelledby="titulo">
         <div class="hero-copy">
           <p class="eyebrow">TEM CRÉDITO HABITAÇÃO?</p>
-          <h1 id="titulo">O seu seguro de vida <span>pode custar menos.</span></h1>
-          <p class="intro">Não continue a pagar por hábito. Peça uma simulação gratuita e descubra se há uma opção mais vantajosa para o seu seguro de vida.</p>
+          <h1 id="titulo" class="savings-headline">Poupe até <span class="savings-number">60%<sup>*</sup></span><span class="savings-product">no seguro de vida do crédito habitação.</span></h1>
+          <p class="intro">Simule gratuitamente e descubra quanto pode poupar. Compare alternativas ao seguro do banco, com apoio especializado e sem compromisso.</p>
           <ul class="hero-benefits"><li>Compare alternativas ao seguro do banco</li><li>Receba apoio para analisar preço e proteção</li><li>Decida depois de conhecer a proposta</li></ul>
           <a class="cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">→</span></a>
           <p class="cta-reassurance">Grátis. Sem obrigação de contratar.</p>
           <p class="next-step">Continua no site do parceiro, onde deixa o contacto para receber uma simulação adaptada ao seu caso.</p>
+          <p class="savings-note">*Poupança máxima anunciada pelo parceiro para o seguro de vida. O valor depende do seu perfil, das coberturas e das condições da proposta.</p>
         </div>
         <div class="hero-visual">
           <img src="/imagens/landings/seguro-vida/casal-casa.webp" alt="Casal a rever documentos à mesa de casa" width="1200" height="900" fetchpriority="high" decoding="async" />
