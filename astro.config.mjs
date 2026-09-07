@@ -10,6 +10,7 @@ export default defineConfig({
     filter: (page) => ![
       "https://guiadoproprietario.pt/quanto-me-sobra-se-vender/",
       "https://guiadoproprietario.pt/servicos-limpeza/",
+      "https://guiadoproprietario.pt/seguro-vida-credito-habitacao/",
       "https://guiadoproprietario.pt/kit-estudante/obrigado/"
     ].includes(page)
   })],

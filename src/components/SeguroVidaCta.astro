@@ -1,0 +1,28 @@
+---
+import { SEGURO_VIDA_DESTINOS } from "../data/seguro-vida";
+interface Props { titulo?: string; texto?: string; botao?: string; compacto?: boolean; canal?: keyof typeof SEGURO_VIDA_DESTINOS; }
+const { titulo = "Vale a pena comparar o seu seguro.", texto = "Peça uma simulação para conhecer uma alternativa e avaliar o que muda no preço e na proteção.", botao = "Quero comparar o meu seguro", compacto = false, canal = "editorial" } = Astro.props;
+---
+<aside class:list={["seguro-cta", { compacto }]} aria-label="Pedido de simulação">
+  <p class="seguro-cta-label">Simulação gratuita · Sem compromisso</p>
+  <h2>{titulo}</h2>
+  <p>{texto}</p>
+  <a class="seguro-button" href={SEGURO_VIDA_DESTINOS[canal]} rel="sponsored noopener" data-seguro-link>{botao}<span aria-hidden="true"> ↗</span></a>
+  <p class="seguro-cta-note">Vai seguir para o site do parceiro. Ao preencher o pedido, solicita contacto telefónico para analisar a sua situação.</p>
+</aside>
+<script>
+  import { prepararLinksSeguroVida } from "../lib/seguro-vida-links";
+  prepararLinksSeguroVida();
+</script>
+<style>
+  .seguro-cta { margin: 2rem 0; padding: clamp(1.4rem, 4vw, 2.2rem); background: #163f38; border-radius: 12px; color: #fff; }
+  .seguro-cta .seguro-cta-label { margin: 0 0 .8rem; color: #dceccd; font-size: .875rem; font-weight: 700; }
+  .seguro-cta h2 { color: #fff; margin: 0 0 .8rem; font-size: clamp(1.55rem, 3vw, 2rem); line-height: 1.2; }
+  .seguro-cta p { color: #edf4f1; margin: 0 0 1.25rem; font-size: 1rem; line-height: 1.6; }
+  .seguro-cta a.seguro-button { display: inline-flex; align-items: center; justify-content: center; gap: .7rem; min-height: 52px; padding: .85rem 1.3rem; border-radius: 6px; background: #e5c68e; color: #182e29; font-size: 1rem; font-weight: 750; text-decoration: none; }
+  .seguro-cta a.seguro-button:hover { background: #f1d6a4; }
+  .seguro-cta a:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+  .seguro-cta .seguro-cta-note { margin: 1rem 0 0; max-width: 65ch; font-size: .875rem; color: #d2e1db; }
+  .seguro-cta.compacto h2 { font-size: 1.45rem; }
+  @media (max-width: 540px) { .seguro-cta a.seguro-button { width: 100%; } }
+</style>

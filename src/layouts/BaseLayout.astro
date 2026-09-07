@@ -11,6 +11,7 @@ interface Props {
   canonical?: string;
   tipo?: "website" | "article";
   imagemOg?: string;
+  robots?: string;
 }
 
 const {
@@ -18,7 +19,8 @@ const {
   descricao = site.descricao,
   canonical = new URL(Astro.url.pathname, site.dominio).toString(),
   tipo = "website",
-  imagemOg
+  imagemOg,
+  robots
 } = Astro.props;
 const tituloCompleto = titulo === site.nome ? titulo : `${titulo} | ${site.nome}`;
 const leadFormsEnabled = import.meta.env.PUBLIC_LEAD_FORMS_ENABLED !== "false";
@@ -47,6 +49,7 @@ const linksNavegacao = [
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={descricao} />
+    {robots && <meta name="robots" content={robots} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href={canonical} />
     <meta property="og:type" content={tipo} />
