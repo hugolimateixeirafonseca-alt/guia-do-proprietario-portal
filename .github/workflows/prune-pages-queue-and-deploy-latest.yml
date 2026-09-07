@@ -24,6 +24,7 @@ jobs:
       CF_PAGES_PROJECT: guia-do-proprietario-portal
       TARGET_SHA: ${{ github.event.client_payload.sha || github.sha }}
       GH_TOKEN: ${{ github.token }}
+      OPS_DASHBOARD_TOKEN: ${{ secrets.OPS_DASHBOARD_TOKEN }}
     steps:
       - name: Validate secrets
         shell: bash
@@ -159,6 +160,18 @@ jobs:
             current = await request(`${base}/deployments/${encodeURIComponent(deploymentId)}`);
           }
           NODE
+
+      - name: Atualizar dashboard após o resultado do deploy
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [[ -z "${OPS_DASHBOARD_TOKEN:-}" ]]; then
+            echo "::warning::OPS_DASHBOARD_TOKEN em falta; atualizar o dashboard pela sincronização habitual."
+            exit 0
+          fi
+          GH_TOKEN="$OPS_DASHBOARD_TOKEN" gh api --method POST \
+            repos/hugolimateixeirafonseca-alt/guia-do-proprietario-ops/dispatches \
+            -f event_type=portal_content_changed
 
       - name: Emitir candidato a Reel após deploy concluído
         if: ${{ github.event_name == 'repository_dispatch' && vars.REELS_AUTO_PUBLISH_ENABLED != 'false' }}

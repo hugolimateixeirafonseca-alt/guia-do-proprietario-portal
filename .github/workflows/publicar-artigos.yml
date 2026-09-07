@@ -38,6 +38,9 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
+      - name: Validar texto antes de preparar a publicação
+        run: npm run validate:copy
+
       - name: Selecionar, preparar imagem e mover 1 artigo
         shell: bash
         run: |
@@ -169,6 +172,7 @@ jobs:
           done
 
           npm run validate:dates
+          npm run validate:copy
           npm run validate:images
 
           git config user.name "github-actions[bot]"
@@ -183,12 +187,12 @@ jobs:
           git push origin HEAD:main
 
           PUBLISHED_SHA="$(git rev-parse HEAD)"
-          echo "Artigo publicado no SHA $PUBLISHED_SHA."
+          echo "Artigo guardado no repositório no SHA $PUBLISHED_SHA; publicação no site por confirmar."
           {
             echo "### Publicação diária"
-            echo "**PUBLICADO:** \`$(basename "${FILES[0]}")\`"
+            echo "**NO REPOSITÓRIO, A AGUARDAR PUBLICAÇÃO NO SITE:** \`$(basename "${FILES[0]}")\`"
             echo "Origem da seleção: **$SELECTION_SOURCE**"
-            echo "Deploy do portal: **solicitado**"
+            echo "O envio para o alojamento é solicitado a seguir. Só a conclusão do deploy e o sitemap público confirmam a publicação."
           } >> "$GITHUB_STEP_SUMMARY"
 
           # Um push feito pelo GITHUB_TOKEN não dispara de forma fiável outro
