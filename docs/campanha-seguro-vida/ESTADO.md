@@ -4,7 +4,7 @@ Preparada em 7 de setembro de 2026. Fonte de verdade da implementação e das de
 
 ## Estado real
 
-- Três artigos escritos e uma pré-landing implementada na branch local `agent/seguro-vida-campanha`.
+- Três artigos escritos e duas variantes de pré-landing implementadas na branch local `agent/seguro-vida-campanha`.
 - Sem envio para o repositório remoto, sem publicação e sem confirmação online.
 - Os artigos usam `rascunho: true`: não entram nas listagens, RSS, feed, sitemap ou páginas de produção. O servidor local permite rever apenas os rascunhos com o tema `campanha-seguro-vida`.
 - A landing tem `noindex,follow` e está excluída do sitemap. Não está ligada na navegação pública. O ficheiro existe apenas nesta branch até integração autorizada.
@@ -19,6 +19,7 @@ Preparada em 7 de setembro de 2026. Fonte de verdade da implementação e das de
 | SC36 | Seguro de vida no banco? Descubra se pode pagar menos fora. | /casa/mudar-seguro-vida-credito-habitacao-banco/ |
 | SC37 | Paga o seguro de vida todos os meses. Está a comprar a proteção certa? | /casa/comparar-seguro-vida-credito-habitacao/ |
 | Landing | Está a pagar demasiado pelo seguro de vida? | /seguro-vida-credito-habitacao/ |
+| Variante visual próprio | O seu seguro de vida pode custar menos. | /seguro-vida-simulacao/ |
 
 ## Destinos fornecidos pelo utilizador
 
@@ -29,7 +30,7 @@ Os endereços são usados exatamente como fornecidos. Não são acrescentadas UT
 
 ## Decisões editoriais
 
-- Português de Portugal, identidade do Guia, sem nome ou logótipo do cliente.
+- Português de Portugal, sem nome ou logótipo do cliente. Primeira landing com identidade do Guia; segunda com visual próprio, mantendo a identificação do promotor no rodapé.
 - Disclosure comercial e ligações marcadas como `sponsored`.
 - Nenhuma reprodução das alegações de poupança de 60% ou 20.000 €, nem de testemunhos do cliente.
 - Exemplos claramente hipotéticos. A comparação inclui proteção e efeito no crédito.
@@ -46,6 +47,10 @@ Não foi feita verificação visual em browser nem confirmação online. A revis
 ## Publicação futura
 
 Após a revisão, integrar a campanha e o estado operacional no mesmo ciclo. Preparar as datas reais, retirar `rascunho: true` dos três artigos e validar apenas as verificações afetadas. Manter o `noindex` da landing de performance. A medição de leads depende de um evento confirmado no destino, nunca do clique de saída no Guia.
+
+## Segunda variante de pré-landing
+
+Adicionada a pedido do utilizador em 7 de setembro de 2026, com visual próprio, fotografia gerada e quatro posições de CTA. Documentação, fontes, adaptação da oferta e hipótese de teste em `VARIANTE-PERFORMANCE.md`. A validação isolada e exportação desta quinta página usa `scripts/preview-seguro-vida-performance.mjs`; as quatro páginas anteriores permanecem inalteradas. As duas pré-landings têm `noindex` e exclusão do sitemap. Estado apenas local, sem medição de conversões.
 
 ## Revisão comercial orientada à conversão
 

@@ -11,6 +11,7 @@ export default defineConfig({
       "https://guiadoproprietario.pt/quanto-me-sobra-se-vender/",
       "https://guiadoproprietario.pt/servicos-limpeza/",
       "https://guiadoproprietario.pt/seguro-vida-credito-habitacao/",
+      "https://guiadoproprietario.pt/seguro-vida-simulacao/",
       "https://guiadoproprietario.pt/kit-estudante/obrigado/"
     ].includes(page)
   })],

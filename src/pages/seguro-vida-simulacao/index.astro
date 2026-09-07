@@ -1,0 +1,76 @@
+---
+import CookieConsent from "../../components/CookieConsent.astro";
+import { SEGURO_VIDA_DESTINOS } from "../../data/seguro-vida";
+import "../../styles/seguro-vida-performance.css";
+const destino = SEGURO_VIDA_DESTINOS.landing;
+const titulo = "O seu seguro de vida pode custar menos. Peça uma simulação gratuita.";
+const descricao = "Tem crédito habitação? Descubra se pode pagar menos pelo seguro de vida. Peça uma simulação gratuita e sem compromisso no site do parceiro.";
+---
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    <meta name="description" content={descricao} />
+    <meta name="robots" content="noindex,follow" />
+    <link rel="canonical" href="https://guiadoproprietario.pt/seguro-vida-simulacao/" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:type" content="website" />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+    <header class="topbar wrap">
+      <div class="category"><strong>SEGURO DE VIDA</strong><span>CRÉDITO HABITAÇÃO</span></div>
+      <a class="header-cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">↗</span></a>
+    </header>
+    <main id="conteudo">
+      <section class="hero wrap" aria-labelledby="titulo">
+        <div class="hero-copy">
+          <p class="eyebrow">TEM CRÉDITO HABITAÇÃO?</p>
+          <h1 id="titulo">O seu seguro de vida <span>pode custar menos.</span></h1>
+          <p class="intro">Não continue a pagar por hábito. Peça uma simulação gratuita e descubra se há uma opção mais vantajosa para o seu seguro de vida.</p>
+          <ul class="hero-benefits"><li>Compare alternativas ao seguro do banco</li><li>Receba apoio para analisar preço e proteção</li><li>Decida depois de conhecer a proposta</li></ul>
+          <a class="cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">→</span></a>
+          <p class="cta-reassurance">Grátis. Sem obrigação de contratar.</p>
+          <p class="next-step">Continua no site do parceiro, onde deixa o contacto para receber uma simulação adaptada ao seu caso.</p>
+        </div>
+        <div class="hero-visual">
+          <img src="/imagens/landings/seguro-vida/casal-casa.webp" alt="Casal a rever documentos à mesa de casa" width="1200" height="900" fetchpriority="high" decoding="async" />
+          <div class="photo-message"><span>SEGURO NO BANCO?</span><strong>Pode procurar<br />uma alternativa.</strong><p>O crédito habitação não o impede de comparar.</p></div>
+        </div>
+      </section>
+      <section class="offer-strip" aria-label="O que recebe com o pedido">
+        <div class="wrap offer-grid">
+          <div><strong>0 €</strong><p>para pedir a simulação</p></div>
+          <div><strong>Várias seguradoras</strong><p>analisadas pelo parceiro</p></div>
+          <div><strong>A decisão é sua</strong><p>sem obrigação de mudar</p></div>
+        </div>
+      </section>
+      <section class="how wrap" aria-labelledby="como">
+        <div class="section-intro"><p class="eyebrow">COMECE POR SABER O PREÇO</p><h2 id="como">Antes de renovar,<br />ponha o seu seguro à prova.</h2><p>Não precisa de decidir já se vai mudar. Precisa de uma proposta para comparar com o que paga hoje.</p></div>
+        <ol class="steps">
+          <li><span class="step-number">01</span><div><h3>Peça a simulação</h3><p>Avance para o site do parceiro e preencha os dados do pedido.</p></div></li>
+          <li><span class="step-number">02</span><div><h3>Fale com um especialista</h3><p>Receba contacto telefónico para analisar o seu caso e as opções disponíveis.</p></div></li>
+          <li><span class="step-number">03</span><div><h3>Compare. Só depois decida.</h3><p>Veja o preço, as coberturas e o efeito nas condições do crédito antes de escolher.</p></div></li>
+        </ol>
+      </section>
+      <section class="faq wrap" aria-labelledby="duvidas">
+        <h2 id="duvidas">O que falta para pedir a sua?</h2>
+        <div class="questions">
+          <details><summary>Posso mudar o seguro sem mudar o crédito?</summary><p>Sim. Pode escolher outra seguradora, mantendo o crédito no banco, desde que as coberturas cumpram os requisitos exigidos. Confirme também se a mudança altera o spread ou outros benefícios do contrato.</p></details>
+          <details><summary>A simulação tem algum custo?</summary><p>O pedido de simulação é gratuito e sem compromisso. Conhecer a proposta não o obriga a contratar nem a cancelar o seguro atual.</p></details>
+          <details><summary>Vou saber o preço imediatamente?</summary><p>O próximo passo é um pedido no site do parceiro. Depois, recebe contacto telefónico para analisar os seus dados e preparar a simulação.</p></details>
+          <details><summary>Quanto posso poupar?</summary><p>Depende da idade, do capital em dívida, das coberturas e das condições do seguro e do crédito. A simulação serve para perceber se existe uma alternativa mais vantajosa no seu caso.</p></details>
+        </div>
+      </section>
+      <section class="closing">
+        <div class="wrap closing-inner"><div><p class="eyebrow">PAGAR MENOS COMEÇA POR COMPARAR</p><h2>Vai renovar sem<br />ver outra proposta?</h2><p>Peça a sua simulação e decida com um preço na mão.</p></div><div class="closing-action"><a class="cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">→</span></a><p>Gratuita e sem compromisso.<br />Pedido no site do parceiro.</p></div></div>
+      </section>
+    </main>
+    <footer class="footer wrap"><p>Conteúdo comercial com ligações de afiliado. Podemos receber uma comissão pelo encaminhamento. Página promovida pelo Guia do Proprietário; a simulação e a proposta são da responsabilidade do parceiro identificado no destino.</p><div><a href="/privacidade/">Privacidade</a><a href="/cookies/">Cookies</a><button type="button" data-cookie-settings>Gerir cookies</button></div></footer>
+    <div class="mobile-action"><a class="cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">→</span></a><span>Grátis e sem compromisso</span></div>
+    <CookieConsent />
+  </body>
+</html>
