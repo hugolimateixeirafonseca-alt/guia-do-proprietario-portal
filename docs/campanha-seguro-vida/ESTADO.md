@@ -15,10 +15,10 @@ Preparada em 7 de setembro de 2026. Fonte de verdade da implementação e das de
 
 | ID | Conteúdo | Rota prevista |
 | --- | --- | --- |
-| SC35 | Quanto pode poupar no seguro de vida do crédito habitação? Saiba o que comparar | /casa/seguro-vida-credito-habitacao-poupar/ |
-| SC36 | Tem o seguro de vida no banco? O que deve verificar antes de mudar | /casa/mudar-seguro-vida-credito-habitacao-banco/ |
-| SC37 | Seguro de vida do crédito habitação: 5 pontos a comparar além do preço | /casa/comparar-seguro-vida-credito-habitacao/ |
-| Landing | A casa é a mesma. O seguro de vida pode custar menos. | /seguro-vida-credito-habitacao/ |
+| SC35 | Seguro de vida do crédito habitação: está a pagar mais do que precisa? | /casa/seguro-vida-credito-habitacao-poupar/ |
+| SC36 | Seguro de vida no banco? Descubra se pode pagar menos fora. | /casa/mudar-seguro-vida-credito-habitacao-banco/ |
+| SC37 | Paga o seguro de vida todos os meses. Está a comprar a proteção certa? | /casa/comparar-seguro-vida-credito-habitacao/ |
+| Landing | Está a pagar demasiado pelo seguro de vida? | /seguro-vida-credito-habitacao/ |
 
 ## Destinos fornecidos pelo utilizador
 
@@ -39,10 +39,14 @@ Os endereços são usados exatamente como fornecidos. Não são acrescentadas UT
 
 ## Pré-visualização e validação
 
-As quatro rotas foram compiladas individualmente pelo servidor local, sem build integral. O exportador `scripts/preview-seguro-vida.mjs` verifica os nove CTAs, as regras editoriais, os rascunhos, a compilação dos componentes alterados, a ausência de formulários, os metadados e as regras de preservação de UTMs. Cria quatro HTML autónomos com CSS e imagens incorporados, sem scripts ou recolha de dados, em `D:/CodexProjects/Products/relatorios/campanha-seguro-vida/`.
+As quatro rotas foram compiladas individualmente pelo servidor local, sem build integral. O exportador `scripts/preview-seguro-vida.mjs` verifica os 13 CTAs, as regras editoriais, os rascunhos, a compilação dos componentes alterados, a ausência de formulários, os metadados e as regras de preservação de UTMs. Cria quatro HTML autónomos com CSS e imagens incorporados, sem scripts ou recolha de dados, em `D:/CodexProjects/Products/relatorios/campanha-seguro-vida/`.
 
 Não foi feita verificação visual em browser nem confirmação online. A revisão visual e funcional cabe ao utilizador. A versão HTML de revisão tem navegação própria entre as quatro páginas; essa barra não faz parte das páginas de produção.
 
 ## Publicação futura
 
 Após a revisão, integrar a campanha e o estado operacional no mesmo ciclo. Preparar as datas reais, retirar `rascunho: true` dos três artigos e validar apenas as verificações afetadas. Manter o `noindex` da landing de performance. A medição de leads depende de um evento confirmado no destino, nunca do clique de saída no Guia.
+
+## Revisão comercial orientada à conversão
+
+Reescrita a pedido do utilizador: títulos e aberturas centrados no custo de continuar sem comparar, no preço da alternativa e no pedido gratuito. A landing tem quatro CTAs, elimina as saídas para artigos e termina num pedido de simulação. Cada artigo tem três CTAs, incluindo um antes do corpo editorial. Os exemplos e o aviso geral passam para depois do corpo, mantendo claras as condições materiais no texto. As recomendações de outros artigos e a newsletter são omitidas apenas nesta campanha. As perguntas frequentes resolvem as objeções ao pedido. Os dois links de afiliado permanecem exatos. Não há percentagens, testemunhos ou urgência inventados. Sem testes de performance reais ou publicação.

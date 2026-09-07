@@ -11,10 +11,10 @@ const localOrigin = process.argv[2] || "http://127.0.0.1:4327";
 assert(["127.0.0.1", "localhost"].includes(new URL(localOrigin).hostname), "A exportação só aceita o servidor local.");
 const output = path.resolve(process.argv[3] || path.join(root, "out", "preview-seguro-vida"));
 const pages = [
-  { route: "/seguro-vida-credito-habitacao/", file: "index.html", label: "Landing", id: "7efb1337347c0ae601f420f34ba38154", links: 3 },
-  { route: "/casa/seguro-vida-credito-habitacao-poupar/", file: "artigo-poupanca.html", label: "Artigo: poupança", id: "4713195f3e647940b7614c616838155c", links: 2 },
-  { route: "/casa/mudar-seguro-vida-credito-habitacao-banco/", file: "artigo-mudar-seguro.html", label: "Artigo: mudar o seguro", id: "4713195f3e647940b7614c616838155c", links: 2 },
-  { route: "/casa/comparar-seguro-vida-credito-habitacao/", file: "artigo-comparar.html", label: "Artigo: comparar", id: "4713195f3e647940b7614c616838155c", links: 2 },
+  { route: "/seguro-vida-credito-habitacao/", file: "index.html", label: "Landing", id: "7efb1337347c0ae601f420f34ba38154", links: 4 },
+  { route: "/casa/seguro-vida-credito-habitacao-poupar/", file: "artigo-poupanca.html", label: "Artigo: poupança", id: "4713195f3e647940b7614c616838155c", links: 3 },
+  { route: "/casa/mudar-seguro-vida-credito-habitacao-banco/", file: "artigo-mudar-seguro.html", label: "Artigo: mudar o seguro", id: "4713195f3e647940b7614c616838155c", links: 3 },
+  { route: "/casa/comparar-seguro-vida-credito-habitacao/", file: "artigo-comparar.html", label: "Artigo: comparar", id: "4713195f3e647940b7614c616838155c", links: 3 },
 ];
 const attrs = (node) => Object.fromEntries((node.attrs || []).map(({ name, value }) => [name, value]));
 const set = (node, name, value) => { const attr = node.attrs.find((a) => a.name === name); if (attr) attr.value = value; else node.attrs.push({ name, value }); };
@@ -112,5 +112,5 @@ for (const page of pages) {
   await writeFile(path.join(output, page.file), exported, "utf8");
   reports.push({ route: page.route, file: page.file, affiliateLinks: affiliates.length, status: 200 });
 }
-await writeFile(path.join(output, "validacao.json"), JSON.stringify({ localOnly: true, checkedAt: new Date().toISOString(), checks: ["Quatro rotas compiladas", "Nove CTAs com o adsid correto", "Copy sem marca nem travessões", "Rascunhos excluídos da publicação", "UTM só em navegação interna", "Recursos incorporados no HTML", "Sem formulários ou scripts no artefacto"], pages: reports }, null, 2) + "\n");
+await writeFile(path.join(output, "validacao.json"), JSON.stringify({ localOnly: true, checkedAt: new Date().toISOString(), checks: ["Quatro rotas compiladas", "CTAs com o adsid correto", "Copy sem marca nem travessões", "Rascunhos excluídos da publicação", "UTM só em navegação interna", "Recursos incorporados no HTML", "Sem formulários ou scripts no artefacto"], pages: reports }, null, 2) + "\n");
 console.log(JSON.stringify({ output, pages: reports.length, affiliateLinks: reports.reduce((sum, p) => sum + p.affiliateLinks, 0), result: "ok" }));

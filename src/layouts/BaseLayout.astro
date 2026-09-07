@@ -12,6 +12,7 @@ interface Props {
   tipo?: "website" | "article";
   imagemOg?: string;
   robots?: string;
+  mostrarNewsletter?: boolean;
 }
 
 const {
@@ -20,7 +21,8 @@ const {
   canonical = new URL(Astro.url.pathname, site.dominio).toString(),
   tipo = "website",
   imagemOg,
-  robots
+  robots,
+  mostrarNewsletter = true
 } = Astro.props;
 const tituloCompleto = titulo === site.nome ? titulo : `${titulo} | ${site.nome}`;
 const leadFormsEnabled = import.meta.env.PUBLIC_LEAD_FORMS_ENABLED !== "false";
@@ -80,7 +82,7 @@ const linksNavegacao = [
       </details>
     </header>
     <main id="conteudo"><slot /></main>
-    {leadFormsEnabled && <Newsletter />}
+    {leadFormsEnabled && mostrarNewsletter && <Newsletter />}
     <footer class="site-footer">
       <div>
         <a class="brand footer-brand" href="/"><Marca /><span>Guia do Proprietário</span></a>

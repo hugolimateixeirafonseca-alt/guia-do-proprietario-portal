@@ -5,7 +5,22 @@ export const SEGURO_VIDA_DESTINOS = {
 } as const;
 
 export const SEGURO_VIDA_ARTIGOS = [
-  { slug: "seguro-vida-credito-habitacao-poupar", titulo: "Quanto pode poupar no seguro de vida do crédito habitação? Saiba o que comparar", angulo: "Perceber a poupança", descricao: "Faça as contas ao seguro e ao crédito antes de decidir." },
-  { slug: "mudar-seguro-vida-credito-habitacao-banco", titulo: "Tem o seguro de vida no banco? O que deve verificar antes de mudar", angulo: "Preparar a mudança", descricao: "Saiba o que confirmar com o banco e com a nova seguradora." },
-  { slug: "comparar-seguro-vida-credito-habitacao", titulo: "Seguro de vida do crédito habitação: 5 pontos a comparar além do preço", angulo: "Escolher com informação", descricao: "Compare a proteção, as exclusões e o preço ao longo do tempo." },
+  {
+    "slug": "seguro-vida-credito-habitacao-poupar",
+    "titulo": "Seguro de vida do crédito habitação: está a pagar mais do que precisa?",
+    "angulo": "Pagar menos",
+    "descricao": "Não deixe o seguro de vida renovar por hábito. Peça uma simulação gratuita e descubra se pode reduzir este custo do seu crédito habitação."
+  },
+  {
+    "slug": "mudar-seguro-vida-credito-habitacao-banco",
+    "titulo": "Seguro de vida no banco? Descubra se pode pagar menos fora.",
+    "angulo": "Sair do seguro do banco",
+    "descricao": "Ter o crédito no banco não o impede de procurar outro seguro. Peça uma simulação gratuita e descubra se a mudança pode baixar os seus encargos."
+  },
+  {
+    "slug": "comparar-seguro-vida-credito-habitacao",
+    "titulo": "Paga o seguro de vida todos os meses. Está a comprar a proteção certa?",
+    "angulo": "Melhor preço e proteção",
+    "descricao": "Ponha o preço e a proteção do seu seguro de vida à prova. Descubra cinco pontos que fazem diferença e peça uma simulação gratuita para o seu caso."
+  }
 ] as const;

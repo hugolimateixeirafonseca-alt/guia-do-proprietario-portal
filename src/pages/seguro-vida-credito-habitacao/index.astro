@@ -2,79 +2,74 @@
 import Squeeze from "../../layouts/Squeeze.astro";
 import Marca from "../../components/Marca.astro";
 import SeguroVidaCta from "../../components/SeguroVidaCta.astro";
-import { SEGURO_VIDA_DESTINOS, SEGURO_VIDA_ARTIGOS } from "../../data/seguro-vida";
-const SEGURO_VIDA_DESTINO = SEGURO_VIDA_DESTINOS.landing;
+import { SEGURO_VIDA_DESTINOS } from "../../data/seguro-vida";
 import "../../styles/seguro-vida.css";
-const titulo = "Seguro de vida do crédito habitação: veja se pode pagar menos | Guia do Proprietário";
-const descricao = "Peça uma simulação gratuita e sem compromisso para comparar o seu seguro de vida do crédito habitação. Conheça o próximo passo e o que deve verificar.";
+const destino = SEGURO_VIDA_DESTINOS.landing;
+const titulo = "Está a pagar demasiado pelo seguro de vida? Peça uma simulação gratuita | Guia do Proprietário";
+const descricao = "Ponha o preço do seguro de vida do crédito habitação à prova. Peça a sua simulação gratuita e descubra se pode baixar este custo da casa.";
 const perguntas = [
-  { pergunta: "Tenho o seguro no banco. Posso comparar alternativas?", resposta: "Sim. Quando exige um seguro adequado ao crédito, o banco deve aceitar um contrato de outro prestador com um nível de garantia equivalente. Confirme também se a mudança afeta algum benefício previsto no seu contrato de crédito." },
-  { pergunta: "Vou saber imediatamente quanto posso poupar?", resposta: "O próximo passo é preencher um pedido de simulação no site do parceiro. O formulário permite solicitar contacto telefónico para analisar a sua situação. A poupança só pode ser avaliada depois de comparar a proposta com o seguro atual e o efeito nas condições do crédito." },
-  { pergunta: "O pedido é gratuito e obriga a mudar?", resposta: "O pedido de simulação é apresentado pelo parceiro como gratuito e sem compromisso. Pedir informação não substitui os passos de contratação de um novo seguro e de cessação do anterior." },
-  { pergunta: "O que convém ter à mão para o contacto?", resposta: "O último recibo e as condições do seguro atual, o capital em dívida, o prazo do crédito e as condições do banco. São elementos úteis para comparar a proposta. Preencha no site do parceiro apenas os dados aí solicitados." },
+  { pergunta: "Tenho o seguro no banco. Também posso pedir?", resposta: "Sim. Pode procurar uma alternativa mantendo o crédito. O banco deve aceitar um seguro com garantias equivalentes às exigidas. Confirme o eventual efeito no spread ou noutros benefícios para saber quanto pode poupar no conjunto." },
+  { pergunta: "Tenho de pagar ou de mudar de seguro?", resposta: "O pedido de simulação é gratuito e sem compromisso. Conheça a proposta e decida depois se quer avançar. O seu seguro atual não muda por pedir informação." },
+  { pergunta: "O que acontece depois do clique?", resposta: "Segue para a página do parceiro, preenche o pedido e solicita contacto telefónico. É nesse contacto que pode esclarecer o preço e as condições para o seu caso." },
+  { pergunta: "Quanto posso poupar?", resposta: "A diferença depende do seguro atual, da nova proposta e das condições do crédito. Peça a simulação para ter os valores à frente e perceber se a mudança compensa. Compare também as coberturas e a evolução prevista do preço." },
 ];
 ---
 <Squeeze titulo={titulo} descricao={descricao} imagemOg="/imagens/artigos/vender-casa-com-credito-por-pagar.webp" robots="noindex,follow">
   <a class="sv-skip" href="#conteudo">Saltar para o conteúdo</a>
   <header class="sv-header"><div class="sv-container sv-header-inner">
-    <a class="sv-brand" href="/" aria-label="Guia do Proprietário, início"><Marca /><span>Guia do<br />Proprietário</span></a>
-    <p class="sv-header-topic">As decisões da sua casa,<br /><strong>com mais informação.</strong></p>
-    <a class="sv-header-cta" href={SEGURO_VIDA_DESTINO} rel="sponsored noopener" data-seguro-link>Comparar o meu seguro <span aria-hidden="true">↗</span></a>
+    <a class="sv-brand" href="#conteudo" aria-label="Guia do Proprietário"><Marca /><span>Guia do<br />Proprietário</span></a>
+    <p class="sv-header-topic">Seguro de vida do crédito habitação<br /><strong>Simulação gratuita e sem compromisso</strong></p>
+    <a class="sv-header-cta" href={destino} rel="sponsored noopener" data-seguro-link>Pedir simulação gratuita <span aria-hidden="true">↗</span></a>
   </div></header>
   <div id="conteudo">
     <section class="sv-hero"><div class="sv-container sv-hero-grid">
       <div class="sv-hero-copy">
-        <p class="sv-eyebrow">Seguro de vida · Crédito habitação</p>
-        <h1>A casa é a mesma.<br />O seguro de vida <em>pode custar menos.</em></h1>
-        <p class="sv-lead">Há quanto tempo não compara o seu seguro? Peça uma simulação e veja se encontra uma alternativa que compense no preço e na proteção.</p>
-        <a class="sv-button" href={SEGURO_VIDA_DESTINO} rel="sponsored noopener" data-seguro-link>Quero comparar o meu seguro <span aria-hidden="true">↗</span></a>
-        <p class="sv-benefit">Pedido gratuito e sem compromisso</p>
-        <p class="sv-handoff">Vai seguir para o site do parceiro e poderá pedir contacto telefónico para analisar a sua situação.</p>
-        <a class="sv-text-link" href="#como-funciona">Perceber como funciona <span aria-hidden="true">↓</span></a>
+        <p class="sv-eyebrow">Tem crédito habitação?</p>
+        <h1>Está a pagar demasiado pelo <em>seguro de vida?</em></h1>
+        <p class="sv-lead">Descubra se pode baixar este custo da casa. <strong>Peça uma simulação gratuita</strong> e ponha o preço que paga todos os meses à prova.</p>
+        <a class="sv-button" href={destino} rel="sponsored noopener" data-seguro-link>Quero a minha simulação gratuita <span aria-hidden="true">↗</span></a>
+        <p class="sv-benefit">Sem compromisso. Decide depois de conhecer a proposta.</p>
+        <p class="sv-handoff">Pedido no site do parceiro, com contacto telefónico para analisar o seu caso.</p>
       </div>
       <div class="sv-hero-visual">
         <picture><source srcset="/imagens/artigos/vender-casa-com-credito-por-pagar.avif" type="image/avif" /><img src="/imagens/artigos/vender-casa-com-credito-por-pagar.webp" alt="Ilustração de uma casa portuguesa, documentos de crédito, um banco e moedas" width="1200" height="675" fetchpriority="high" /></picture>
-        <div class="sv-visual-note"><span class="sv-note-number" aria-hidden="true">01</span><div><strong>O primeiro passo é comparar.</strong><p>A decisão de mudar vem depois de conhecer a proposta.</p></div></div>
+        <div class="sv-visual-note"><div><strong>O preço atual já conhece.<br />Falta conhecer a alternativa.</strong><p>Ponha o seu seguro a competir pelo seu orçamento.</p></div></div>
       </div>
     </div></section>
-    <div class="sv-partnership"><div class="sv-container">Conteúdo com finalidade comercial. As ligações de simulação encaminham para um parceiro de seguros.</div></div>
+    <div class="sv-partnership"><div class="sv-container">Publicidade · Conteúdo com ligações de afiliado para um parceiro de seguros.</div></div>
     <section class="sv-section sv-container sv-reasons" aria-labelledby="reasons-title">
-      <div><p class="sv-eyebrow">Um custo que merece atenção</p><h2 id="reasons-title">Contratou o seguro com o crédito.<br />E nunca mais o reviu?</h2></div>
-      <div class="sv-reasons-copy"><p>O seguro pode ter ficado decidido no meio de toda a papelada da compra. Hoje, vale a pena colocar o recibo atual ao lado de uma nova proposta.</p><p><strong>Uma comparação útil olha para o preço, para a proteção e para o efeito no empréstimo.</strong> É isso que lhe permite perceber se a mudança faz sentido.</p></div>
+      <div><p class="sv-eyebrow">Não pague por hábito</p><h2 id="reasons-title">O seguro veio com o crédito.<br />O preço ficou por comparar?</h2></div>
+      <div class="sv-reasons-copy"><p>Na compra da casa havia muito para decidir. O seguro ficou tratado e os pagamentos continuaram. Mas <strong>continuar a pagar não lhe diz se tem um preço competitivo.</strong></p><p>Peça uma proposta nova. Se a alternativa compensar no custo global e na proteção, a diferença pode ficar no seu orçamento.</p></div>
     </section>
     <section class="sv-comparison" aria-labelledby="compare-title"><div class="sv-container">
-      <p class="sv-eyebrow">Antes de decidir</p><h2 id="compare-title">Três coisas a pôr lado a lado.</h2>
+      <p class="sv-eyebrow">O que ganha ao pedir</p><h2 id="compare-title">Um preço para pôr o seu à prova.</h2>
       <div class="sv-compare-grid">
-        <article><span class="sv-number">01</span><h3>Quanto paga</h3><p>Compare o custo anual e peça a evolução prevista do preço. O primeiro recibo não conta a história toda.</p></article>
-        <article><span class="sv-number">02</span><h3>O que protege</h3><p>Confirme coberturas, exclusões e capital por pessoa. Uma diferença no preço pode acompanhar uma diferença na proteção.</p></article>
-        <article><span class="sv-number">03</span><h3>O que muda no crédito</h3><p>Peça ao banco o impacto nas condições do empréstimo, incluindo eventuais benefícios associados ao seguro atual.</p></article>
+        <article><span class="sv-number">01</span><h3>Descubra se pode pagar menos</h3><p>Deixe de adivinhar se o seguro está caro. Conheça uma alternativa para a sua situação.</p></article>
+        <article><span class="sv-number">02</span><h3>Esclareça a proteção</h3><p>Use o contacto para saber o que a proposta inclui e como se compara com o seguro atual.</p></article>
+        <article><span class="sv-number">03</span><h3>Decida sem compromisso</h3><p>Peça a simulação gratuitamente. Só avança para a mudança se a proposta lhe interessar.</p></article>
       </div>
-      <p class="sv-compare-foot">A poupança depende de cada situação. Compare as condições completas antes de contratar.</p>
+      <p class="sv-compare-foot">Compare as coberturas, o custo ao longo do tempo e o efeito nas condições do crédito. É o resultado global que mostra se a mudança compensa.</p>
     </div></section>
+    <section class="sv-container sv-action sv-action-middle" aria-label="Pedir uma nova proposta"><SeguroVidaCta canal="landing" titulo="Não deixe a dúvida passar para o próximo recibo." texto="Peça a sua simulação e descubra se existe uma alternativa mais barata para o seguro de vida da casa." botao="Quero descobrir se posso pagar menos" /></section>
     <section class="sv-section sv-container sv-process" id="como-funciona" aria-labelledby="process-title">
-      <div><p class="sv-eyebrow">Como funciona</p><h2 id="process-title">Conheça uma alternativa.<br />Depois, faça as contas.</h2><p>O Guia ajuda-o a preparar a comparação. O pedido e o contacto são tratados pelo parceiro.</p></div>
+      <div><p class="sv-eyebrow">Comece pelo pedido</p><h2 id="process-title">Peça a simulação.<br />Faça as contas com uma proposta real.</h2><p>O primeiro passo é simples. A decisão de mudar vem depois.</p></div>
       <ol class="sv-steps">
-        <li><span aria-hidden="true">1</span><div><h3>Siga para o pedido de simulação</h3><p>O botão leva-o diretamente à página do parceiro.</p></div></li>
-        <li><span aria-hidden="true">2</span><div><h3>Preencha os dados pedidos</h3><p>Leia as condições e a autorização de contacto no formulário antes de o enviar.</p></div></li>
-        <li><span aria-hidden="true">3</span><div><h3>Compare com o apoio do contacto</h3><p>Esclareça o preço e as coberturas. Confirme com o banco as condições aplicáveis à mudança.</p></div></li>
+        <li><span aria-hidden="true">1</span><div><h3>Aceda ao pedido</h3><p>O botão leva-o à página do parceiro.</p></div></li>
+        <li><span aria-hidden="true">2</span><div><h3>Preencha o formulário</h3><p>Indique os dados pedidos e solicite contacto telefónico.</p></div></li>
+        <li><span aria-hidden="true">3</span><div><h3>Ponha o seguro atual à prova</h3><p>Esclareça preço e coberturas e veja se a mudança compensa.</p></div></li>
       </ol>
     </section>
-    <section class="sv-container sv-action" aria-label="Avançar para uma simulação"><SeguroVidaCta canal="landing" titulo="O seu próximo recibo merece uma comparação." texto="Peça uma simulação e perceba se existe uma alternativa que faça sentido para a sua casa e para o seu orçamento." botao="Quero comparar o meu seguro" /></section>
     <section class="sv-section sv-container sv-faq" aria-labelledby="faq-title">
-      <div><p class="sv-eyebrow">As dúvidas mais comuns</p><h2 id="faq-title">Antes do próximo passo.</h2></div>
+      <div><p class="sv-eyebrow">Falta esclarecer alguma coisa?</p><h2 id="faq-title">Não precisa de mudar para descobrir outro preço.</h2></div>
       <div>{perguntas.map(({ pergunta, resposta }) => <details><summary>{pergunta}</summary><p>{resposta}</p></details>)}</div>
     </section>
-    <section class="sv-reading" aria-labelledby="reading-title"><div class="sv-container">
-      <p class="sv-eyebrow">Para decidir com mais informação</p><h2 id="reading-title">Prefere esclarecer primeiro?</h2>
-      <div class="sv-reading-grid">{SEGURO_VIDA_ARTIGOS.map((artigo) => <a href={`/casa/${artigo.slug}/`} data-seguro-link><span>{artigo.angulo}</span><h3>{artigo.titulo}</h3><p>{artigo.descricao}</p><strong>Ler artigo <span aria-hidden="true">↗</span></strong></a>)}</div>
-    </div></section>
+    <section class="sv-container sv-action sv-action-final" aria-label="Pedir simulação gratuita"><SeguroVidaCta canal="landing" titulo="Antes de pagar mais um ano, descubra se pode pagar menos." texto="O seu seguro merece uma comparação. Peça a simulação gratuita e decida com os valores à frente." botao="Quero a minha simulação gratuita" /></section>
   </div>
   <footer class="sv-footer"><div class="sv-container">
-    <a class="sv-brand" href="/"><Marca /><span>Guia do<br />Proprietário</span></a>
-    <p>Informação prática para proprietários em Portugal.</p>
-    <p class="sv-footer-note">O Guia disponibiliza conteúdo informativo e encaminha para o parceiro. O pedido de simulação e o tratamento dos dados são realizados no site de destino.</p>
+    <a class="sv-brand" href="#conteudo"><Marca /><span>Guia do<br />Proprietário</span></a>
+    <p class="sv-footer-note">O pedido de simulação e o tratamento dos dados são realizados no site do parceiro. A poupança depende da proposta e da situação de cada cliente.</p>
     <nav aria-label="Informação legal"><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><a href="/parceiros/">Parceiros</a><a href="#cookie-settings" data-cookie-settings>Definições de cookies</a></nav>
-    <p class="sv-sources">Fontes: <a href="https://clientebancario.bportugal.pt/pt-pt/como-contratar-0">Banco de Portugal, contratação de crédito</a> e <a href="https://www.asf.com.pt/web/site-pc/w/seguro-de-vida-associado-ao-credito-a-habitacao">ASF, escolha do seguro e spread</a>.</p>
+    <p class="sv-sources">Fontes: <a href="https://clientebancario.bportugal.pt/pt-pt/como-contratar-0">Banco de Portugal</a> e <a href="https://www.asf.com.pt/web/site-pc/w/seguro-de-vida-associado-ao-credito-a-habitacao">ASF</a>.</p>
     <small>© {new Date().getFullYear()} Guia do Proprietário.</small>
   </div></footer>
 </Squeeze>

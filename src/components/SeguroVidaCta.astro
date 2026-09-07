@@ -1,14 +1,14 @@
 ---
 import { SEGURO_VIDA_DESTINOS } from "../data/seguro-vida";
 interface Props { titulo?: string; texto?: string; botao?: string; compacto?: boolean; canal?: keyof typeof SEGURO_VIDA_DESTINOS; }
-const { titulo = "Vale a pena comparar o seu seguro.", texto = "Peça uma simulação para conhecer uma alternativa e avaliar o que muda no preço e na proteção.", botao = "Quero comparar o meu seguro", compacto = false, canal = "editorial" } = Astro.props;
+const { titulo = "Descubra se pode pagar menos pelo seguro de vida.", texto = "Peça a sua simulação gratuita. Ponha o preço atual à prova e veja se encontra uma alternativa que compense.", botao = "Quero a minha simulação gratuita", compacto = false, canal = "editorial" } = Astro.props;
 ---
 <aside class:list={["seguro-cta", { compacto }]} aria-label="Pedido de simulação">
   <p class="seguro-cta-label">Simulação gratuita · Sem compromisso</p>
   <h2>{titulo}</h2>
   <p>{texto}</p>
   <a class="seguro-button" href={SEGURO_VIDA_DESTINOS[canal]} rel="sponsored noopener" data-seguro-link>{botao}<span aria-hidden="true"> ↗</span></a>
-  <p class="seguro-cta-note">Vai seguir para o site do parceiro. Ao preencher o pedido, solicita contacto telefónico para analisar a sua situação.</p>
+  <p class="seguro-cta-note">Pedido no site do parceiro, com contacto telefónico para analisar o seu caso. Pedir a simulação não obriga a contratar.</p>
 </aside>
 <script>
   import { prepararLinksSeguroVida } from "../lib/seguro-vida-links";
