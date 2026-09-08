@@ -33,3 +33,9 @@ O resultado do envio e o commit final são registados no dashboard operacional. 
 ## Histórico de apresentação
 
 Versão separada disponível em https://seguro-vida-propostas.pages.dev/, com 17 links de tracking desde o deployment 97d72f5b. Fonte local: guia-seguro-vida-apresentacao. Essa apresentação não substitui as rotas do portal. Os exportadores de pré-visualização desta pasta são históricos e não fazem parte do fluxo de publicação atual.
+
+## Revisão do cartão principal da landing
+
+Nova fotografia editorial de um apartamento português luminoso, em substituição da ilustração antiga. Ficheiros public/imagens/campanhas/seguro-vida-apartamento.avif e .webp, usados no hero e na imagem de partilha. Imagem gerada com a ferramenta integrada image_gen e exportada a 1200 × 1000 px. Texto: «O seu seguro pode custar menos. Descubra quanto pode poupar.» Apoio: «Peça uma simulação gratuita e veja se consegue baixar o que paga todos os meses. Sem compromisso.» A faixa «Publicidade · Conteúdo com ligações de afiliado para um parceiro de seguros.» foi retirada desta landing por pedido expresso. Quatro CTAs e tracking preservados.
+
+Validação: compilação isolada do ficheiro Astro, dimensões/formatos da nova imagem, contagem dos CTAs e validação de copy. Publicação pelo fluxo Git/Cloudflare normal, sem build integral local ou consulta do deployment após envio. Estado online por confirmar pelo utilizador.
