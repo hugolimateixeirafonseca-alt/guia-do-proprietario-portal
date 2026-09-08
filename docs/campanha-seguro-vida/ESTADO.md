@@ -5,13 +5,21 @@ Preparada em 7 de setembro de 2026. Fonte de verdade da implementação e das de
 ## Estado real
 
 - Três artigos escritos e duas variantes de pré-landing implementadas na branch local `agent/seguro-vida-campanha`.
-- Sem envio para o repositório remoto, sem publicação e sem confirmação online.
+- A apresentação das cinco propostas foi publicada separadamente em 8 de setembro de 2026, por autorização do utilizador. A publicação editorial no portal permanece pendente; os artigos continuam como rascunho.
 - Os artigos usam `rascunho: true`: não entram nas listagens, RSS, feed, sitemap ou páginas de produção. O servidor local permite rever apenas os rascunhos com o tema `campanha-seguro-vida`.
 - A landing tem `noindex,follow` e está excluída do sitemap. Não está ligada na navegação pública. O ficheiro existe apenas nesta branch até integração autorizada.
 - Os campos de data dos rascunhos são provisórios para a pré-visualização. Na preparação da publicação devem ser atualizados para a data efetiva e passar pela rotina normal de datas do portal.
 - Nenhuma lead foi recolhida, nenhum anúncio foi criado e nenhum link de afiliado foi aberto para testar atribuição.
 
 ## Páginas
+
+### Apresentação ao cliente, publicada em 8 de setembro de 2026
+
+URL: https://seguro-vida-propostas-cliente.hugofonseca.chatgpt.site
+
+Site separado, partilhável com quem tiver o endereço, sem autenticação. Índice e cinco páginas com noindex, sem ligação na navegação do portal. Sem formulários, scripts de medição ou campanhas ativas. Os links de afiliado fornecidos foram preservados. O conceito de PDF não foi criado nem incluído. Fonte do site de apresentação em `D:/CodexProjects/Products/guia-seguro-vida-apresentacao`, commit `c5eb084d9fd27bc83b9092dab105f19ce405e001`. O alojamento devolveu publicação concluída. Não foi feita confirmação visual ou funcional online. As fontes da campanha e o estado operacional são enviados nas branches da tarefa; não são integrados no main editorial.
+
+### Rotas editoriais previstas
 
 | ID | Conteúdo | Rota prevista |
 | --- | --- | --- |
