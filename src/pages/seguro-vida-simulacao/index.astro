@@ -2,7 +2,7 @@
 import CookieConsent from "../../components/CookieConsent.astro";
 import { SEGURO_VIDA_DESTINOS } from "../../data/seguro-vida";
 import "../../styles/seguro-vida-performance.css";
-const destino = SEGURO_VIDA_DESTINOS.landing;
+const destino = SEGURO_VIDA_DESTINOS.landing + "?source=seguro-vida-simulacao";
 const titulo = "Poupe até 60% no seguro de vida do crédito habitação.";
 const descricao = "O parceiro anuncia poupanças até 60% no seguro de vida do crédito habitação. Peça uma simulação gratuita e descubra quanto pode poupar no seu caso.";
 ---
@@ -23,7 +23,7 @@ const descricao = "O parceiro anuncia poupanças até 60% no seguro de vida do c
     <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
     <header class="topbar wrap">
       <div class="category"><strong>SEGURO DE VIDA</strong><span>CRÉDITO HABITAÇÃO</span></div>
-      <a class="header-cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">↗</span></a>
+      <a class="header-cta" href={destino} rel="sponsored noopener" data-seguro-link>Pedir simulação gratuita <span aria-hidden="true">↗</span></a>
     </header>
     <main id="conteudo">
       <section class="hero wrap" aria-labelledby="titulo">
@@ -32,7 +32,7 @@ const descricao = "O parceiro anuncia poupanças até 60% no seguro de vida do c
           <h1 id="titulo" class="savings-headline">Poupe até <span class="savings-number">60%<sup>*</sup></span><span class="savings-product">no seguro de vida do crédito habitação.</span></h1>
           <p class="intro">Simule gratuitamente e descubra quanto pode poupar. Compare alternativas ao seguro do banco, com apoio especializado e sem compromisso.</p>
           <ul class="hero-benefits"><li>Compare alternativas ao seguro do banco</li><li>Receba apoio para analisar preço e proteção</li><li>Decida depois de conhecer a proposta</li></ul>
-          <a class="cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">→</span></a>
+          <a class="cta" href={destino} rel="sponsored noopener" data-seguro-link>Pedir simulação gratuita <span aria-hidden="true">→</span></a>
           <p class="cta-reassurance">Grátis. Sem obrigação de contratar.</p>
           <p class="next-step">Continua no site do parceiro, onde deixa o contacto para receber uma simulação adaptada ao seu caso.</p>
           <p class="savings-note">*Poupança máxima anunciada pelo parceiro para o seguro de vida. O valor depende do seu perfil, das coberturas e das condições da proposta.</p>
@@ -67,11 +67,15 @@ const descricao = "O parceiro anuncia poupanças até 60% no seguro de vida do c
         </div>
       </section>
       <section class="closing">
-        <div class="wrap closing-inner"><div><p class="eyebrow">PAGAR MENOS COMEÇA POR COMPARAR</p><h2>Vai renovar sem<br />ver outra proposta?</h2><p>Peça a sua simulação e decida com um preço na mão.</p></div><div class="closing-action"><a class="cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">→</span></a><p>Gratuita e sem compromisso.<br />Pedido no site do parceiro.</p></div></div>
+        <div class="wrap closing-inner"><div><p class="eyebrow">PAGAR MENOS COMEÇA POR COMPARAR</p><h2>Vai renovar sem<br />ver outra proposta?</h2><p>Peça a sua simulação e decida com um preço na mão.</p></div><div class="closing-action"><a class="cta" href={destino} rel="sponsored noopener" data-seguro-link>Pedir simulação gratuita <span aria-hidden="true">→</span></a><p>Gratuita e sem compromisso.<br />Pedido no site do parceiro.</p></div></div>
       </section>
     </main>
     <footer class="footer wrap"><p>Conteúdo comercial com ligações de afiliado. Podemos receber uma comissão pelo encaminhamento. Página promovida pelo Guia do Proprietário; a simulação e a proposta são da responsabilidade do parceiro identificado no destino.</p><div><a href="/privacidade/">Privacidade</a><a href="/cookies/">Cookies</a><button type="button" data-cookie-settings>Gerir cookies</button></div></footer>
-    <div class="mobile-action"><a class="cta" href={destino} rel="sponsored noopener">Pedir simulação gratuita <span aria-hidden="true">→</span></a><span>Grátis e sem compromisso</span></div>
+    <div class="mobile-action"><a class="cta" href={destino} rel="sponsored noopener" data-seguro-link>Pedir simulação gratuita <span aria-hidden="true">→</span></a><span>Grátis e sem compromisso</span></div>
     <CookieConsent />
+    <script>
+      import { prepararLinksSeguroVida } from "../../lib/seguro-vida-links";
+      prepararLinksSeguroVida();
+    </script>
   </body>
 </html>

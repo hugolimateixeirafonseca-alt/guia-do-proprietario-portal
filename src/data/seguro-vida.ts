@@ -1,7 +1,7 @@
-// Ligações de afiliado fornecidas pelo utilizador, distintas por percurso.
+// O tracker mantém os destinos afiliados e acrescenta o nosso identificador em subid.
 export const SEGURO_VIDA_DESTINOS = {
-  landing: "https://adsplatform.com/?adsid=7efb1337347c0ae601f420f34ba38154",
-  editorial: "https://adsplatform.com/?adsid=4713195f3e647940b7614c616838155c",
+  landing: "https://track.guiadoproprietario.pt/go/seguro-vida-landing",
+  editorial: "https://track.guiadoproprietario.pt/go/seguro-vida-editorial",
 } as const;
 
 export const SEGURO_VIDA_ARTIGOS = [

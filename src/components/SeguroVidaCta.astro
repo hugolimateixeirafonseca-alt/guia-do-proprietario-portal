@@ -7,7 +7,7 @@ const { titulo = "Descubra se pode pagar menos pelo seguro de vida.", texto = "P
   <p class="seguro-cta-label">Simulação gratuita · Sem compromisso</p>
   <h2>{titulo}</h2>
   <p>{texto}</p>
-  <a class="seguro-button" href={SEGURO_VIDA_DESTINOS[canal]} rel="sponsored noopener" data-seguro-link>{botao}<span aria-hidden="true"> ↗</span></a>
+  <a class="seguro-button" href={`${SEGURO_VIDA_DESTINOS[canal]}?source=${encodeURIComponent(Astro.url.pathname.split('/').filter(Boolean).at(-1) || 'guia')}`} rel="sponsored noopener" data-seguro-link>{botao}<span aria-hidden="true"> ↗</span></a>
   <p class="seguro-cta-note">Pedido no site do parceiro, com contacto telefónico para analisar o seu caso. Pedir a simulação não obriga a contratar.</p>
 </aside>
 <script>

@@ -1,67 +1,35 @@
 # Campanha de seguro de vida do crédito habitação
 
-Preparada em 7 de setembro de 2026. Fonte de verdade da implementação e das decisões desta campanha.
+## Revisão para publicação no portal, 8 de setembro de 2026
 
-## Estado real
+O utilizador esclareceu que as landings devem estar no domínio principal e os três artigos na secção de artigos. Esta revisão integra a campanha no portal; a apresentação Cloudflare Pages é apenas uma cópia para revisão pelo cliente.
 
-- Três artigos escritos e duas variantes de pré-landing implementadas na branch local `agent/seguro-vida-campanha`.
-- A apresentação das cinco propostas foi publicada separadamente em 8 de setembro de 2026, por autorização do utilizador. A publicação editorial no portal permanece pendente; os artigos continuam como rascunho.
-- Os artigos usam `rascunho: true`: não entram nas listagens, RSS, feed, sitemap ou páginas de produção. O servidor local permite rever apenas os rascunhos com o tema `campanha-seguro-vida`.
-- A landing tem `noindex,follow` e está excluída do sitemap. Não está ligada na navegação pública. O ficheiro existe apenas nesta branch até integração autorizada.
-- Os campos de data dos rascunhos são provisórios para a pré-visualização. Na preparação da publicação devem ser atualizados para a data efetiva e passar pela rotina normal de datas do portal.
-- Nenhuma lead foi recolhida, nenhum anúncio foi criado e nenhum link de afiliado foi aberto para testar atribuição.
+- Artigos SC35, SC36 e SC37 com rascunho false, data de publicação de 8 de setembro e chegada obtida do primeiro commit real de cada ficheiro.
+- Os artigos entram automaticamente em /artigos/, /casa/ e no sitemap através das listagens normais. Não foi criada uma secção editorial paralela.
+- Duas landings públicas no domínio principal, com noindex e fora do sitemap, como previsto para as campanhas pagas.
+- 17 CTAs passam pelo tracker ativo. Landing e editorial continuam separados pelas ofertas seguro-vida-landing e seguro-vida-editorial.
+- O tracker acrescenta subid ao link do parceiro. O postback devolve transaction_id e significa lead validada. Token apenas no material privado do tracker, nunca no portal.
+- Origem, UTMs e IDs de campanha preservados. Identificadores Meta só seguem com consentimento de medição válido, relido no clique. Integração com o cookie já existente no Guia; nenhum consentimento fixo. CAPI do tracker continua desligada.
+- Nenhum anúncio, PDF ou email criado. Ensaio com a agência pendente. Não efetuar confirmação online após publicação sem pedido do utilizador.
 
-## Páginas
+## Rotas de produção
 
-### Apresentação ao cliente, publicada em 8 de setembro de 2026
+- /seguro-vida-credito-habitacao/
+- /seguro-vida-simulacao/
+- /casa/seguro-vida-credito-habitacao-poupar/
+- /casa/mudar-seguro-vida-credito-habitacao-banco/
+- /casa/comparar-seguro-vida-credito-habitacao/
 
-URL para partilhar: https://seguro-vida-propostas.pages.dev/
+## Copy e imagens
 
-Atualização de 8 de setembro de 2026: a pedido do utilizador, a apresentação foi publicada no Cloudflare Pages para retirar «chatgpt» do endereço. Projeto `seguro-vida-propostas`, publicação `8ceb03db`, fonte local da apresentação no commit `e86f641`. A publicação terminou com sucesso no comando de envio. Foram preservadas as cinco páginas, os 17 links de afiliado e as regras de não indexação. Sem verificação online posterior. O endereço anterior do Sites mantém-se existente, mas deixou de ser o link indicado para o cliente.
+Preservada a copy comercial aprovada, sem marca ou logótipo do cliente. Máximo de 60% apenas no seguro de vida, atribuído ao parceiro e condicionado ao perfil/coberturas. Fontes oficiais e exemplos hipotéticos preservados. Imagens previamente existentes e aprovadas; nenhuma geração de imagens nesta revisão.
 
-Site separado, partilhável com quem tiver o endereço, sem autenticação. Índice e cinco páginas com noindex, sem ligação na navegação do portal. Sem formulários, scripts de medição ou campanhas ativas. Os links de afiliado fornecidos foram preservados. O conceito de PDF não foi criado nem incluído. Fonte do site de apresentação em `D:/CodexProjects/Products/guia-seguro-vida-apresentacao`, commit `c5eb084d9fd27bc83b9092dab105f19ce405e001`. O alojamento devolveu publicação concluída. Não foi feita confirmação visual ou funcional online. As fontes da campanha e o estado operacional são enviados nas branches da tarefa; não são integrados no main editorial.
+## Publicação e validação
 
-### Rotas editoriais previstas
+Uma compilação Astro de publicação, reutilizando capas existentes. O passo inicial de reconversão foi interrompido ao detetar que recalculava capas já aprovadas; esses resultados foram repostos. Apenas variantes JPEG/OG necessárias ao funcionamento normal do portal são preparadas localmente. Sem nova instalação, automação de IA ou build redundante no GitHub/Cloudflare.
 
-| ID | Conteúdo | Rota prevista |
-| --- | --- | --- |
-| SC35 | Seguro de vida do crédito habitação: está a pagar mais do que precisa? | /casa/seguro-vida-credito-habitacao-poupar/ |
-| SC36 | Seguro de vida no banco? Descubra se pode pagar menos fora. | /casa/mudar-seguro-vida-credito-habitacao-banco/ |
-| SC37 | Paga o seguro de vida todos os meses. Está a comprar a proteção certa? | /casa/comparar-seguro-vida-credito-habitacao/ |
-| Landing | Está a pagar demasiado pelo seguro de vida? | /seguro-vida-credito-habitacao/ |
-| Variante visual próprio | Poupe até 60% no seguro de vida do crédito habitação. | /seguro-vida-simulacao/ |
+O resultado do envio e o commit final são registados no dashboard operacional. A existência das rotas no build local e a conclusão do comando de publicação não equivalem a confirmação visual/funcional online.
 
-## Destinos fornecidos pelo utilizador
+## Histórico de apresentação
 
-- Pré-landing: https://adsplatform.com/?adsid=7efb1337347c0ae601f420f34ba38154
-- Editorial: https://adsplatform.com/?adsid=4713195f3e647940b7614c616838155c
-
-Os endereços são usados exatamente como fornecidos. Não são acrescentadas UTMs nem substituído o adsid. A propagação ou atribuição depois do redirecionamento depende da plataforma e não foi confirmada. As UTMs admissíveis são preservadas apenas nas ligações internas da campanha, sem copiar parâmetros arbitrários, dados de contacto ou click IDs.
-
-## Decisões editoriais
-
-- Português de Portugal, sem nome ou logótipo do cliente. Primeira landing com identidade do Guia; segunda com visual próprio, mantendo a identificação do promotor no rodapé.
-- Disclosure comercial e ligações marcadas como `sponsored`.
-- Os três artigos e a primeira landing não reproduzem percentagens de poupança. Na segunda variante, a pedido do utilizador, o máximo de 60% anunciado pelo parceiro é o destaque principal, com atribuição e condições junto da oferta. Sem reprodução de 20.000 € ou de testemunhos.
-- Exemplos claramente hipotéticos. A comparação inclui proteção e efeito no crédito.
-- Pedido de simulação apresentado como pedido que permite contacto telefónico, sem promessa de cotação imediata.
-- Fontes oficiais específicas do Banco de Portugal e da ASF identificadas nos artigos e na landing.
-- Reutilização da ilustração existente sobre casa e crédito, sem apresentar uma pessoa ilustrada como cliente real.
-
-## Pré-visualização e validação
-
-As quatro rotas foram compiladas individualmente pelo servidor local, sem build integral. O exportador `scripts/preview-seguro-vida.mjs` verifica os 13 CTAs, as regras editoriais, os rascunhos, a compilação dos componentes alterados, a ausência de formulários, os metadados e as regras de preservação de UTMs. Cria quatro HTML autónomos com CSS e imagens incorporados, sem scripts ou recolha de dados, em `D:/CodexProjects/Products/relatorios/campanha-seguro-vida/`.
-
-Não foi feita verificação visual em browser nem confirmação online. A revisão visual e funcional cabe ao utilizador. A versão HTML de revisão tem navegação própria entre as quatro páginas; essa barra não faz parte das páginas de produção.
-
-## Publicação futura
-
-Após a revisão, integrar a campanha e o estado operacional no mesmo ciclo. Preparar as datas reais, retirar `rascunho: true` dos três artigos e validar apenas as verificações afetadas. Manter o `noindex` da landing de performance. A medição de leads depende de um evento confirmado no destino, nunca do clique de saída no Guia.
-
-## Segunda variante de pré-landing
-
-Adicionada a pedido do utilizador em 7 de setembro de 2026, com visual próprio, fotografia gerada e quatro posições de CTA. Documentação, fontes, adaptação da oferta e hipótese de teste em `VARIANTE-PERFORMANCE.md`. A validação isolada e exportação desta quinta página usa `scripts/preview-seguro-vida-performance.mjs`; as quatro páginas anteriores permanecem inalteradas. As duas pré-landings têm `noindex` e exclusão do sitemap. Estado apenas local, sem medição de conversões.
-
-## Revisão comercial orientada à conversão
-
-Reescrita a pedido do utilizador: títulos e aberturas centrados no custo de continuar sem comparar, no preço da alternativa e no pedido gratuito. A landing tem quatro CTAs, elimina as saídas para artigos e termina num pedido de simulação. Cada artigo tem três CTAs, incluindo um antes do corpo editorial. Os exemplos e o aviso geral passam para depois do corpo, mantendo claras as condições materiais no texto. As recomendações de outros artigos e a newsletter são omitidas apenas nesta campanha. As perguntas frequentes resolvem as objeções ao pedido. Os dois links de afiliado permanecem exatos. Não há percentagens, testemunhos ou urgência inventados. Sem testes de performance reais ou publicação.
+Versão separada disponível em https://seguro-vida-propostas.pages.dev/, com 17 links de tracking desde o deployment 97d72f5b. Fonte local: guia-seguro-vida-apresentacao. Essa apresentação não substitui as rotas do portal. Os exportadores de pré-visualização desta pasta são históricos e não fazem parte do fluxo de publicação atual.
