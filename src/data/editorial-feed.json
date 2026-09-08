@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-07T10:13:45.028Z",
+  "generatedAt": "2026-09-08T07:33:45.045Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 84,
     "written": 108,
-    "published": 94,
+    "published": 95,
     "newsOnline": 21
   },
   "articles": [
@@ -1168,14 +1168,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "porta-seguranca-vale-investimento.mdx",
       "arrivedAt": "2026-08-12T16:46:17+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-08T07:01:34Z",
+      "url": "https://guiadoproprietario.pt/casa/porta-seguranca-vale-investimento/"
     },
     {
       "id": "SC24",
