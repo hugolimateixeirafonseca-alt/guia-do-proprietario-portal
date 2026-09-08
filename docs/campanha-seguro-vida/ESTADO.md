@@ -39,3 +39,9 @@ Versão separada disponível em https://seguro-vida-propostas.pages.dev/, com 17
 Nova fotografia editorial de um apartamento português luminoso, em substituição da ilustração antiga. Ficheiros public/imagens/campanhas/seguro-vida-apartamento.avif e .webp, usados no hero e na imagem de partilha. Imagem gerada com a ferramenta integrada image_gen e exportada a 1200 × 1000 px. Texto: «O seu seguro pode custar menos. Descubra quanto pode poupar.» Apoio: «Peça uma simulação gratuita e veja se consegue baixar o que paga todos os meses. Sem compromisso.» A faixa «Publicidade · Conteúdo com ligações de afiliado para um parceiro de seguros.» foi retirada desta landing por pedido expresso. Quatro CTAs e tracking preservados.
 
 Validação: compilação isolada do ficheiro Astro, dimensões/formatos da nova imagem, contagem dos CTAs e validação de copy. Publicação pelo fluxo Git/Cloudflare normal, sem build integral local ou consulta do deployment após envio. Estado online por confirmar pelo utilizador.
+
+## Correção do estilo visual
+
+A fotografia da revisão anterior foi rejeitada pelo utilizador por não seguir o estilo ilustrado do site. Substituída no hero e na partilha por seguro-vida-casa-ilustrada.avif/.webp: casa portuguesa em tons creme, verde, terracota e dourado, com textura mate, azulejos, proposta de seguro, chave e moedas. Referência visual direta: vender-casa-com-credito-por-pagar.webp. Os dois ficheiros fotográficos rejeitados foram retirados de public. Copy comercial e remoção da faixa preservadas. Imagem gerada com image_gen, exportada e validada a 1200 × 1000. Compilação isolada Astro passou. Correção enviada pelo fluxo normal de publicação, sem confirmação online.
+
+Regra visual explícita: as imagens desta landing e dos artigos do Guia devem seguir o estilo de ilustração do site. Não reutilizar a estética fotográfica dos criativos Meta como referência para estas páginas, salvo novo pedido expresso.
