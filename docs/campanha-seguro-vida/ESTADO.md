@@ -15,7 +15,9 @@ Preparada em 7 de setembro de 2026. Fonte de verdade da implementação e das de
 
 ### Apresentação ao cliente, publicada em 8 de setembro de 2026
 
-URL: https://seguro-vida-propostas-cliente.hugofonseca.chatgpt.site
+URL para partilhar: https://seguro-vida-propostas.pages.dev/
+
+Atualização de 8 de setembro de 2026: a pedido do utilizador, a apresentação foi publicada no Cloudflare Pages para retirar «chatgpt» do endereço. Projeto `seguro-vida-propostas`, publicação `8ceb03db`, fonte local da apresentação no commit `e86f641`. A publicação terminou com sucesso no comando de envio. Foram preservadas as cinco páginas, os 17 links de afiliado e as regras de não indexação. Sem verificação online posterior. O endereço anterior do Sites mantém-se existente, mas deixou de ser o link indicado para o cliente.
 
 Site separado, partilhável com quem tiver o endereço, sem autenticação. Índice e cinco páginas com noindex, sem ligação na navegação do portal. Sem formulários, scripts de medição ou campanhas ativas. Os links de afiliado fornecidos foram preservados. O conceito de PDF não foi criado nem incluído. Fonte do site de apresentação em `D:/CodexProjects/Products/guia-seguro-vida-apresentacao`, commit `c5eb084d9fd27bc83b9092dab105f19ce405e001`. O alojamento devolveu publicação concluída. Não foi feita confirmação visual ou funcional online. As fontes da campanha e o estado operacional são enviados nas branches da tarefa; não são integrados no main editorial.
 
