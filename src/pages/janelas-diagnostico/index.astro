@@ -1,0 +1,56 @@
+---
+import Squeeze from "../../layouts/Squeeze.astro";
+import "../../styles/janelas-diagnostico.css";
+const perguntas = [
+  { titulo: "O que mais o incomoda nas suas janelas atuais?", opcoes: [["temperatura", "Frio no inverno / calor no verão", "❄"], ["ruido", "Ruído da rua", "🔊"], ["condensacao", "Condensação ou humidade", "💧"], ["vedacao", "São antigas ou vedam mal", "🪟"], ["renovar", "Quero simplesmente renovar", "🏠"]] },
+  { titulo: "Quantas janelas está a pensar substituir?", opcoes: [["1-2", "1–2", ""], ["3-5", "3–5", ""], ["6-10", "6–10", ""], ["mais-10", "Mais de 10", ""], ["nao-sei", "Ainda não sei", ""]] },
+  { titulo: "Onde fica o imóvel?", opcoes: ["Amadora", "Cascais", "Lisboa", "Loures", "Odivelas", "Oeiras", "Sintra"].map(zona => [zona, zona, ""]).concat([["outra", "Outra zona", ""]]) },
+];
+---
+<Squeeze titulo="Diagnóstico de Janelas | Guia do Proprietário" descricao="Está a pensar trocar as janelas? Responda a 3 perguntas e conheça a campanha NUVI para a sua zona. Sem nome, telefone ou email." imagemOg="/imagens/artigos/escolher-janelas.webp" robots="noindex,follow">
+  <div class="janelas" data-janelas>
+    <header class="j-header"><a href="/" aria-label="Guia do Proprietário, início">Guia do <strong>Proprietário</strong><span>DECISÕES MELHORES PARA A SUA CASA</span></a><span class="j-category">Remodelações · Janelas</span></header>
+    <div class="j-content">
+      <div class="j-flow">
+        <section data-step="0" aria-labelledby="j-title">
+          <p class="j-eyebrow">ESTÁ A PENSAR TROCAR AS JANELAS?</p>
+          <h1 id="j-title" tabindex="-1">Mais conforto em casa <em>começa nas janelas.</em></h1>
+          <p class="j-intro">Frio, ruído ou janelas que já não vedam bem? Responda a <strong>3 perguntas rápidas</strong> e veja se a campanha se aplica ao seu caso.</p>
+          <button class="j-primary" type="button" data-start hidden>Ver campanha para a minha casa <span aria-hidden="true">→</span></button>
+          <p class="j-small">Cerca de 30 segundos. Sem nome, telefone ou email.</p>
+          <ul class="j-trust"><li>Orçamento gratuito</li><li>Sem compromisso</li><li>Visita técnica</li></ul>
+          <p class="j-condition">Campanha para substituição de 3 ou mais janelas, nas zonas abrangidas da Grande Lisboa.</p>
+          <noscript><p class="j-note">Ative o JavaScript para responder às 3 perguntas e verificar as condições da campanha.</p></noscript>
+        </section>
+        {perguntas.map((pergunta, index) => <section data-step={index + 1} hidden aria-labelledby={`j-q-${index}`}>
+          <div class="j-progress"><p class="j-eyebrow">PERGUNTA {index + 1} DE 3</p><div aria-hidden="true">{perguntas.map((_, i) => <i class:list={{filled: i <= index}} />)}</div></div>
+          <h2 id={`j-q-${index}`} tabindex="-1">{pergunta.titulo}</h2>
+          <p class="j-help">{index === 0 ? "Escolha o que é mais importante para si." : index === 1 ? "Uma estimativa é suficiente." : "Escolha o concelho onde fica a casa."}</p>
+          <div class:list={["j-options", {"j-options-grid": index > 0}]}>{pergunta.opcoes.map(([value, label, icon]) => <button type="button" data-answer={value} aria-pressed="false"><span>{icon && <span class="j-icon" aria-hidden="true">{icon}</span>}{label}</span><span class="j-option-arrow" aria-hidden="true">→</span></button>)}</div>
+          <button type="button" class="j-back" data-back>← Voltar</button>
+        </section>)}
+        <section data-step="4" hidden aria-labelledby="j-loading-title" aria-live="polite" aria-busy="true">
+          <span class="j-spinner" aria-hidden="true"></span><h2 id="j-loading-title" tabindex="-1">A preparar o seu resultado...</h2><p class="j-help">A cruzar as suas respostas com as condições da campanha.</p>
+        </section>
+        <section data-step="5" hidden aria-labelledby="j-result-title">
+          <p class="j-eyebrow">O SEU PRÓXIMO PASSO</p><h2 id="j-result-title" tabindex="-1">Boa notícia. Pode pedir uma avaliação para a sua casa.</h2>
+          <p class="j-help" data-personalized></p>
+          <div class="j-result-offer"><p>CAMPANHA NUVI · JANELAS EM PVC</p><strong>Até <b>25%</b> de desconto</strong><span>Orçamento gratuito e sem compromisso.</span></div>
+          <ul class="j-result-checks"><li data-zone></li><li>Acompanhamento da visita técnica à instalação</li><li data-quantity></li></ul>
+          <a class="j-primary" href="https://track.guiadoproprietario.pt/go/janelas-diagnostico?source=janelas-diagnostico" rel="sponsored noopener" data-outbound>Ver campanha e pedir orçamento <span aria-hidden="true">→</span></a>
+          <p class="j-small">Será encaminhado para o formulário da NUVI para concluir o pedido.</p><p class="j-condition">Desconto sujeito às condições da NUVI e ao orçamento após visita técnica.</p>
+          <button type="button" class="j-back" data-edit>← Rever as minhas respostas</button>
+        </section>
+        <section data-step="6" hidden aria-labelledby="j-unavailable-title">
+          <p class="j-eyebrow">CONDIÇÕES DA CAMPANHA</p><h2 id="j-unavailable-title" tabindex="-1">Esta campanha não abrange o seu pedido.</h2><p class="j-intro" data-unavailable></p><p class="j-help">Se selecionou uma opção por engano, pode voltar e corrigir a resposta.</p><button type="button" class="j-primary" data-edit>Rever as minhas respostas <span aria-hidden="true">←</span></button>
+        </section>
+      </div>
+      <aside class="j-visual" aria-label="Campanha de janelas NUVI"><img src="/imagens/artigos/escolher-janelas.webp" width="1200" height="675" alt="Ilustração de uma janela antiga e uma janela renovada numa casa portuguesa" fetchpriority="high" /><div class="j-visual-caption"><span>JANELAS EM PVC · NUVI</span><p>Uma casa mais confortável.<br />Uma mudança que se sente.</p></div><div class="j-offer-badge"><span>ATÉ</span><strong>25<small>%</small></strong><span>DE DESCONTO</span></div></aside>
+    </div>
+    <footer class="j-footer"><p>Uma seleção do Guia do Proprietário. Serviço prestado pela NUVI.<br />Podemos receber uma comissão por pedidos válidos através desta campanha.</p><div><a href="/privacidade/">Privacidade</a><a href="#cookie-settings" data-cookie-settings>Definições de cookies</a></div></footer>
+  </div>
+</Squeeze>
+<script>
+  import { iniciarDiagnostico } from "../../lib/janelas-diagnostico.mjs";
+  iniciarDiagnostico(document.querySelector('[data-janelas]'));
+</script>

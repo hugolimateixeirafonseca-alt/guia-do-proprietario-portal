@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { avaliarRespostas, zonas, quantidades, sugestoes } from '../src/lib/janelas-diagnostico.mjs';
+import { trackerLink } from '../src/lib/tracker-link.mjs';
+test('apenas concelhos autorizados, sem Margem Sul',()=>{assert.deepEqual(zonas,['Amadora','Cascais','Lisboa','Loures','Odivelas','Oeiras','Sintra']);for(const p of Object.keys(sugestoes))for(const q of quantidades)for(const z of [...zonas,'outra'])assert.equal(avaliarRespostas([p,q,z]),q==='1-2'?'quantidade':z==='outra'?'zona':'abrangido')});
+test('não apresenta elegibilidade com respostas incompletas ou inválidas',()=>{for(const a of [[],['ruido'],['ruido','3-5'],['ruido','0','Lisboa'],['ruido','3-5','Setúbal'],['invalido','3-5','Lisboa']])assert.equal(avaliarRespostas(a),'incompleto')});
+test('CTA usa oferta de janelas e preserva campanha sem contactos ou identificadores Meta sem consentimento',()=>{const url=new URL(trackerLink({offer:'janelas-diagnostico',trackerOrigin:'https://track.guiadoproprietario.pt',pageUrl:'https://guiadoproprietario.pt/janelas-diagnostico/?utm_campaign=123456789012345&utm_content=987654321012345&email=teste&fbclid=fb123',cookieString:''}));assert.equal(url.pathname,'/go/janelas-diagnostico');assert.equal(url.searchParams.get('utm_campaign'),'123456789012345');assert.equal(url.searchParams.get('utm_content'),'987654321012345');assert.equal(url.searchParams.has('email'),false);assert.equal(url.searchParams.has('fbclid'),false);assert.equal(url.searchParams.has('measurement_consent'),false)});
