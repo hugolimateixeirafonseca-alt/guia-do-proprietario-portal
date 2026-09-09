@@ -12,7 +12,7 @@ import { compararNotasRecentes } from "../lib/notas";
 const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
 const artigos = todosArtigos
   .filter((artigo) => artigo.data.destaque && artigo.data.nivel === "essencial")
-  .sort((a, b) => b.data.revisto.valueOf() - a.data.revisto.valueOf());
+  .sort(compararPorPublicacao);
 const artigosRecentes = [...todosArtigos]
   .sort(compararPorPublicacao)
   .slice(0, 8);

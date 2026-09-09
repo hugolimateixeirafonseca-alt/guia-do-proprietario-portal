@@ -1,23 +1,15 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
-# O workflow publica os primeiros ficheiros disponíveis desta lista.
-ar-condicionado-quanto-custa.mdx
-escolher-ar-condicionado.mdx
-cano-entupido-desentupir.mdx
-quanto-cobra-canalizador.mdx
-ar-condicionado-ou-bomba-de-calor.mdx
-custo-reparar-infiltracao.mdx
-esquentador-reparar-ou-trocar.mdx
-escolher-aquecimento-agua.mdx
-limpeza-profunda-casa.mdx
-empresa-limpeza-mensal.mdx
-vidro-duplo-compensa.mdx
-escolher-janelas.mdx
-trocar-chao-pavimento-custo.mdx
-escolher-pavimento.mdx
-vale-a-pena-isolar-casa.mdx
-portas-janelas-novas-custo.mdx
-limpar-estofos-sofa.mdx
-limpar-telhado-caleiras.mdx
-empresa-mudancas-quanto-custa.mdx
-dedetizacao-controlo-pragas.mdx
-quanto-cobra-eletricista.mdx
+# Um artigo por execução. Adicionar novos pendentes a esta fila.
+# Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
+tinta-certa-cada-parede.mdx
+reforma-arrendamento-o-que-muda.mdx
+adaptar-casa-pais-idosos.mdx
+alargar-porta-casa-banho.mdx
+barras-apoio-casa-banho.mdx
+resolver-escadas-em-casa.mdx
+iluminacao-pisos-reduzir-quedas.mdx
+rampa-acesso-casa.mdx
+regresso-casa-depois-hospital.mdx
+sapa-adaptacoes-casa.mdx
+trocar-banheira-base-duche.mdx
+casa-preparada-viver-sozinho.mdx

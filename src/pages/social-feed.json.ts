@@ -1,3 +1,4 @@
+import { datasEditoriais } from "../lib/datas-editoriais.mjs";
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { compararPorPublicacao } from "../lib/artigos";
@@ -25,7 +26,7 @@ export const GET: APIRoute = async ({ site }) => {
       pilar: artigo.data.pilar,
       temas: artigo.data.temas || [],
       publicado: artigo.data.publicado_em.toISOString(),
-      revisto: artigo.data.revisto.toISOString(),
+      revisto: datasEditoriais(artigo.data).atualizacao.toISOString(),
       aviso: artigo.data.aviso,
       imagem: imagemSocial,
       imagem_social: imagemSocial,

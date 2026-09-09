@@ -1,9 +1,11 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { formatarData, pilares } from "../config";
+import { datasEditoriais } from "../lib/datas-editoriais.mjs";
 import { obterImagensArtigo } from "../lib/imagens-artigos";
 interface Props { artigo: CollectionEntry<"artigos">; }
 const { artigo } = Astro.props;
+const datas = datasEditoriais(artigo.data);
 const pilar = pilares.find((item) => item.slug === artigo.data.pilar);
 const imagem = obterImagensArtigo(artigo);
 ---
@@ -13,6 +15,6 @@ const imagem = obterImagensArtigo(artigo);
     <span class="card-pillar">{pilar?.nome}{artigo.data.nivel === "detalhado" && " · Versão completa"}</span>
     <h3>{artigo.data.titulo}</h3>
     <p>{artigo.data.descricao}</p>
-    <small>Atualizado a {formatarData(artigo.data.revisto)}</small>
+    <small>Publicado a {formatarData(datas.publicacao)}{datas.revisaoPosterior && <> · Atualizado a {formatarData(datas.atualizacao)}</>}</small>
   </a>
 </article>

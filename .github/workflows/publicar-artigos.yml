@@ -35,6 +35,9 @@ jobs:
         with:
           node-version-file: .node-version
 
+      - name: Testar seleção e datas de publicação
+        run: node --test tests/publicacao-pipeline.test.mjs tests/datas-artigos.test.mjs
+
       - name: Instalar dependências
         run: npm ci
 
@@ -49,61 +52,11 @@ jobs:
           SOURCE="src/content/por-publicar"
           DESTINATION="src/content/artigos"
           QUEUE="src/content/fila-publicacao-artigos.txt"
-          MAX_ARTICLES=1
-          SELECTION_SOURCE=""
-
-          if [[ ! -d "$SOURCE" ]]; then
-            echo "::error::A pasta $SOURCE não existe."
-            exit 1
-          fi
-
-          mkdir -p "$DESTINATION"
+          SELECTION_SOURCE="queue"
+          SELECTED_NAME="$(node scripts/selecionar-artigo-publicacao.mjs)"
           FILES=()
-
-          if [[ -f "$QUEUE" ]]; then
-            while IFS= read -r NAME || [[ -n "$NAME" ]]; do
-              NAME="${NAME%$'\r'}"
-              [[ -z "$NAME" ]] && continue
-              [[ "$NAME" == \#* ]] && continue
-
-              if [[ "$NAME" == */* ]] || [[ "$NAME" != *.mdx ]]; then
-                echo "::error::Entrada inválida na fila: $NAME"
-                exit 1
-              fi
-
-              if [[ -f "$SOURCE/$NAME" ]]; then
-                FILES+=("$SOURCE/$NAME")
-                SELECTION_SOURCE="queue"
-              fi
-
-              if [[ "${#FILES[@]}" -ge "$MAX_ARTICLES" ]]; then
-                break
-              fi
-            done < "$QUEUE"
-          else
-            echo "::warning::O ficheiro de prioridade $QUEUE não existe; será usado o fallback automático."
-          fi
-
-          if [[ "${#FILES[@]}" -eq 0 ]]; then
-            OLDEST_NAME=""
-            OLDEST_TS=""
-
-            while IFS= read -r NAME; do
-              [[ -z "$NAME" ]] && continue
-              TS="$(git log --follow --format=%ct --reverse -- "$SOURCE/$NAME" | sed -n '1p')"
-              [[ -n "$TS" ]] || TS="9999999999"
-
-              if [[ -z "$OLDEST_NAME" ]] || (( TS < OLDEST_TS )) || { (( TS == OLDEST_TS )) && [[ "$NAME" < "$OLDEST_NAME" ]]; }; then
-                OLDEST_NAME="$NAME"
-                OLDEST_TS="$TS"
-              fi
-            done < <(find "$SOURCE" -maxdepth 1 -type f -name '*.mdx' -printf '%f\n' | sort)
-
-            if [[ -n "$OLDEST_NAME" ]]; then
-              FILES+=("$SOURCE/$OLDEST_NAME")
-              SELECTION_SOURCE="fallback"
-              echo "::warning::FILA_DESATUALIZADA: nenhum item da fila está disponível; selecionado automaticamente $OLDEST_NAME."
-            fi
+          if [[ -n "$SELECTED_NAME" ]]; then
+            FILES+=("$SOURCE/$SELECTED_NAME")
           fi
 
           COUNT="${#FILES[@]}"
