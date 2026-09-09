@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-09T16:28:09.051Z",
+  "generatedAt": "2026-09-09T16:43:39.355Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 87,
-    "written": 111,
+    "written": 112,
     "published": 99,
     "newsOnline": 21
   },
@@ -1400,6 +1400,22 @@
       "arrivedAt": "2026-09-07T17:10:36+01:00",
       "publishedAt": "2026-09-08T13:10:21Z",
       "url": "https://guiadoproprietario.pt/casa/comparar-seguro-vida-credito-habitacao/"
+    },
+    {
+      "id": "SC38",
+      "title": "Renovar as janelas de casa: quando avançar e o que pedir no orçamento",
+      "pillar": "casa",
+      "priority": null,
+      "channel": null,
+      "level": "essencial",
+      "status": "written",
+      "planned": false,
+      "written": true,
+      "published": false,
+      "file": "renovar-janelas-casa.mdx",
+      "arrivedAt": "2026-09-09T16:39:29.978Z",
+      "publishedAt": null,
+      "url": null
     },
     {
       "id": "EXTRA-010",
