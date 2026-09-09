@@ -1,9 +1,9 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-09T16:43:39.355Z",
+  "generatedAt": "2026-09-09T16:47:08.181Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
-    "planned": 87,
+    "planned": 88,
     "written": 112,
     "published": 99,
     "newsOnline": 21
@@ -1404,12 +1404,12 @@
     {
       "id": "SC38",
       "title": "Renovar as janelas de casa: quando avançar e o que pedir no orçamento",
-      "pillar": "casa",
+      "pillar": "Casa e obras",
       "priority": null,
       "channel": null,
       "level": "essencial",
       "status": "written",
-      "planned": false,
+      "planned": true,
       "written": true,
       "published": false,
       "file": "renovar-janelas-casa.mdx",
