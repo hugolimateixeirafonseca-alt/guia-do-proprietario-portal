@@ -35,3 +35,8 @@ Retiradas as menções públicas à NUVI, a frase sobre nome/telefone/email e a 
 ## Autorização e confirmação de tracking
 
 Publicação autorizada pelo utilizador. Oferta ativa relida pela administração autenticada: mesmo partner agencia-seguro-vida da Certezza, subid_parameter sub_id, default_status approved e meta_enabled ativo. Mesmo postback global, retorno transaction_id=<idSub> e token privado existente, sem rotação ou nova configuração de endpoint. Apenas slug, link adsid e página do formulário diferem por campanha. Nenhum postback artificial enviado. Nova rota excluída do sitemap, com noindex, como as outras pré-landings pagas.
+
+## Correção da publicação
+
+O controlo editorial rejeitou os intervalos com travessão médio na pergunta de quantidade. Substituídos por 1 a 2, 3 a 5 e 6 a 10. Validação editorial do repositório e três testes de percurso passaram. Tracking e postback sem alterações.
+

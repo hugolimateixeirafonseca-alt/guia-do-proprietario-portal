@@ -35,7 +35,7 @@ export function iniciarDiagnostico(raiz) {
   if(resultado==='incompleto'){mostrar(1);return}
   raiz.querySelector('[data-personalized]').textContent=sugestoes[respostas[0]];
   raiz.querySelector('[data-zone]').textContent='Localização: '+(respostas[2]==='outra'?'outra zona':respostas[2]);
-  raiz.querySelector('[data-quantity]').textContent='Janelas a substituir: '+({'1-2':'1–2','3-5':'3–5','6-10':'6–10','mais-10':'mais de 10','nao-sei':'a definir'}[respostas[1]]);
+  raiz.querySelector('[data-quantity]').textContent='Janelas a substituir: '+({'1-2':'1 a 2','3-5':'3 a 5','6-10':'6 a 10','mais-10':'mais de 10','nao-sei':'a definir'}[respostas[1]]);
   atualizarLink();mostrar(5);
  };
  raiz.querySelector('[data-start]').hidden=false;
