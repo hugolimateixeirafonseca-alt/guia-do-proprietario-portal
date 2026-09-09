@@ -45,3 +45,11 @@ Validação: compilação isolada do ficheiro Astro, dimensões/formatos da nova
 A fotografia da revisão anterior foi rejeitada pelo utilizador por não seguir o estilo ilustrado do site. Substituída no hero e na partilha por seguro-vida-casa-ilustrada.avif/.webp: casa portuguesa em tons creme, verde, terracota e dourado, com textura mate, azulejos, proposta de seguro, chave e moedas. Referência visual direta: vender-casa-com-credito-por-pagar.webp. Os dois ficheiros fotográficos rejeitados foram retirados de public. Copy comercial e remoção da faixa preservadas. Imagem gerada com image_gen, exportada e validada a 1200 × 1000. Compilação isolada Astro passou. Correção enviada pelo fluxo normal de publicação, sem confirmação online.
 
 Regra visual explícita: as imagens desta landing e dos artigos do Guia devem seguir o estilo de ilustração do site. Não reutilizar a estética fotográfica dos criativos Meta como referência para estas páginas, salvo novo pedido expresso.
+
+## Pré-landing de mini-diagnóstico
+
+Nova variante /seguro-vida-diagnostico/: introdução, três perguntas simples com uma pergunta por ecrã e resultado «Vale a pena comparar.». Sem recolha de dados pessoais ou armazenamento/envio das respostas. Navegação por botões com regresso ao ecrã anterior, foco acessível e alternativa sem JavaScript. Não há pontuação nem redirecionamento automático. CTA «Ver quanto posso poupar» usa a oferta seguro-vida-landing, com source=seguro-vida-diagnostico e o helper existente de atribuição/consentimento. Visual creme e verde, sem imagens. Noindex e exclusão do sitemap.
+
+Validação direcionada: compilação isolada Astro/TypeScript e teste existente de tracking. Publicação autorizada pelo utilizador em 9 de setembro de 2026 e enviada pelo fluxo Git/Cloudflare. Sem build integral ou confirmação online. Variante do mesmo produto, sem nova oferta ou alteração do Worker.
+
+Verificação Meta nas três landings: componente CookieConsent presente diretamente ou através de Squeeze. Pixel 1394294186173855 inicializado com PageView após consentimento de medição. Teste de execução isolada confirmou aceitação nova, preferência guardada e prevenção de carregamento duplicado. Teste de atribuição passou. Receção efetiva de eventos na Meta não foi verificada nesta tarefa.
