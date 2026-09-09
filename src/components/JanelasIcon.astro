@@ -1,0 +1,14 @@
+---
+interface Props { name: string }
+const { name } = Astro.props;
+const paths: Record<string,string> = {
+ thermal: 'M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0ZM12 9v8m5-10h2m-2 4h2',
+ quiet: 'm3 3 18 18M9 9H4v6h4l5 4V5L9 9m8-1a6 6 0 0 1 2 5m-3-3a3 3 0 0 1 0 3',
+ leaf: 'M20 3C10 3 4 6 4 12a6 6 0 0 0 6 6c6 0 9-6 10-15ZM3 21 15 9',
+ document: 'M14 3H5v18h14V8l-5-5Zm0 0v6h5M8 13h8m-8 4h6',
+ lock: 'M7 10V7a5 5 0 0 1 10 0v3M6 10h12v11H6V10Zm6 4v3',
+ arrow: 'M4 12h16m-6-6 6 6-6 6',
+ check: 'm5 12 4 4L19 6'
+};
+---
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={paths[name]} /></svg>

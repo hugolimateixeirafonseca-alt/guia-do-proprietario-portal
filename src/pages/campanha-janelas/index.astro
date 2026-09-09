@@ -1,0 +1,48 @@
+---
+import Squeeze from '../../layouts/Squeeze.astro';
+import Icon from '../../components/JanelasIcon.astro';
+import '../../styles/campanha-janelas.css';
+const destino = 'https://track.guiadoproprietario.pt/go/janelas-diagnostico?source=campanha-janelas';
+const beneficios = [
+ {icon:'thermal',titulo:'Mais conforto térmico',texto:'Casa mais fresca no verão e mais quente no inverno.',curto:'Mais bem-estar em casa'},
+ {icon:'quiet',titulo:'Menos ruído',texto:'Um ambiente mais tranquilo para toda a família.',curto:'Mais tranquilidade para a sua família'},
+ {icon:'leaf',titulo:'Mais eficiência energética',texto:'Reduza as perdas de energia e melhore o conforto da sua casa.',curto:'Maior eficiência energética'}
+];
+const passos = [
+ {imagem:'condensacao',alt:'Condensação no vidro de uma janela',titulo:'Identifique o que quer melhorar',texto:'Frio, calor, ruído, condensação ou janelas antigas? Saber qual o principal problema ajuda a escolher a melhor solução.'},
+ {imagem:'perfil',alt:'Pormenor do perfil e do vidro de uma janela em PVC',titulo:'Compare o que está incluído',texto:'Tipo de vidro, perfil, ferragens, instalação e acabamentos podem tornar dois orçamentos muito diferentes.'},
+ {imagem:'medicao',alt:'Técnico a medir uma janela antes da substituição',titulo:'Não escolha sem medir primeiro',texto:'Cada casa é diferente. Uma visita técnica permite perceber medidas, aberturas e condições existentes.'}
+];
+---
+<Squeeze titulo="Campanha Janelas 2026 | Guia do Proprietário" descricao="Está a pensar trocar as janelas de casa? Conheça a campanha de janelas na Grande Lisboa, com até 25% de desconto, e peça um orçamento gratuito." imagemOg="/imagens/artigos/escolher-janelas.webp" robots="noindex,follow">
+ <div class="cj">
+  <a class="cj-skip" href="#campanha">Saltar para a campanha</a>
+  <section class="cj-hero" id="campanha" aria-labelledby="cj-title">
+   <img class="cj-hero-photo" src="/imagens/campanhas/janelas/hero.webp" alt="Sala luminosa com grandes janelas brancas e vista para o exterior" width="1536" height="1024" fetchpriority="high" />
+   <div class="cj-container cj-hero-inner">
+    <div class="cj-hero-copy"><p class="cj-eyebrow">JANELAS · 2026</p><h1 id="cj-title">Está a pensar trocar as janelas de casa?</h1>
+     <p class="cj-lead">Veja a campanha disponível na Grande Lisboa e peça o seu orçamento gratuito.</p>
+     <div class="cj-benefits">{beneficios.map(b=><div><span class="cj-icon"><Icon name={b.icon}/></span><h3>{b.titulo}</h3><p>{b.texto}</p></div>)}</div>
+     <a class="cj-button" href={destino} rel="sponsored noopener" data-janelas-link>Ver campanha de janelas <Icon name="arrow"/></a>
+     <p class="cj-assurance"><Icon name="lock"/>Pedido de orçamento gratuito e sem compromisso.</p>
+    </div>
+    <div class="cj-discount"><b>CAMPANHA<br/>JANELAS 2026</b><span>até</span><strong>25<small>%</small></strong><b>de desconto</b></div>
+   </div>
+  </section>
+  <section class="cj-advice cj-container" aria-labelledby="cj-advice-title">
+   <div><div class="cj-advice-intro"><p class="cj-eyebrow">ANTES DE PEDIR UM ORÇAMENTO</p><h2 id="cj-advice-title">3 coisas que fazem diferença</h2><p>Uma substituição bem feita melhora o conforto e a eficiência energética da sua casa. Antes de avançar, tenha em atenção estes pontos:</p></div>
+    <div class="cj-cards">{passos.map((p,i)=><article><div class="cj-card-image"><img src={'/imagens/campanhas/janelas/'+p.imagem+'.webp'} alt={p.alt} width="640" height="480" loading="lazy"/><span>{i+1}</span></div><h3>{p.titulo}</h3><p>{p.texto}</p></article>)}</div>
+   </div>
+   <aside class="cj-request"><h3><Icon name="document"/><span>Peça uma avaliação gratuita e sem compromisso</span></h3><ul>{['Orçamento gratuito','Sem compromisso','Visita técnica','Atuação na Grande Lisboa'].map(t=><li><span><Icon name="check"/></span>{t}</li>)}</ul><a class="cj-button" href={destino} rel="sponsored noopener" data-janelas-link>Ver campanha<br/>de janelas <Icon name="arrow"/></a></aside>
+  </section>
+  <section class="cj-comfort" aria-labelledby="cj-comfort-title"><img src="/imagens/campanhas/janelas/conforto.webp" alt="Mulher a desfrutar de um momento tranquilo junto à janela de casa" width="1536" height="512" loading="lazy"/><div class="cj-container cj-comfort-inner"><h2 id="cj-comfort-title">Janelas novas.<br/>Uma casa mais confortável todos os dias.</h2><div class="cj-comfort-benefits">{beneficios.map(b=><div><span class="cj-icon"><Icon name={b.icon}/></span><p>{b.curto}</p></div>)}</div></div></section>
+  <section class="cj-final cj-container" aria-labelledby="cj-final-title"><p class="cj-eyebrow">DÊ O PRIMEIRO PASSO</p><h2 id="cj-final-title">Veja a campanha e peça o seu orçamento</h2><p>Conheça as condições da campanha e inicie o seu pedido.</p><a class="cj-button" href={destino} rel="sponsored noopener" data-janelas-link>Ver campanha de janelas <Icon name="arrow"/></a>
+   <p class="cj-conditions">Campanha para substituição de 3 ou mais janelas, nas zonas abrangidas da Grande Lisboa. Até 25% de desconto, sujeito às condições da campanha e ao orçamento após visita técnica.</p>
+  </section>
+  <footer class="cj-footer cj-container"><nav aria-label="Informação legal"><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><a href="#cookie-settings" data-cookie-settings>Definições de cookies</a></nav></footer>
+ </div>
+</Squeeze>
+<script>
+ import { prepararLinksJanelas } from '../../lib/campanha-janelas.mjs';
+ prepararLinksJanelas(document, window);
+</script>
