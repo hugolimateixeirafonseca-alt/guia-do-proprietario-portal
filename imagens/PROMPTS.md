@@ -24,3 +24,7 @@ Regras comuns: três alternativas separadas por margens creme, traço consistent
 10. `pilar-arrendar`: fachada de apartamento português, chave e contrato de arrendamento vazio.
 11. `pilar-condominio`: prédio português, entrada comum, pasta de reunião e cadeiras.
 12. `herancas-futuro`: casa portuguesa, laço de herança, chave e duas páginas de documentos vazias.
+
+## Renovar janelas de casa, SC38
+
+Imagem gerada com ferramenta integrada em 9 de setembro de 2026. Referência de estilo: public/imagens/pilar-casa.webp. Prompt: ilustração editorial plana de uma sala portuguesa durante a renovação de uma janela, nova janela branca com vista para telhados, caixilho antigo verde encostado, proteção creme no chão, ferramentas e fita métrica. Paleta verde, areia, creme e terracota, sem pessoas, texto, logótipos ou marcas de água. Formato panorâmico. Ficheiros finais: public/imagens/artigos/renovar-janelas-casa.avif e .webp, 1200 por 675.

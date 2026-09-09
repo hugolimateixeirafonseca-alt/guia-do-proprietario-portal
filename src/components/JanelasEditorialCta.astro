@@ -1,0 +1,27 @@
+---
+interface Props { titulo: string; texto: string; compacto?: boolean }
+const {titulo,texto,compacto=false}=Astro.props;
+const source=Astro.url.pathname.split('/').filter(Boolean).at(-1)||'janelas-editorial';
+---
+<aside class:list={['janelas-editorial-cta',{compacto}]} aria-label="Campanha de janelas">
+ <p class="janelas-editorial-label">Orçamento gratuito · Sem compromisso</p>
+ <h2>{titulo}</h2><p>{texto}</p>
+ <a class="janelas-editorial-button" href={'https://track.guiadoproprietario.pt/go/janelas-diagnostico?source='+encodeURIComponent(source)} rel="sponsored noopener" data-janelas-editorial-link>Ver campanha e pedir orçamento <span aria-hidden="true">↗</span></a>
+ <p class="janelas-editorial-note">Pedido no site do parceiro. Campanha para 3 ou mais janelas nas zonas abrangidas da Grande Lisboa. Até 25% de desconto, sujeito às condições da campanha e ao orçamento após visita técnica.</p>
+</aside>
+<script>
+ import {prepararJanelasEditorial} from '../lib/janelas-editorial.mjs';
+ prepararJanelasEditorial(document,window);
+</script>
+<style>
+ .janelas-editorial-cta{margin:2rem 0;padding:clamp(1.4rem,4vw,2.2rem);background:#163f38;border-radius:12px;color:#fff}
+ .janelas-editorial-cta .janelas-editorial-label{margin:0 0 .8rem;color:#dceccd;font-size:.875rem;font-weight:700}
+ .janelas-editorial-cta h2{color:#fff;margin:0 0 .8rem;font-size:clamp(1.55rem,3vw,2rem);line-height:1.2}
+ .janelas-editorial-cta p{color:#edf4f1;margin:0 0 1.25rem;font-size:1rem;line-height:1.6}
+ .janelas-editorial-cta a.janelas-editorial-button{display:inline-flex;align-items:center;justify-content:center;gap:.7rem;min-height:52px;padding:.85rem 1.3rem;border-radius:6px;background:#e5c68e;color:#182e29;font-size:1rem;font-weight:750;text-decoration:none;text-align:center}
+ .janelas-editorial-cta a.janelas-editorial-button:hover{background:#f1d6a4}
+ .janelas-editorial-cta a:focus-visible{outline:3px solid #fff;outline-offset:4px}
+ .janelas-editorial-cta .janelas-editorial-note{margin:1rem 0 0;max-width:65ch;font-size:.875rem;color:#d2e1db}
+ .janelas-editorial-cta.compacto h2{font-size:1.45rem}
+ @media(max-width:540px){.janelas-editorial-cta a.janelas-editorial-button{width:100%}}
+</style>
