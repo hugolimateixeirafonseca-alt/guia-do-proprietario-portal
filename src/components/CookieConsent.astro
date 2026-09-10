@@ -6,10 +6,10 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
   : OFFICIAL_META_PIXEL_ID;
 ---
 
-<aside class="cookie-banner" id="cookie-banner" aria-labelledby="cookie-title" role="dialog" aria-modal="false" hidden>
+<dialog class="cookie-banner" id="cookie-banner" aria-labelledby="cookie-title" aria-describedby="cookie-description" tabindex="-1">
   <div class="cookie-summary">
     <strong id="cookie-title">A sua escolha sobre cookies</strong>
-    <p>Usamos cookies necessários para guardar a sua preferência. Os cookies de medição só são ativados se os aceitar.</p>
+    <p id="cookie-description">Podemos usar cookies e partilhar dados de medição com a Meta para perceber as visitas e os resultados das campanhas. Escolha se aceita esta medição. Pode recusar e continuar a usar o site.</p>
     <a href="/cookies/">Consultar a Política de Cookies</a>
   </div>
 
@@ -25,12 +25,12 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
   </div>
 
   <div class="cookie-actions">
-    <button type="button" data-cookie-choice="all">Aceitar todos</button>
-    <button type="button" data-cookie-choice="necessary">Recusar opcionais</button>
+    <button type="button" data-cookie-choice="all">Aceitar medição</button>
+    <button type="button" data-cookie-choice="necessary">Recusar</button>
     <button type="button" class="cookie-customize" data-cookie-customize>Personalizar</button>
     <button type="button" class="cookie-save" data-cookie-save hidden>Guardar escolha</button>
   </div>
-</aside>
+</dialog>
 
 <script is:inline define:vars={{ metaPixelId }}>
   (() => {
@@ -53,11 +53,30 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
       if (!raw) return null;
       try {
         const parsed = JSON.parse(decodeURIComponent(raw));
-        return parsed.version === COOKIE_VERSION ? parsed : null;
+        const savedAt = Date.parse(parsed.savedAt);
+        return parsed.version === COOKIE_VERSION && typeof parsed.measurement === "boolean"
+          && Number.isFinite(savedAt) && savedAt <= Date.now() + 300000
+          && savedAt >= Date.now() - 15552000000 ? parsed : null;
       } catch {
         return null;
       }
     };
+
+    let previousOverflow = "";
+    const openConsent = () => {
+      if (banner.open) return;
+      previousOverflow = document.documentElement.style.overflow;
+      banner.showModal();
+      document.documentElement.style.overflow = "hidden";
+      banner.focus();
+    };
+    const closeConsent = () => {
+      if (!banner.open) return;
+      banner.close();
+      document.documentElement.style.overflow = previousOverflow;
+    };
+    // Escape e cliques no fundo não equivalem a uma escolha de consentimento.
+    banner.addEventListener("cancel", (event) => event.preventDefault());
 
     const loadPixel = () => {
       if (!metaPixelId || window._pixelOn) return;
@@ -81,7 +100,7 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
       }));
       const secure = location.protocol === "https:" ? "; Secure" : "";
       document.cookie = `${COOKIE_NAME}=${value}; Path=/; Max-Age=15552000; SameSite=Lax${secure}`;
-      banner.hidden = true;
+      closeConsent();
       if (measurementAllowed) loadPixel();
       if (!measurementAllowed) {
         document.cookie = "_fbp=; Path=/; Max-Age=0; SameSite=Lax";
@@ -108,20 +127,23 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
         options.hidden = false;
         customize.hidden = true;
         save.hidden = false;
-        banner.hidden = false;
+        openConsent();
         measurement.focus();
       });
     });
 
     const preferences = readPreferences();
     if (preferences?.measurement) loadPixel();
-    if (!preferences) banner.hidden = false;
+    // A informação legal continua acessível antes de escolher.
+    const legalPage = ["/cookies", "/privacidade", "/politica-de-privacidade", "/termos"].includes(location.pathname.replace(/\/+$/, ""));
+    if (!preferences && !legalPage) openConsent();
   })();
 </script>
 
 <style>
-  .cookie-banner { position: fixed; z-index: 1000; right: 20px; bottom: 20px; left: 20px; width: min(820px, calc(100% - 40px)); margin-inline: auto; padding: 20px; display: grid; gap: 16px; color: #102a31; background: #fffefa; border: 1px solid #b9c9c3; box-shadow: 0 18px 55px rgba(9, 34, 41, .24); }
-  .cookie-banner[hidden], .cookie-options[hidden], .cookie-actions [hidden] { display: none; }
+  .cookie-banner { position: fixed; inset: 0; width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; box-sizing: border-box; margin: auto; padding: 24px; display: grid; gap: 18px; border-radius: 12px; font-family: inherit; color: #102a31; background: #fffefa; border: 1px solid #b9c9c3; box-shadow: 0 18px 55px rgba(9, 34, 41, .24); }
+  .cookie-banner::backdrop { background: rgba(9, 34, 41, .58); }
+  .cookie-banner:not([open]), .cookie-options[hidden], .cookie-actions [hidden] { display: none; }
   .cookie-summary strong { display: block; margin-bottom: 5px; font-size: 17px; }
   .cookie-summary p { margin: 0; font-size: 13px; line-height: 1.5; }
   .cookie-summary a { display: inline-block; margin-top: 6px; color: #256b5c; font-size: 12px; font-weight: 750; }
@@ -131,13 +153,13 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
   .cookie-option span { margin-top: 2px; color: #53656a; font-size: 11px; }
   .cookie-option input { width: 20px; height: 20px; accent-color: #256b5c; }
   .cookie-always { color: #256b5c !important; font-weight: 800; }
-  .cookie-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .cookie-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
   .cookie-actions button { min-height: 44px; padding: 8px 14px; color: white; background: #256b5c; border: 2px solid #256b5c; border-radius: 4px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
-  .cookie-actions .cookie-customize { color: #256b5c; background: transparent; }
+  .cookie-actions .cookie-customize { grid-column: 1 / -1; color: #256b5c; background: transparent; border-color: transparent; }
   .cookie-actions .cookie-save { grid-column: 1 / -1; }
   .cookie-actions button:hover, .cookie-actions button:focus-visible { outline: 3px solid rgba(37, 107, 92, .2); outline-offset: 2px; }
   @media (max-width: 650px) {
-    .cookie-banner { right: 12px; bottom: 12px; left: 12px; width: calc(100% - 24px); max-height: calc(100vh - 24px); overflow-y: auto; padding: 17px; }
+    .cookie-banner { width: calc(100% - 24px); max-height: calc(100dvh - 24px); padding: 20px; }
     .cookie-actions { grid-template-columns: 1fr; }
     .cookie-actions .cookie-save { grid-column: auto; }
     .cookie-actions button { width: 100%; }
