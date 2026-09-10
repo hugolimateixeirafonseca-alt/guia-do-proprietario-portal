@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-10T07:13:35.492Z",
+  "generatedAt": "2026-09-10T07:33:23.726Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 100,
+    "published": 101,
     "newsOnline": 21
   },
   "articles": [
@@ -1312,14 +1312,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "tinta-certa-cada-parede.mdx",
       "arrivedAt": "2026-08-12T16:46:17+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-10T07:01:29Z",
+      "url": "https://guiadoproprietario.pt/casa/tinta-certa-cada-parede/"
     },
     {
       "id": "SC33",
