@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-09T16:47:08.181Z",
+  "generatedAt": "2026-09-10T07:13:35.492Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 99,
+    "published": 100,
     "newsOnline": 21
   },
   "articles": [
@@ -1408,14 +1408,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": true,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "renovar-janelas-casa.mdx",
       "arrivedAt": "2026-09-09T16:39:29.978Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-09T16:39:29.978Z",
+      "url": "https://guiadoproprietario.pt/casa/renovar-janelas-casa/"
     },
     {
       "id": "EXTRA-010",
