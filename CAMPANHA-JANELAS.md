@@ -21,3 +21,9 @@ Prompts: sala lisboeta luminosa com grandes janelas brancas, sofá creme e almof
 ## Revisão de copy
 
 Revisão pedida pelo utilizador: removidas todas as menções públicas à NUVI, incluindo metadados, e retirado o parágrafo de seleção, prestação de serviço e comissão do rodapé. Ligações legais, condições da campanha, tracking e postback preservados. Copy aprovada pelo utilizador, com publicação expressamente autorizada.
+
+## Versão compacta de 11 de setembro de 2026
+
+Substitui a composição anterior pela referência enviada pelo utilizador: sala lisboeta, título de desconto em PVC, três cartões que encaminham para a mesma oferta, bloco da campanha e CTA final. Sem navegação editorial ou secções adicionais. Fotografia derivada da referência com imagegen, otimizada localmente para WebP. Texto Contacto em 24h fornecido na referência pelo utilizador, não verificado independentemente. Condições de 3+ janelas mantidas em nota discreta. Consentimento partilhado preservado.
+
+Backend: reutiliza /go/janelas-diagnostico com source=campanha-janelas, já mapeada para esta URL na migração 0003. Mantém sub_id, transaction_id e postback global. As vistas por dia e landing continuam a identificar esta página; não cria novas conversões, métricas de visitas ou alterações de segredos. Os números anteriores e futuros desta URL continuam no mesmo grupo.

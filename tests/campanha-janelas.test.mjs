@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {prepararLinksJanelas} from '../src/lib/campanha-janelas.mjs';
-test('Três CTAs mantêm atribuição, não divulgam contactos e respeitam revogação do consentimento',()=>{
- const links=Array.from({length:3},()=>({href:'',events:{},addEventListener(name,handler){this.events[name]=handler}}));
+test('Quatro acessos à campanha mantêm atribuição, não divulgam contactos e respeitam revogação do consentimento',()=>{
+ const links=Array.from({length:4},()=>({href:'',events:{},addEventListener(name,handler){this.events[name]=handler}}));
  const doc={cookie:'',querySelectorAll:()=>links};
  const win={location:{href:'https://guiadoproprietario.pt/campanha-janelas/?utm_source=meta&utm_campaign=12345678901234&ad_id=4567890123456&fbclid=CLICK&email=private@example.com&source=outro'}};
  prepararLinksJanelas(doc,win);
