@@ -1,7 +1,6 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # Um artigo por execução. Adicionar novos pendentes a esta fila.
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
-reforma-arrendamento-o-que-muda.mdx
 adaptar-casa-pais-idosos.mdx
 alargar-porta-casa-banho.mdx
 barras-apoio-casa-banho.mdx
