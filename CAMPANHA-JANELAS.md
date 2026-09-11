@@ -22,8 +22,10 @@ Prompts: sala lisboeta luminosa com grandes janelas brancas, sofá creme e almof
 
 Revisão pedida pelo utilizador: removidas todas as menções públicas à NUVI, incluindo metadados, e retirado o parágrafo de seleção, prestação de serviço e comissão do rodapé. Ligações legais, condições da campanha, tracking e postback preservados. Copy aprovada pelo utilizador, com publicação expressamente autorizada.
 
-## Versão compacta de 11 de setembro de 2026
+## Separação de endereços em 11 de setembro de 2026
 
-Substitui a composição anterior pela referência enviada pelo utilizador: sala lisboeta, título de desconto em PVC, três cartões que encaminham para a mesma oferta, bloco da campanha e CTA final. Sem navegação editorial ou secções adicionais. Fotografia derivada da referência com imagegen, otimizada localmente para WebP. Texto Contacto em 24h fornecido na referência pelo utilizador, não verificado independentemente. Condições de 3+ janelas mantidas em nota discreta. Consentimento partilhado preservado.
+A pedido do utilizador, a composição original de 9 de setembro foi reposta integralmente em /campanha-janelas/, incluindo o CSS original. A versão compacta PVC de 11 de setembro foi preservada em /campanha-janelas-pvc/, com CSS próprio e a fotografia sala-lisboa-pvc.webp. Não existe redirecionamento entre estas páginas. Ambas têm canonical próprio calculado pelo layout Squeeze, noindex e exclusão do sitemap.
 
-Backend: reutiliza /go/janelas-diagnostico com source=campanha-janelas, já mapeada para esta URL na migração 0003. Mantém sub_id, transaction_id e postback global. As vistas por dia e landing continuam a identificar esta página; não cria novas conversões, métricas de visitas ou alterações de segredos. Os números anteriores e futuros desta URL continuam no mesmo grupo.
+As duas páginas mantêm a oferta janelas-diagnostico, source=campanha-janelas, consentimento, atribuição e postback existentes. Esta correção separa os endereços e o desenho; os relatórios existentes continuam a agregar as duas versões na mesma source. Sem alterações ao tracker ou aos dados históricos.
+
+Publicação da correção autorizada pelo pedido do utilizador. Validação local direcionada antes do envio. Conclusão do deployment e confirmação online ficam pendentes da confirmação do utilizador.

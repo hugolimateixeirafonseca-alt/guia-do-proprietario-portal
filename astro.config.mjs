@@ -16,6 +16,7 @@ export default defineConfig({
       "https://guiadoproprietario.pt/janelas-diagnostico/",
       "https://guiadoproprietario.pt/campanha-janelas/",
       "https://guiadoproprietario.pt/campanha-janelas-cinema/",
+      "https://guiadoproprietario.pt/campanha-janelas-pvc/",
       "https://guiadoproprietario.pt/kit-estudante/obrigado/"
     ].includes(page)
   })],

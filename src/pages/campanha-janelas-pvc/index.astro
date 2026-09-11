@@ -1,0 +1,32 @@
+---
+import Squeeze from '../../layouts/Squeeze.astro';
+import Icon from '../../components/JanelasIcon.astro';
+import '../../styles/campanha-janelas-pvc.css';
+const destino = 'https://track.guiadoproprietario.pt/go/janelas-diagnostico?source=campanha-janelas';
+const beneficios = [
+ {icon:'thermal',titulo:'Mais conforto térmico'},
+ {icon:'quiet',titulo:'Menos ruído'},
+ {icon:'leaf',titulo:'Poupar energia'}
+];
+---
+<Squeeze titulo="Campanha Janelas 2026 | Até 25% de desconto" descricao="Até 25% de desconto em janelas em PVC. Veja a campanha na Grande Lisboa e peça um orçamento gratuito e sem compromisso." imagemOg="/imagens/campanhas/janelas/sala-lisboa-pvc.webp" robots="noindex,follow">
+ <div class="cj">
+  <img class="cj-photo" src="/imagens/campanhas/janelas/sala-lisboa-pvc.webp" alt="Sala acolhedora em Lisboa com grandes janelas e vista para o Tejo" width="1536" height="896" fetchpriority="high" />
+  <section class="cj-content" aria-labelledby="cj-title">
+   <p class="cj-eyebrow">CAMPANHA JANELAS 2026</p>
+   <h1 id="cj-title"><span>ATÉ 25% DE DESCONTO</span><br/>em janelas em PVC.</h1>
+   <div class="cj-benefits">{beneficios.map(b=><a class="cj-benefit" href={destino} rel="sponsored noopener" data-janelas-link aria-label={b.titulo + ': ver campanha'}><span class="cj-icon"><Icon name={b.icon}/></span><span class="cj-benefit-label">{b.titulo}</span><span class="cj-chevron" aria-hidden="true">›</span></a>)}</div>
+   <div class="cj-offer">
+    <span class="cj-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 12 13 2h8v8L11 20a2 2 0 0 1-3 0l-5-5a2 2 0 0 1 0-3Z"/><circle cx="17" cy="6" r="1.7" fill="#f2f8eb"/></svg><span>Até <strong>25% de desconto</strong></span></span>
+    <h2>Veja a campanha disponível para<br class="cj-wide"/> substituição de janelas na sua zona.</h2>
+    <ul>{['Grande Lisboa','Orçamento gratuito','Sem compromisso','Contacto em 24h'].map(t=><li><span class="cj-check"><Icon name="check"/></span><span>{t}</span></li>)}</ul>
+    <p class="cj-conditions">Para substituição de 3 ou mais janelas. Desconto sujeito às condições da campanha e ao orçamento após visita técnica.</p>
+   </div>
+   <a class="cj-button" href={destino} rel="sponsored noopener" data-janelas-link>VER CAMPANHA <Icon name="arrow"/></a>
+  </section>
+ </div>
+</Squeeze>
+<script>
+ import { prepararLinksJanelas } from '../../lib/campanha-janelas.mjs';
+ prepararLinksJanelas(document, window);
+</script>
