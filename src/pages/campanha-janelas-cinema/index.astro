@@ -1,0 +1,58 @@
+---
+import Squeeze from '../../layouts/Squeeze.astro';
+import Icon from '../../components/JanelasIcon.astro';
+import '../../styles/janelas-cinema.css';
+const destino='https://track.guiadoproprietario.pt/go/janelas-diagnostico?source=campanha-janelas-cinema';
+const cold='/imagens/campanhas/janelas/sala-chuva.webp';
+const warm='/imagens/campanhas/janelas/sala-lisboa-pvc.webp';
+---
+<Squeeze titulo="Janelas em PVC | Sinta a diferença de chegar a casa" descricao="Até 25% de desconto em janelas em PVC na Grande Lisboa. Descubra a campanha e peça um orçamento gratuito e sem compromisso." imagemOg={warm} robots="noindex,follow">
+ <div class="cinema" id="cinema">
+  <div class="film-stage" aria-hidden="true"><div class="film-camera"><img class="film-cold" src={cold} width="1640" height="958" fetchpriority="high" alt=""/><img class="film-warm" src={warm} width="1536" height="896" alt=""/><div class="film-rain" id="film-rain"></div><div class="film-glow"></div></div><div class="film-shade"></div><div class="film-grain"></div></div>
+  <header class="film-header"><span class="film-brand">Guia do<br/>Proprietário<span class="brand-dot">.</span></span><div><button class="motion-toggle" type="button" aria-pressed="false">Pausar animações</button><a class="film-small-cta" href={destino} data-cinema-link rel="sponsored noopener">Ver campanha <Icon name="arrow"/></a></div></header>
+  <section class="film-hero film-wrap" aria-labelledby="film-title">
+   <p class="film-kicker enter">CAMPANHA JANELAS 2026 <span></span></p>
+   <h1 id="film-title" class="enter">Lá fora, o frio.<br/><em>Cá dentro,</em><br/>a sua casa.</h1>
+   <p class="film-offer enter"><strong>Até 25% de desconto</strong><br/>em janelas em PVC.</p>
+   <p class="film-location enter">Grande Lisboa <span>·</span> Orçamento gratuito <span>·</span> Sem compromisso</p>
+   <a class="film-cta enter" href={destino} data-cinema-link rel="sponsored noopener">VER CAMPANHA <Icon name="arrow"/></a>
+   <a class="film-scroll" href="#diferenca"><span>↓</span>Entre. Sinta a diferença.</a>
+   <span class="film-side-note">O conforto começa<br/>à sua janela.</span>
+  </section>
+  <section class="film-story film-wrap" id="diferenca" aria-labelledby="story-title">
+   <p class="film-kicker reveal">A DIFERENÇA SENTE-SE <span></span></p>
+   <h2 id="story-title"><span class="reveal">Mais conforto.</span><span class="reveal">Menos ruído.</span><span class="reveal"><em>Mais sua casa.</em></span></h2>
+   <p class="film-copy reveal">Janelas em PVC que ajudam a manter a temperatura, a reduzir o ruído exterior e a tornar a casa mais eficiente.</p>
+   <div class="film-benefits">{[{icon:'thermal',label:'Conforto térmico'},{icon:'quiet',label:'Menos ruído'},{icon:'leaf',label:'Eficiência energética'}].map(b=><div class="reveal"><Icon name={b.icon}/><span>{b.label}</span></div>)}</div>
+   <a class="film-text-link reveal" href="#ambientes">Explore os dois ambientes <span>↘</span></a>
+  </section>
+  <section class="film-compare-section" id="ambientes" aria-labelledby="compare-title">
+   <div class="film-wrap"><p class="film-kicker reveal">A MESMA CASA. OUTRA SENSAÇÃO.</p><h2 id="compare-title" class="reveal">A diferença está<br/><em>nas suas mãos.</em></h2><p class="film-copy reveal">Deslize e descubra a mudança de ambiente.</p></div>
+   <div class="film-comparison" style="--split:50%">
+    <img src={cold} alt="A sala num ambiente de chuva e luz fria" width="1640" height="958" loading="lazy"/>
+    <img class="comparison-warm" src={warm} alt="A mesma sala com luz quente e acolhedora" width="1536" height="896" loading="lazy"/>
+    <span class="compare-label cold-label">LÁ FORA</span><span class="compare-label warm-label">CÁ DENTRO</span>
+    <div class="compare-line" aria-hidden="true"><span>‹ ›</span></div>
+    <input id="ambiente-range" type="range" min="0" max="100" value="50" aria-label="Comparar ambientes: aumentar a luz quente"/>
+   </div>
+   <div class="compare-controls"><button type="button" data-atmosphere="0">Ambiente frio</button><span>← Arraste →</span><button type="button" data-atmosphere="100">Ambiente acolhedor</button></div>
+   <p class="film-caption">Ilustração de ambientes. O desempenho das janelas depende da solução e da instalação.</p>
+  </section>
+  <section class="film-quiz-section film-wrap" id="campanha" aria-labelledby="quiz-title">
+   <div class="quiz-intro reveal"><p class="film-kicker">O SEU PRÓXIMO PASSO</p><h2 id="quiz-title">Uma casa mais<br/><em>confortável.</em><br/>Comece aqui.</h2><p class="film-copy">Duas escolhas simples para orientar o seu pedido. Sem compromisso.</p><a class="film-text-link" href={destino} data-cinema-link rel="sponsored noopener">Prefiro ver já a campanha →</a></div>
+   <div class="film-glass reveal">
+    <ol class="quiz-progress" aria-label="Passos do pedido"><li aria-current="step"><b>1</b> Zona</li><li><b>2</b> Janelas</li><li><b>3</b> Campanha</li></ol>
+    <form id="cinema-quiz">
+     <fieldset data-step="0"><legend tabindex="-1">Onde fica a sua casa?</legend><p>Selecione o concelho.</p><div class="quiz-options">{['Lisboa','Cascais','Oeiras','Sintra','Amadora','Loures','Odivelas','Outro'].map(z=><label><input type="radio" name="zona" value={z} required/><span>{z}</span></label>)}</div><button class="film-cta" type="submit">CONTINUAR <Icon name="arrow"/></button></fieldset>
+     <fieldset data-step="1" hidden disabled><legend tabindex="-1">Quantas janelas quer substituir?</legend><p>Pode indicar uma estimativa.</p><div class="quiz-options">{['1 a 2','3 a 5','6 ou mais','Ainda não sei'].map(z=><label><input type="radio" name="janelas" value={z} required/><span>{z}</span></label>)}</div><button class="film-cta" type="submit">VER PRÓXIMO PASSO <Icon name="arrow"/></button><button class="quiz-back" type="button" data-back>← Voltar</button></fieldset>
+     <div data-step="2" hidden><p class="result-kicker">O SEU PRÓXIMO PASSO</p><h3 tabindex="-1">Peça uma avaliação para a sua casa.</h3><p id="quiz-summary"></p><p>A campanha destina-se à substituição de 3 ou mais janelas nas zonas abrangidas da Grande Lisboa. O cliente confirma as condições e a disponibilidade.</p><a class="film-cta" href={destino} data-cinema-link rel="sponsored noopener">VER CAMPANHA E PEDIR ORÇAMENTO <Icon name="arrow"/></a><button class="quiz-back" type="button" data-back>← Alterar escolhas</button></div>
+    </form>
+    <noscript><p>Para continuar, veja diretamente a campanha.</p><a class="film-cta" href={destino} rel="sponsored noopener">VER CAMPANHA →</a></noscript>
+    <p class="quiz-privacy">Estas escolhas ficam apenas nesta página. O pedido de contacto é feito no site do cliente.</p>
+   </div>
+  </section>
+  <footer class="film-footer film-wrap"><p>Até 25% de desconto, sujeito às condições da campanha e ao orçamento após visita técnica. Substituição de 3 ou mais janelas nas zonas abrangidas da Grande Lisboa.</p><button type="button" data-cookie-settings>Definições de cookies</button></footer>
+  <div class="film-mobile-bar"><span>Janelas em PVC<strong>Até 25% de desconto</strong></span><a href={destino} data-cinema-link rel="sponsored noopener">Ver campanha <Icon name="arrow"/></a></div>
+ </div>
+</Squeeze>
+<script>import {initCinema} from '../../lib/janelas-cinema.mjs';initCinema(document,window);</script>
