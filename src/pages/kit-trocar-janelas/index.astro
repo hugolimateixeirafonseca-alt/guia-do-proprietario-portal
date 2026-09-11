@@ -1,0 +1,73 @@
+---
+import Squeeze from '../../layouts/Squeeze.astro';
+import { CONSENT_TEXT, KIT_JANELAS_CONSENT_VERSION } from '../../data/consent';
+import '../../styles/kit-trocar-janelas.css';
+const consent = CONSENT_TEXT[KIT_JANELAS_CONSENT_VERSION];
+---
+<Squeeze titulo="Checklist para trocar janelas em 2026 | PDF grátis" descricao="Receba por email a checklist com 17 pontos para escolher bem, evitar erros e pedir orçamento para novas janelas com mais confiança." imagemOg="/imagens/landings/kit-trocar-janelas/capa.webp" robots="noindex,follow">
+  <div class="kj">
+    <header class="kj-header">
+      <a class="kj-brand" href="/" aria-label="Guia do Proprietário, página inicial">
+        <svg class="kj-home" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 21 24 4l19 17v23H29V30H19v14H5Z" fill="currentColor"/></svg>
+        <span>CASA E OBRAS</span>
+      </a>
+      <span class="kj-tagline">CONSELHOS PRÁTICOS<br/>PARA A SUA CASA</span>
+      <nav aria-label="Navegação principal"><a href="#checklist">Guias</a><a href="/casa/">Dicas</a><a href="/sobre/">Sobre</a></nav>
+    </header>
+    <section class="kj-hero kj-wrap" id="checklist" aria-labelledby="kj-title">
+      <div class="kj-copy">
+        <p class="kj-eyebrow"><span></span>GUIA DO PROPRIETÁRIO · JANELAS</p>
+        <h1 id="kj-title">Receba grátis<br class="kj-desktop-break"/> a checklist para<br class="kj-desktop-break"/> trocar janelas<br/> <em>em 2026</em></h1>
+        <p class="kj-intro">17 pontos para escolher bem, evitar erros e pedir orçamento com mais confiança.</p>
+        <form id="kit-janelas-form" class="kj-form" data-consent-version={KIT_JANELAS_CONSENT_VERSION} novalidate>
+          <label class="kj-sr-only" for="kj-email">O seu email</label>
+          <div class="kj-email">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 8 9-8" /></svg>
+            <input id="kj-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="O seu email" maxlength="254" required aria-describedby="kj-email-error" />
+          </div>
+          <p class="kj-error" id="kj-email-error" hidden></p>
+          <div class="kj-honeypot" aria-hidden="true"><label>Empresa<input name="company" tabindex="-1" autocomplete="off" /></label></div>
+          <label class="kj-consent" for="kj-consent-pdf">
+            <input id="kj-consent-pdf" name="consent_pdf" type="checkbox" required aria-describedby="kj-consent-error" />
+            <span><strong>{consent.c1}</strong><small>Saiba como tratamos os seus dados na <a href="/privacidade/" target="_blank" rel="noopener">Política de Privacidade</a>.</small></span>
+          </label>
+          <label class="kj-consent" for="kj-consent-marketing">
+            <input id="kj-consent-marketing" name="consent_marketing" type="checkbox" />
+            <span><strong>Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados.</strong><small>As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento.</small></span>
+          </label>
+          <p class="kj-error" id="kj-consent-error" hidden></p>
+          <button class="kj-submit" type="submit"><span>RECEBER PDF GRÁTIS</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button>
+          <p id="kj-form-error" class="kj-error" role="alert" hidden></p>
+          <p class="kj-reassurance"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 8V5a4 4 0 0 1 8 0v3M4 8h12v10H4zM10 12v3"/></svg>O PDF segue para o seu email.</p>
+        </form>
+        <section id="kj-success" class="kj-success" tabindex="-1" aria-labelledby="kj-success-title" hidden>
+          <span class="kj-success-check" aria-hidden="true">✓</span>
+          <h2 id="kj-success-title">O seu kit está a caminho.</h2>
+          <p>Enviámos o PDF para <strong id="kj-success-email"></strong>.</p>
+          <p>Verifique a caixa de entrada e, se necessário, as pastas de promoções e spam. O email pode demorar alguns minutos a chegar.</p>
+          <button id="kj-change-email" type="button">Corrigir o endereço de email</button>
+        </section>
+        <p class="kj-next">No kit, poderá também ver a campanha disponível para a sua zona.</p>
+      </div>
+      <figure class="kj-book-scene">
+        <div class="kj-book"><img src="/imagens/landings/kit-trocar-janelas/capa.webp" alt="Capa do kit Trocar Janelas em 2026, com checklist de 17 pontos e ilustração de uma sala com janelas novas" width="952" height="1348" fetchpriority="high" /></div>
+        <figcaption>O seu guia para imprimir ou guardar no telemóvel.</figcaption>
+      </figure>
+    </section>
+    <div class="kj-benefits kj-wrap" aria-label="O que recebe">
+      <div><span class="kj-benefit-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="4" width="24" height="24" rx="5" fill="currentColor" stroke="none"/><path d="m10 16 4 4 9-10" stroke="#fff"/></svg></span><p><strong>Checklist prática</strong><span>17 pontos essenciais</span></p></div>
+      <div><span class="kj-benefit-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 3h12l6 6v20H8zM20 3v7h6M12 15h10M12 20h10M12 25h7"/></svg></span><p><strong>Linguagem simples</strong><span>Sem jargão técnico</span></p></div>
+      <div><span class="kj-benefit-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12h22v6H5zM8 18v11h16V18M16 12v17M16 12c-12-1-10-13-3-7l3 7Zm0 0c12-1 10-13 3-7l-3 7Z"/></svg></span><p><strong>Grátis</strong><span>PDF no seu email</span></p></div>
+    </div>
+    <footer class="kj-footer kj-wrap">
+      <p class="kj-footer-brand"><span></span>CASA E OBRAS<span></span></p>
+      <p class="kj-footer-tagline">CASAS MAIS CONFORTÁVEIS. PESSOAS MAIS FELIZES.</p>
+      <nav aria-label="Informação legal"><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><button type="button" data-cookie-settings>Definições de cookies</button></nav>
+    </footer>
+    <svg class="kj-landscape" viewBox="0 0 1440 190" preserveAspectRatio="none" aria-hidden="true"><path d="M0 25C330 10 425 230 860 110s450-30 580 40v40H0Z" fill="#91a788" opacity=".12"/><path d="M0 145c285 25 435-155 880-75s380 100 560 56v64H0Z" fill="#c1c8ae" opacity=".2"/></svg>
+  </div>
+</Squeeze>
+<script>
+  import { initKitJanelas } from '../../lib/kit-janelas-form.mjs';
+  initKitJanelas(document, window);
+</script>
