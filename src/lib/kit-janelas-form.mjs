@@ -1,3 +1,4 @@
+import { kitThankYouUrl } from './kit-janelas-campaign.mjs';
 export function initKitJanelas(doc, win) {
   const form = doc.getElementById('kit-janelas-form');
   if (!form) return;
@@ -53,6 +54,7 @@ export function initKitJanelas(doc, win) {
       }
       doc.getElementById('kj-success-email').textContent = email.value.trim();
       form.hidden = true; success.hidden = false; success.focus();
+      win.location.assign(kitThankYouUrl(win.location.href));
     } catch (error) {
       errorFor('kj-form-error', error instanceof Error ? error.message : 'Não foi possível enviar o kit. Tente novamente.');
     } finally {

@@ -1,0 +1,31 @@
+---
+import Squeeze from '../../../layouts/Squeeze.astro';
+import '../../../styles/kit-trocar-janelas.css';
+import '../../../styles/kit-janelas-obrigado.css';
+const destino = 'https://track.guiadoproprietario.pt/go/kit-trocar-janelas?source=kit-trocar-janelas-obrigado&utm_source=kit-trocar-janelas&utm_medium=thank-you&utm_campaign=checklist-17-pontos&utm_content=cta-obrigado';
+---
+<Squeeze titulo="O próximo passo para trocar as suas janelas | Guia do Proprietário" descricao="Conheça a campanha de janelas e peça um orçamento para a sua casa." robots="noindex,follow">
+  <div class="kj kj-thanks">
+    <header class="kj-header"><a class="kj-brand" href="/" aria-label="Guia do Proprietário, página inicial"><svg class="kj-home" viewBox="0 0 48 48" aria-hidden="true"><path d="M5 21 24 4l19 17v23H29V30H19v14H5Z" fill="currentColor"/></svg><span>CASA E OBRAS</span></a><span class="kj-tagline">CONSELHOS PRÁTICOS<br/>PARA A SUA CASA</span></header>
+    <main class="kt-main">
+      <p class="kt-confirmation"><span aria-hidden="true">✓</span> Obrigado! O seu kit está a caminho do email.</p>
+      <section class="kt-card" aria-labelledby="kt-title">
+        <div class="kt-copy">
+          <p class="kj-eyebrow">O PRÓXIMO PASSO</p>
+          <h1 id="kt-title">Quanto custa trocar<br/> <em>as suas janelas?</em></h1>
+          <p class="kt-lead">Já tem a checklist para escolher bem. Agora conheça a campanha disponível na Grande Lisboa e peça um orçamento para a sua casa.</p>
+          <a class="kt-cta" href={destino} rel="sponsored noopener" data-kit-campaign>Ver campanha e pedir orçamento <span aria-hidden="true">→</span></a>
+          <p class="kt-reassurance">Orçamento gratuito e sem compromisso.</p>
+          <p class="kt-conditions">Campanha para substituição de 3 ou mais janelas, nas zonas abrangidas da Grande Lisboa. Consulte as condições na página da campanha.</p>
+        </div>
+        <img class="kt-photo" src="/imagens/campanhas/janelas/hero.webp" width="1536" height="1024" alt="Sala luminosa e confortável com janelas novas" fetchpriority="high"/>
+      </section>
+      <p class="kt-email-note">O PDF pode demorar alguns minutos a chegar. Verifique também as pastas de promoções e spam. <a href="/kit-trocar-janelas/">Precisa de corrigir o email?</a></p>
+    </main>
+    <footer class="kt-footer"><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><button type="button" data-cookie-settings>Definições de cookies</button></footer>
+  </div>
+</Squeeze>
+<script>
+  import { prepararCampanhaKit } from '../../../lib/kit-janelas-campaign.mjs';
+  prepararCampanhaKit(document, window);
+</script>

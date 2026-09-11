@@ -6,6 +6,12 @@ on:
       - main
     paths:
       - 'functions/**'
+      - 'src/pages/kit-trocar-janelas/**'
+      - 'src/lib/kit-janelas-*.mjs'
+      - 'src/styles/kit*.css'
+      - 'public/downloads/kit-trocar-janelas-2026.pdf'
+      - 'public/imagens/landings/kit-trocar-janelas/**'
+      - 'tests/kit-janelas.test.mjs'
       - 'src/components/CookieConsent.astro'
       - 'src/layouts/KitEstudanteLayout.astro'
       - 'src/pages/kit-estudante/**'
@@ -165,6 +171,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate windows kit flow
+        run: npm run test:kit-janelas
 
       - name: Build production site
         run: |

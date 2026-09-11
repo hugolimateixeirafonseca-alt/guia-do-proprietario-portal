@@ -120,3 +120,34 @@ test("a página tem duas caixas vazias; só a primeira é obrigatória e não mo
   assert.doesNotMatch(page,/opcional|checked=/i);
   assert.ok(!page.includes('href="/downloads/'));
 });
+
+test("o agradecimento conserva atribuição sem colocar email ou campos arbitrários no endereço",async()=>{
+  const {kitThankYouUrl}=await import('../src/lib/kit-janelas-campaign.mjs');
+  const url=new URL(kitThankYouUrl('https://guiadoproprietario.pt/kit-trocar-janelas/?email=privado@example.com&next=https://example.net&source=alterada&utm_campaign=campanha&ad_id=123'));
+  assert.equal(url.pathname,'/kit-trocar-janelas/obrigado/');
+  assert.equal(url.searchParams.get('utm_campaign'),'campanha');
+  assert.equal(url.searchParams.get('ad_id'),'123');
+  assert.equal(url.searchParams.has('email'),false);
+  assert.equal(url.searchParams.has('next'),false);
+  assert.equal(url.searchParams.has('source'),false);
+});
+test("CTA do agradecimento usa a oferta do kit, origem própria e relê consentimento",async()=>{
+  const {prepararCampanhaKit}=await import('../src/lib/kit-janelas-campaign.mjs');
+  const events={};const link={href:'',addEventListener:(name,fn)=>events[name]=fn};
+  const doc={cookie:'',querySelectorAll:()=>[link]};
+  const win={location:{href:'https://guiadoproprietario.pt/kit-trocar-janelas/obrigado/?source=pdf&utm_campaign=anuncio&fbclid=example'}};
+  prepararCampanhaKit(doc,win);
+  let url=new URL(link.href);
+  assert.equal(url.pathname,'/go/kit-trocar-janelas');
+  assert.equal(url.searchParams.get('source'),'kit-trocar-janelas-obrigado');
+  assert.equal(url.searchParams.get('utm_campaign'),'anuncio');
+  assert.equal(url.searchParams.get('utm_content'),'cta-obrigado');
+  assert.equal(url.searchParams.has('fbclid'),false);
+  doc.cookie='gp_cookie_preferences='+encodeURIComponent(JSON.stringify({measurement:true,version:'2026-09-01-1',savedAt:new Date().toISOString()}));
+  events.click();url=new URL(link.href);
+  assert.equal(url.searchParams.get('measurement_consent'),'true');
+  assert.equal(url.searchParams.get('fbclid'),'example');
+  doc.cookie='';events.click();url=new URL(link.href);
+  assert.equal(url.searchParams.has('measurement_consent'),false);
+  assert.equal(url.searchParams.has('fbclid'),false);
+});
