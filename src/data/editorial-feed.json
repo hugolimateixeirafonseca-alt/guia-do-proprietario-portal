@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-11T07:13:08.294Z",
+  "generatedAt": "2026-09-11T07:34:50.832Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 101,
+    "published": 102,
     "newsOnline": 21
   },
   "articles": [
@@ -1664,14 +1664,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "reforma-arrendamento-o-que-muda.mdx",
       "arrivedAt": "2026-08-17T14:22:02+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-11T07:01:27Z",
+      "url": "https://guiadoproprietario.pt/arrendar/reforma-arrendamento-o-que-muda/"
     },
     {
       "id": "EXTRA-004",
