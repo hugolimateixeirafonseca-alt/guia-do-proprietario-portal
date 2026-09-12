@@ -36,3 +36,11 @@ Estado: publicação da landing e ativação do Sender autorizadas expressamente
 - Conserva apenas parâmetros de atribuição permitidos na passagem entre páginas, sem email no URL. Identificadores Meta só no clique com consentimento de medição válido. Não dispara Lead ou Contact no clique.
 - Ambos os endereços excluídos do sitemap e com noindex. Revisão local em desktop e telemóvel, sem overflow, aprovada.
 - O workflow normal de publicação inclui os ficheiros do kit e os 13 testes direcionados. Sem build integral local, consulta de deployment ou clique real no tracker.
+
+## Correção de publicação em 12 de setembro de 2026
+
+O envio original ed66c38d0 falhou no workflow 34607102980: a página de agradecimento omitia a propriedade obrigatória imagemOg do layout Squeeze. A verificação Astro bloqueou a publicação integral. A propriedade foi corrigida com a imagem já existente da campanha. A verificação direcionada reproduziu o erro original e passou com a correção (3 ficheiros, zero erros). Foi acrescentada uma verificação de tipos das páginas do kit antes do build de produção.
+
+O publicador de artigos executou diariamente às 07:00 UTC nos oito dias consultados (08:00 de Lisboa). Em 12 de setembro, a execução 34679580639 moveu adaptar-casa-pais-idosos.mdx para artigos no commit 7024a474a. O deployment 0716b842-4887-4bdc-9914-66df9841f0da falhou na etapa de build, com aviso do observador de proximidade ao limite de 20 minutos; o detalhe do erro desse build Cloudflare não foi consultado. Nove artigos continuam na fila válida, um por execução. O próximo é alargar-porta-casa-banho.mdx. Oito testes de fila e datas aprovados. Não se alterou a cadência nem se anteciparam os nove artigos.
+
+Antes da correção, landing, agradecimento e artigo adaptar-casa-pais-idosos devolveram HTTP 404. Correção autorizada pelo pedido do utilizador. Confirmação de publicação será registada no dashboard após a recuperação.

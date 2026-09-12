@@ -12,6 +12,7 @@ on:
       - 'public/downloads/kit-trocar-janelas-2026.pdf'
       - 'public/imagens/landings/kit-trocar-janelas/**'
       - 'tests/kit-janelas.test.mjs'
+      - 'tsconfig.kit-janelas.json'
       - 'src/components/CookieConsent.astro'
       - 'src/layouts/KitEstudanteLayout.astro'
       - 'src/pages/kit-estudante/**'

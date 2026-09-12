@@ -33,7 +33,8 @@
     "build:functions": "wrangler pages functions build --outdir .wrangler/functions-build",
     "build:verificacao-worker": "wrangler deploy --dry-run --config workers/verificacao-anuncio/wrangler.jsonc --outdir .wrangler/verificacao-worker-build",
     "verificacao:cli": "node scripts/verificacao-anuncio.mjs",
-    "test:kit-janelas": "node --test tests/kit-janelas.test.mjs"
+    "test:kit-janelas": "node --test tests/kit-janelas.test.mjs",
+    "check:kit-janelas": "astro check --tsconfig tsconfig.kit-janelas.json --minimumFailingSeverity error"
   },
   "dependencies": {
     "@astrojs/mdx": "latest",

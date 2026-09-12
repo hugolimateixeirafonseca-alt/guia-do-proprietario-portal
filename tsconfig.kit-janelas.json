@@ -1,0 +1,14 @@
+{
+  "extends": "astro/tsconfigs/base",
+  "compilerOptions": {
+    "checkJs": false,
+    "skipLibCheck": true,
+    "types": [
+      "astro/client"
+    ]
+  },
+  "include": [
+    "src/pages/kit-trocar-janelas/**/*.astro",
+    "src/layouts/Squeeze.astro"
+  ]
+}
