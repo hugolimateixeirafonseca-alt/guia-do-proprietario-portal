@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-12T07:14:17.044Z",
+  "generatedAt": "2026-09-12T16:05:42.325Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 102,
+    "published": 103,
     "newsOnline": 21
   },
   "articles": [
@@ -1568,14 +1568,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "adaptar-casa-pais-idosos.mdx",
       "arrivedAt": "2026-09-06T12:12:12+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-12T07:01:23Z",
+      "url": "https://guiadoproprietario.pt/casa/adaptar-casa-pais-idosos/"
     },
     {
       "id": "EXTRA-004",
