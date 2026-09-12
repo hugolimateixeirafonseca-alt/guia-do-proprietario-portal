@@ -1,6 +1,6 @@
-import { CONSENT_TEXT, KIT_JANELAS_CONSENT_VERSION } from "../../src/data/consent";
+import { KIT_JANELAS_CONSENT_VERSION } from "../../src/data/consent";
 import { checkRateLimit, logEvent, sha256, PublicError, type D1Database } from "../lib/kit-estudante";
-import { createSenderTransactionalClient } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
+import { createSenderTransactionalClient, SenderTransactionalError } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
 
 interface Env {
   SENDER_API_TOKEN?: string;
@@ -18,11 +18,20 @@ const json = (body: object, status = 200) => new Response(JSON.stringify(body), 
 });
 const safe = (value: unknown, max: number) => typeof value === "string" && value.length <= max ? value.trim() : "";
 
+class MarketingError extends Error {
+  constructor(readonly code: string) { super(code); }
+}
+
 async function registerMarketing(env: Env, email: string, requestId: string, date: string) {
   const headers = { Authorization: "Bearer " + env.SENDER_API_TOKEN, Accept: "application/json", "Content-Type": "application/json" };
-  const api = async (path: string, method: string, body?: object) => fetch("https://api.sender.net/v2" + path, {
-    method, headers, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(8000)
-  });
+  const api = async (path: string, method: string, body?: object) => {
+    const response = await fetch("https://api.sender.net/v2" + path, {
+      method, headers, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(8000)
+    });
+    // Libertar a ligação antes de iniciar o próximo pedido no Worker.
+    await response.body?.cancel();
+    return response;
+  };
   const identifier = encodeURIComponent(email);
   const fields = {
     "{$CONSENT_DATA}": date, "{$CONSENT_VERSAO}": KIT_JANELAS_CONSENT_VERSION,
@@ -31,17 +40,26 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
   };
   const lookup = await api("/subscribers/" + identifier, "GET");
   const group = env.SENDER_GROUP_MARKETING || "egK8WG";
-  if (!lookup.ok && lookup.status !== 404) throw new Error("marketing_lookup");
-  let response = await api(lookup.ok ? "/subscribers/" + identifier : "/subscribers", lookup.ok ? "PATCH" : "POST",
+  if (!lookup.ok && lookup.status !== 404) throw new MarketingError("marketing_lookup_" + lookup.status);
+  const writeSubscriber = async (path: string, method: string, payload: Record<string, unknown>) => {
+    let response = await api(path, method, payload);
+    // O consentimento comercial principal mantém-se mesmo se o campo adicional ainda não existir.
+    if (!response.ok && (response.status === 400 || response.status === 422)) {
+      const { "{$CONSENT_PUBLICIDADE}": _advertising, ...requiredFields } = fields;
+      response = await api(path, method, { ...payload, fields: requiredFields });
+    }
+    return response;
+  };
+  let response = await writeSubscriber(lookup.ok ? "/subscribers/" + identifier : "/subscribers", lookup.ok ? "PATCH" : "POST",
     lookup.ok ? { fields, trigger_automation: false } : { email, fields, groups: [group], trigger_automation: false });
   if (!response.ok && response.status === 409) {
-    response = await api("/subscribers/" + identifier, "PATCH", { fields, trigger_automation: false });
+    response = await writeSubscriber("/subscribers/" + identifier, "PATCH", { fields, trigger_automation: false });
   }
-  if (!response.ok) throw new Error("marketing_save");
+  if (!response.ok) throw new MarketingError("marketing_save_" + response.status);
   const membership = await api("/subscribers/groups/" + encodeURIComponent(group), "POST", {
     subscribers: [email], trigger_automation: false
   });
-  if (!membership.ok) throw new Error("marketing_group");
+  if (!membership.ok) throw new MarketingError("marketing_group_" + membership.status);
 }
 
 export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
@@ -91,7 +109,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       await logEvent(db, { source: SOURCE, event: "janelas_marketing_registered", status: "success",
         requestId, ipHash, sessionHash: emailHash, consentVersion: KIT_JANELAS_CONSENT_VERSION });
     }
-    const client = createSenderTransactionalClient({ apiToken: env.SENDER_API_TOKEN });
+    const client = createSenderTransactionalClient({ apiToken: env.SENDER_API_TOKEN, sendTimeoutMs: 45_000 });
     await client.send({
       to: email,
       fromEmail: env.SENDER_TRANSACTIONAL_FROM_EMAIL || "geral@guiadoproprietario.pt",
@@ -105,10 +123,13 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       sessionHash: emailHash, consentVersion: KIT_JANELAS_CONSENT_VERSION });
     return json({ ok: true });
   } catch (error) {
-    const publicCode = error instanceof PublicError ? error.publicCode : "delivery_failed";
+    const publicCode = error instanceof PublicError ? error.publicCode
+      : error instanceof SenderTransactionalError && error.code === "send_timeout" ? "delivery_unconfirmed" : "delivery_failed";
+    const diagnosticCode = error instanceof MarketingError || error instanceof SenderTransactionalError
+      ? error.code : publicCode;
     try {
       await logEvent(db, { source: SOURCE, event: "janelas_pdf_error", status: "error", requestId, ipHash,
-        sessionHash: emailHash, consentVersion: KIT_JANELAS_CONSENT_VERSION, error: publicCode });
+        sessionHash: emailHash, consentVersion: KIT_JANELAS_CONSENT_VERSION, error: diagnosticCode });
     } catch { /* Não guardar contactos nem a resposta do fornecedor em logs públicos. */ }
     return json({ error: publicCode }, error instanceof PublicError ? error.status : 502);
   }

@@ -71,8 +71,12 @@ export function buildSenderTemplateMessage(input) {
   };
 }
 
-export function createSenderTransactionalClient({ apiToken, fetchImpl = fetch, apiBase = SENDER_API_BASE }) {
+export function createSenderTransactionalClient({ apiToken, fetchImpl = fetch, apiBase = SENDER_API_BASE, sendTimeoutMs = 12_000 }) {
   if (!clean(apiToken, 512)) throw new TypeError("SENDER_API_TOKEN não configurado.");
+
+  if (!Number.isInteger(sendTimeoutMs) || sendTimeoutMs < 1000 || sendTimeoutMs > 60_000) {
+    throw new TypeError("Tempo de espera Sender inválido.");
+  }
 
   return {
     async send(input) {
@@ -84,7 +88,12 @@ export function createSenderTransactionalClient({ apiToken, fetchImpl = fetch, a
           "Content-Type": "application/json"
         },
         body: JSON.stringify(buildSenderMessage(input)),
-        signal: AbortSignal.timeout(12_000)
+        signal: AbortSignal.timeout(sendTimeoutMs)
+      }).catch(error => {
+        if (error?.name === "TimeoutError" || error?.name === "AbortError") {
+          throw new SenderTransactionalError("send_timeout");
+        }
+        throw error;
       });
       if (!response.ok) {
         throw new SenderTransactionalError(`send_${response.status}`, response.status);

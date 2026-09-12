@@ -46,6 +46,7 @@ export function initKitJanelas(doc, win) {
       const result = await response.json().catch(() => ({}));
       if (!response.ok || result.ok !== true) {
         const messages = {
+          delivery_unconfirmed: 'O envio está a demorar. Verifique o seu email e a pasta de spam antes de fazer um novo pedido.',
           invalid_email: 'Confirme o endereço de email e tente novamente.',
           invalid_consent: 'Autorize o envio do PDF para receber o kit.',
           too_many_requests: 'Já foram feitos vários pedidos. Aguarde alguns minutos antes de tentar novamente.'

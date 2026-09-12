@@ -68,3 +68,17 @@ test("transforma uma resposta de erro do Sender num erro estável", async () => 
   });
   await assert.rejects(client.send(input), (error) => error instanceof SenderTransactionalError && error.status === 422);
 });
+
+
+test("permite aguardar o anexo sem mudar o limite dos outros clientes",async()=>{
+  const original=AbortSignal.timeout;
+  const values=[];
+  AbortSignal.timeout=(ms)=>{values.push(ms);return new AbortController().signal};
+  try {
+    const fetchImpl=async()=>Response.json({success:true});
+    await createSenderTransactionalClient({apiToken:"test",fetchImpl,sendTimeoutMs:45000}).send(input);
+    await createSenderTransactionalClient({apiToken:"test",fetchImpl}).send(input);
+    assert.deepEqual(values,[45000,12000]);
+    assert.throws(()=>createSenderTransactionalClient({apiToken:"test",sendTimeoutMs:0}));
+  } finally {AbortSignal.timeout=original}
+});

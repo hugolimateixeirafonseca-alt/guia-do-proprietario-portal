@@ -151,3 +151,39 @@ test("CTA do agradecimento usa a oferta do kit, origem própria e relê consenti
   assert.equal(url.searchParams.has('measurement_consent'),false);
   assert.equal(url.searchParams.has('fbclid'),false);
 });
+
+
+test("um campo adicional indisponível não impede guardar o consentimento e enviar o PDF",async()=>{
+  globalThis.fetch=async(url,init={})=>{
+    const payload=init.body?JSON.parse(init.body):null;
+    calls.push({url:String(url),method:init.method,body:payload});
+    if(init.method==="GET")return new Response("{}",{status:404});
+    if(payload?.fields?.["{$CONSENT_PUBLICIDADE}"])return Response.json({errors:{fields:["unknown"]}},{status:422});
+    return Response.json({success:true});
+  };
+  assert.equal((await call({...body,consent2:true})).status,200);
+  const retry=calls.filter(c=>c.url.endsWith('/subscribers'))[1].body;
+  assert.equal(retry.fields["{$CONSENT_MARKETING}"],"true");
+  assert.equal(retry.fields["{$CONSENT_VERSAO}"],body.consentVersion);
+  assert.equal(retry.fields["{$CONSENT_PUBLICIDADE}"],undefined);
+  assert.equal(calls.filter(c=>c.url.endsWith('/message/send')).length,1);
+});
+test("regista o passo e estado do fornecedor sem expor o contacto ou a resposta",async()=>{
+  globalThis.fetch=async(url,init={})=>new Response("private provider response",{status:init.method==="GET"?401:503});
+  const response=await call({...body,consent2:true});
+  assert.deepEqual(await response.json(),{error:"delivery_failed"});
+  const audit=sql.prepare("SELECT * FROM kit_events WHERE event='janelas_pdf_error'").get();
+  assert.equal(audit.error_code,"marketing_lookup_401");
+  assert.ok(!JSON.stringify(audit).includes('private provider response'));
+  assert.ok(!JSON.stringify(audit).includes(body.email));
+});
+test("timeout de envio não confirma entrega nem repete automaticamente",async()=>{
+  let attempts=0;
+  globalThis.fetch=async()=>{attempts++;throw new DOMException("timeout", "TimeoutError")};
+  const response=await call();
+  assert.equal(response.status,502);
+  assert.deepEqual(await response.json(),{error:"delivery_unconfirmed"});
+  assert.equal(attempts,1);
+  assert.equal(sql.prepare("SELECT error_code FROM kit_events WHERE event='janelas_pdf_error'").get().error_code,"send_timeout");
+  assert.equal(sql.prepare("SELECT count(*) AS n FROM kit_events WHERE event='janelas_pdf_sent'").get().n,0);
+});
