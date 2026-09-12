@@ -28,9 +28,10 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
     const response = await fetch("https://api.sender.net/v2" + path, {
       method, headers, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(8000)
     });
-    // Libertar a ligação antes de iniciar o próximo pedido no Worker.
-    await response.body?.cancel();
-    return response;
+    // Consumir a resposta liberta a ligação e permite confirmar grupos já existentes.
+    const payload = await response.json().catch(() => null);
+    return { ok: response.ok, status: response.status, payload };
+
   };
   const identifier = encodeURIComponent(email);
   const fields = {
@@ -40,6 +41,10 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
   };
   const lookup = await api("/subscribers/" + identifier, "GET");
   const group = env.SENDER_GROUP_MARKETING || "egK8WG";
+  const hasGroup = (payload: unknown) => {
+    const tags = (payload as { data?: { subscriber_tags?: { id?: string }[] } } | null)?.data?.subscriber_tags;
+    return Array.isArray(tags) && tags.some(tag => tag.id === group);
+  };
   if (!lookup.ok && lookup.status !== 404) throw new MarketingError("marketing_lookup_" + lookup.status);
   const writeSubscriber = async (path: string, method: string, payload: Record<string, unknown>) => {
     let response = await api(path, method, payload);
@@ -52,14 +57,25 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
   };
   let response = await writeSubscriber(lookup.ok ? "/subscribers/" + identifier : "/subscribers", lookup.ok ? "PATCH" : "POST",
     lookup.ok ? { fields, trigger_automation: false } : { email, fields, groups: [group], trigger_automation: false });
+  const createdWithGroup = !lookup.ok && response.ok;
   if (!response.ok && response.status === 409) {
     response = await writeSubscriber("/subscribers/" + identifier, "PATCH", { fields, trigger_automation: false });
   }
   if (!response.ok) throw new MarketingError("marketing_save_" + response.status);
+  // O POST de criação já inclui o grupo. Repeti-lo pode devolver 400 no Sender.
+  if (createdWithGroup || hasGroup(lookup.payload) || hasGroup(response.payload)) return;
   const membership = await api("/subscribers/groups/" + encodeURIComponent(group), "POST", {
     subscribers: [email], trigger_automation: false
   });
-  if (!membership.ok) throw new MarketingError("marketing_group_" + membership.status);
+  if (!membership.ok) {
+    // Duas submissões concorrentes podem associar o mesmo contacto entretanto.
+    // Só aceitar a resposta ambígua quando uma releitura confirmar a associação.
+    if (membership.status === 400 || membership.status === 409) {
+      const confirmed = await api("/subscribers/" + identifier, "GET");
+      if (confirmed.ok && hasGroup(confirmed.payload)) return;
+    }
+    throw new MarketingError("marketing_group_" + membership.status);
+  }
 }
 
 export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {

@@ -187,3 +187,43 @@ test("timeout de envio não confirma entrega nem repete automaticamente",async()
   assert.equal(sql.prepare("SELECT error_code FROM kit_events WHERE event='janelas_pdf_error'").get().error_code,"send_timeout");
   assert.equal(sql.prepare("SELECT count(*) AS n FROM kit_events WHERE event='janelas_pdf_sent'").get().n,0);
 });
+
+
+test("novo contacto recebe o grupo na criação sem repetir associação",async()=>{
+  assert.equal((await call({...body,consent2:true})).status,200);
+  assert.equal(calls.filter(c=>c.url.includes('/subscribers/groups/')).length,0);
+  assert.equal(calls.filter(c=>c.url.endsWith('/message/send')).length,1);
+});
+test("contacto já no grupo recebe o PDF sem nova associação",async()=>{
+  globalThis.fetch=async(url,init={})=>{
+    calls.push({url:String(url),method:init.method});
+    if(String(url).includes('/subscribers/groups/'))return new Response('{}',{status:400});
+    return Response.json({data:{subscriber_tags:[{id:'marketing-only'}]}});
+  };
+  assert.equal((await call({...body,consent2:true})).status,200);
+  assert.ok(!calls.some(c=>c.url.includes('/subscribers/groups/')));
+  assert.equal(calls.filter(c=>c.url.endsWith('/message/send')).length,1);
+});
+test("contacto existente sem grupo é associado sem substituir os outros grupos",async()=>{
+  globalThis.fetch=async(url,init={})=>{
+    calls.push({url:String(url),method:init.method,body:init.body?JSON.parse(init.body):null});
+    return Response.json({data:{subscriber_tags:[{id:'outro-kit'}]}});
+  };
+  assert.equal((await call({...body,consent2:true})).status,200);
+  assert.equal(calls.filter(c=>c.url.includes('/subscribers/groups/')).length,1);
+  assert.equal(calls.find(c=>c.method==='PATCH').body.groups,undefined);
+});
+test("erro de associação só é aceite quando o Sender confirma o grupo numa releitura",async()=>{
+  for(const confirmed of [true,false]){
+    let lookups=0,deliveries=0;
+    globalThis.fetch=async(url,init={})=>{
+      if(init.method==='GET')return Response.json({data:{subscriber_tags:++lookups>1&&confirmed?[{id:'marketing-only'}]:[]}});
+      if(String(url).includes('/subscribers/groups/'))return new Response('{}',{status:400});
+      if(String(url).endsWith('/message/send'))deliveries++;
+      return Response.json({data:{subscriber_tags:[]}});
+    };
+    const response=await call({...body,consent2:true,eventId:crypto.randomUUID()});
+    assert.equal(response.status,confirmed?200:502);
+    assert.equal(deliveries,confirmed?1:0);
+  }
+});
