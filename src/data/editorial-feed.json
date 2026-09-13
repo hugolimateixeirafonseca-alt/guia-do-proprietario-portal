@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-13T07:18:55.984Z",
+  "generatedAt": "2026-09-13T07:40:15.219Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 103,
+    "published": 104,
     "newsOnline": 21
   },
   "articles": [
@@ -1552,14 +1552,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "alargar-porta-casa-banho.mdx",
       "arrivedAt": "2026-09-06T12:12:38+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-13T07:01:22Z",
+      "url": "https://guiadoproprietario.pt/casa/alargar-porta-casa-banho/"
     },
     {
       "id": "EXTRA-001",
