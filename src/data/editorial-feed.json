@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-14T07:20:00.798Z",
+  "generatedAt": "2026-09-14T07:36:27.317Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 104,
+    "published": 105,
     "newsOnline": 21
   },
   "articles": [
@@ -1536,14 +1536,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "barras-apoio-casa-banho.mdx",
       "arrivedAt": "2026-09-06T12:13:02+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-14T07:01:42Z",
+      "url": "https://guiadoproprietario.pt/casa/barras-apoio-casa-banho/"
     },
     {
       "id": "EXTRA-002",
