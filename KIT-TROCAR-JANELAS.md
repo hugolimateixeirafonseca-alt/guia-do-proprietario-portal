@@ -1,5 +1,15 @@
 # Kit Trocar Janelas em 2026
 
+## Reforço comercial do agradecimento e email, 15 de setembro de 2026
+
+- Base: correção de backend 22a495440, já integrada antes desta edição. Alterações limitadas ao conteúdo do agradecimento, respetivo CSS e assunto/corpos do email na função existente.
+- Agradecimento: título “Janelas novas com até 25% de desconto”, CTA “Pedir o meu orçamento grátis” e instrução explícita para preencher o formulário no site do parceiro, enquanto o kit chega ao email.
+- Email: campanha apresentada em destaque, botão principal de orçamento e repetição da chamada à ação no fecho. Ligação ao PDF e anexo preservados. Aplica-se aos próximos envios do kit, sem reenvio para contactos anteriores.
+- Condições confirmadas no módulo público https://www.nuvi.pt/assets/Janelas2026Desc25-CDbpP_xh.js em 15 de setembro: PVC, até 25%, 3 ou mais janelas, orçamento gratuito e sem compromisso após visita técnica. Mantido o âmbito comercial da Grande Lisboa.
+- Reutiliza o encaminhamento existente /go/kit-trocar-janelas. Email identificado por source=kit-trocar-janelas-email, utm_medium=email e utm_content=cta-email. Não acrescenta dados pessoais ou identificadores de publicidade ao link do email. O agradecimento mantém o helper atual com atribuição e consentimento.
+- Preservados backend de envio, registo de consentimentos, CompleteRegistration, deduplicação e Lead final no postback do parceiro. Nenhum email real ou clique de teste enviado.
+- Validação dirigida: tipos da API e 24 testes do kit aprovados. Compilação isolada do agradecimento e CSS. Sem build integral ou confirmação online desta alteração. Publicação autorizada explicitamente pelo utilizador após revisão da alteração. Envio pelo fluxo habitual; conclusão do deployment e confirmação online não consultadas.
+
 ## Recuperação da publicação do evento, 15 de setembro de 2026
 
 A execução 34964869636 do commit efa9b2701e14fa5062d35c32d1a980c084be9636 falhou às 12:02 UTC. O verificador Astro/TypeScript considerava externalId obrigatório na função partilhada sendMetaConversion, apesar de o identificador externo ser opcional no envio. A chamada do kit omitia-o. A compilação isolada e os testes anteriores não verificavam este contrato de tipos, e a alteração não chegou ao site por esta execução.
