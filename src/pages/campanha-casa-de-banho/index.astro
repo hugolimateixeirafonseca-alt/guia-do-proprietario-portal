@@ -1,0 +1,60 @@
+---
+import Squeeze from '../../layouts/Squeeze.astro';
+import Icon from '../../components/CasaBanhoIcon.astro';
+import '../../styles/campanha-casa-de-banho.css';
+const destino = 'https://track.guiadoproprietario.pt/go/casa-banho-campanha?source=campanha-casa-de-banho';
+const beneficios = [
+ {icon:'shield',text:'Mais conforto e facilidade de acesso'},
+ {icon:'space',text:'Mais espaço para o seu dia a dia'},
+ {icon:'home',text:'Uma casa de banho mais moderna'},
+ {icon:'spark',text:'Acompanhamento do início ao fim'}
+];
+---
+<Squeeze titulo="Troque a banheira por uma base de duche | Campanha 2026" descricao="Dê mais conforto à sua casa de banho. Conheça a campanha com até 25% de desconto na Grande Lisboa, Sintra e Cascais e peça um orçamento gratuito." imagemOg="/imagens/campanhas/casa-banho/partilha.jpg" robots="noindex,follow">
+ <div class="cb">
+  <a class="cb-skip" href="#pedido">Saltar para o pedido de orçamento</a>
+  <section class="cb-hero" aria-labelledby="cb-title">
+   <div class="cb-copy">
+    <p class="cb-eyebrow">CAMPANHA CASA DE BANHO 2026</p>
+    <h1 id="cb-title">Troque a sua banheira por uma <span>base de duche</span></h1>
+    <p class="cb-lead">Mais espaço, mais conforto e uma casa de banho moderna. Com o acompanhamento de uma equipa especialista.</p>
+    <a class="cb-discount" href={destino} rel="sponsored noopener" data-banho-link aria-label="Ver campanha com até 25% de desconto">
+     <span class="cb-discount-value"><small>até</small><strong>25<span>%</span></strong></span>
+     <span class="cb-discount-copy"><b>DE DESCONTO</b><span>Campanha<br/>Casa de banho 2026</span></span>
+     <span class="cb-discount-arrow"><Icon name="arrow"/></span>
+    </a>
+    <p class="cb-discount-note">Sujeito às condições da campanha e ao orçamento após visita técnica.</p>
+    <ul class="cb-checks">
+     <li><span><Icon name="check"/></span>Orçamento gratuito e sem compromisso</li>
+     <li><span><Icon name="check"/></span>Acompanhamento de toda a obra</li>
+     <li><span><Icon name="check"/></span>Grande Lisboa, Sintra e Cascais</li>
+    </ul>
+   </div>
+   <figure class="cb-visual">
+    <img src="/imagens/campanhas/casa-banho/antes-depois.webp" srcset="/imagens/campanhas/casa-banho/antes-depois-768.webp 768w, /imagens/campanhas/casa-banho/antes-depois.webp 1536w" sizes="(max-width: 720px) 100vw, 60vw" alt="Comparação ilustrativa da mesma casa de banho: à esquerda com banheira, à direita com base de duche e resguardo de vidro." width="1536" height="1024" fetchpriority="high"/>
+    <span class="cb-before">ANTES</span><span class="cb-after">DEPOIS</span>
+    <span class="cb-change" aria-hidden="true"><Icon name="arrow"/></span>
+    <figcaption>Imagem ilustrativa da transformação.</figcaption>
+   </figure>
+  </section>
+  <section class="cb-request" id="pedido" aria-labelledby="cb-question">
+   <div class="cb-request-heading"><p class="cb-eyebrow">UM PASSO PARA COMEÇAR</p><h2 id="cb-question">O que pretende fazer?</h2><p>Selecione a opção que melhor se enquadra no seu caso.</p></div>
+   <div class="cb-request-grid">
+    <fieldset class="cb-options"><legend class="cb-sr-only">Tipo de intervenção</legend>
+     <label class="cb-option"><input type="radio" name="intervencao" value="banheira" checked/><Icon name="bath"/><span>Trocar banheira<br/><b>por base de duche</b></span></label>
+     <label class="cb-option"><input type="radio" name="intervencao" value="duche"/><Icon name="shower"/><span>Trocar uma base<br/><b>de duche antiga</b></span></label>
+    </fieldset>
+    <div class="cb-action"><a class="cb-button" href={destino} rel="sponsored noopener" data-banho-link><span>Ver campanha e pedir orçamento</span><Icon name="arrow"/></a><p class="cb-next-step" data-banho-next aria-live="polite">Na página seguinte, preencha o pedido para trocar a banheira.</p><p class="cb-secure"><Icon name="lock"/>Orçamento gratuito e sem compromisso.</p></div>
+   </div>
+  </section>
+  <section class="cb-benefits" aria-label="Vantagens de renovar a casa de banho">{beneficios.map(b=><div><span class="cb-benefit-icon"><Icon name={b.icon}/></span><p>{b.text}</p></div>)}</section>
+  <footer class="cb-footer">
+   <a class="cb-brand" href="/">Guia do Proprietário<span>Decisões melhores para a sua casa.</span></a>
+   <div class="cb-footer-info"><p>Podemos receber uma comissão pelo encaminhamento.</p><nav aria-label="Informação legal"><a href="/privacidade/">Privacidade</a><a href="/termos/">Termos</a><a href="#cookie-settings" data-cookie-settings>Definições de cookies</a></nav></div>
+  </footer>
+ </div>
+</Squeeze>
+<script>
+ import { prepararCampanhaBanho } from '../../lib/campanha-casa-de-banho.mjs';
+ prepararCampanhaBanho(document, window);
+</script>
