@@ -1,5 +1,15 @@
 # Kit Trocar Janelas em 2026
 
+## Separação de conversões Meta, 15 de setembro de 2026
+
+- O pedido de email do kit emite `CompleteRegistration` só após o Sender aceitar o envio. Não emite `Lead`.
+- Pixel e API de Conversões partilham `kit-janelas-registration-{requestId}` para deduplicação. A repetição de um pedido concluído não reenvia o PDF nem uma conversão CAPI já aceite. Falhas de medição não bloqueiam o agradecimento.
+- Medição exige a preferência de cookies atual, explícita e dentro de validade. Consentimento para PDF e inscrição comercial não substituem esta escolha. O email enviado por CAPI é protegido por SHA-256; nenhuma informação pessoal entra no URL de agradecimento.
+- Reutiliza `META_CAPI_ACCESS_TOKEN`, `META_DATASET_ID` (dataset oficial por omissão), `META_GRAPH_VERSION` e `META_TEST_EVENT_CODE` do portal. Credencial CAPI presente em produção, confirmada apenas pelo nome. Receção real do evento ainda não confirmada.
+- O CTA continua a usar a oferta `kit-trocar-janelas`. O tracker conserva o evento `Lead` apenas no postback validado do parceiro e só o envia à Meta quando tem consentimento e identificadores de atribuição válidos. Acesso à página e clique no CTA não são leads finais.
+- O conjunto Meta `AS05 | PL5 KIT | GRANDE LISBOA | BROAD` (120249702360960143) deve otimizar por `Complete registration` no dataset 1394294186173855. O anúncio associado 120249702360950143 deve apontar para `/kit-trocar-janelas/`, com `campaign_id`, `adset_id` e `ad_id` preenchidos pelas macros Meta.
+- Validação local: 28 testes do kit e conversões e 10 testes direcionados do tracker aprovados com chamadas externas simuladas. Utilizador autorizou explicitamente a publicação do portal e dashboard e do conjunto AS05 com o anúncio, mantendo campanha desligada e orçamento de 15 EUR/dia. Conclusão do deployment e receção Meta não consultadas.
+
 Estado: publicação da landing e ativação do Sender autorizadas expressamente pelo utilizador em 11 de setembro de 2026. Implementação validada e preparada para envio pelo fluxo normal de produção. Conclusão do deployment e entrega real não consultadas nem presumidas.
 
 ## Página e documento

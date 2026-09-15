@@ -47,6 +47,69 @@ after(async()=>{
 });
 const call = (data=body, headers) => handler({request:requestFor(data,headers),env});
 
+const measurementCookie = (measurement = true, savedAt = new Date().toISOString()) =>
+  'gp_cookie_preferences=' + encodeURIComponent(JSON.stringify({measurement, savedAt, version:'2026-09-01-1'}));
+
+test('registo do kit usa CompleteRegistration com consentimento e deduplicação entre Pixel e CAPI', async () => {
+  env.META_CAPI_ACCESS_TOKEN = 'fake-meta-token';
+  const data = {...body, metaMeasurement:true, metaFbp:'fb.1.1788888000000.123456789'};
+  globalThis.fetch = async (url, init) => {
+    calls.push({url:String(url),body:JSON.parse(init.body)});
+    return Response.json(String(url).includes('graph.facebook.com') ? {events_received:1} : {success:true});
+  };
+  const headers = {Cookie:measurementCookie()};
+  const response = await (await call(data,headers)).json();
+  const meta = calls.find(c => c.url.includes('graph.facebook.com'));
+  assert.equal(meta.body.data[0].event_name,'CompleteRegistration');
+  assert.equal(meta.body.data[0].event_id,response.metaEventId);
+  assert.equal(meta.body.data[0].event_source_url,'https://guiadoproprietario.pt/kit-trocar-janelas/');
+  assert.match(meta.body.data[0].user_data.em[0],/^[a-f0-9]{64}$/);
+  assert.equal(meta.body.data[0].user_data.fbp,data.metaFbp);
+  assert.ok(!JSON.stringify(meta).includes('pessoa@example.com'));
+  await call(data,headers);
+  assert.equal(calls.filter(c=>c.url.includes('graph.facebook.com')).length,1);
+  assert.equal(calls.filter(c=>c.url.endsWith('/message/send')).length,1);
+  const {trackKitRegistration}=await import('../src/lib/kit-janelas-measurement.mjs');
+  const pixel=[];
+  trackKitRegistration({cookie:headers.Cookie},{fbq:(...args)=>pixel.push(args)},response.metaEventId);
+  assert.equal(pixel[0][1],'CompleteRegistration');
+  assert.equal(pixel[0][3].eventID,meta.body.data[0].event_id);
+});
+
+test('consentimento comercial não substitui medição e cookies inválidos não autorizam Meta', async () => {
+  env.META_CAPI_ACCESS_TOKEN='fake-meta-token';
+  for (const cookie of ['',measurementCookie(false),measurementCookie(true,'2000-01-01'),measurementCookie(true,'2099-01-01')]) {
+    const response=await (await call({...body,metaMeasurement:true},{Cookie:cookie})).json();
+    assert.equal(response.ok,true);
+    assert.equal(response.metaEventId,undefined);
+  }
+  assert.ok(!calls.some(c=>c.url.includes('graph.facebook.com')));
+  const {trackKitRegistration}=await import('../src/lib/kit-janelas-measurement.mjs');
+  trackKitRegistration({cookie:measurementCookie(false)},{fbq:()=>assert.fail('medição recusada')},'id');
+});
+
+test('falha de Meta mantém o PDF concluído e repetição usa o mesmo identificador', async () => {
+  env.META_CAPI_ACCESS_TOKEN='fake-meta-token';
+  globalThis.fetch=async(url,init)=>{
+    calls.push({url:String(url),body:JSON.parse(init.body)});
+    if(String(url).includes('graph.facebook.com'))throw Error('network');
+    return Response.json({success:true});
+  };
+  const data={...body,metaMeasurement:true};
+  const a=await (await call(data,{Cookie:measurementCookie()})).json();
+  const b=await (await call(data,{Cookie:measurementCookie()})).json();
+  assert.equal(a.ok,true);assert.equal(b.metaEventId,a.metaEventId);
+  assert.equal(calls.filter(c=>c.url.endsWith('/message/send')).length,1);
+  assert.equal(calls.filter(c=>c.url.includes('graph.facebook.com')).length,2);
+});
+
+test('envio recusado pelo Sender nunca emite registo Meta', async () => {
+  env.META_CAPI_ACCESS_TOKEN='fake-meta-token';
+  globalThis.fetch=async(url)=>{calls.push({url:String(url)});return Response.json({}, {status:503})};
+  assert.equal((await call({...body,metaMeasurement:true},{Cookie:measurementCookie()})).status,502);
+  assert.ok(!calls.some(c=>c.url.includes('graph.facebook.com')));
+});
+
 test("o envio exige o primeiro consentimento e a versão atual",async()=>{
   for(const change of [{consent1:false},{consent1:"true"},{consentVersion:"antiga"},{source:"outro"},{consent2:"true"}]){
     assert.equal((await call({...body,...change})).status,400);

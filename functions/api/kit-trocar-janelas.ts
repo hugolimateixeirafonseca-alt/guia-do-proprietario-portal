@@ -1,6 +1,8 @@
 import { KIT_JANELAS_CONSENT_VERSION } from "../../src/data/consent";
 import { checkRateLimit, logEvent, sha256, PublicError, type D1Database } from "../lib/kit-estudante";
 import { createSenderTransactionalClient, SenderTransactionalError } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
+import { buildMetaAttribution, sendMetaConversion } from "../../src/lib/meta-conversions.mjs";
+import { kitMeasurement } from "../../src/lib/kit-janelas-measurement.mjs";
 
 interface Env {
   SENDER_API_TOKEN?: string;
@@ -9,6 +11,10 @@ interface Env {
   SENDER_TRANSACTIONAL_FROM_NAME?: string;
   KIT_ESTUDANTE_DB?: D1Database;
   SESSION_SECRET?: string;
+  META_CAPI_ACCESS_TOKEN?: string;
+  META_DATASET_ID?: string;
+  META_GRAPH_VERSION?: string;
+  META_TEST_EVENT_CODE?: string;
 }
 const PDF_URL = "https://guiadoproprietario.pt/downloads/kit-trocar-janelas-2026.pdf";
 const PAGE_URL = "https://guiadoproprietario.pt/kit-trocar-janelas/";
@@ -102,14 +108,42 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   if (!db || !env.SESSION_SECRET || !env.SENDER_API_TOKEN) return json({ error: "not_configured" }, 503);
   const requestId = body.eventId as string;
   const marketing = body.consent2 === true;
+  const metaEventId = `kit-janelas-registration-${requestId}`;
+  const attribution = body.metaMeasurement === true && kitMeasurement(request.headers.get("Cookie") || "")
+    ? buildMetaAttribution(request, { fbp: body.metaFbp, fbc: body.metaFbc }) : null;
   let ipHash = "";
   let emailHash = "";
+  const completeRegistration = async () => {
+    if (!attribution) return json({ ok: true });
+    try {
+      const sent = await db.prepare("SELECT id FROM kit_events WHERE source = ? AND event = 'janelas_meta_registration' AND request_id = ? AND status = 'success' LIMIT 1")
+        .bind(SOURCE, requestId).first();
+      if (!sent) {
+        const result = await sendMetaConversion({
+          ...attribution, accessToken: env.META_CAPI_ACCESS_TOKEN,
+          datasetId: env.META_DATASET_ID, graphVersion: env.META_GRAPH_VERSION,
+          testEventCode: env.META_TEST_EVENT_CODE, eventName: "CompleteRegistration",
+          eventId: metaEventId, eventSourceUrl: PAGE_URL, email,
+          customData: { content_name: SOURCE, content_category: "lead_magnet", status: true }
+        });
+        await logEvent(db, { source: SOURCE, event: "janelas_meta_registration",
+          status: result.sent && result.eventsReceived === 1 ? "success" : "ignored", requestId,
+          consentVersion: "2026-09-01-1", error: result.reason || (result.eventsReceived === 1 ? undefined : "not_accepted") });
+      }
+    } catch {
+      try {
+        await logEvent(db, { source: SOURCE, event: "janelas_meta_registration", status: "error",
+          requestId, error: "meta_registration_failed" });
+      } catch { /* A medição não pode transformar um envio concluído num erro. */ }
+    }
+    return json({ ok: true, metaEventId });
+  };
   try {
     emailHash = await sha256(env.SESSION_SECRET + ":kit-janelas-email:" + email);
     const completed = await db.prepare(
       "SELECT id FROM kit_events WHERE source = ? AND event = 'janelas_pdf_sent' AND request_id = ? AND session_hash = ? AND status = 'success' LIMIT 1"
     ).bind(SOURCE, requestId, emailHash).first();
-    if (completed) return json({ ok: true });
+    if (completed) return completeRegistration();
     ipHash = await checkRateLimit(request, db, env.SESSION_SECRET + ":kit-janelas-ip", 6);
     const recipientRequest = new Request(request.url, { headers: { "CF-Connecting-IP": emailHash } });
     await checkRateLimit(recipientRequest, db, env.SESSION_SECRET + ":kit-janelas-recipient", 3);
@@ -137,7 +171,7 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
     });
     await logEvent(db, { source: SOURCE, event: "janelas_pdf_sent", status: "success", requestId, ipHash,
       sessionHash: emailHash, consentVersion: KIT_JANELAS_CONSENT_VERSION });
-    return json({ ok: true });
+    return completeRegistration();
   } catch (error) {
     const publicCode = error instanceof PublicError ? error.publicCode
       : error instanceof SenderTransactionalError && error.code === "send_timeout" ? "delivery_unconfirmed" : "delivery_failed";

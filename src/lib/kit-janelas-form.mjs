@@ -1,4 +1,5 @@
 import { kitThankYouUrl } from './kit-janelas-campaign.mjs';
+import { kitMeasurement, trackKitRegistration } from './kit-janelas-measurement.mjs';
 export function initKitJanelas(doc, win) {
   const form = doc.getElementById('kit-janelas-form');
   if (!form) return;
@@ -40,7 +41,8 @@ export function initKitJanelas(doc, win) {
         body: JSON.stringify({
           email: email.value.trim(), consent1: true, consent2: marketing.checked,
           consentVersion: form.dataset.consentVersion, source: 'kit-trocar-janelas',
-          eventId: requestId, company: form.elements.namedItem('company').value
+          eventId: requestId, company: form.elements.namedItem('company').value,
+          ...kitMeasurement(doc.cookie)
         })
       });
       const result = await response.json().catch(() => ({}));
@@ -53,6 +55,7 @@ export function initKitJanelas(doc, win) {
         };
         throw new Error(messages[result.error] || 'Não foi possível enviar o kit agora. Tente novamente dentro de momentos.');
       }
+      trackKitRegistration(doc, win, result.metaEventId);
       doc.getElementById('kj-success-email').textContent = email.value.trim();
       form.hidden = true; success.hidden = false; success.focus();
       win.location.assign(kitThankYouUrl(win.location.href));
