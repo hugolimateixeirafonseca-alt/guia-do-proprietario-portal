@@ -79,7 +79,7 @@ export async function sendMetaConversion({
   eventTime = Math.floor(Date.now() / 1000),
   eventSourceUrl,
   email,
-  externalId,
+  externalId = "",
   fbp,
   fbc,
   clientIpAddress,

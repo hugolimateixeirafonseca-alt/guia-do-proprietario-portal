@@ -13,6 +13,8 @@ on:
       - 'public/imagens/landings/kit-trocar-janelas/**'
       - 'tests/kit-janelas.test.mjs'
       - 'tsconfig.kit-janelas.json'
+      - 'tsconfig.kit-janelas-api.json'
+      - 'src/lib/meta-conversions.mjs'
       - 'src/components/CookieConsent.astro'
       - 'src/layouts/KitEstudanteLayout.astro'
       - 'src/pages/kit-estudante/**'

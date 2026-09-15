@@ -1,5 +1,13 @@
 # Kit Trocar Janelas em 2026
 
+## Recuperação da publicação do evento, 15 de setembro de 2026
+
+A execução 34964869636 do commit efa9b2701e14fa5062d35c32d1a980c084be9636 falhou às 12:02 UTC. O verificador Astro/TypeScript considerava externalId obrigatório na função partilhada sendMetaConversion, apesar de o identificador externo ser opcional no envio. A chamada do kit omitia-o. A compilação isolada e os testes anteriores não verificavam este contrato de tipos, e a alteração não chegou ao site por esta execução.
+
+Correção: externalId tem agora valor por omissão vazio, mantendo o payload anterior sem acrescentar um identificador. Nova verificação dirigida tsconfig.kit-janelas-api.json reproduziu o erro TS2345 antes da correção e passou depois. O comando test:kit-janelas executa esta verificação antes dos testes de comportamento e antes da compilação de produção. 28 testes de kit e conversões aprovados. Não se alteraram o consentimento, a deduplicação, o evento Lead do parceiro ou a campanha Meta.
+
+O Pixel emite CompleteRegistration no formulário após confirmação do envio, antes da navegação para o agradecimento. A extensão que mostra apenas eventos da página /obrigado/ pode por isso mostrar apenas PageView. Um acesso direto ao agradecimento não deve criar conversões. A atribuição a anúncio depende também de uma interação elegível com o anúncio; receber o evento no dataset e atribuí-lo a um anúncio são verificações diferentes.
+
 ## Separação de conversões Meta, 15 de setembro de 2026
 
 - O pedido de email do kit emite `CompleteRegistration` só após o Sender aceitar o envio. Não emite `Lead`.
