@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-16T07:14:39.786Z",
+  "generatedAt": "2026-09-16T07:34:03.534Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 105,
+    "published": 106,
     "newsOnline": 21
   },
   "articles": [
@@ -1520,14 +1520,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "resolver-escadas-em-casa.mdx",
       "arrivedAt": "2026-09-06T12:13:28+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-16T07:01:51Z",
+      "url": "https://guiadoproprietario.pt/casa/resolver-escadas-em-casa/"
     },
     {
       "id": "EXTRA-003",
