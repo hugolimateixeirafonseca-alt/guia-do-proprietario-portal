@@ -1,3 +1,4 @@
+import { recordConsent } from "../lib/consent-archive.mjs";
 import {
   CONSENT_TEXT,
   NEWSLETTER_CONSENT_VERSION,
@@ -6,6 +7,8 @@ import {
 } from "../../src/data/consent";
 
 interface Env {
+  CONSENT_ARCHIVE_DB?: unknown;
+  CONSENT_ARCHIVE_KEY?: string;
   SENDER_API_TOKEN?: string;
   SENDER_GROUP_NEWSLETTER?: string;
   SENDER_GROUP_MARKETING?: string;
@@ -447,6 +450,13 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     return json({ error: "postal_not_found" }, 400);
   }
 
+  let evidence;
+  try {
+    evidence = await recordConsent(env, request, {email, eventId:cleanText(body.eventId,128), source,
+      version:consentVersion, text:consentText, choices:{c1:body.consent1 === true,c2:body.consent2 === true},
+      pageUrl:cleanText(body.pageUrl,2048)});
+  } catch { return json({error:"consent_archive_unavailable"},503); }
+
   if (isCleaningLead) {
     const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup?.municipality || "Por confirmar", consentText);
     if (!dashboardResult.ok) {
@@ -473,17 +483,17 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     return json({ error: "not_configured" }, 503);
   }
 
-  const consentDate = new Date().toISOString();
+  const consentDate = evidence.received_at;
   const fields = {
     "{$CONSENT_DATA}": consentDate,
-    "{$CONSENT_IP}": cleanText(request.headers.get("CF-Connecting-IP"), 64),
+    "{$CONSENT_IP}": evidence.ip || "",
     "{$CONSENT_VERSAO}": consentVersion,
     ...(!isDirectValueLead && !isCleaningLead || marketingConsent ? { "{$CONSENT_MARKETING}": marketingConsent ? "true" : "false" } : {}),
     ...(isNewsletter ? { "{$CONSENT_PUBLICIDADE}": advertisingConsent ? "true" : "false" } : {}),
     ...(!isCleaningLead ? { "{$CONSENT_PARCEIROS}": partnerConsent ? "true" : "false" } : {}),
     "{$ORIGEM}": cleanText(body.pageUrl, 2048),
     "{$LEAD_SOURCE}": source,
-    "{$EVENT_ID}": cleanText(body.eventId, 128),
+    "{$EVENT_ID}": evidence.event_id,
     ...(isQualifiedLead && !isCleaningLead ? {
       "{$CODIGO_POSTAL}": postalCode,
       "{$LOCALIDADE}": resolvedPostalLookup?.locality || "Por confirmar",

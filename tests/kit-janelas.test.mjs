@@ -27,13 +27,14 @@ before(async () => {
 beforeEach(async () => {
   sql = new DatabaseSync(":memory:");
   sql.exec(await readFile("migrations/kit-janelas/0001_kit_janelas.sql", "utf8"));
+  sql.exec(await readFile("migrations/consent-archive/0001_consent_evidence.sql", "utf8"));
   calls = [];
   const db = { prepare(query) { let values=[];return {
     bind(...args){values=args;return this},
     async first(){return sql.prepare(query).get(...values)||null},
     async run(){sql.prepare(query).run(...values);return {success:true}}
   }}};
-  env = { KIT_JANELAS_DB: db, SESSION_SECRET: "local-test-secret-with-no-production-access",
+  env = { CONSENT_ARCHIVE_DB: db, CONSENT_ARCHIVE_KEY:"synthetic-archive-secret-for-local-tests-only", KIT_JANELAS_DB: db, SESSION_SECRET: "local-test-secret-with-no-production-access",
     SENDER_API_TOKEN: "fake-token", SENDER_GROUP_MARKETING: "marketing-only" };
   globalThis.fetch = async (url, init = {}) => {
     calls.push({url:String(url),method:init.method,body:init.body?init.body ? JSON.parse(init.body) : null:null});
@@ -366,3 +367,6 @@ test("erro de associação só é aceite quando o Sender confirma o grupo numa r
     assert.equal(deliveries,confirmed?1:0);
   }
 });
+
+test('IP é copiado para o Sender e a evidência existe antes do envio',async()=>{const response=await call();assert.equal(response.status,200);const write=calls.find(x=>x.url.endsWith('/subscribers')&&x.method==='POST');assert.equal(write.body.fields['{$CONSENT_IP}'],'192.0.2.10');assert.equal(sql.prepare('SELECT count(*) AS n FROM consent_evidence').get().n,1);});
+test('sem arquivo o Kit não envia inscrição nem PDF',async()=>{delete env.CONSENT_ARCHIVE_DB;assert.equal((await call()).status,502);assert.equal(calls.length,0);});

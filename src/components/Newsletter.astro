@@ -1,5 +1,6 @@
 ---
-import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
+import { CONSENT_TEXT, NEWSLETTER_CONSENT_VERSION } from "../data/consent";
+const consent = CONSENT_TEXT[NEWSLETTER_CONSENT_VERSION];
 ---
 
 <section class="newsletter" id="newsletter-form" aria-labelledby="newsletter-title">
@@ -16,12 +17,12 @@ import { NEWSLETTER_CONSENT_VERSION } from "../data/consent";
     </div>
     <label class="newsletter-consent newsletter-consent-required">
       <input type="checkbox" name="newsletter_consent" required aria-describedby="newsletter-consent-error" />
-      <span><strong>Newsletter do Guia</strong> Quero receber por email guias, prazos importantes, novidades e conselhos práticos sobre casa. Li a <a href="/privacidade/">Política de Privacidade</a> e posso cancelar a qualquer momento.</span>
+      <span><strong>Newsletter do Guia</strong> {consent.c1} <a href="/privacidade/">Consultar a Política de Privacidade</a>.</span>
     </label>
     <p class="newsletter-error" id="newsletter-consent-error" hidden>É preciso aceitar a newsletter para subscrever.</p>
     <label class="newsletter-consent newsletter-consent-optional">
       <input type="checkbox" name="advertising_consent" />
-      <span><strong>Publicidade e ofertas <em>Opcional</em></strong> Quero também receber publicidade, ofertas e conteúdos patrocinados de empresas terceiras selecionadas pelo Guia do Proprietário. As mensagens são enviadas pelo Guia e o meu email não é partilhado com os anunciantes.</span>
+      <span><strong>Publicidade e ofertas <em>Opcional</em></strong> {consent.c2}</span>
     </label>
     <small>As duas escolhas são independentes e podem ser retiradas a qualquer momento.</small>
     <p class="newsletter-status" role="status" aria-live="polite"></p>

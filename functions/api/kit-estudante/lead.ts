@@ -1,3 +1,5 @@
+import { recordConsent } from "../../lib/consent-archive.mjs";
+import { KIT_ESTUDANTE_CONSENT_TEXT } from "../../../src/data/kit-estudante";
 import {
   ALLOWED_CITIES,
   ALLOWED_PHASES,
@@ -77,7 +79,14 @@ export const onRequestPost = async (context: RequestContext) => {
       ipHash
     });
 
+    const evidence = await recordConsent(env, request, {email, eventId:eventRef,
+      source:"kit-estudante:"+source, version:consentVersion, text:{c1:KIT_ESTUDANTE_CONSENT_TEXT},
+      choices:{c1:true},pageUrl:new URL("/kit-estudante/",request.url).toString(),urlSource:"server_defined_form"});
     const senderFields: Record<string, string> = {
+      "{$CONSENT_IP}": evidence.ip || "",
+      "{$CONSENT_DATA}": evidence.received_at,
+      "{$CONSENT_VERSAO}": consentVersion,
+      "{$EVENT_ID}": evidence.event_id,
       "{$est_origem}": source,
       "{$est_relacao}": relation
     };

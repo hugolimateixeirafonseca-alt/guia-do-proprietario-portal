@@ -87,7 +87,8 @@ export const handleVerificationIntake = async (
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "CF-Connecting-IP": request.headers.get("CF-Connecting-IP") || ""
+            "CF-Connecting-IP": request.headers.get("CF-Connecting-IP") || "",
+            "User-Agent": request.headers.get("User-Agent") || ""
           },
           body: JSON.stringify({
             email: upload.email,

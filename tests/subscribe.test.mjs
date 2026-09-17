@@ -3,11 +3,12 @@ import { after, before, beforeEach, test } from "node:test";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import ts from "typescript";
+import { DatabaseSync } from "node:sqlite";
 
 let onRequestPost;
 let buildDirectory;
 let calls;
+let archiveSql;
 const originalFetch = globalThis.fetch;
 
 const env = {
@@ -85,28 +86,23 @@ const alojamentoLocalBody = {
 before(async () => {
   buildDirectory = await mkdtemp(path.join(process.cwd(), ".tmp-subscribe-test-"));
   const outfile = path.join(buildDirectory, "subscribe.mjs");
-  const compilerOptions = {
-    module: ts.ModuleKind.ESNext,
-    target: ts.ScriptTarget.ES2022
-  };
-  const consentSource = await readFile(path.resolve("src/data/consent.ts"), "utf8");
-  const subscribeSource = await readFile(path.resolve("functions/api/subscribe.ts"), "utf8");
-  const consentOutput = ts.transpileModule(consentSource, { compilerOptions }).outputText;
-  const subscribeOutput = ts.transpileModule(subscribeSource, { compilerOptions }).outputText
-    .replace('"../../src/data/consent"', '"./consent.mjs"');
-  await Promise.all([
-    writeFile(path.join(buildDirectory, "consent.mjs"), consentOutput, "utf8"),
-    writeFile(outfile, subscribeOutput, "utf8")
-  ]);
+  const {build}=await import(process.env.KIT_TEST_ESBUILD || "esbuild");
+  await build({entryPoints:[path.resolve("functions/api/subscribe.ts")],outfile,bundle:true,platform:"node",format:"esm",tsconfigRaw:{compilerOptions:{}}});
   ({ onRequestPost } = await import(`${pathToFileURL(outfile).href}?v=${Date.now()}`));
 });
 
-beforeEach(() => {
+beforeEach(async () => {
+  archiveSql?.close();
+  archiveSql = new DatabaseSync(":memory:");
+  archiveSql.exec(await readFile("migrations/consent-archive/0001_consent_evidence.sql","utf8"));
+  env.CONSENT_ARCHIVE_KEY="synthetic-archive-secret-for-local-tests-only";
+  env.CONSENT_ARCHIVE_DB={prepare(query){let values=[];return {bind(...args){values=args;return this},async first(){return archiveSql.prepare(query).get(...values)||null},async run(){archiveSql.prepare(query).run(...values);return {success:true}}}}};
   calls = [];
 });
 
 after(async () => {
   globalThis.fetch = originalFetch;
+  archiveSql?.close();
   await rm(buildDirectory, { recursive: true, force: true });
 });
 
@@ -160,9 +156,9 @@ test("usa os grupos confirmados mesmo sem variáveis adicionais na Cloudflare", 
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-09-a"
+      consentVersion: "newsletter-2026-09-b"
     }),
-    env: { SENDER_API_TOKEN: "token-de-teste" }
+    env: { SENDER_API_TOKEN: "token-de-teste", CONSENT_ARCHIVE_DB:env.CONSENT_ARCHIVE_DB, CONSENT_ARCHIVE_KEY:env.CONSENT_ARCHIVE_KEY }
   });
   assert.equal(response.status, 200);
   assert.match(calls[2].url, /subscribers\/groups\/eEvG4m$/);
@@ -180,7 +176,7 @@ test("atualiza um subscritor e adiciona uma newsletter single opt-in ao grupo at
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-09-a"
+      consentVersion: "newsletter-2026-09-b"
     }),
     env
   });
@@ -656,7 +652,7 @@ test("cria uma subscrição nova da newsletter diretamente no grupo ativo", asyn
     request: requestFor({
       ...ebookBody,
       source: "newsletter",
-      consentVersion: "newsletter-2026-09-a"
+      consentVersion: "newsletter-2026-09-b"
     }),
     env
   });
@@ -682,7 +678,7 @@ test("adiciona publicidade apenas quando o segundo consentimento é dado", async
       ...ebookBody,
       consent2: true,
       source: "newsletter",
-      consentVersion: "newsletter-2026-09-a"
+      consentVersion: "newsletter-2026-09-b"
     }),
     env
   });
@@ -749,3 +745,6 @@ test("regista as submissões válidas das duas landings de limpeza como Lead no 
   assert.match(deployWorkflow, /public\/scripts\/landings\/limpezas\.js/);
   assert.match(deployWorkflow, /public\/scripts\/landings\/alojamento-local-cleaning\.js/);
 });
+
+test("não envia para o Sender sem guardar primeiro a evidência",async()=>{globalThis.fetch=async()=>{throw Error("Sender não deve ser contactado")};const response=await onRequestPost({request:requestFor(ebookBody),env:{...env,CONSENT_ARCHIVE_DB:undefined}});assert.equal(response.status,503);});
+test("falha do Sender conserva a evidência original",async()=>{globalThis.fetch=async()=>new Response("{}",{status:503});const response=await onRequestPost({request:requestFor(ebookBody),env});assert.equal(response.status,502);assert.equal(archiveSql.prepare("SELECT count(*) AS n FROM consent_evidence").get().n,1);});

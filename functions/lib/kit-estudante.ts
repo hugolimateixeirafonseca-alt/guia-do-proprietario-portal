@@ -20,6 +20,8 @@ export interface D1Database {
 }
 
 export interface KitEnv {
+  CONSENT_ARCHIVE_DB?: unknown;
+  CONSENT_ARCHIVE_KEY?: string;
   KIT_ESTUDANTE_DB?: D1Database;
   DB?: D1Database;
   SENDER_API_TOKEN?: string;

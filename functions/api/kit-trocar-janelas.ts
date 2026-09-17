@@ -1,4 +1,5 @@
-import { KIT_JANELAS_CONSENT_VERSION } from "../../src/data/consent";
+import { recordConsent } from "../lib/consent-archive.mjs";
+import { CONSENT_TEXT, KIT_JANELAS_CONSENT_VERSION } from "../../src/data/consent";
 import { checkRateLimit, logEvent, sha256, PublicError, type D1Database } from "../lib/kit-estudante";
 import { createSenderTransactionalClient, SenderTransactionalError } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
 import { buildMetaAttribution } from "../../src/lib/meta-conversions.mjs";
@@ -7,6 +8,8 @@ import { kitMeasurement } from "../../src/lib/kit-janelas-measurement.mjs";
 import { copyLegacyKitEvents } from "../../src/lib/kit-janelas-history.mjs";
 
 interface Env {
+  CONSENT_ARCHIVE_DB?: unknown;
+  CONSENT_ARCHIVE_KEY?: string;
   SENDER_API_TOKEN?: string;
   SENDER_GROUP_MARKETING?: string;
   SENDER_TRANSACTIONAL_FROM_EMAIL?: string;
@@ -32,7 +35,7 @@ class MarketingError extends Error {
   constructor(readonly code: string) { super(code); }
 }
 
-async function registerMarketing(env: Env, email: string, requestId: string, date: string, advertising: boolean) {
+async function registerMarketing(env: Env, email: string, requestId: string, date: string, advertising: boolean, ip: string) {
   const headers = { Authorization: "Bearer " + env.SENDER_API_TOKEN, Accept: "application/json", "Content-Type": "application/json" };
   const api = async (path: string, method: string, body?: object) => {
     const response = await fetch("https://api.sender.net/v2" + path, {
@@ -45,7 +48,7 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
   };
   const identifier = encodeURIComponent(email);
   const fields = {
-    "{$CONSENT_DATA}": date, "{$CONSENT_VERSAO}": KIT_JANELAS_CONSENT_VERSION,
+    "{$CONSENT_IP}": ip, "{$CONSENT_DATA}": date, "{$CONSENT_VERSAO}": KIT_JANELAS_CONSENT_VERSION,
     "{$CONSENT_MARKETING}": "true", ...(advertising ? { "{$CONSENT_PUBLICIDADE}": "true" } : {}),
     "{$ORIGEM}": PAGE_URL, "{$LEAD_SOURCE}": SOURCE, "{$EVENT_ID}": requestId
   };
@@ -178,14 +181,17 @@ export const onRequestPost = async ({ request, env, waitUntil }: {
     ipHash = await checkRateLimit(request, db, env.SESSION_SECRET + ":kit-janelas-ip", 6);
     const recipientRequest = new Request(request.url, { headers: { "CF-Connecting-IP": emailHash } });
     await checkRateLimit(recipientRequest, db, env.SESSION_SECRET + ":kit-janelas-recipient", 3);
-    const date = new Date().toISOString();
+    const evidence = await recordConsent(env, request, {email, eventId:requestId, source:SOURCE,
+      version:KIT_JANELAS_CONSENT_VERSION, text:CONSENT_TEXT[KIT_JANELAS_CONSENT_VERSION],
+      choices:{c1:true,c2:marketing},pageUrl:PAGE_URL,urlSource:"server_defined_form"});
+    const date = evidence.received_at;
     await logEvent(db, {
       source: SOURCE, event: "janelas_pdf_requested", status: "received", requestId, ipHash, sessionHash: emailHash,
       consentVersion: KIT_JANELAS_CONSENT_VERSION, field: "consents",
       value: JSON.stringify({ delivery: true, newsletter: true, marketing })
     });
     // A primeira escolha autoriza PDF + Newsletter. A segunda conserva a opção comercial.
-    await registerMarketing(env, email, requestId, date, marketing);
+    await registerMarketing(env, email, requestId, date, marketing, evidence.ip || "");
     await logEvent(db, { source: SOURCE, event: "janelas_newsletter_registered", status: "success",
       requestId, ipHash, sessionHash: emailHash, consentVersion: KIT_JANELAS_CONSENT_VERSION });
     if (marketing) {
