@@ -1,7 +1,6 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # Um artigo por execução. Adicionar novos pendentes a esta fila.
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
-iluminacao-pisos-reduzir-quedas.mdx
 rampa-acesso-casa.mdx
 regresso-casa-depois-hospital.mdx
 sapa-adaptacoes-casa.mdx
