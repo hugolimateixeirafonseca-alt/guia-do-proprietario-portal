@@ -23,6 +23,12 @@
       "binding": "VERIFICACAO_ANUNCIO_DB",
       "database_name": "guia-proprietario-verificacao-anuncio",
       "database_id": "d5428dbe-363f-4556-a7fe-4b7494be630f"
+    },
+    {
+      "binding": "CONSENT_ARCHIVE_DB",
+      "database_name": "guia-proprietario-consentimentos",
+      "database_id": "4fcb7ecd-7281-4e65-9c3f-bf30b0feb0b7",
+      "migrations_dir": "migrations/consent-archive"
     }
   ],
   "r2_buckets": [

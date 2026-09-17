@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - 'functions/**'
+      - 'public/arquivo-consentimentos/**'
+      - 'public/_headers'
+      - 'tests/consent-archive.test.mjs'
       - 'src/pages/kit-trocar-janelas/**'
       - 'src/lib/kit-janelas-*.mjs'
       - 'src/styles/kit*.css'
@@ -177,6 +180,9 @@ jobs:
 
       - name: Validate windows kit flow
         run: npm run test:kit-janelas
+
+      - name: Validate consent archive integration
+        run: node --test tests/consent-archive.test.mjs tests/subscribe.test.mjs
 
       - name: Build production site
         run: |

@@ -1,6 +1,6 @@
 # Arquivo privado de consentimentos
 
-Estado: implementado localmente em 17/09/2026. Não publicado nem ligado a uma base de produção. Não foram consultados, importados ou alterados contactos reais.
+Estado em 17/09/2026: ativação autorizada pelo utilizador. D1 dedicada europeia criada, migração aplicada e configuração de produção verificada por leitura da API. Código enviado pelo fluxo normal de publicação nesta tarefa; conclusão do deployment e confirmação online não consultadas. Não foram consultados, importados ou alterados contactos reais.
 
 ## Utilização
 
@@ -26,7 +26,7 @@ A gravação tem de concluir antes do Sender. Se falhar, não se envia o contact
 
 Isto é um registo técnico da submissão, não uma confirmação de titularidade do email, assinatura digital qualificada ou certificação de conformidade. Um administrador da infraestrutura continua a ter poderes sobre a base. Eliminações controladas por retenção ou exercício de direitos continuam possíveis fora da aplicação; não tornar a retenção infinita em nome da imutabilidade. Aplicar o prazo da política existente e registar separadamente cancelamentos recebidos antes de determinar o prazo de eliminação. A interface não declara o estado atual de subscrição do Sender.
 
-## Ativação, ainda pendente
+## Configuração e publicação
 
 1. Criar uma D1 exclusiva e aplicar migrations/consent-archive/0001_consent_evidence.sql.
 2. Acrescentar CONSENT_ARCHIVE_DB ao wrangler.jsonc com o ID real, database_name e migrations_dir migrations/consent-archive. Não reutilizar a D1 operacional ou a base de outro produto.
@@ -42,3 +42,7 @@ Não é necessário um novo domínio nem Domain Connect. A área privada não é
 Testes direcionados com SQLite em memória e Sender simulado: cifragem, deteção de adulteração, pesquisa autorizada, isolamento entre emails, paginação, conflitos de evento, preservação da evidência após falha do fornecedor e IP no Sender. Tipos das funções alteradas verificados, sem build integral.
 
 Validação concluída: 69 testes direcionados (7 do arquivo, 30 de subscrição, 32 do Kit Janelas), mais um ensaio local do Kit Estudante com SQLite e Sender simulado. Verificação TypeScript aprovada. Nenhum build integral ou consulta de deployment.
+
+## Ativação autorizada
+
+D1 guia-proprietario-consentimentos, ID 4fcb7ecd-7281-4e65-9c3f-bf30b0feb0b7, jurisdiction eu. Migração 0001 aplicada pela API D1. Binding CONSENT_ARCHIVE_DB e secrets CONSENT_ARCHIVE_KEY e CONSENT_ARCHIVE_ADMIN_TOKEN confirmados na configuração de produção Pages. Bases existentes e secret SENDER_API_TOKEN preservados. A cópia de recuperação e o acesso administrativo estão em D:/CodexProjects/worktrees/private/consent-archive, fora dos repositórios. Nenhum valor secreto consta deste documento. A existência funcional do campo Sender usa a integração já existente; não foi criada uma subscrição real para a testar.
