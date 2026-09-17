@@ -42,7 +42,7 @@ export function initKitJanelas(doc, win) {
           email: email.value.trim(), consent1: true, consent2: marketing.checked,
           consentVersion: form.dataset.consentVersion, source: 'kit-trocar-janelas',
           eventId: requestId, company: form.elements.namedItem('company').value,
-          ...kitMeasurement(doc.cookie)
+          ...kitMeasurement(doc.cookie, Date.now(), win.location.href)
         })
       });
       const result = await response.json().catch(() => ({}));

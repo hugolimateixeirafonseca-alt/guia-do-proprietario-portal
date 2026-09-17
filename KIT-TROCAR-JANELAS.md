@@ -1,5 +1,17 @@
 # Kit Trocar Janelas em 2026
 
+## Robustez da medição, 17 de setembro de 2026
+
+Publicação autorizada pelo utilizador em 17 de setembro de 2026. Alteração integrada para envio pelo fluxo habitual; conclusão do deployment e confirmação online não consultadas.
+
+- Com consentimento de medição válido, o formulário usa o `fbclid` presente no URL para formar `fbc` quando falta o cookie do mesmo clique. Não cria identificadores de clique para visitas sem esse parâmetro. A preferência é relida na submissão e confirmada no servidor.
+- O evento mantém `CompleteRegistration`, o ID partilhado com o Pixel e o envio apenas após aceitação do PDF pelo Sender. `Lead` do parceiro permanece independente.
+- Pages `waitUntil` mantém o envio CAPI depois da resposta. Há até três tentativas para falhas de rede, timeout, limitação temporária ou receção vazia, com o mesmo ID e instante. Esperas de 0,5 s e 1,5 s e limite de 6 s por chamada. Não é uma fila persistente nem recupera períodos longos de indisponibilidade.
+- Credenciais inválidas e erros permanentes não são repetidos. Regista apenas códigos de erro permitidos, presença de `fbc`/`fbp` e número de tentativas, sem valores publicitários ou contactos.
+- Pedidos sem autorização válida passam a registar `measurement_not_authorized`. No histórico, ausência de evento Meta não prova recusa: também pode representar falta de sinal do browser ou interrupção antes do registo.
+- Um `janelas_pdf_sent` confirma aceitação do envio pelo fornecedor, não entrega na caixa de entrada. Eventos aceites pela Meta não equivalem a conversões atribuídas à campanha.
+- Validação direcionada: tipos da API e 36 testes locais com fornecedores simulados. Sem build integral, inscrição de teste real ou alteração da campanha.
+
 ## Reforço comercial do agradecimento e email, 15 de setembro de 2026
 
 - Base: correção de backend 22a495440, já integrada antes desta edição. Alterações limitadas ao conteúdo do agradecimento, respetivo CSS e assunto/corpos do email na função existente.

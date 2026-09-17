@@ -2,6 +2,14 @@ export const OFFICIAL_META_DATASET_ID = "1394294186173855";
 export const DEFAULT_META_GRAPH_VERSION = "v25.0";
 export const META_MEASUREMENT_CONSENT_VERSION = "2026-09-01-1";
 
+export class MetaConversionError extends Error {
+  constructor(code, retryable = false) {
+    super(`meta_conversion_failed_${code}`);
+    this.code = code;
+    this.retryable = retryable;
+  }
+}
+
 const encoder = new TextEncoder();
 
 const clean = (value, maxLength = 500) =>
@@ -135,7 +143,9 @@ export async function sendMetaConversion({
   try { result = await response.json(); } catch { /* a resposta HTTP decide o resultado */ }
   if (!response.ok || result?.error) {
     const codeValue = result?.error?.code || response.status || "unknown";
-    throw new Error(`meta_conversion_failed_${codeValue}`);
+    const retryable = response.status === 429 || response.status >= 500 ||
+      result?.error?.is_transient === true || [1, 2, 4, 17, 32, 341, 613].includes(Number(codeValue));
+    throw new MetaConversionError(codeValue, retryable);
   }
   return { sent: true, eventsReceived: Number(result?.events_received || 0) };
 }

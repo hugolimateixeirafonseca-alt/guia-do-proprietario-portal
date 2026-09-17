@@ -1,7 +1,8 @@
 import { KIT_JANELAS_CONSENT_VERSION } from "../../src/data/consent";
 import { checkRateLimit, logEvent, sha256, PublicError, type D1Database } from "../lib/kit-estudante";
 import { createSenderTransactionalClient, SenderTransactionalError } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
-import { buildMetaAttribution, sendMetaConversion } from "../../src/lib/meta-conversions.mjs";
+import { buildMetaAttribution } from "../../src/lib/meta-conversions.mjs";
+import { deliverKitRegistration, kitMetaFailureCode } from "../../src/lib/kit-janelas-meta-delivery.mjs";
 import { kitMeasurement } from "../../src/lib/kit-janelas-measurement.mjs";
 
 interface Env {
@@ -85,7 +86,9 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
   }
 }
 
-export const onRequestPost = async ({ request, env }: { request: Request; env: Env }) => {
+export const onRequestPost = async ({ request, env, waitUntil }: {
+  request: Request; env: Env; waitUntil?: (promise: Promise<unknown>) => void
+}) => {
   const origin = request.headers.get("Origin");
   if (origin && origin !== new URL(request.url).origin) return json({ error: "invalid_origin" }, 403);
   if (!request.headers.get("Content-Type")?.includes("application/json")) return json({ error: "invalid" }, 400);
@@ -115,12 +118,19 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   let ipHash = "";
   let emailHash = "";
   const completeRegistration = async () => {
-    if (!attribution) return json({ ok: true });
+    if (!attribution) {
+      try {
+        await logEvent(db, { source: SOURCE, event: "janelas_meta_registration", status: "ignored",
+          requestId, error: "measurement_not_authorized" });
+      } catch { /* A falta de registo não bloqueia o PDF já enviado. */ }
+      return json({ ok: true });
+    }
+    const deliver = async () => {
     try {
       const sent = await db.prepare("SELECT id FROM kit_events WHERE source = ? AND event = 'janelas_meta_registration' AND request_id = ? AND status = 'success' LIMIT 1")
         .bind(SOURCE, requestId).first();
       if (!sent) {
-        const result = await sendMetaConversion({
+        const result = await deliverKitRegistration({
           ...attribution, accessToken: env.META_CAPI_ACCESS_TOKEN,
           datasetId: env.META_DATASET_ID, graphVersion: env.META_GRAPH_VERSION,
           testEventCode: env.META_TEST_EVENT_CODE, eventName: "CompleteRegistration",
@@ -129,14 +139,19 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
         });
         await logEvent(db, { source: SOURCE, event: "janelas_meta_registration",
           status: result.sent && result.eventsReceived === 1 ? "success" : "ignored", requestId,
+          field: "attribution", value: JSON.stringify({ fbc: Boolean(attribution.fbc), fbp: Boolean(attribution.fbp), attempts: result.attempts }),
           consentVersion: "2026-09-01-1", error: result.reason || (result.eventsReceived === 1 ? undefined : "not_accepted") });
       }
-    } catch {
+    } catch (error) {
       try {
         await logEvent(db, { source: SOURCE, event: "janelas_meta_registration", status: "error",
-          requestId, error: "meta_registration_failed" });
+          requestId, error: kitMetaFailureCode(error) });
       } catch { /* A medição não pode transformar um envio concluído num erro. */ }
     }
+    };
+    // Pages mantém a tarefa viva após a resposta, sem atrasar o agradecimento.
+    if (waitUntil) waitUntil(deliver());
+    else await deliver();
     return json({ ok: true, metaEventId });
   };
   try {

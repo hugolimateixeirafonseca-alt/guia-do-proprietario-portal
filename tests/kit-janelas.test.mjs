@@ -110,6 +110,32 @@ test('envio recusado pelo Sender nunca emite registo Meta', async () => {
   assert.ok(!calls.some(c=>c.url.includes('graph.facebook.com')));
 });
 
+test('resposta não aguarda Meta e tarefa continua ligada ao ciclo de vida Pages', async () => {
+  env.META_CAPI_ACCESS_TOKEN = 'fake-meta-token';
+  let release, background;
+  const pending = new Promise(resolve => { release = resolve; });
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: String(url), body: JSON.parse(init.body) });
+    if (String(url).includes('graph.facebook.com')) { await pending; return Response.json({ events_received: 1 }); }
+    return Response.json({ success: true });
+  };
+  const response = await handler({ request: requestFor({ ...body, metaMeasurement: true }, { Cookie: measurementCookie() }),
+    env, waitUntil: promise => { background = promise; } });
+  assert.equal((await response.json()).metaEventId, `kit-janelas-registration-${body.eventId}`);
+  assert.ok(background instanceof Promise);
+  release(); await background;
+  assert.equal(sql.prepare("SELECT count(*) AS n FROM kit_events WHERE event='janelas_meta_registration' AND status='success'").get().n, 1);
+});
+
+test('regista exclusão de medição sem guardar identificadores publicitários', async () => {
+  await call();
+  const entry = sql.prepare("SELECT * FROM kit_events WHERE event='janelas_meta_registration'").get();
+  assert.equal(entry.status, 'ignored');
+  assert.equal(entry.error_code, 'measurement_not_authorized');
+  assert.equal(entry.field_value, null);
+  assert.ok(!calls.some(c => c.url.includes('graph.facebook.com')));
+});
+
 test("o envio exige o primeiro consentimento e a versão atual",async()=>{
   for(const change of [{consent1:false},{consent1:"true"},{consentVersion:"antiga"},{source:"outro"},{consent2:"true"}]){
     assert.equal((await call({...body,...change})).status,400);
