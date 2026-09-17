@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 let handler, buildDirectory, sql, calls, env;
 const originalFetch = globalThis.fetch;
 const body = { email: "Pessoa@example.com", consent1: true, consent2: false,
-  consentVersion: "kit-janelas-2026-09-a", source: "kit-trocar-janelas",
+  consentVersion: "kit-janelas-2026-09-b", source: "kit-trocar-janelas",
   eventId: "e2c4c975-2c92-4198-865f-cd5c1d32f5d8", company: "" };
 const requestFor = (value = body, extra = {}) => new Request("https://guiadoproprietario.pt/api/kit-trocar-janelas", {
   method: "POST", headers: { "Content-Type": "application/json", Origin: "https://guiadoproprietario.pt",
@@ -36,7 +36,7 @@ beforeEach(async () => {
   env = { KIT_JANELAS_DB: db, SESSION_SECRET: "local-test-secret-with-no-production-access",
     SENDER_API_TOKEN: "fake-token", SENDER_GROUP_MARKETING: "marketing-only" };
   globalThis.fetch = async (url, init = {}) => {
-    calls.push({url:String(url),method:init.method,body:init.body?JSON.parse(init.body):null});
+    calls.push({url:String(url),method:init.method,body:init.body?init.body ? JSON.parse(init.body) : null:null});
     if(init.method==="GET") return new Response("{}",{status:404});
     return Response.json({success:true});
   };
@@ -81,7 +81,7 @@ test('registo do kit usa CompleteRegistration com consentimento e deduplicação
   env.META_CAPI_ACCESS_TOKEN = 'fake-meta-token';
   const data = {...body, metaMeasurement:true, metaFbp:'fb.1.1788888000000.123456789'};
   globalThis.fetch = async (url, init) => {
-    calls.push({url:String(url),body:JSON.parse(init.body)});
+    calls.push({url:String(url),body:init.body ? JSON.parse(init.body) : null});
     return Response.json(String(url).includes('graph.facebook.com') ? {events_received:1} : {success:true});
   };
   const headers = {Cookie:measurementCookie()};
@@ -118,7 +118,7 @@ test('consentimento comercial não substitui medição e cookies inválidos não
 test('falha de Meta mantém o PDF concluído e repetição usa o mesmo identificador', async () => {
   env.META_CAPI_ACCESS_TOKEN='fake-meta-token';
   globalThis.fetch=async(url,init)=>{
-    calls.push({url:String(url),body:JSON.parse(init.body)});
+    calls.push({url:String(url),body:init.body ? JSON.parse(init.body) : null});
     if(String(url).includes('graph.facebook.com'))throw Error('network');
     return Response.json({success:true});
   };
@@ -142,7 +142,7 @@ test('resposta não aguarda Meta e tarefa continua ligada ao ciclo de vida Pages
   let release, background;
   const pending = new Promise(resolve => { release = resolve; });
   globalThis.fetch = async (url, init) => {
-    calls.push({ url: String(url), body: JSON.parse(init.body) });
+    calls.push({ url: String(url), body: init.body ? JSON.parse(init.body) : null });
     if (String(url).includes('graph.facebook.com')) { await pending; return Response.json({ events_received: 1 }); }
     return Response.json({ success: true });
   };
@@ -169,22 +169,45 @@ test("o envio exige o primeiro consentimento e a versão atual",async()=>{
   }
   assert.equal(calls.length,0);
 });
-test("envia o PDF sem inscrever quem deixa a segunda caixa vazia",async()=>{
+test("primeira escolha inscreve na Newsletter mesmo com a segunda caixa vazia",async()=>{
   assert.equal((await call()).status,200);
-  assert.equal(calls.length,1);
-  assert.equal(calls[0].url,"https://api.sender.net/v2/message/send");
-  assert.equal(calls[0].body.to.email,"pessoa@example.com");
-  assert.equal(calls[0].body.attachments["Trocar-Janelas-2026.pdf"],"https://guiadoproprietario.pt/downloads/kit-trocar-janelas-2026.pdf");
-  assert.ok(!calls[0].body.groups);
+  const created=calls.find(c=>c.url.endsWith('/subscribers')&&c.method==='POST').body;
+  assert.deepEqual(created.groups,['eEvG4m']);
+  assert.equal(created.fields['{$CONSENT_PUBLICIDADE}'],undefined);
+  assert.equal(created.fields['{$CONSENT_MARKETING}'],'true');
+  const delivery=calls.find(c=>c.url.endsWith('/message/send')).body;
+  assert.equal(delivery.to.email,"pessoa@example.com");
+  assert.equal(delivery.attachments["Trocar-Janelas-2026.pdf"],"https://guiadoproprietario.pt/downloads/kit-trocar-janelas-2026.pdf");
   const audit=sql.prepare("SELECT * FROM kit_events WHERE event='janelas_pdf_requested'").get();
-  assert.deepEqual(JSON.parse(audit.field_value),{delivery:true,marketing:false});
+  assert.deepEqual(JSON.parse(audit.field_value),{delivery:true,newsletter:true,marketing:false});
+  assert.equal(sql.prepare("SELECT COUNT(*) AS n FROM kit_events WHERE event='janelas_newsletter_registered'").get().n,1);
   assert.equal(audit.consent_version,body.consentVersion);
   assert.ok(!JSON.stringify(sql.prepare("SELECT * FROM kit_events").all()).includes("pessoa@example.com"));
 });
-test("a segunda escolha inscreve só no grupo comercial e mantém consentimentos separados",async()=>{
+
+test('versão antiga não autoriza Newsletter e o texto anterior fica preservado',async()=>{
+  const response=await call({...body,consentVersion:'kit-janelas-2026-09-a'});
+  assert.equal(response.status,400);assert.equal(calls.length,0);
+  const text=await readFile('src/data/consent.ts','utf8');
+  assert.ok(text.includes('que estou a pedir, bem como enviar comunicações relevantes sobre o Guia do Proprietário'));
+  assert.ok(text.includes('que estou a pedir."'));
+});
+
+test('subscritor existente entra na Newsletter sem apagar autorização comercial anterior',async()=>{
+  globalThis.fetch=async(url,init={})=>{
+    calls.push({url:String(url),method:init.method,body:init.body?JSON.parse(init.body):null});
+    return Response.json({data:{subscriber_tags:[{id:'marketing-only'}]}});
+  };
+  assert.equal((await call()).status,200);
+  const patched=calls.find(c=>c.method==='PATCH').body;
+  assert.equal(patched.fields['{$CONSENT_PUBLICIDADE}'],undefined);
+  assert.equal(patched.groups,undefined);
+  assert.deepEqual(calls.filter(c=>c.url.includes('/subscribers/groups/')).map(c=>c.url),['https://api.sender.net/v2/subscribers/groups/eEvG4m']);
+});
+test("a segunda escolha acrescenta o grupo comercial sem substituir a Newsletter",async()=>{
   assert.equal((await call({...body,consent2:true})).status,200);
   const created=calls.find(c=>c.url.endsWith("/subscribers")&&c.method==="POST").body;
-  assert.deepEqual(created.groups,["marketing-only"]);
+  assert.deepEqual(created.groups,["eEvG4m","marketing-only"]);
   assert.equal(created.fields["{$CONSENT_MARKETING}"],"true");
   assert.equal(created.fields["{$CONSENT_PUBLICIDADE}"],"true");
   assert.equal(created.fields["{$CONSENT_PARCEIROS}"],undefined);
@@ -192,7 +215,7 @@ test("a segunda escolha inscreve só no grupo comercial e mantém consentimentos
   assert.equal(calls.filter(c=>c.url.endsWith("/message/send")).length,1);
 });
 test("um subscritor existente mantém os outros grupos e não dispara automações de outros kits",async()=>{
-  globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),method:init.method,body:init.body?JSON.parse(init.body):null});return Response.json({data:{id:"existing",groups:[{id:"old-kit"}]}})};
+  globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),method:init.method,body:init.body?init.body ? JSON.parse(init.body) : null:null});return Response.json({data:{id:"existing",groups:[{id:"old-kit"}]}})};
   assert.equal((await call({...body,consent2:true})).status,200);
   const patched=calls.find(c=>c.method==="PATCH").body;
   assert.equal(patched.groups,undefined);
@@ -271,7 +294,7 @@ test("CTA do agradecimento usa a oferta do kit, origem própria e relê consenti
 
 test("um campo adicional indisponível não impede guardar o consentimento e enviar o PDF",async()=>{
   globalThis.fetch=async(url,init={})=>{
-    const payload=init.body?JSON.parse(init.body):null;
+    const payload=init.body?init.body ? JSON.parse(init.body) : null:null;
     calls.push({url:String(url),method:init.method,body:payload});
     if(init.method==="GET")return new Response("{}",{status:404});
     if(payload?.fields?.["{$CONSENT_PUBLICIDADE}"])return Response.json({errors:{fields:["unknown"]}},{status:422});
@@ -295,7 +318,7 @@ test("regista o passo e estado do fornecedor sem expor o contacto ou a resposta"
 });
 test("timeout de envio não confirma entrega nem repete automaticamente",async()=>{
   let attempts=0;
-  globalThis.fetch=async()=>{attempts++;throw new DOMException("timeout", "TimeoutError")};
+  globalThis.fetch=async(url,init={})=>{if(String(url).endsWith("/message/send")){attempts++;throw new DOMException("timeout", "TimeoutError")}return init.method==="GET"?new Response("{}",{status:404}):Response.json({success:true})};
   const response=await call();
   assert.equal(response.status,502);
   assert.deepEqual(await response.json(),{error:"delivery_unconfirmed"});
@@ -314,7 +337,7 @@ test("contacto já no grupo recebe o PDF sem nova associação",async()=>{
   globalThis.fetch=async(url,init={})=>{
     calls.push({url:String(url),method:init.method});
     if(String(url).includes('/subscribers/groups/'))return new Response('{}',{status:400});
-    return Response.json({data:{subscriber_tags:[{id:'marketing-only'}]}});
+    return Response.json({data:{subscriber_tags:[{id:'eEvG4m'},{id:'marketing-only'}]}});
   };
   assert.equal((await call({...body,consent2:true})).status,200);
   assert.ok(!calls.some(c=>c.url.includes('/subscribers/groups/')));
@@ -322,18 +345,18 @@ test("contacto já no grupo recebe o PDF sem nova associação",async()=>{
 });
 test("contacto existente sem grupo é associado sem substituir os outros grupos",async()=>{
   globalThis.fetch=async(url,init={})=>{
-    calls.push({url:String(url),method:init.method,body:init.body?JSON.parse(init.body):null});
+    calls.push({url:String(url),method:init.method,body:init.body?init.body ? JSON.parse(init.body) : null:null});
     return Response.json({data:{subscriber_tags:[{id:'outro-kit'}]}});
   };
   assert.equal((await call({...body,consent2:true})).status,200);
-  assert.equal(calls.filter(c=>c.url.includes('/subscribers/groups/')).length,1);
+  assert.equal(calls.filter(c=>c.url.includes('/subscribers/groups/')).length,2);
   assert.equal(calls.find(c=>c.method==='PATCH').body.groups,undefined);
 });
 test("erro de associação só é aceite quando o Sender confirma o grupo numa releitura",async()=>{
   for(const confirmed of [true,false]){
     let lookups=0,deliveries=0;
     globalThis.fetch=async(url,init={})=>{
-      if(init.method==='GET')return Response.json({data:{subscriber_tags:++lookups>1&&confirmed?[{id:'marketing-only'}]:[]}});
+      if(init.method==='GET')return Response.json({data:{subscriber_tags:++lookups>1&&confirmed?[{id:'eEvG4m'},{id:'marketing-only'}]:[]}});
       if(String(url).includes('/subscribers/groups/'))return new Response('{}',{status:400});
       if(String(url).endsWith('/message/send'))deliveries++;
       return Response.json({data:{subscriber_tags:[]}});

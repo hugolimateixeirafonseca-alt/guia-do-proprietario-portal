@@ -5,9 +5,13 @@ export const LIMPEZA_CONSENT_VERSION = "limpeza-2026-08-b";
 export const ALOJAMENTO_LOCAL_CONSENT_VERSION = "alojamento-local-2026-08-a";
 export const VERIFICACAO_DIRECT_CONSENT_VERSION = "verificacao-direto-2026-09-a";
 
-export const KIT_JANELAS_CONSENT_VERSION = "kit-janelas-2026-09-a";
+export const KIT_JANELAS_CONSENT_VERSION = "kit-janelas-2026-09-b";
 
 export const CONSENT_TEXT = {
+  "kit-janelas-2026-09-b": {
+    c1: "Autorizo o Guia do Proprietário a utilizar o meu email para me enviar o PDF «Trocar Janelas em 2026» que estou a pedir, bem como enviar comunicações relevantes sobre o Guia do Proprietário",
+    c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
+  },
   "kit-janelas-2026-09-a": {
     c1: "Autorizo o Guia do Proprietário a utilizar o meu email para me enviar o PDF «Trocar Janelas em 2026» que estou a pedir.",
     c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."

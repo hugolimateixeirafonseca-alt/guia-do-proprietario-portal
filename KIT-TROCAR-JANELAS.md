@@ -1,5 +1,14 @@
 # Kit Trocar Janelas em 2026
 
+## Primeiro consentimento e Newsletter, 17 de setembro de 2026
+
+- A pedido do utilizador, o primeiro consentimento passa a: «Autorizo o Guia do Proprietário a utilizar o meu email para me enviar o PDF «Trocar Janelas em 2026» que estou a pedir, bem como enviar comunicações relevantes sobre o Guia do Proprietário».
+- Nova versão `kit-janelas-2026-09-b`; texto anterior preservado no catálogo. Pedidos com a versão antiga não autorizam a inscrição na Newsletter. Não há migração de contactos antigos nem consentimento retroativo.
+- Cada novo pedido válido associa o contacto ao grupo Newsletter `eEvG4m` do Sender, mesmo com a segunda caixa vazia. A segunda caixa mantém o grupo comercial existente e o campo de publicidade, apenas quando assinalada. Uma caixa vazia não revoga escolhas anteriores.
+- Contactos existentes mantêm os restantes grupos. Criação inclui os grupos numa só chamada; associações já presentes não são repetidas. Mantém `trigger_automation:false` e a entrega transacional do PDF.
+- Auditoria na base exclusiva do Kit Janelas: `newsletter:true` nas escolhas e evento `janelas_newsletter_registered`. Consentimento de medição Meta continua independente.
+- Informação sobre kits na página de privacidade alinhada com a nova escolha. Tipos da API e 45 testes direcionados aprovados, sem inscrição ou email real de teste. Publicação autorizada pelo pedido de alteração, pelo fluxo habitual. Conclusão do deployment e confirmação online não consultadas.
+
 ## Base exclusiva do Kit Janelas, 17 de setembro de 2026
 
 - Criada em produção a D1 `guia-proprietario-kit-janelas`, ID `32fe7615-5bf4-427a-9ea0-7c4c5546497d`, binding `KIT_JANELAS_DB`. Estrutura em `migrations/kit-janelas/0001_kit_janelas.sql`, independente das migrações do Kit Estudante.

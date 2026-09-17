@@ -32,7 +32,7 @@ class MarketingError extends Error {
   constructor(readonly code: string) { super(code); }
 }
 
-async function registerMarketing(env: Env, email: string, requestId: string, date: string) {
+async function registerMarketing(env: Env, email: string, requestId: string, date: string, advertising: boolean) {
   const headers = { Authorization: "Bearer " + env.SENDER_API_TOKEN, Accept: "application/json", "Content-Type": "application/json" };
   const api = async (path: string, method: string, body?: object) => {
     const response = await fetch("https://api.sender.net/v2" + path, {
@@ -46,12 +46,12 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
   const identifier = encodeURIComponent(email);
   const fields = {
     "{$CONSENT_DATA}": date, "{$CONSENT_VERSAO}": KIT_JANELAS_CONSENT_VERSION,
-    "{$CONSENT_MARKETING}": "true", "{$CONSENT_PUBLICIDADE}": "true",
+    "{$CONSENT_MARKETING}": "true", ...(advertising ? { "{$CONSENT_PUBLICIDADE}": "true" } : {}),
     "{$ORIGEM}": PAGE_URL, "{$LEAD_SOURCE}": SOURCE, "{$EVENT_ID}": requestId
   };
   const lookup = await api("/subscribers/" + identifier, "GET");
-  const group = env.SENDER_GROUP_MARKETING || "egK8WG";
-  const hasGroup = (payload: unknown) => {
+  const groups = [...new Set(["eEvG4m", ...(advertising ? [env.SENDER_GROUP_MARKETING || "egK8WG"] : [])])];
+  const hasGroup = (payload: unknown, group: string) => {
     const tags = (payload as { data?: { subscriber_tags?: { id?: string }[] } } | null)?.data?.subscriber_tags;
     return Array.isArray(tags) && tags.some(tag => tag.id === group);
   };
@@ -59,21 +59,23 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
   const writeSubscriber = async (path: string, method: string, payload: Record<string, unknown>) => {
     let response = await api(path, method, payload);
     // O consentimento comercial principal mantém-se mesmo se o campo adicional ainda não existir.
-    if (!response.ok && (response.status === 400 || response.status === 422)) {
+    if (advertising && !response.ok && (response.status === 400 || response.status === 422)) {
       const { "{$CONSENT_PUBLICIDADE}": _advertising, ...requiredFields } = fields;
       response = await api(path, method, { ...payload, fields: requiredFields });
     }
     return response;
   };
   let response = await writeSubscriber(lookup.ok ? "/subscribers/" + identifier : "/subscribers", lookup.ok ? "PATCH" : "POST",
-    lookup.ok ? { fields, trigger_automation: false } : { email, fields, groups: [group], trigger_automation: false });
+    lookup.ok ? { fields, trigger_automation: false } : { email, fields, groups, trigger_automation: false });
   const createdWithGroup = !lookup.ok && response.ok;
   if (!response.ok && response.status === 409) {
     response = await writeSubscriber("/subscribers/" + identifier, "PATCH", { fields, trigger_automation: false });
   }
   if (!response.ok) throw new MarketingError("marketing_save_" + response.status);
   // O POST de criação já inclui o grupo. Repeti-lo pode devolver 400 no Sender.
-  if (createdWithGroup || hasGroup(lookup.payload) || hasGroup(response.payload)) return;
+  if (createdWithGroup) return;
+  for (const group of groups) {
+  if (hasGroup(lookup.payload, group) || hasGroup(response.payload, group)) continue;
   const membership = await api("/subscribers/groups/" + encodeURIComponent(group), "POST", {
     subscribers: [email], trigger_automation: false
   });
@@ -82,9 +84,10 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
     // Só aceitar a resposta ambígua quando uma releitura confirmar a associação.
     if (membership.status === 400 || membership.status === 409) {
       const confirmed = await api("/subscribers/" + identifier, "GET");
-      if (confirmed.ok && hasGroup(confirmed.payload)) return;
+      if (confirmed.ok && hasGroup(confirmed.payload, group)) continue;
     }
     throw new MarketingError("marketing_group_" + membership.status);
+  }
   }
 }
 
@@ -179,11 +182,13 @@ export const onRequestPost = async ({ request, env, waitUntil }: {
     await logEvent(db, {
       source: SOURCE, event: "janelas_pdf_requested", status: "received", requestId, ipHash, sessionHash: emailHash,
       consentVersion: KIT_JANELAS_CONSENT_VERSION, field: "consents",
-      value: JSON.stringify({ delivery: true, marketing })
+      value: JSON.stringify({ delivery: true, newsletter: true, marketing })
     });
-    // Só a segunda escolha autoriza a inscrição. Uma caixa vazia não altera subscrições anteriores.
+    // A primeira escolha autoriza PDF + Newsletter. A segunda conserva a opção comercial.
+    await registerMarketing(env, email, requestId, date, marketing);
+    await logEvent(db, { source: SOURCE, event: "janelas_newsletter_registered", status: "success",
+      requestId, ipHash, sessionHash: emailHash, consentVersion: KIT_JANELAS_CONSENT_VERSION });
     if (marketing) {
-      await registerMarketing(env, email, requestId, date);
       await logEvent(db, { source: SOURCE, event: "janelas_marketing_registered", status: "success",
         requestId, ipHash, sessionHash: emailHash, consentVersion: KIT_JANELAS_CONSENT_VERSION });
     }
