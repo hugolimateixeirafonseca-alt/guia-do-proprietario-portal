@@ -4,13 +4,15 @@ import { createSenderTransactionalClient, SenderTransactionalError } from "../..
 import { buildMetaAttribution } from "../../src/lib/meta-conversions.mjs";
 import { deliverKitRegistration, kitMetaFailureCode } from "../../src/lib/kit-janelas-meta-delivery.mjs";
 import { kitMeasurement } from "../../src/lib/kit-janelas-measurement.mjs";
+import { copyLegacyKitEvents } from "../../src/lib/kit-janelas-history.mjs";
 
 interface Env {
   SENDER_API_TOKEN?: string;
   SENDER_GROUP_MARKETING?: string;
   SENDER_TRANSACTIONAL_FROM_EMAIL?: string;
   SENDER_TRANSACTIONAL_FROM_NAME?: string;
-  KIT_ESTUDANTE_DB?: D1Database;
+  KIT_JANELAS_DB?: D1Database;
+  KIT_ESTUDANTE_DB?: D1Database; // Ponte de leitura do histórico. Nunca escrever aqui.
   SESSION_SECRET?: string;
   META_CAPI_ACCESS_TOKEN?: string;
   META_DATASET_ID?: string;
@@ -108,9 +110,15 @@ export const onRequestPost = async ({ request, env, waitUntil }: {
     !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(safe(body.eventId, 36))) {
     return json({ error: "invalid" }, 400);
   }
-  const db = env.KIT_ESTUDANTE_DB;
+  const db = env.KIT_JANELAS_DB;
   if (!db || !env.SESSION_SECRET || !env.SENDER_API_TOKEN) return json({ error: "not_configured" }, 503);
   const requestId = body.eventId as string;
+  const legacy = env.KIT_ESTUDANTE_DB;
+  if (legacy && waitUntil) {
+    waitUntil(copyLegacyKitEvents(legacy, db).catch(() => {
+      console.error('kit_janelas_history_import_failed');
+    }));
+  }
   const marketing = body.consent2 === true;
   const metaEventId = `kit-janelas-registration-${requestId}`;
   const attribution = body.metaMeasurement === true && kitMeasurement(request.headers.get("Cookie") || "")
@@ -156,9 +164,13 @@ export const onRequestPost = async ({ request, env, waitUntil }: {
   };
   try {
     emailHash = await sha256(env.SESSION_SECRET + ":kit-janelas-email:" + email);
-    const completed = await db.prepare(
-      "SELECT id FROM kit_events WHERE source = ? AND event = 'janelas_pdf_sent' AND request_id = ? AND session_hash = ? AND status = 'success' LIMIT 1"
-    ).bind(SOURCE, requestId, emailHash).first();
+    // Evitar reenvio de pedidos concluídos na versão antiga durante a mudança.
+    const completedQuery = "SELECT id FROM kit_events WHERE source = ? AND event = 'janelas_pdf_sent' AND request_id = ? AND session_hash = ? AND status = 'success' LIMIT 1";
+    let completed = await db.prepare(completedQuery).bind(SOURCE, requestId, emailHash).first();
+    if (!completed && legacy) {
+      await copyLegacyKitEvents(legacy, db, requestId);
+      completed = await db.prepare(completedQuery).bind(SOURCE, requestId, emailHash).first();
+    }
     if (completed) return completeRegistration();
     ipHash = await checkRateLimit(request, db, env.SESSION_SECRET + ":kit-janelas-ip", 6);
     const recipientRequest = new Request(request.url, { headers: { "CF-Connecting-IP": emailHash } });

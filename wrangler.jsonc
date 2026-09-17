@@ -9,6 +9,12 @@
   },
   "d1_databases": [
     {
+      "binding": "KIT_JANELAS_DB",
+      "database_name": "guia-proprietario-kit-janelas",
+      "database_id": "32fe7615-5bf4-427a-9ea0-7c4c5546497d",
+      "migrations_dir": "migrations/kit-janelas"
+    },
+    {
       "binding": "KIT_ESTUDANTE_DB",
       "database_name": "guia-proprietario-kit-estudante",
       "database_id": "4a664d7b-760b-443f-8c8a-a40467474bdf"

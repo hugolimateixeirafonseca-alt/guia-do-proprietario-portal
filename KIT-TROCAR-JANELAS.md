@@ -1,5 +1,14 @@
 # Kit Trocar Janelas em 2026
 
+## Base exclusiva do Kit Janelas, 17 de setembro de 2026
+
+- Criada em produção a D1 `guia-proprietario-kit-janelas`, ID `32fe7615-5bf4-427a-9ea0-7c4c5546497d`, binding `KIT_JANELAS_DB`. Estrutura em `migrations/kit-janelas/0001_kit_janelas.sql`, independente das migrações do Kit Estudante.
+- O endpoint escreve eventos e limites de pedidos apenas nesta base. Não usa a base antiga como alternativa se faltar o novo binding. As funções utilitárias partilhadas não determinam o destino da base.
+- Histórico copiado com `scripts/migrate-kit-janelas-history.mjs`, filtrado por `source='kit-trocar-janelas'`. `legacy_event_id` evita duplicados. A origem não foi alterada. Não copia contactos, sessões ou registos de outros produtos. Ficheiros temporários apagados pelo importador.
+- Há uma ponte de leitura durante a transição: páginas de até 100 eventos tardios são copiadas de D1 para D1, no mesmo fornecedor, após pedidos válidos. O cursor só avança após a página completa. Pedidos repetidos consultam e copiam o respetivo histórico antes de qualquer envio para impedir repetição do PDF. Nenhuma escrita é feita em `KIT_ESTUDANTE_DB` pelo endpoint de Janelas. A ponte pode ser removida numa tarefa posterior após confirmar a conclusão da transição.
+- Vistas no Studio: `resumo_inscricoes_por_dia` (hora de Lisboa com horário de verão), `inscricoes_meta` e `inscricoes_nao_enviadas_meta`. Sem email ou hashes nas vistas. `sem_registo` não significa recusa: pode ser histórico sem motivo ou envio em curso. Aceitação CAPI não equivale a atribuição à campanha.
+- 43 testes direcionados e tipos da API aprovados. A base, a cópia inicial e as vistas foram verificadas antes do envio do código. Publicação autorizada no pedido de separação. Alteração do endpoint enviada pelo fluxo normal; conclusão do deployment e comportamento público não consultados.
+
 ## Robustez da medição, 17 de setembro de 2026
 
 Publicação autorizada pelo utilizador em 17 de setembro de 2026. Alteração integrada para envio pelo fluxo habitual; conclusão do deployment e confirmação online não consultadas.

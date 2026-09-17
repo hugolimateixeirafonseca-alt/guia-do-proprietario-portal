@@ -5,6 +5,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
 
 let handler, buildDirectory, sql, calls, env;
 const originalFetch = globalThis.fetch;
@@ -25,14 +26,14 @@ before(async () => {
 });
 beforeEach(async () => {
   sql = new DatabaseSync(":memory:");
-  sql.exec(await readFile("migrations/0001_kit_estudante.sql", "utf8"));
+  sql.exec(await readFile("migrations/kit-janelas/0001_kit_janelas.sql", "utf8"));
   calls = [];
   const db = { prepare(query) { let values=[];return {
     bind(...args){values=args;return this},
     async first(){return sql.prepare(query).get(...values)||null},
     async run(){sql.prepare(query).run(...values);return {success:true}}
   }}};
-  env = { KIT_ESTUDANTE_DB: db, SESSION_SECRET: "local-test-secret-with-no-production-access",
+  env = { KIT_JANELAS_DB: db, SESSION_SECRET: "local-test-secret-with-no-production-access",
     SENDER_API_TOKEN: "fake-token", SENDER_GROUP_MARKETING: "marketing-only" };
   globalThis.fetch = async (url, init = {}) => {
     calls.push({url:String(url),method:init.method,body:init.body?JSON.parse(init.body):null});
@@ -46,6 +47,32 @@ after(async()=>{
   if(buildDirectory && path.basename(buildDirectory).startsWith("kit-janelas-test-")) await rm(buildDirectory,{recursive:true,force:true});
 });
 const call = (data=body, headers) => handler({request:requestFor(data,headers),env});
+
+test('sem binding Janelas não escreve na base do Estudante como alternativa', async () => {
+  env.KIT_ESTUDANTE_DB = env.KIT_JANELAS_DB;
+  delete env.KIT_JANELAS_DB;
+  assert.equal((await call()).status,503);
+  assert.equal(calls.length,0);
+  assert.equal(sql.prepare('SELECT COUNT(*) AS n FROM kit_events').get().n,0);
+});
+
+test('pedido concluído durante a transição é copiado sem reenviar o PDF', async () => {
+  const old = new DatabaseSync(':memory:');
+  try {
+    old.exec(await readFile('migrations/0001_kit_estudante.sql','utf8'));
+    const hash = createHash('sha256').update(env.SESSION_SECRET+':kit-janelas-email:pessoa@example.com').digest('base64url');
+    old.prepare("INSERT INTO kit_events (source,event,status,occurred_at,request_id,session_hash) VALUES ('kit-trocar-janelas','janelas_pdf_sent','success',?,?,?)")
+      .run(new Date().toISOString(),body.eventId,hash);
+    env.KIT_ESTUDANTE_DB = {prepare(query){let args=[];return {
+      bind(...values){args=values;return this;},async first(){return old.prepare(query).get(...args)||null;},
+      async run(){assert.fail('Escrita indevida no Kit Estudante');}
+    };}};
+    assert.equal((await call()).status,200);
+    assert.equal(calls.length,0);
+    assert.equal(sql.prepare("SELECT COUNT(*) AS n FROM kit_events WHERE event='janelas_pdf_sent'").get().n,1);
+    assert.equal(old.prepare('SELECT COUNT(*) AS n FROM kit_events').get().n,1);
+  } finally {old.close();}
+});
 
 const measurementCookie = (measurement = true, savedAt = new Date().toISOString()) =>
   'gp_cookie_preferences=' + encodeURIComponent(JSON.stringify({measurement, savedAt, version:'2026-09-01-1'}));
