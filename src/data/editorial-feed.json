@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-17T07:18:19.999Z",
+  "generatedAt": "2026-09-17T07:38:39.651Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 106,
+    "published": 107,
     "newsOnline": 21
   },
   "articles": [
@@ -1504,14 +1504,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "iluminacao-pisos-reduzir-quedas.mdx",
       "arrivedAt": "2026-09-06T12:13:53+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-17T07:01:54Z",
+      "url": "https://guiadoproprietario.pt/casa/iluminacao-pisos-reduzir-quedas/"
     },
     {
       "id": "EXTRA-004",
