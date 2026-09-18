@@ -5,3 +5,4 @@ regresso-casa-depois-hospital.mdx
 sapa-adaptacoes-casa.mdx
 trocar-banheira-base-duche.mdx
 casa-preparada-viver-sozinho.mdx
+manutencao-ar-condicionado.mdx
