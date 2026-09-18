@@ -1,5 +1,19 @@
 const FRONTMATTER_PATTERN = /^(---\r?\n)([\s\S]*?)(\r?\n---(?:\r?\n|$))/;
 
+export function ativarArtigoParaPublicacao(source) {
+  const match = source.match(FRONTMATTER_PATTERN);
+  if (!match) throw new Error("O artigo não tem frontmatter YAML válido.");
+  const newline = match[1].includes("\r\n") ? "\r\n" : "\n";
+  const lines = match[2].match(/^rascunho:.*$/gm) || [];
+  if (lines.length > 1 || (lines.length === 1 && !/^rascunho:[ \t]*(?:true|false)[ \t]*(?:#.*)?\r?$/.test(lines[0]))) {
+    throw new Error("O campo rascunho deve ser um booleano único.");
+  }
+  const frontmatter = lines.length
+    ? match[2].replace(/^rascunho:[^\r\n]*/m, "rascunho: false")
+    : match[2] + newline + "rascunho: false";
+  return match[1] + frontmatter + match[3] + source.slice(match[0].length);
+}
+
 export function formatarDataIso(value) {
   const date = value instanceof Date ? value : new Date(String(value));
   if (Number.isNaN(date.valueOf())) {

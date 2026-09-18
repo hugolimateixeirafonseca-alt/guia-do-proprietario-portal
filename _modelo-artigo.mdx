@@ -58,11 +58,11 @@ publicado: 2026-07-26
 
 # Momento em que o artigo entrou no portal. OBRIGATÓRIO no schema.
 # Normalmente é preenchido automaticamente pelo workflow de publicação.
-chegada: 2026-07-26T10:00:00Z
+# Nos artigos novos em espera, omita chegada. A automação usa o histórico Git.
 
 # Momento exato da primeira publicação no site. OBRIGATÓRIO no schema.
 # Normalmente é preenchido automaticamente pelo workflow de publicação.
-publicado_em: 2026-07-26T10:05:00Z
+# Nos artigos novos em espera, omita publicado_em. A automação preenche na publicação.
 
 # Data da última revisão, em AAAA-MM-DD. OBRIGATÓRIO.
 revisto: 2026-07-26
@@ -87,7 +87,8 @@ fontes:
 # Valores possíveis: fiscal, juridico, financeiro ou nenhum.
 aviso: nenhum
 
-# Impede a publicação no site, RSS e feed JSON. OPCIONAL. Por omissão é false.
+# Nos artigos novos em por-publicar, use sempre true.
+# A automação altera para false apenas ao preparar o artigo para publicação.
 rascunho: true
 
 # Permite destacar o artigo na homepage quando também é essencial. OPCIONAL. Por omissão é false.
@@ -137,12 +138,13 @@ Exemplo de tabela Markdown:
 | Solução B | 1 a 2 semanas | Quando existem trabalhos preparatórios |
 
 Para publicar:
-1. Copie este ficheiro para src/content/artigos/.
+1. Copie este ficheiro para src/content/por-publicar/ ou importe-o no dashboard.
 2. Dê ao ficheiro o slug pretendido, por exemplo como-escolher-seguro-casa.mdx.
 3. Substitua os valores de exemplo.
-4. Confirme que chegada e publicado_em estão preenchidos pelo workflow ou manualmente quando a publicação é direta.
-5. Defina rascunho: false ou remova o campo rascunho.
+4. Omita chegada e publicado_em. O workflow preenche ambas automaticamente.
+5. Mantenha rascunho: true. A automação altera para false ao publicar.
 6. Escreva o artigo abaixo deste comentário.
+7. Acrescente o nome do ficheiro a src/content/fila-publicacao-artigos.txt. A importação pelo dashboard faz isto automaticamente.
 -->
 
 ## Comece pela resposta prática

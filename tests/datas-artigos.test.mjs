@@ -1,6 +1,21 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { lerDatasFrontmatter, preencherDatasFrontmatter } from "../scripts/lib/datas-artigos.mjs";
+import { lerDatasFrontmatter, preencherDatasFrontmatter, ativarArtigoParaPublicacao } from "../scripts/lib/datas-artigos.mjs";
+
+test("publicação ativa apenas o frontmatter e preserva o corpo e as datas", () => {
+  for (const newline of ["\n", "\r\n"]) {
+    const source = ["---", "publicado: 2026-09-18", "rascunho: true # espera", "---", "rascunho: true no corpo"].join(newline);
+    const result = ativarArtigoParaPublicacao(source);
+    assert.equal(result, source.replace("rascunho: true # espera", "rascunho: false"));
+    assert.equal(ativarArtigoParaPublicacao(result), result);
+  }
+});
+test("rascunho ausente é preenchido e valores inválidos não são publicados", () => {
+  assert.match(ativarArtigoParaPublicacao("---\npublicado: 2026-09-18\n---\nTexto"), /rascunho: false\n---/);
+  for (const fields of ['rascunho: "true"', "rascunho: true\nrascunho: false", "rascunho: sim"]) {
+    assert.throws(() => ativarArtigoParaPublicacao("---\n" + fields + "\n---\nTexto"), /booleano único/);
+  }
+});
 
 test("preenche as datas imediatamente depois de publicado", () => {
   const source = "---\ntitulo: Exemplo\npublicado: 2026-08-10\nrevisto: 2026-08-10\n---\n\nTexto.";

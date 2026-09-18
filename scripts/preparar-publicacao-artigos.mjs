@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
-import { lerDatasFrontmatter, preencherDatasFrontmatter } from "./lib/datas-artigos.mjs";
+import { lerDatasFrontmatter, preencherDatasFrontmatter, ativarArtigoParaPublicacao } from "./lib/datas-artigos.mjs";
 
 const execFileAsync = promisify(execFile);
 const root = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -40,10 +40,10 @@ for (const input of files) {
     throw new Error("Não foi possível confirmar a chegada de " + path.basename(filePath) + " no histórico Git.");
   }
 
-  const nextSource = preencherDatasFrontmatter(source, {
+  const nextSource = ativarArtigoParaPublicacao(preencherDatasFrontmatter(source, {
     chegada,
     publicadoEm: currentDates.publicadoEm ?? new Date(),
-  });
+  }));
   await writeFile(filePath, nextSource, "utf8");
 
   const finalDates = lerDatasFrontmatter(nextSource);
