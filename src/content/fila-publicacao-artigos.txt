@@ -6,3 +6,7 @@ sapa-adaptacoes-casa.mdx
 trocar-banheira-base-duche.mdx
 casa-preparada-viver-sozinho.mdx
 manutencao-ar-condicionado.mdx
+calendario-manutencao-casa.mdx
+fendas-nas-paredes.mdx
+procurar-fuga-de-agua.mdx
+manutencao-lareira-recuperador.mdx
