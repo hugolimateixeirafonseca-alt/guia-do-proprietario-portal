@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-18T07:21:41.462Z",
+  "generatedAt": "2026-09-18T07:40:44.978Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 112,
-    "published": 107,
+    "published": 108,
     "newsOnline": 21
   },
   "articles": [
@@ -1488,14 +1488,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "rampa-acesso-casa.mdx",
       "arrivedAt": "2026-09-06T12:14:18+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-18T07:01:54Z",
+      "url": "https://guiadoproprietario.pt/casa/rampa-acesso-casa/"
     },
     {
       "id": "EXTRA-005",
