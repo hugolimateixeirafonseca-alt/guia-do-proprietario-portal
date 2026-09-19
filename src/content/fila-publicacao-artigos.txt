@@ -1,7 +1,6 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # Um artigo por execução. Adicionar novos pendentes a esta fila.
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
-regresso-casa-depois-hospital.mdx
 sapa-adaptacoes-casa.mdx
 trocar-banheira-base-duche.mdx
 casa-preparada-viver-sozinho.mdx
