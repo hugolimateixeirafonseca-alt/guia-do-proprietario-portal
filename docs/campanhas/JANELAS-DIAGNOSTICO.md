@@ -10,7 +10,7 @@ Fonte: https://www.nuvi.pt/campanhas/janelas-2026-desc25, conteúdo público con
 
 Zonas: Amadora, Cascais, Lisboa, Loures, Odivelas, Oeiras e Sintra. Todas as respostas, incluindo Outra zona, 1–2 e Ainda não sei, conduzem ao resultado com o botão de encaminhamento. A quantidade e a zona são apresentadas como respostas declaradas, sem afirmar elegibilidade ou cobertura. A validação comercial compete ao cliente. Animação de 1,2 segundos apresenta a preparação do resultado.
 
-Imagem: reutilizada public/imagens/artigos/escolher-janelas.webp, preservando o estilo ilustrado do Guia. Fotografia da NUVI não integrada.
+Imagem atual: public/imagens/landings/janelas-diagnostico/hero-pvc-casa.webp. Imagem fotorrealista gerada por IA e aprovada pelo utilizador, com janela branca em PVC numa casa portuguesa simples e cuidada. Substitui a ilustração anteriormente reutilizada do artigo.
 
 ## Integração
 
@@ -40,3 +40,9 @@ Publicação autorizada pelo utilizador. Oferta ativa relida pela administraçã
 
 O controlo editorial rejeitou os intervalos com travessão médio na pergunta de quantidade. Substituídos por 1 a 2, 3 a 5 e 6 a 10. Validação editorial do repositório e três testes de percurso passaram. Tracking e postback sem alterações.
 
+
+## Hero aprovado em 19 de setembro de 2026
+
+Substituição visual e envio para publicação autorizados pelo utilizador após pré-visualização. Mantidos os textos HTML do desconto até 25% e da legenda, sem duplicação na imagem. WebP otimizado e enquadramento centrado. Questionário, condições e tracking preservados. Validação local direcionada; confirmação online pelo utilizador.
+
+Imagem preparada com a ferramenta integrada image_gen. Prompt de produção: remover apenas textos, selo e gradiente da pré-visualização aprovada, preservando a janela, composição, casa, luz e mobiliário; as sobreposições continuam em HTML.
