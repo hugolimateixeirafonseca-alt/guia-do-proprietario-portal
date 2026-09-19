@@ -19,6 +19,8 @@ export default defineConfig({
       "https://guiadoproprietario.pt/campanha-janelas-cinema/",
       "https://guiadoproprietario.pt/campanha-janelas-pvc/",
       "https://guiadoproprietario.pt/kit-trocar-janelas/",
+      "https://guiadoproprietario.pt/pdf-casa-de-banho/",
+      "https://guiadoproprietario.pt/pdf-casa-de-banho/obrigado/",
       "https://guiadoproprietario.pt/kit-trocar-janelas/obrigado/",
       "https://guiadoproprietario.pt/kit-estudante/obrigado/"
     ].includes(page)

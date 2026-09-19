@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - 'functions/**'
+      - 'src/pages/pdf-casa-de-banho/**'
+      - 'src/lib/pdf-*.mjs'
+      - 'src/styles/pdf-casa-banho.css'
+      - 'public/downloads/guia-banheira-base-de-duche-2026.pdf'
+      - 'public/imagens/landings/pdf-casa-de-banho/**'
+      - 'tests/pdf-casa-banho.test.mjs'
+      - 'tsconfig.pdf-casa-banho-api.json'
       - 'public/arquivo-consentimentos/**'
       - 'public/_headers'
       - 'tests/consent-archive.test.mjs'
@@ -180,6 +187,9 @@ jobs:
 
       - name: Validate windows kit flow
         run: npm run test:kit-janelas
+
+      - name: Validate bathroom PDF flow
+        run: npm run test:pdf-casa-banho
 
       - name: Validate consent archive integration
         run: node --test tests/consent-archive.test.mjs tests/subscribe.test.mjs

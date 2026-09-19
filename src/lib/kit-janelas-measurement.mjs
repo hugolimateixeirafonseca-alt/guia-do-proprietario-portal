@@ -23,11 +23,11 @@ export function kitMeasurement(cookieString = '', now = Date.now(), pageUrl = ''
   } catch { return null; }
 }
 
-export function trackKitRegistration(doc, win, eventId) {
+export function trackKitRegistration(doc, win, eventId, source = 'kit-trocar-janelas') {
   if (!eventId || !kitMeasurement(doc.cookie) || typeof win.fbq !== 'function') return;
   try {
     win.fbq('track', 'CompleteRegistration', {
-      content_name: 'kit-trocar-janelas', content_category: 'lead_magnet', status: true
+      content_name: source, content_category: 'lead_magnet', status: true
     }, { eventID: eventId });
   } catch { /* Uma falha de medição não impede o acesso ao agradecimento. */ }
 }

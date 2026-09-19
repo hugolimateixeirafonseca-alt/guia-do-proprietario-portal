@@ -1,0 +1,54 @@
+---
+import Squeeze from '../../layouts/Squeeze.astro';
+import Icon from '../../components/CasaBanhoIcon.astro';
+import { CONSENT_TEXT, PDF_CASA_BANHO_CONSENT_VERSION } from '../../data/consent';
+import '../../styles/pdf-casa-banho.css';
+const consent = CONSENT_TEXT[PDF_CASA_BANHO_CONSENT_VERSION];
+const chapters = [
+  ['spark','Quando faz sentido trocar a banheira','Veja em que situações a mudança é realmente vantajosa.'],
+  ['home','O que influencia o preço','Conheça os principais fatores que podem fazer o valor variar.'],
+  ['shower','Tipos de base de duche','Descubra as opções mais comuns e as suas vantagens.'],
+  ['space','Resguardos e acabamentos','Saiba como escolher resguardos, revestimentos e outros detalhes.'],
+  ['shield','Erros a evitar','Conheça os erros mais comuns e como os evitar.'],
+  ['check','Checklist antes de avançar','Uma lista prática para confirmar o que está incluído no orçamento.']
+];
+---
+<Squeeze titulo="Vai trocar a banheira por uma base de duche? | PDF gratuito" descricao="Receba grátis o guia prático de 20 páginas. Saiba o que verificar, o que influencia o preço e como evitar erros antes de trocar a banheira por uma base de duche." imagemOg="/imagens/landings/pdf-casa-de-banho/hero.webp" robots="noindex,follow">
+<div class="pb">
+  <header class="pb-header pb-wrap"><a class="pb-brand" href="/"><Icon name="home"/><span>Guia do Proprietário</span></a><nav aria-label="Navegação principal"><a href="#guia">Guias</a><a href="/casa/">Dicas</a><a href="#para-si">Inspiração</a><a href="/sobre/">Sobre</a></nav><span class="pb-motto">Casas melhores.<br/>Pessoas mais informadas.</span></header>
+  <section class="pb-hero" aria-labelledby="pb-title">
+    <div class="pb-hero-photo"><img src="/imagens/landings/pdf-casa-de-banho/hero.webp" alt="Imagem ilustrativa da mesma casa de banho antes, com banheira, e depois, com uma base de duche" width="965" height="732" fetchpriority="high"/></div>
+    <div class="pb-hero-inner pb-wrap">
+      <div class="pb-copy"><span class="pb-pill">PDF gratuito</span><h1 id="pb-title">Vai trocar a banheira<br/>por uma base de duche?</h1><p class="pb-intro">Receba <strong>grátis</strong> o guia prático que o ajuda a evitar erros, perceber o que influencia o preço e tomar <strong>melhores decisões antes de avançar.</strong></p>
+      <ul class="pb-checks"><li>O que verificar antes de começar</li><li>O que pode encarecer a intervenção</li><li>Medidas, materiais e escolhas importantes</li><li>Checklist final antes de pedir orçamento</li></ul>
+      <div class="pb-form-card" id="receber"><h2>Receber o PDF gratuito</h2>
+      <form id="kit-janelas-form" data-consent-version={PDF_CASA_BANHO_CONSENT_VERSION} novalidate>
+        <label class="pb-sr-only" for="kj-email">O seu email</label><input id="kj-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="O seu email" maxlength="254" required aria-describedby="kj-email-error"/>
+        <p class="pb-error" id="kj-email-error" hidden></p>
+        <div class="pb-honeypot" aria-hidden="true"><label>Empresa<input name="company" tabindex="-1" autocomplete="off"/></label></div>
+        <label class="pb-consent"><input name="consent_pdf" type="checkbox" required aria-describedby="kj-consent-error"/><span>{consent.c1}. <a href="/privacidade/" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>
+        <label class="pb-consent"><input name="consent_marketing" type="checkbox"/><span>{consent.c2}</span></label>
+        <p class="pb-error" id="kj-consent-error" hidden></p>
+        <button class="pb-button" type="submit"><span>Quero receber o guia</span><Icon name="arrow"/></button><p id="kj-form-error" class="pb-error" role="alert" hidden></p><p class="pb-reassurance"><Icon name="lock"/>Grátis. Receba por email.</p>
+      </form>
+      <section id="kj-success" tabindex="-1" hidden><h3>O seu guia está a caminho.</h3><p>Enviámos o PDF para <strong id="kj-success-email"></strong>.</p><p>Verifique também as pastas de promoções e spam.</p><a href="/pdf-casa-de-banho/obrigado/">Ver o próximo passo</a><button id="kj-change-email" type="button">Corrigir o endereço de email</button></section>
+      </div>
+      <div class="pb-social"><div class="pb-avatars" aria-hidden="true"><span></span><span></span><span></span></div><p>Mais de <strong>1.000 proprietários</strong> já descarregaram<br class="pb-desktop"/> guias do Guia do Proprietário.</p></div>
+      </div>
+      <figure class="pb-book-scene"><div class="pb-book"><img src="/imagens/landings/pdf-casa-de-banho/capa.webp" alt="Capa original do PDF Vai trocar a banheira por uma base de duche?, edição 2026" width="849" height="1200"/><span class="pb-free">GRÁTIS</span></div><figcaption>20 páginas para decidir com mais confiança.</figcaption></figure>
+    </div><span class="pb-photo-caption">Imagem ilustrativa</span>
+  </section>
+  <section class="pb-content pb-wrap" id="guia"><h2>O que vai encontrar no guia</h2><p class="pb-subtitle">Um guia completo e prático, com informação clara e objetiva.</p><div class="pb-chapters">{chapters.map(([icon,title,description])=><article><Icon name={icon}/><h3>{title}</h3><p>{description}</p></article>)}</div></section>
+  <section class="pb-comparison"><div class="pb-wrap pb-comparison-grid"><div><h2>Evite decisões precipitadas<br/>e custos inesperados</h2><p>Ter a informação certa faz toda a diferença. Veja como este guia o ajuda a <strong>tomar melhores decisões.</strong></p></div><article class="pb-without"><h3><span>×</span> Sem informação</h3><ul><li>Maior risco de escolher a solução menos adequada.</li><li>Surpresas no orçamento.</li><li>Dificuldade em comparar propostas.</li><li>Decisões baseadas apenas em opiniões de terceiros.</li></ul></article><article class="pb-with"><h3><span>✓</span> Com este guia</h3><ul><li>Entende o que realmente precisa.</li><li>Sabe o que influencia o preço.</li><li>Consegue comparar soluções com mais confiança.</li><li>Evita erros que podem sair caros.</li></ul></article></div></section>
+  <section class="pb-for-you" id="para-si"><div class="pb-detail-photo" role="img" aria-label="Base de duche com resguardo de vidro, imagem ilustrativa"></div><div class="pb-for-copy"><p class="pb-eyebrow">ESTE GUIA É PARA SI SE…</p><h2>Quer tomar uma decisão<br/>mais informada e segura</h2><ul class="pb-checks"><li>Está a pensar trocar a banheira por duche.</li><li>Quer perceber melhor as opções disponíveis.</li><li>Não quer avançar às cegas.</li><li>Quer comparar soluções com confiança.</li><li>Procura informação prática e independente.</li><li>Quer evitar erros e custos desnecessários.</li></ul></div><div class="pb-quote"><p><b aria-hidden="true">“</b>Mais do que uma remodelação, é um dia a dia mais prático e confortável.</p></div></section>
+  <section class="pb-repeat pb-wrap"><span class="pb-mail-icon">✉</span><div><h2>Receba já o PDF gratuito no seu email</h2><p>Junte-se a mais de 1.000 proprietários e receba o guia.</p></div><a class="pb-button" href="#receber">Quero receber o guia <Icon name="arrow"/></a></section>
+  <section class="pb-faq pb-wrap"><h2>Perguntas frequentes</h2><p>Tire aqui as suas dúvidas.</p><div class="pb-faq-grid"><details open><summary>O guia é mesmo gratuito?</summary><p>Sim. O guia é 100% gratuito. Preencha o email e autorize o envio no formulário para o receber.</p></details><details open><summary>Vou receber outro tipo de email?</summary><p>A primeira autorização inclui o PDF e comunicações relevantes sobre o Guia do Proprietário. A segunda permite receber também ofertas e conteúdos patrocinados. Pode cancelar a subscrição a qualquer momento.</p></details><details open><summary>O Guia do Proprietário faz obras?</summary><p>Não. O Guia do Proprietário disponibiliza conteúdos informativos e não executa obras. Se quiser avançar, pode consultar a campanha no site do parceiro.</p></details><details open><summary>Quanto tempo demora a receber o PDF?</summary><p>O envio é iniciado após o pedido. Normalmente chega em poucos minutos. Verifique também as pastas de promoções e spam.</p></details></div></section>
+  <section class="pb-final"><div class="pb-wrap"><h2>Dê o próximo passo com mais informação<br/>e menos incerteza</h2><p>Receba o guia gratuitamente e prepare a mudança.</p><a class="pb-button" href="#receber">Quero receber o guia <Icon name="arrow"/></a><p class="pb-reassurance"><Icon name="lock"/>Grátis. Receba por email.</p></div></section>
+  <footer class="pb-footer pb-wrap"><a class="pb-brand" href="/"><Icon name="home"/>Guia do Proprietário</a><nav aria-label="Informação legal"><a href="/privacidade/">Política de Privacidade</a><a href="/termos/">Termos</a><a href="mailto:geral@guiadoproprietario.pt">Contacto</a><button type="button" data-cookie-settings>Cookies</button></nav><p>Conteúdo informativo. O Guia do Proprietário não executa obras nem presta serviços de remodelação.</p></footer>
+</div>
+</Squeeze>
+<script>
+import { initPdfOptin } from '../../lib/pdf-optin-form.mjs';
+import { banhoThankYouUrl } from '../../lib/pdf-casa-banho-campaign.mjs';
+initPdfOptin(document, window, {endpoint:'/api/pdf-casa-de-banho',source:'pdf-casa-de-banho',thankYouUrl:banhoThankYouUrl});
+</script>
