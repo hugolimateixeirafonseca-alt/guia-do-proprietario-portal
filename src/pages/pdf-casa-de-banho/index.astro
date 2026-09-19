@@ -15,12 +15,11 @@ const chapters = [
 ---
 <Squeeze titulo="Vai trocar a banheira por uma base de duche? | PDF gratuito" descricao="Receba grátis o guia prático de 20 páginas. Saiba o que verificar, o que influencia o preço e como evitar erros antes de trocar a banheira por uma base de duche." imagemOg="/imagens/landings/pdf-casa-de-banho/hero.webp" robots="noindex,follow">
 <div class="pb">
-  <header class="pb-header pb-wrap"><a class="pb-brand" href="/"><Icon name="home"/><span>Guia do Proprietário</span></a><nav aria-label="Navegação principal"><a href="#guia">Guias</a><a href="/casa/">Dicas</a><a href="#para-si">Inspiração</a><a href="/sobre/">Sobre</a></nav><span class="pb-motto">Casas melhores.<br/>Pessoas mais informadas.</span></header>
   <section class="pb-hero" aria-labelledby="pb-title">
-    <div class="pb-hero-photo"><img src="/imagens/landings/pdf-casa-de-banho/hero.webp" alt="Imagem ilustrativa da mesma casa de banho antes, com banheira, e depois, com uma base de duche" width="965" height="732" fetchpriority="high"/></div>
     <div class="pb-hero-inner pb-wrap">
-      <div class="pb-copy"><span class="pb-pill">PDF gratuito</span><h1 id="pb-title">Vai trocar a banheira<br/>por uma base de duche?</h1><p class="pb-intro">Receba <strong>grátis</strong> o guia prático que o ajuda a evitar erros, perceber o que influencia o preço e tomar <strong>melhores decisões antes de avançar.</strong></p>
+      <div class="pb-copy"><div class="pb-copy-intro"><span class="pb-pill">PDF gratuito</span><h1 id="pb-title">Vai trocar a banheira<br/>por uma base de duche?</h1><p class="pb-intro">Receba <strong>grátis</strong> o guia prático que o ajuda a evitar erros, perceber o que influencia o preço e tomar <strong>melhores decisões antes de avançar.</strong></p>
       <ul class="pb-checks"><li>O que verificar antes de começar</li><li>O que pode encarecer a intervenção</li><li>Medidas, materiais e escolhas importantes</li><li>Checklist final antes de pedir orçamento</li></ul>
+      </div>
       <div class="pb-form-card" id="receber"><h2>Receber o PDF gratuito</h2>
       <form id="kit-janelas-form" data-consent-version={PDF_CASA_BANHO_CONSENT_VERSION} novalidate>
         <label class="pb-sr-only" for="kj-email">O seu email</label><input id="kj-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="O seu email" maxlength="254" required aria-describedby="kj-email-error"/>
@@ -35,8 +34,11 @@ const chapters = [
       </div>
       <div class="pb-social"><div class="pb-avatars" aria-hidden="true"><span></span><span></span><span></span></div><p>Mais de <strong>1.000 proprietários</strong> já descarregaram<br class="pb-desktop"/> guias do Guia do Proprietário.</p></div>
       </div>
-      <figure class="pb-book-scene"><div class="pb-book"><img src="/imagens/landings/pdf-casa-de-banho/capa.webp" alt="Capa original do PDF Vai trocar a banheira por uma base de duche?, edição 2026" width="849" height="1200"/><span class="pb-free">GRÁTIS</span></div><figcaption>20 páginas para decidir com mais confiança.</figcaption></figure>
-    </div><span class="pb-photo-caption">Imagem ilustrativa</span>
+      <div class="pb-visual">
+    <div class="pb-hero-photo"><img src="/imagens/landings/pdf-casa-de-banho/hero.webp" alt="Imagem ilustrativa da mesma casa de banho antes, com banheira, e depois, com uma base de duche" width="965" height="700" fetchpriority="high"/></div>
+      <figure class="pb-book-scene"><div class="pb-book"><img src="/imagens/landings/pdf-casa-de-banho/capa.webp" alt="Capa original do PDF Vai trocar a banheira por uma base de duche?, edição 2026" width="849" height="1200"/><span class="pb-free">GRÁTIS</span></div><figcaption><span class="pb-eyebrow">O SEU GUIA PRÁTICO 2026</span><strong>Prepare a mudança.<br/>Evite surpresas na obra.</strong><p>20 páginas com medidas, materiais e uma checklist para comparar orçamentos.</p><span class="pb-book-format">PDF gratuito · Para guardar ou imprimir</span></figcaption></figure>
+      </div>
+    </div>
   </section>
   <section class="pb-content pb-wrap" id="guia"><h2>O que vai encontrar no guia</h2><p class="pb-subtitle">Um guia completo e prático, com informação clara e objetiva.</p><div class="pb-chapters">{chapters.map(([icon,title,description])=><article><Icon name={icon}/><h3>{title}</h3><p>{description}</p></article>)}</div></section>
   <section class="pb-comparison"><div class="pb-wrap pb-comparison-grid"><div><h2>Evite decisões precipitadas<br/>e custos inesperados</h2><p>Ter a informação certa faz toda a diferença. Veja como este guia o ajuda a <strong>tomar melhores decisões.</strong></p></div><article class="pb-without"><h3><span>×</span> Sem informação</h3><ul><li>Maior risco de escolher a solução menos adequada.</li><li>Surpresas no orçamento.</li><li>Dificuldade em comparar propostas.</li><li>Decisões baseadas apenas em opiniões de terceiros.</li></ul></article><article class="pb-with"><h3><span>✓</span> Com este guia</h3><ul><li>Entende o que realmente precisa.</li><li>Sabe o que influencia o preço.</li><li>Consegue comparar soluções com mais confiança.</li><li>Evita erros que podem sair caros.</li></ul></article></div></section>

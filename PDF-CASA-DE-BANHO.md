@@ -1,5 +1,15 @@
 # PDF Casa de Banho
 
+## Correção do hero e do opt-in, 20 de setembro de 2026
+
+- Removido o cabeçalho de navegação. A fotografia antes/depois passa a ser um elemento integral, na proporção original, sem recorte nem sobreposição da capa. Em telemóvel surge antes do formulário.
+- Mockup do PDF separado da fotografia, com perspetiva moderada, lombada, sombra e texto de apoio. Removida a legenda visível Imagem ilustrativa da landing e do agradecimento, a pedido do utilizador.
+- Diagnóstico autorizado do erro: configuração de produção sem PDF_CASA_BANHO_DB e base sem eventos. O handler devolve not_configured antes de contactar o Sender quando falta esse binding. A configuração anterior feita pela API não tinha sido incluída em wrangler.jsonc e o deployment substituiu-a.
+- Binding reposto pela API, com resposta de sucesso, e acrescentado ao ficheiro versionado wrangler.jsonc, incluindo ID da base e diretório da migração. As próximas publicações passam a preservar a ligação.
+- Teste de regressão da configuração de deployment acrescentado. Nove testes específicos aprovados. Compilação isolada da página e revisão local em computador e 390 px, sem overflow e com imagem completa. Falha de rede simulada apenas no servidor local confirmou que o botão recupera o texto original e fica novamente utilizável.
+- Código preparado para envio pelo fluxo habitual. Não foram enviados emails nem criados contactos reais de teste. Conclusão do deployment e reteste público após a correção não consultados.
+
+
 ## Estado de implementação, 19 de setembro de 2026
 
 Pedido do utilizador: criar a landing segundo a referência, com a imagem antes/depois e o PDF fornecidos, opt-ins iguais ao Kit Janelas, envio pelo Sender, tracking e destaque comercial no agradecimento e no email. Inclusão de todos os opt-ins no grupo `dw87gX` expressamente pedida. O utilizador confirmou mais de 1.000 downloads dos guias nesta tarefa.

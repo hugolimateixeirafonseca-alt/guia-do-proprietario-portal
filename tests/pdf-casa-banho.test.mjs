@@ -23,3 +23,12 @@ test('repetição do pedido não reenvia PDF ou conversão; Pixel e CAPI usam ID
 test('consentimento PDF ou comercial não autoriza medição',async()=>{await submit({consent2:true,metaMeasurement:true});assert.ok(!calls.some(c=>c.url.includes('graph.facebook.com')));});
 test('exige versão e consentimento próprios e nunca usa a base Janelas como alternativa',async()=>{assert.equal((await submit({consent1:false})).status,400);assert.equal((await submit({consentVersion:'kit-janelas-2026-09-b'})).status,400);env.KIT_JANELAS_DB=env.PDF_CASA_BANHO_DB;delete env.PDF_CASA_BANHO_DB;assert.equal((await submit()).status,503);assert.equal(calls.length,0);assert.throws(()=>sql.exec("INSERT INTO kit_events(source,event,status,occurred_at) VALUES('kit-trocar-janelas','x','x','x')"));});
 test('páginas de agradecimento e links excluem email e mantêm a oferta do cliente',()=>{const url=banhoThankYouUrl('https://guiadoproprietario.pt/pdf-casa-de-banho/?utm_content=anuncio1&email=pessoa@example.com');assert.match(url,/pdf-casa-de-banho\/obrigado\//);assert.doesNotMatch(url,/email|pessoa/);assert.match(url,/utm_content=anuncio1/);const listeners={};const link={addEventListener(e,fn){listeners[e]=fn}};const doc={cookie:'',querySelectorAll(){return[link]}};prepararCampanhaPdfBanho(doc,{location:{href:url}});const tracker=new URL(link.href);assert.equal(tracker.pathname,'/go/casa-banho-campanha');assert.equal(tracker.searchParams.get('source'),'pdf-casa-de-banho-obrigado');assert.equal(tracker.searchParams.get('measurement_consent'),null);assert.equal(tracker.searchParams.get('utm_content'),'anuncio1');});
+
+test('deploy conserva a base exclusiva do PDF e a migração que a inicializa',async()=>{
+ const config=JSON.parse(await readFile('wrangler.jsonc','utf8'));
+ const binding=config.d1_databases.find(db=>db.binding==='PDF_CASA_BANHO_DB');
+ assert.ok(binding,'A publicação removeria o binding sem configuração versionada');
+ assert.equal(binding.database_id,'0035dea4-9613-4933-b7b4-9f926bf452fe');
+ assert.equal(binding.database_name,'guia-proprietario-pdf-casa-banho');
+ assert.match(await readFile(binding.migrations_dir+'/0001_pdf_casa_banho.sql','utf8'),/source = 'pdf-casa-de-banho'/);
+});

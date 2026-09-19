@@ -9,6 +9,12 @@
   },
   "d1_databases": [
     {
+      "binding": "PDF_CASA_BANHO_DB",
+      "database_name": "guia-proprietario-pdf-casa-banho",
+      "database_id": "0035dea4-9613-4933-b7b4-9f926bf452fe",
+      "migrations_dir": "migrations/pdf-casa-banho"
+    },
+    {
       "binding": "KIT_JANELAS_DB",
       "database_name": "guia-proprietario-kit-janelas",
       "database_id": "32fe7615-5bf4-427a-9ea0-7c4c5546497d",

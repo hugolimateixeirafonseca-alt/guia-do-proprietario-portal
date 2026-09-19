@@ -1,4 +1,3 @@
-import { kitThankYouUrl } from './kit-janelas-campaign.mjs';
 import { kitMeasurement, trackKitRegistration } from './kit-janelas-measurement.mjs';
 export function initPdfOptin(doc, win, options) {
   const { endpoint, source, thankYouUrl } = options;
@@ -9,6 +8,7 @@ export function initPdfOptin(doc, win, options) {
   const marketing = form.elements.namedItem('consent_marketing');
   const submit = form.querySelector('button[type="submit"]');
   const submitLabel = submit.querySelector('span');
+  const initialSubmitLabel = submitLabel.textContent;
   const success = doc.getElementById('kj-success');
   const errorFor = (id, message) => {
     const element = doc.getElementById(id);
@@ -63,7 +63,7 @@ export function initPdfOptin(doc, win, options) {
     } catch (error) {
       errorFor('kj-form-error', error instanceof Error ? error.message : 'Não foi possível enviar o guia. Tente novamente.');
     } finally {
-      sending = false; submit.disabled = false; submitLabel.textContent = 'RECEBER PDF GRÁTIS';
+      sending = false; submit.disabled = false; submitLabel.textContent = initialSubmitLabel;
     }
   });
   doc.getElementById('kj-change-email').addEventListener('click', () => {
