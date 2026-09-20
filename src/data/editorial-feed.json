@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-20T07:22:06.470Z",
+  "generatedAt": "2026-09-20T07:52:25.953Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 117,
-    "published": 109,
+    "published": 110,
     "newsOnline": 21
   },
   "articles": [
@@ -1536,14 +1536,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "sapa-adaptacoes-casa.mdx",
       "arrivedAt": "2026-09-06T12:15:11+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-20T07:01:38Z",
+      "url": "https://guiadoproprietario.pt/casa/sapa-adaptacoes-casa/"
     },
     {
       "id": "EXTRA-007",
