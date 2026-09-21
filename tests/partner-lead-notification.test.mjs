@@ -62,3 +62,24 @@ test("aceita apenas ligações do dashboard oficial", async () => {
   assert.equal(response.status, 400);
   assert.deepEqual(await response.json(), { error: "invalid_dashboard_url" });
 });
+
+test("boas-vindas incluem o acesso permanente e condições sem anunciar um pedido inexistente", async () => {
+  let sent;
+  const originalFetch=globalThis.fetch;
+  globalThis.fetch=async(_url,init)=>{sent=JSON.parse(init.body);return new Response('{}',{status:200});};
+  try {
+    const welcome={...payload,event_id:'welcome:12345678-1234-1234-1234-123456789abc',partner_name:'Empresa <teste>',expires_at:null};
+    const response=await onRequestPost({request:request(welcome),env:{MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,SENDER_API_TOKEN:'sender-test'}});
+    assert.equal(response.status,200);
+    assert.match(sent.subject,/Bem-vindo/);
+    for(const body of [sent.html,sent.text]){
+      assert.ok(body.includes(payload.dashboard_url));
+      assert.match(body,/Entrar na minha área de parceiro/);
+      assert.match(body,/quatro contactos aceites são gratuitos/);
+      assert.match(body,/primeiro a aceitar/);
+      assert.doesNotMatch(body,/Tem um novo pedido|Pedido disponível até/);
+    }
+    assert.ok(sent.html.includes('Empresa &lt;teste&gt;'));
+    assert.equal(sent.to.email,payload.partner_email);
+  }finally{globalThis.fetch=originalFetch;}
+});
