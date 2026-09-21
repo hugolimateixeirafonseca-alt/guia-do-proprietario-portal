@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-21T07:22:57.810Z",
+  "generatedAt": "2026-09-21T07:43:05.357Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 132,
-    "published": 110,
+    "published": 111,
     "newsOnline": 21
   },
   "articles": [
@@ -1760,14 +1760,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "trocar-banheira-base-duche.mdx",
       "arrivedAt": "2026-09-06T12:15:38+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-21T07:02:00Z",
+      "url": "https://guiadoproprietario.pt/casa/trocar-banheira-base-duche/"
     },
     {
       "id": "EXTRA-008",
