@@ -104,7 +104,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     text = 'Olá, '+partnerName+'.\n\n'+message+'\n\nSe precisar de ajuda, responda a este email.';
   }
 
-  return deliverOnce(env.EMAIL_DELIVERY_DB,eventId,partnerEmail,async (markSending) => {
+  return deliverOnce(env.EMAIL_DELIVERY_DB,eventId,partnerEmail,async (markSending: () => Promise<void>) => {
   // Register applicants, never the administrative notification recipient.
   if (application) {
     let stage="lookup",providerStatus=0;
