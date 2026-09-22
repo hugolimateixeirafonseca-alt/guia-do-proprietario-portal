@@ -1,4 +1,6 @@
+import {deliverOnce} from "../../lib/partner-email-delivery.mjs";
 interface Env {
+  EMAIL_DELIVERY_DB?: unknown;
   SENDER_API_TOKEN?: string;
   MAKE_PARTNER_NOTIFICATIONS_SECRET?: string;
 }
@@ -102,22 +104,31 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     text = 'Olá, '+partnerName+'.\n\n'+message+'\n\nSe precisar de ajuda, responda a este email.';
   }
 
+  return deliverOnce(env.EMAIL_DELIVERY_DB,eventId,partnerEmail,async (markSending) => {
   // Register applicants, never the administrative notification recipient.
   if (application) {
+    let stage="lookup",providerStatus=0;
     try {
       const headers = {Authorization: `Bearer ${env.SENDER_API_TOKEN}`, Accept:'application/json', 'Content-Type':'application/json'};
-      const existing = await fetch('https://api.sender.net/v2/subscribers/'+encodeURIComponent(partnerEmail), {headers});
+      const existing = await fetch('https://api.sender.net/v2/subscribers/'+encodeURIComponent(partnerEmail), {headers,signal:AbortSignal.timeout(7000)});
+      providerStatus=existing.status;
       if (!existing.ok && existing.status !== 404) throw new Error('lookup');
       if (existing.status === 404) {
-        const created = await fetch('https://api.sender.net/v2/subscribers', {method:'POST',headers,body:JSON.stringify({email:partnerEmail,firstname:partnerName,groups:['aOoGvG'],trigger_automation:false})});
+        stage='create'; providerStatus=0;
+        const created = await fetch('https://api.sender.net/v2/subscribers', {method:'POST',headers,signal:AbortSignal.timeout(7000),body:JSON.stringify({email:partnerEmail,firstname:partnerName,groups:['aOoGvG'],trigger_automation:false})});
+        providerStatus=created.status;
         if (!created.ok && created.status !== 409) throw new Error('create');
       }
-      const grouped = await fetch('https://api.sender.net/v2/subscribers/groups/aOoGvG', {method:'POST',headers,body:JSON.stringify({subscribers:[partnerEmail],trigger_automation:false})});
+      stage='group'; providerStatus=0;
+      const grouped = await fetch('https://api.sender.net/v2/subscribers/groups/aOoGvG', {method:'POST',headers,signal:AbortSignal.timeout(7000),body:JSON.stringify({subscribers:[partnerEmail],trigger_automation:false})});
+      providerStatus=grouped.status;
       if (!grouped.ok) throw new Error('group');
-    } catch { return json({error:'partner_group_sync_failed'},502); }
+    } catch { return {state:providerStatus>=400&&providerStatus<500&&providerStatus!==429?'failed':'retry',error:'partner_group_sync_failed',stage,providerStatus,status:502}; }
   }
 
+  await markSending();
   const response = await fetch(SENDER_ENDPOINT, {
+    signal:AbortSignal.timeout(12000),
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.SENDER_API_TOKEN}`,
@@ -135,9 +146,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   });
 
   if (!response.ok) {
-    console.error("partner_notification_sender_error", JSON.stringify({ eventId, status: response.status }));
-    return json({ error: "sender_error", status: response.status }, 502);
+    // 429 is a confirmed rejection. A lost response or 5xx is ambiguous:
+    // preserve for review rather than risking a duplicate email.
+    return {state:response.status===429?'retry':response.status>=500?'uncertain':'failed',
+      error:response.status===429?'sender_rate_limited':response.status>=500?'sender_response_unknown':'sender_rejected',
+      providerStatus:response.status,retryAfter:response.headers.get('retry-after'),status:503};
   }
-
-  return json({ ok: true, event_id: eventId });
+  return {state:'sent'};
+  });
 };

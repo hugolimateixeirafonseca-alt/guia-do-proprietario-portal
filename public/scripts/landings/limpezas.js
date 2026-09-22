@@ -155,11 +155,14 @@
     event.target.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
   });
 
+  let submissionInFlight = false;
+  let pendingSubmission = null;
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (submissionInFlight) return;
     if (!validateStep(5)) return;
 
-    const submissionId = eventId();
+    let submissionId = eventId();
     const payload = {
       source: "guia_limpeza_preco_disponibilidade",
       consentVersion: form.dataset.consentVersion,
@@ -186,6 +189,11 @@
     sendingState.classList.remove("is-hidden");
     errorState.classList.add("is-hidden");
 
+    const identity = JSON.stringify({...payload, eventId:undefined});
+    if (pendingSubmission?.identity === identity) submissionId = pendingSubmission.id;
+    pendingSubmission = {identity, id:submissionId};
+    payload.eventId = submissionId;
+    submissionInFlight = true;
     try {
       const response = await fetch("/api/subscribe", {
         method: "POST",
@@ -211,10 +219,11 @@
     } catch {
       sendingState.classList.add("is-hidden");
       errorState.classList.remove("is-hidden");
-    }
+    } finally { submissionInFlight = false; }
   });
 
   document.getElementById("resetForm")?.addEventListener("click", () => {
+    pendingSubmission = null;
     form.reset();
     successState.classList.add("is-hidden");
     form.classList.remove("is-hidden");

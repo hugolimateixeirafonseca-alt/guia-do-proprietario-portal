@@ -35,6 +35,12 @@
       "database_name": "guia-proprietario-consentimentos",
       "database_id": "4fcb7ecd-7281-4e65-9c3f-bf30b0feb0b7",
       "migrations_dir": "migrations/consent-archive"
+    },
+    {
+      "binding": "EMAIL_DELIVERY_DB",
+      "database_name": "guia-proprietario-partner-email-delivery",
+      "database_id": "ab388de5-cc23-409a-97f1-0a6d0d4e77f0",
+      "migrations_dir": "migrations/partner-email"
     }
   ],
   "r2_buckets": [

@@ -89,10 +89,13 @@
     event.target.value = digits.length > 4 ? `${digits.slice(0, 4)}-${digits.slice(4)}` : digits;
   });
 
+  let submissionInFlight = false;
+  let pendingSubmission = null;
   form.addEventListener("submit", async event => {
     event.preventDefault();
+    if (submissionInFlight) return;
     if (!validate(4)) return;
-    const submissionId = eventId();
+    let submissionId = eventId();
     const services = getValues("al_services");
     const payload = {
       source: "guia_limpeza_alojamento_local",
@@ -121,6 +124,11 @@
     form.classList.add("is-hidden");
     sending.classList.remove("is-hidden");
     technicalError.classList.add("is-hidden");
+    const identity = JSON.stringify({...payload, eventId:undefined});
+    if (pendingSubmission?.identity === identity) submissionId = pendingSubmission.id;
+    pendingSubmission = {identity, id:submissionId};
+    payload.eventId = submissionId;
+    submissionInFlight = true;
     try {
       const response = await fetch("/api/subscribe", {
         method: "POST",
@@ -145,10 +153,11 @@
     } catch {
       sending.classList.add("is-hidden");
       technicalError.classList.remove("is-hidden");
-    }
+    } finally { submissionInFlight = false; }
   });
 
   document.getElementById("alResetForm")?.addEventListener("click", () => {
+    pendingSubmission = null;
     form.reset();
     success.classList.add("is-hidden");
     form.classList.remove("is-hidden");

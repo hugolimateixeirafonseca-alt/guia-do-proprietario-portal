@@ -1,0 +1,17 @@
+# Recuperação e duplicados de limpeza
+
+## Submissões
+
+As duas landings mantêm o eventId nas tentativas do mesmo conteúdo e bloqueiam duplo envio em curso. No serviço de parceiros, a migração 0019 e a inserção atómica impedem pedidos integralmente iguais dentro de 30 minutos. Dados de serviço diferentes são preservados. Não houve limpeza retroativa: o proprietário removeu o pedido repetido.
+
+## Emails
+
+EMAIL_DELIVERY_DB é uma base própria (guia-proprietario-partner-email-delivery), sem alterações à base de consentimentos. Guarda identificador do evento, hash do destinatário, estado, tentativas, prazo e código HTTP. Não guarda destinatários em claro, mensagens ou ligações de acesso. A migração está em migrations/partner-email/0001_delivery.sql.
+
+Uma reserva atómica impede envios simultâneos ou repetidos do mesmo evento. Confirmação aceite pelo Sender passa a sent; não confirma chegada à caixa de entrada. Falhas de grupo anteriores ao envio podem repetir. Recusa explícita 429 aplica espera crescente e Retry-After; máximo seis tentativas. Falhas 4xx permanentes ficam failed. Timeout ou 5xx no envio e falha de persistência após envio ficam para revisão, sem reenvio automático, porque o Sender não documenta uma chave idempotente para este endpoint.
+
+Make: ativar execuções incompletas e Retry no módulo HTTP após publicar a proteção. Não reproduzir execuções históricas em massa: primeiro cruzar o histórico Sender. Estados sending/uncertain requerem confirmação no fornecedor antes de qualquer alteração para retry. O registo não deve ser apagado para tentar reenviar.
+
+Testes locais com SQLite e fetch simulado cobrem concorrência, repetição, destinatário incompatível, 429, falha de rede, falha de gravação após sucesso e formulários. Sem envio de emails reais de teste.
+
+Estado inicial: migração dedicada aplicada; implementação e formulários preparados, publicação pendente.
