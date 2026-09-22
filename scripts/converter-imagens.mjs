@@ -59,7 +59,9 @@ for (const fonte of fontes) {
   const webp = path.join(pastaAlvo, `${nome}.webp`);
   const imagemDeArtigo = relativo.split(path.sep)[0] === "artigos";
   const socialJpeg = imagemDeArtigo ? path.join(pastaAlvo, `${nome}.social.jpg`) : null;
-  const alvos = socialJpeg ? [avif, webp, socialJpeg] : [avif, webp];
+  // Missing JPEG variants are generated from the existing WebP by the backfill below.
+  // They must not force expensive AVIF recompression of unchanged sources.
+  const alvos = [avif, webp];
 
   if (!(await precisaDeConversao(fonte, alvos))) continue;
 
