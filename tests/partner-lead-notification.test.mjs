@@ -76,7 +76,7 @@ test("boas-vindas incluem o acesso permanente e condições sem anunciar um pedi
       assert.ok(body.includes(payload.dashboard_url));
       assert.match(body,/Entrar na minha área de parceiro/);
       assert.match(body,/quatro contactos são gratuitos/);
-      assert.match(body,/4,50 €/);assert.match(body,/7 €/);assert.match(body,/sem limite diário/);assert.match(body,/até 3 parceiros/);
+      assert.match(body,/4,50 €/);assert.match(body,/7 €/);assert.match(body,/sem limite diário/);assert.match(body,/Até mais 2 empresas podem receber o mesmo contacto/);assert.match(body,/só a sua empresa recebe os dados deste cliente através do Guia do Proprietário/);assert.doesNotMatch(body,/Contacto partilhado|para partilhar/);
       assert.doesNotMatch(body,/Tem um novo pedido|Pedido disponível até/);
     }
     assert.ok(sent.html.includes('Empresa &lt;teste&gt;'));
