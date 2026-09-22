@@ -75,7 +75,7 @@ test("boas-vindas incluem o acesso permanente e condições sem anunciar um pedi
     for(const body of [sent.html,sent.text]){
       assert.ok(body.includes(payload.dashboard_url));
       assert.match(body,/Entrar na minha área de parceiro/);
-      assert.match(body,/quatro contactos partilhados são gratuitos/);
+      assert.match(body,/quatro contactos são gratuitos/);
       assert.match(body,/4,50 €/);assert.match(body,/7 €/);assert.match(body,/sem limite diário/);assert.match(body,/até 3 parceiros/);
       assert.doesNotMatch(body,/Tem um novo pedido|Pedido disponível até/);
     }
