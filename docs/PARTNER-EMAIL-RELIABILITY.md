@@ -23,3 +23,5 @@ Parceiros 1d66b71 publicado em Production 2ac88a18, migração 0019 aplicada. Po
 Make confirmado no job 35792744390: execuções incompletas ativas, sem descarte, seis tentativas a cada cinco minutos, sem bloquear destinatários seguintes, mapeamentos/webhook preservados. Preferências de aviso, erro e desativação já estavam ativas. Não foram reproduzidas execuções históricas pelo agente.
 
 Pausa global acrescentada em a05e5dc, migração 0002 aplicada apenas na base dedicada. Novos destinatários aguardam o prazo imposto pelo Sender, sem gastar tentativas enquanto a pausa está ativa. Publicação em curso no job 35793222397. Testes direcionados passaram; nenhuma verificação pública posterior nem envio de email de teste.
+
+Pausa global a05e5dc publicada com sucesso no job 35793222397. Sem confirmação online posterior. O registo e a recuperação estão ativos; isto não garante ausência de falhas externas nem confirma entrega na caixa de entrada.
