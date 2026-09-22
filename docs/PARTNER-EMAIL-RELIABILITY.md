@@ -15,3 +15,11 @@ Make: ativar execuções incompletas e Retry no módulo HTTP após publicar a pr
 Testes locais com SQLite e fetch simulado cobrem concorrência, repetição, destinatário incompatível, 429, falha de rede, falha de gravação após sucesso e formulários. Sem envio de emails reais de teste.
 
 Estado inicial: migração dedicada aplicada; implementação e formulários preparados, publicação pendente.
+
+## Publicação e causa confirmada
+
+Parceiros 1d66b71 publicado em Production 2ac88a18, migração 0019 aplicada. Portal 603a1ef publicado com sucesso no job 35792523891. O novo registo identificou seis notificações recusadas pelo Sender com HTTP 429, cinco no envio e uma no grupo; Retry-After observado de cerca de 223 a 224 segundos. A causa concreta das falhas atuais é limitação de pedidos no fornecedor, antes escondida pelo 502 genérico.
+
+Make confirmado no job 35792744390: execuções incompletas ativas, sem descarte, seis tentativas a cada cinco minutos, sem bloquear destinatários seguintes, mapeamentos/webhook preservados. Preferências de aviso, erro e desativação já estavam ativas. Não foram reproduzidas execuções históricas pelo agente.
+
+Pausa global acrescentada em a05e5dc, migração 0002 aplicada apenas na base dedicada. Novos destinatários aguardam o prazo imposto pelo Sender, sem gastar tentativas enquanto a pausa está ativa. Publicação em curso no job 35793222397. Testes direcionados passaram; nenhuma verificação pública posterior nem envio de email de teste.
