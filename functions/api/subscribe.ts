@@ -441,7 +441,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
   const groups = {
     newsletter: env.SENDER_GROUP_NEWSLETTER || DEFAULT_GROUPS.newsletter,
-    marketing: env.SENDER_GROUP_MARKETING || DEFAULT_GROUPS.marketing,
+    marketing: isCleaningLead ? "egK8WG" : env.SENDER_GROUP_MARKETING || DEFAULT_GROUPS.marketing,
     guiaVenderCasa: env.SENDER_GROUP_GUIA_VENDER_CASA || DEFAULT_GROUPS.guiaVenderCasa,
     guiaParceiros: env.SENDER_GROUP_GUIA_PARCEIROS || DEFAULT_GROUPS.guiaParceiros
   };
@@ -471,14 +471,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
         municipality: dashboardResult.municipality
       };
     }
-    if (!marketingConsent) {
-      return json({
-        ok: true,
-        locality: resolvedPostalLookup?.locality || "Por confirmar",
-        dashboardStored: true,
-        ...(resolvedPostalLookup?.status === "unavailable" ? { locationPending: true } : {})
-      }, 200);
-    }
+
   }
 
   if (!env.SENDER_API_TOKEN) {
@@ -514,6 +507,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
 
   try {
     const subscriberGroups = [
+      ...(isCleaningLead ? ["bWv1LJ"] : []),
       ...(isNewsletter
         ? [groups.newsletter]
         : (!isDirectValueLead && !isCleaningLead) || marketingConsent
@@ -540,6 +534,8 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
         ...(isCleaningLead ? { dashboardStored: true } : {})
       }, 200);
     }
+
+    if (isCleaningLead) await addSubscriberToGroup(env, "bWv1LJ", email, false);
 
     if (isNewsletter) {
       await addSubscriberToGroup(env, groups.newsletter, email, false);

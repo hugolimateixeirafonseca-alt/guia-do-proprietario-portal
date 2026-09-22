@@ -102,6 +102,21 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     text = 'Olá, '+partnerName+'.\n\n'+message+'\n\nSe precisar de ajuda, responda a este email.';
   }
 
+  // Register applicants, never the administrative notification recipient.
+  if (application) {
+    try {
+      const headers = {Authorization: `Bearer ${env.SENDER_API_TOKEN}`, Accept:'application/json', 'Content-Type':'application/json'};
+      const existing = await fetch('https://api.sender.net/v2/subscribers/'+encodeURIComponent(partnerEmail), {headers});
+      if (!existing.ok && existing.status !== 404) throw new Error('lookup');
+      if (existing.status === 404) {
+        const created = await fetch('https://api.sender.net/v2/subscribers', {method:'POST',headers,body:JSON.stringify({email:partnerEmail,firstname:partnerName,groups:['aOoGvG'],trigger_automation:false})});
+        if (!created.ok && created.status !== 409) throw new Error('create');
+      }
+      const grouped = await fetch('https://api.sender.net/v2/subscribers/groups/aOoGvG', {method:'POST',headers,body:JSON.stringify({subscribers:[partnerEmail],trigger_automation:false})});
+      if (!grouped.ok) throw new Error('group');
+    } catch { return json({error:'partner_group_sync_failed'},502); }
+  }
+
   const response = await fetch(SENDER_ENDPOINT, {
     method: "POST",
     headers: {

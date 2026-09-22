@@ -411,12 +411,13 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
       return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
     }
     if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-1" }, { status: 201 });
-    throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
+    return new Response("{}", {status:init.method === "GET" ? 404 : 201});
   };
 
   const response = await onRequestPost({ request: requestFor(cleaningBody), env });
   assert.equal(response.status, 200);
-  assert.equal(calls.length, 2);
+  assert.equal(calls.length, 4);
+  assert.deepEqual(JSON.parse(calls[3].init.body).groups,["bWv1LJ"]);
   const dashboardCall = calls[1];
   const dashboardBody = JSON.parse(dashboardCall.init.body);
   assert.equal(dashboardCall.init.headers.Authorization, "Bearer token-dashboard-teste");
@@ -429,7 +430,7 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
   assert.deepEqual(dashboardBody.preferred_time_periods, ["morning"]);
   assert.equal(dashboardBody.consent_partner_sharing, true);
   assert.equal(dashboardBody.consent_marketing, false);
-  assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", dashboardStored: true });
+  assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", locationStored:false, dashboardStored: true });
 });
 
 test("recupera o concelho local do dashboard quando a confirmação externa está indisponível", async () => {
@@ -443,18 +444,19 @@ test("recupera o concelho local do dashboard quando a confirmação externa est�
     if (String(url) === env.CLEANING_DASHBOARD_API_URL) {
       return Response.json({ ok: true, lead_id: "lead-local", municipality: "Lisboa" }, { status: 201 });
     }
-    throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
+    return new Response("{}", {status:init.method === "GET" ? 404 : 201});
   };
 
   const response = await onRequestPost({ request: requestFor(cleaningBody), env });
   assert.equal(response.status, 200);
   assert.equal(geoAttempts, 2);
-  const dashboardBody = JSON.parse(calls.at(-1).init.body);
+  const dashboardBody = JSON.parse(calls.find(x=>x.url===env.CLEANING_DASHBOARD_API_URL).init.body);
   assert.equal(dashboardBody.postal_code, "1000-001");
   assert.equal(dashboardBody.municipality, "Por confirmar");
   assert.deepEqual(await response.json(), {
     ok: true,
     locality: "Lisboa",
+    locationStored:false,
     dashboardStored: true
   });
 });
@@ -471,24 +473,24 @@ test("adiciona o pedido de limpeza à newsletter apenas com autorização opcion
   const response = await onRequestPost({ request: requestFor({ ...cleaningBody, consent2: true }), env });
   assert.equal(response.status, 200);
   const createBody = JSON.parse(calls[3].init.body);
-  assert.deepEqual(createBody.groups, ["egK8WG"]);
+  assert.deepEqual(createBody.groups, ["bWv1LJ", "egK8WG"]);
   assert.equal(createBody.fields["{$CONSENT_MARKETING}"], "true");
   assert.equal("phone" in createBody, false);
   assert.equal("{$LIMPEZA_SERVICO}" in createBody.fields, false);
   assert.equal("{$CONSENT_PARCEIROS}" in createBody.fields, false);
 });
 
-test("guarda um pedido de alojamento local no dashboard sem o enviar ao Sender", async () => {
+test("guarda o pedido AL no dashboard e regista o utilizador no grupo de limpeza", async () => {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
     if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Porto", Concelho: "Porto" });
     if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-al-1" }, { status: 201 });
-    throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
+    return new Response("{}", {status:init.method === "GET" ? 404 : 201});
   };
 
   const response = await onRequestPost({ request: requestFor(alojamentoLocalBody), env });
   assert.equal(response.status, 200);
-  const dashboardBody = JSON.parse(calls.at(-1).init.body);
+  const dashboardBody = JSON.parse(calls.find(x=>x.url===env.CLEANING_DASHBOARD_API_URL).init.body);
   assert.equal(dashboardBody.segmento, "alojamento-local");
   assert.equal(dashboardBody.space_type, "alojamento_local");
   assert.equal(dashboardBody.municipality, "Porto");
@@ -511,7 +513,7 @@ test("adiciona o contacto de alojamento local ao Sender apenas com consentimento
   const response = await onRequestPost({ request: requestFor({ ...alojamentoLocalBody, consent2: true }), env });
   assert.equal(response.status, 200);
   const createBody = JSON.parse(calls[3].init.body);
-  assert.deepEqual(createBody.groups, ["egK8WG"]);
+  assert.deepEqual(createBody.groups, ["bWv1LJ", "egK8WG"]);
   assert.equal(createBody.fields["{$AL_UNIDADES}"], "2 a 3 alojamentos");
   assert.equal(createBody.fields["{$AL_SERVICOS}"], "Limpeza entre estadias, Roupa de cama e banho");
   assert.equal(createBody.fields["{$AL_JANELA}"], "Entre 3 e 5 horas");
@@ -585,7 +587,7 @@ test("envia vários dias e períodos para o matching", async () => {
     calls.push({ url: String(url), init });
     if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
     if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-multi" }, { status: 201 });
-    throw new Error("O Sender não deveria ser chamado sem consentimento de marketing");
+    return new Response("{}", {status:init.method === "GET" ? 404 : 201});
   };
 
   const response = await onRequestPost({
@@ -600,7 +602,7 @@ test("envia vários dias e períodos para o matching", async () => {
   });
 
   assert.equal(response.status, 200);
-  const dashboardBody = JSON.parse(calls.at(-1).init.body);
+  const dashboardBody = JSON.parse(calls.find(x=>x.url===env.CLEANING_DASHBOARD_API_URL).init.body);
   assert.deepEqual(dashboardBody.preferred_weekdays, ["monday", "wednesday", "friday"]);
   assert.deepEqual(dashboardBody.preferred_time_periods, ["morning", "afternoon"]);
 });
@@ -748,3 +750,5 @@ test("regista as submissões válidas das duas landings de limpeza como Lead no 
 
 test("não envia para o Sender sem guardar primeiro a evidência",async()=>{globalThis.fetch=async()=>{throw Error("Sender não deve ser contactado")};const response=await onRequestPost({request:requestFor(ebookBody),env:{...env,CONSENT_ARCHIVE_DB:undefined}});assert.equal(response.status,503);});
 test("falha do Sender conserva a evidência original",async()=>{globalThis.fetch=async()=>new Response("{}",{status:503});const response=await onRequestPost({request:requestFor(ebookBody),env});assert.equal(response.status,502);assert.equal(archiveSql.prepare("SELECT count(*) AS n FROM consent_evidence").get().n,1);});
+
+for(const body of [cleaningBody,alojamentoLocalBody])for(const consent2 of [false,true])test('existing cleaning subscriber groups '+body.source+' newsletter='+consent2,async()=>{globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),init});if(String(url).startsWith('https://json.geoapi.pt/'))return Response.json({Localidade:'Lisboa',Concelho:'Lisboa'});return Response.json({ok:true,lead_id:'test'});};const r=await onRequestPost({request:requestFor({...body,consent2}),env});assert.equal(r.status,200);const grouped=calls.filter(c=>c.url.includes('/subscribers/groups/')).map(c=>c.url.split('/').at(-1));assert.deepEqual(grouped,consent2?['bWv1LJ','egK8WG']:['bWv1LJ']);assert.ok(calls.every(c=>c.init.method!=='DELETE'));});
