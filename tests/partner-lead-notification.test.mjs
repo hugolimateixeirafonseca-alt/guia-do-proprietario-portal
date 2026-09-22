@@ -75,8 +75,8 @@ test("boas-vindas incluem o acesso permanente e condições sem anunciar um pedi
     for(const body of [sent.html,sent.text]){
       assert.ok(body.includes(payload.dashboard_url));
       assert.match(body,/Entrar na minha área de parceiro/);
-      assert.match(body,/quatro contactos aceites são gratuitos/);
-      assert.match(body,/primeiro a aceitar/);
+      assert.match(body,/quatro contactos partilhados são gratuitos/);
+      assert.match(body,/4,50 €/);assert.match(body,/7 €/);assert.match(body,/sem limite diário/);assert.match(body,/até 3 parceiros/);
       assert.doesNotMatch(body,/Tem um novo pedido|Pedido disponível até/);
     }
     assert.ok(sent.html.includes('Empresa &lt;teste&gt;'));
@@ -87,3 +87,4 @@ test("boas-vindas incluem o acesso permanente e condições sem anunciar um pedi
 
 test('candidatura pendente confirma aprovação necessária, sem link de acesso',async()=>{const original=globalThis.fetch;let sent;globalThis.fetch=async(_url,init)=>{sent=JSON.parse(init.body);return new Response('{}');};try{const r=await onRequestPost({request:request({...payload,event_id:'application:12345678-1234-1234-1234-123456789abc',dashboard_url:'https://parceiros.guiadoproprietario.pt/aderir'}),env:{MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,SENDER_API_TOKEN:'test'}});assert.equal(r.status,200);assert.match(sent.text,/sujeita a aprovação/);assert.doesNotMatch(sent.html,/Tem um novo pedido|Entrar na minha área|\?t=/);}finally{globalThis.fetch=original;}});
 test('aviso de aprovação vai para o administrador designado',async()=>{const original=globalThis.fetch;let sent;globalThis.fetch=async(_url,init)=>{sent=JSON.parse(init.body);return new Response('{}');};try{const body={...payload,event_id:'application-admin:12345678-1234-1234-1234-123456789abc',partner_email:'hugo.lima.teixeira.fonseca@gmail.com',dashboard_url:'https://parceiros.guiadoproprietario.pt/admin'};const r=await onRequestPost({request:request(body),env:{MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,SENDER_API_TOKEN:'test'}});assert.equal(r.status,200);assert.equal(sent.to.email,body.partner_email);assert.match(sent.subject,/aprovação/);const denied=await onRequestPost({request:request({...body,partner_email:'other@example.pt'}),env:{MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,SENDER_API_TOKEN:'test'}});assert.equal(denied.status,400);}finally{globalThis.fetch=original;}});
+

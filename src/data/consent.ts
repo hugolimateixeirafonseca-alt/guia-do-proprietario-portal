@@ -1,8 +1,8 @@
 export const CONSENT_VERSION = "2026-08-k";
 export const NEWSLETTER_CONSENT_VERSION = "newsletter-2026-09-b";
 export const VALOR_LIQUIDO_CONSENT_VERSION = "valor-liquido-2026-08-a";
-export const LIMPEZA_CONSENT_VERSION = "limpeza-2026-08-b";
-export const ALOJAMENTO_LOCAL_CONSENT_VERSION = "alojamento-local-2026-08-a";
+export const LIMPEZA_CONSENT_VERSION = "limpeza-2026-09-c";
+export const ALOJAMENTO_LOCAL_CONSENT_VERSION = "alojamento-local-2026-09-b";
 export const VERIFICACAO_DIRECT_CONSENT_VERSION = "verificacao-direto-2026-09-a";
 
 export const KIT_JANELAS_CONSENT_VERSION = "kit-janelas-2026-09-b";
@@ -82,8 +82,16 @@ export const CONSENT_TEXT = {
     c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade, para que me possam contactar com informações, disponibilidade e propostas relacionadas com este pedido. Consulte os parceiros que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
     c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
   },
+  "limpeza-2026-09-c": {
+    c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com até 3 parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade, para que me possam contactar com informações, disponibilidade e propostas relacionadas com este pedido. Consulte os parceiros que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
+    c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
+  },
   "alojamento-local-2026-08-a": {
     c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com parceiros de limpeza e manutenção selecionados de acordo com a localização e o serviço pretendido, para que me possam contactar com disponibilidade e propostas para o meu alojamento local. Consulte os parceiros que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
+    c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário sobre gestão de imóveis e alojamento local, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
+  },
+  "alojamento-local-2026-09-b": {
+    c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com até 3 parceiros de limpeza e manutenção selecionados de acordo com a localização e o serviço pretendido, para que me possam contactar com disponibilidade e propostas para o meu alojamento local. Consulte os parceiros que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
     c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário sobre gestão de imóveis e alojamento local, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
   },
   "newsletter-2026-08-c": {

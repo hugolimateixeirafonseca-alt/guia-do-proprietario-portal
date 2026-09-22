@@ -67,6 +67,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -193,6 +195,9 @@ jobs:
 
       - name: Validate consent archive integration
         run: node --test tests/consent-archive.test.mjs tests/subscribe.test.mjs
+
+      - name: Restore tracked image timestamps
+        run: node scripts/restore-image-times.mjs
 
       - name: Build production site
         run: |
