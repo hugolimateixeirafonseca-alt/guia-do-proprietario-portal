@@ -5,6 +5,8 @@ export async function deliverOnce(db,eventId,email,deliver) {
  if(!db)return response({error:'delivery_store_unavailable'},503);
  const now=Math.floor(Date.now()/1000),recipient=await hash(email);
  try {
+  const cooldown=await db.prepare("SELECT blocked_until FROM provider_cooldown WHERE provider='sender'").first();
+  if(cooldown?.blocked_until>now)return response({error:'sender_cooldown',retry_after:cooldown.blocked_until-now},503);
   const claimed=await db.prepare(`INSERT INTO email_delivery(event_id,recipient_hash,state,lease_until,updated_at)
    VALUES (?,?,'processing',?,?) ON CONFLICT(event_id) DO UPDATE SET state='processing',attempts=attempts+1,lease_until=excluded.lease_until,updated_at=excluded.updated_at
    WHERE email_delivery.recipient_hash=excluded.recipient_hash AND attempts<6 AND
@@ -25,7 +27,10 @@ export async function deliverOnce(db,eventId,email,deliver) {
    outcome={state:sending?'uncertain':'retry',error:sending?'sender_response_unknown':'pre_send_unavailable',status:503};
   }
   if(outcome.state==='retry'&&claimed.attempts>=6)outcome={...outcome,state:'failed',error:'delivery_attempts_exhausted'};
-  const next=now+Math.max(Math.min(60*2**(claimed.attempts-1),1800),Math.min(Number(outcome.retryAfter)||0,3600));
+  const next=now+Math.max(Math.min(60*2**(claimed.attempts-1),1800),Number(outcome.retryAfter)||0);
+  if(outcome.providerStatus===429){
+   await db.prepare("INSERT INTO provider_cooldown(provider,blocked_until) VALUES ('sender',?) ON CONFLICT(provider) DO UPDATE SET blocked_until=MAX(blocked_until,excluded.blocked_until)").bind(next).run();
+  }
   await db.prepare('UPDATE email_delivery SET state=?,updated_at=?,next_attempt=?,provider_status=?,error_code=? WHERE event_id=?').bind(outcome.state,Math.floor(Date.now()/1000),next,outcome.providerStatus||null,outcome.error||null,eventId).run();
   if(outcome.state==='sent')return response({ok:true,event_id:eventId},200);
   console.error('partner_email_delivery_failed',JSON.stringify({eventId,state:outcome.state,stage:outcome.stage||'send',providerStatus:outcome.providerStatus||0,error:outcome.error,attempt:claimed.attempts}));
@@ -34,4 +39,13 @@ export async function deliverOnce(db,eventId,email,deliver) {
   console.error('partner_email_delivery_store_error',JSON.stringify({eventId}));
   return response({error:'delivery_store_error'},503);
  }
+}
+
+export function providerRetryAfter(headers) {
+ const raw=headers.get('retry-after');
+ const seconds=Number(raw);
+ if(raw&&Number.isFinite(seconds)&&seconds>=0)return Math.ceil(seconds);
+ const date=Date.parse(raw||headers.get('x-ratelimit-reset')||'');
+ if(Number.isFinite(date))return Math.max(0,Math.ceil((date-Date.now())/1000));
+ return 0;
 }

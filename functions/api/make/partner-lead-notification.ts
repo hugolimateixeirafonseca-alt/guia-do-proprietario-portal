@@ -1,4 +1,4 @@
-import {deliverOnce} from "../../lib/partner-email-delivery.mjs";
+import {deliverOnce,providerRetryAfter} from "../../lib/partner-email-delivery.mjs";
 interface Env {
   EMAIL_DELIVERY_DB?: unknown;
   SENDER_API_TOKEN?: string;
@@ -107,23 +107,23 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   return deliverOnce(env.EMAIL_DELIVERY_DB,eventId,partnerEmail,async (markSending: () => Promise<void>) => {
   // Register applicants, never the administrative notification recipient.
   if (application) {
-    let stage="lookup",providerStatus=0;
+    let stage="lookup",providerStatus=0,retryAfter=0;
     try {
       const headers = {Authorization: `Bearer ${env.SENDER_API_TOKEN}`, Accept:'application/json', 'Content-Type':'application/json'};
       const existing = await fetch('https://api.sender.net/v2/subscribers/'+encodeURIComponent(partnerEmail), {headers,signal:AbortSignal.timeout(7000)});
-      providerStatus=existing.status;
+      providerStatus=existing.status; retryAfter=providerRetryAfter(existing.headers);
       if (!existing.ok && existing.status !== 404) throw new Error('lookup');
       if (existing.status === 404) {
         stage='create'; providerStatus=0;
         const created = await fetch('https://api.sender.net/v2/subscribers', {method:'POST',headers,signal:AbortSignal.timeout(7000),body:JSON.stringify({email:partnerEmail,firstname:partnerName,groups:['aOoGvG'],trigger_automation:false})});
-        providerStatus=created.status;
+        providerStatus=created.status; retryAfter=providerRetryAfter(created.headers);
         if (!created.ok && created.status !== 409) throw new Error('create');
       }
       stage='group'; providerStatus=0;
       const grouped = await fetch('https://api.sender.net/v2/subscribers/groups/aOoGvG', {method:'POST',headers,signal:AbortSignal.timeout(7000),body:JSON.stringify({subscribers:[partnerEmail],trigger_automation:false})});
-      providerStatus=grouped.status;
+      providerStatus=grouped.status; retryAfter=providerRetryAfter(grouped.headers);
       if (!grouped.ok) throw new Error('group');
-    } catch { return {state:providerStatus>=400&&providerStatus<500&&providerStatus!==429?'failed':'retry',error:'partner_group_sync_failed',stage,providerStatus,status:502}; }
+    } catch { return {state:providerStatus>=400&&providerStatus<500&&providerStatus!==429?'failed':'retry',error:'partner_group_sync_failed',stage,providerStatus,retryAfter,status:502}; }
   }
 
   await markSending();
@@ -150,7 +150,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     // preserve for review rather than risking a duplicate email.
     return {state:response.status===429?'retry':response.status>=500?'uncertain':'failed',
       error:response.status===429?'sender_rate_limited':response.status>=500?'sender_response_unknown':'sender_rejected',
-      providerStatus:response.status,retryAfter:response.headers.get('retry-after'),status:503};
+      providerStatus:response.status,retryAfter:providerRetryAfter(response.headers),status:503};
   }
   return {state:'sent'};
   });
