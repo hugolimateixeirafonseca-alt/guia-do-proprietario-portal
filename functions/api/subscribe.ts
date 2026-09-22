@@ -85,7 +85,7 @@ const CLEANING_LABELS = {
   },
   weekday: {
     monday: "Segunda-feira", tuesday: "Terça-feira", wednesday: "Quarta-feira",
-    thursday: "Quinta-feira", friday: "Sexta-feira", saturday: "Sábado", flexible: "Dia flexível"
+    thursday: "Quinta-feira", friday: "Sexta-feira", saturday: "Sábado", sunday: "Domingo", flexible: "Dia flexível"
   },
   period: { morning: "Manhã", afternoon: "Tarde", flexible: "Período indiferente" }
 } as const;
@@ -164,6 +164,7 @@ async function sendCleaningLead(
   body: SubscribeBody,
   postalCode: string,
   municipality: string,
+  locality: string,
   consentText: { readonly c1: string; readonly c2: string }
 ) {
   if (!env.CLEANING_DASHBOARD_API_TOKEN) return { ok: false, status: 503, code: "not_configured" };
@@ -183,6 +184,7 @@ async function sendCleaningLead(
         space_size: cleanText(body.spaceSize, 32),
         postal_code: postalCode,
         municipality,
+        locality,
         service_frequency: cleanText(body.serviceFrequency, 32),
         one_time_timing: cleanText(body.oneTimeTiming, 32),
         preferred_date: cleanText(body.preferredDate, 10),
@@ -458,7 +460,7 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
   } catch { return json({error:"consent_archive_unavailable"},503); }
 
   if (isCleaningLead) {
-    const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup?.municipality || "Por confirmar", consentText);
+    const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup?.municipality || "Por confirmar", postalLookup?.status === "found" ? postalLookup.locality : "", consentText);
     if (!dashboardResult.ok) {
       return json({ error: "dashboard_error", code: dashboardResult.code }, dashboardResult.status === 503 ? 503 : 502);
     }
@@ -569,3 +571,4 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     return json({ error: "provider_error", code }, 502);
   }
 };
+

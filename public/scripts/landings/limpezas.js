@@ -17,7 +17,7 @@
   const labels = {
     service_type: { regular: "Limpeza regular", profunda: "Limpeza profunda", pos_obra: "Pós-obra", mudanca: "Mudança", empresarial: "Empresa", outra: "Outra" },
     service_frequency: { one_time: "Uma vez", weekly: "Semanal", fortnightly: "Quinzenal", monthly: "Mensal", undecided: "Por decidir" },
-    preferred_weekday: { monday: "Segunda-feira", tuesday: "Terça-feira", wednesday: "Quarta-feira", thursday: "Quinta-feira", friday: "Sexta-feira", saturday: "Sábado", flexible: "Flexível" },
+    preferred_weekday: { monday: "Segunda-feira", tuesday: "Terça-feira", wednesday: "Quarta-feira", thursday: "Quinta-feira", friday: "Sexta-feira", saturday: "Sábado", sunday: "Domingo", flexible: "Flexível" },
     preferred_time_period: { morning: "Manhã", afternoon: "Tarde", flexible: "Indiferente" }
   };
 
