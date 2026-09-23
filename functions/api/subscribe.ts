@@ -1,3 +1,4 @@
+import { cleaningAttribution } from "../lib/cleaning-attribution.mjs";
 import { recordConsent } from "../lib/consent-archive.mjs";
 import {
   CONSENT_TEXT,
@@ -203,6 +204,7 @@ async function sendCleaningLead(
         al_services: cleanChoiceList(body.alServices, 5),
         al_turnaround: cleanText(body.alTurnaround, 32),
         al_access: cleanText(body.alAccess, 32),
+        ...cleaningAttribution(body.pageUrl),
         origem: cleanText(body.source, 64) === "guia_limpeza_alojamento_local" ? "landing-alojamento-local" : "landing-servicos-limpeza"
       })
     });
