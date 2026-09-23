@@ -1,5 +1,21 @@
 # PDF Casa de Banho
 
+## Recuperação de falhas Sender, 23/09/2026
+
+Publicado no portal em `6676703`, execução de produção `35859967346` concluída com sucesso. A falha real observada foi `marketing_lookup_429`, antes da associação ao Sender e do envio do PDF.
+
+- O opt-in válido grava consentimento cifrado e uma tarefa persistente antes de responder. A resposta confirma a receção do pedido, não uma entrega de email inexistente.
+- Migração `0002_pdf_delivery_jobs.sql` aplicada na base exclusiva deste produto. A tarefa guarda apenas a referência ao arquivo cifrado, hash e estado, nunca o email em claro.
+- Página de confirmação com ligação direta para abrir e guardar o PDF enquanto o email aguarda.
+- Tentativa imediata em segundo plano e recuperação pelo cenário Make `9854021`, a cada 15 minutos. Limite do Sender partilhado com sincronização de limpeza e emails de parceiros, com espaçamento e respeito por Retry-After.
+- Reserva atómica e registo de entrega impedem duplicados em recuperações concorrentes. Rejeição 429 pode ser retomada; resposta perdida ou envio incerto exige revisão.
+- As escolhas originais e grupos de cada produto mantêm-se. A associação não dispara automações de outros kits. CompleteRegistration passa a medir o pedido aceite e guardado, com a autorização de medição existente e deduplicação Pixel/CAPI. O evento pdf_sent continua a significar aceitação real do envio pelo fornecedor.
+- Recuperação histórica limitada aos últimos sete dias, com evidência de consentimento, versão válida e erro anterior ao envio. Só o pedido mais recente do mesmo destinatário é recuperado; envios concluídos e incertos são excluídos.
+- Tipos e testes dirigidos passaram: concorrência, recuperação 429, timeout sem reenvio, destinatário, consentimentos, grupos e Meta. O pipeline normal executou também as verificações dos dois kits e do arquivo.
+- Verificação funcional autorizada: o pedido de teste já existente voltou a obter HTTP 200 com `delivery=accepted`, sem novo identificador. 17 pedidos históricos foram enfileirados. Isto não confirma entrega de todos os emails: a API Sender continua a devolver 429.
+- Diagnóstico observado às 12:29 UTC: limite 100, restantes 0, Retry-After 858 segundos e X-RateLimit-Reset em 24/09/2026 12:29 UTC. Quota mensal no painel ainda disponível. A duração/causa exata do limite exige esclarecimento do fornecedor; não inferir que o plano precisa de upgrade.
+
+
 ## Correção do hero e do opt-in, 20 de setembro de 2026
 
 - Removido o cabeçalho de navegação. A fotografia antes/depois passa a ser um elemento integral, na proporção original, sem recorte nem sobreposição da capa. Em telemóvel surge antes do formulário.
