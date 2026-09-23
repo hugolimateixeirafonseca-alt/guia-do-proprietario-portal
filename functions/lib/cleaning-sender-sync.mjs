@@ -14,10 +14,10 @@ const suppressed=p=>p?.status?.email && p.status.email!=='active';
 export async function syncLead(env,lead){
  return syncContact(env,lead,['bWv1LJ',...(lead.consentimento_marketing===1?['egK8WG']:[])]);
 }
-export async function syncPartner(env,partner){return syncContact(env,partner,['aOoGvG']);}
-async function syncContact(env,lead,required){
+export async function syncPartner(env,partner){return syncContact(env,partner,['aOoGvG'],true);}
+async function syncContact(env,lead,required,membershipOnly=false){
  let current=await profile(env,lead.email),created=false,added=0;
- if(current&&suppressed(current))return {state:'suppressed',code:'existing_optout',created,added};
+ if(!membershipOnly&&current&&suppressed(current))return {state:'suppressed',code:'existing_optout',created,added};
  if(!current){
   const fields={'{$CONSENT_DATA}':lead.consentimento_marketing_em||lead.consentimento_parceiros_em,'{$LEAD_SOURCE}':lead.origem,...(lead.consentimento_marketing===1?{'{$CONSENT_MARKETING}':'true'}:{})};
   const r=await sender(env,'/subscribers','POST',{email:lead.email,firstname:lead.nome,groups:required,fields,trigger_automation:false});
@@ -25,14 +25,16 @@ async function syncContact(env,lead,required){
   created=r.ok;
   current=await profile(env,lead.email);
   if(!current)throw new SyncError('create_unconfirmed');
-  if(suppressed(current))return {state:'suppressed',code:'existing_optout',created,added};
+  if(!membershipOnly&&suppressed(current))return {state:'suppressed',code:'existing_optout',created,added};
  }
+ const originalStatus=JSON.stringify(current.status);
  for(const group of required.filter(g=>!memberIds(current).has(g))){
   const r=await sender(env,'/subscribers/groups/'+group,'POST',{subscribers:[lead.email],trigger_automation:false});
   if(!r.ok)throw new SyncError('group_'+r.status,r.status);
   added++;
  }
  if(added)current=await profile(env,lead.email);
+ if(membershipOnly&&current&&JSON.stringify(current.status)!==originalStatus)throw new SyncError('subscriber_status_changed',422);
  if(!current||!required.every(g=>memberIds(current).has(g)))throw new SyncError('groups_unconfirmed');
  return {state:'synced',code:created?'created':added?'groups_added':'already_present',created,added};
 }

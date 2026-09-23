@@ -11,7 +11,7 @@ test('partner creates only company group, preserves other groups and opt-outs',a
  try{for(const initial of [null,{id:'s',status:{email:'active'},subscriber_tags:[{id:'other'}]},{id:'s',status:{email:'unsubscribed'},subscriber_tags:[]}]){
  let saved=initial;const writes=[];globalThis.fetch=async(url,options)=>{if(options.method==='GET')return saved?response({data:saved}):response({},404);const body=JSON.parse(options.body);writes.push(body);assert.equal(body.trigger_automation,false);if(String(url).endsWith('/subscribers'))saved={id:'s',status:{email:'active'},subscriber_tags:body.groups.map(id=>({id}))};else{assert.ok(String(url).endsWith('/aOoGvG'));saved.subscriber_tags.push({id:'aOoGvG'});}return response({});};
  const result=await syncPartner({SENDER_API_TOKEN:'x'},{email:'company@example.test',nome:'Company'});
- if(initial?.status.email==='unsubscribed'){assert.equal(result.state,'suppressed');assert.equal(writes.length,0);}else{assert.equal(result.state,'synced');assert.ok(saved.subscriber_tags.some(g=>g.id==='aOoGvG'));assert.equal(writes.length,1);if(initial)assert.ok(saved.subscriber_tags.some(g=>g.id==='other'));else assert.deepEqual(writes[0].groups,['aOoGvG']);}
+ {assert.equal(result.state,'synced');if(initial?.status.email==='unsubscribed')assert.equal(saved.status.email,'unsubscribed');assert.ok(saved.subscriber_tags.some(g=>g.id==='aOoGvG'));assert.equal(writes.length,1);if(initial?.status.email==='active')assert.ok(saved.subscriber_tags.some(g=>g.id==='other'));if(!initial) assert.deepEqual(writes[0].groups,['aOoGvG']);}
  }}finally{globalThis.fetch=original;}
 });
 test('periodic recovery processes partners when lead queue is empty',async()=>{
