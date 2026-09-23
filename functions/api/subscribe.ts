@@ -1,3 +1,4 @@
+import { processSenderSync } from "../lib/cleaning-sender-sync.mjs";
 import { cleaningAttribution } from "../lib/cleaning-attribution.mjs";
 import { recordConsent } from "../lib/consent-archive.mjs";
 import {
@@ -49,6 +50,7 @@ interface SubscribeBody {
 }
 
 interface RequestContext {
+  waitUntil?: (promise: Promise<unknown>) => void;
   request: Request;
   env: Env;
 }
@@ -333,7 +335,7 @@ async function removeSubscriberFromGroup(env: Env, groupId: string, email: strin
   if (!response.ok) throw new SenderError(`group_remove_${response.status}`);
 }
 
-export const onRequestPost = async ({ request, env }: RequestContext) => {
+export const onRequestPost = async ({ request, env, waitUntil }: RequestContext) => {
   let body: SubscribeBody;
   try {
     body = await request.json() as SubscribeBody;
@@ -474,6 +476,13 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
       };
     }
 
+  }
+
+  if (isCleaningLead) {
+    // The lead transaction queued Sender sync durably. Provider failures cannot lose it.
+    const delivery = processSenderSync(env).catch(() => ({state:"pending"}));
+    if (waitUntil) waitUntil(delivery); else await delivery;
+    return json({ok:true,dashboardStored:true,senderSyncQueued:true,locality:resolvedPostalLookup?.locality},200);
   }
 
   if (!env.SENDER_API_TOKEN) {
