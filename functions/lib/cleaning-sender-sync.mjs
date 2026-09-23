@@ -5,7 +5,16 @@ export class SyncError extends Error {
 async function sender(env,path,method='GET',body){
  let response;
  try{response=await fetch(API+path,{method,headers:{Authorization:`Bearer ${env.SENDER_API_TOKEN}`,Accept:'application/json','Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(8000)});}catch{throw new SyncError('network');}
- if(response.status===429){const retry=response.headers.get('Retry-After');const seconds=Number(retry);throw new SyncError('sender_429',429,Math.max(60000,Number.isFinite(seconds)&&seconds>0?seconds*1000:(Date.parse(retry)-Date.now())||300000));}
+ if(response.status===429){
+  const retry=response.headers.get('Retry-After'),seconds=Number(retry);
+  const error=new SyncError('sender_429',429,Math.max(60000,Number.isFinite(seconds)&&seconds>0?seconds*1000:(Date.parse(retry)-Date.now())||300000));
+  // Only allowlisted operational metadata. Never expose provider bodies, URLs or contacts.
+  const numeric=name=>{const value=response.headers.get(name);return value&&/^\d+$/.test(value)?Number(value):null;};
+  const contentType=response.headers.get('Content-Type')||'';
+  const raw=await response.text();
+  error.diagnostics={operation:method==='GET'?'lookup':path==='/subscribers'?'create':'group',limit:numeric('X-RateLimit-Limit'),remaining:numeric('X-RateLimit-Remaining'),reset:numeric('X-RateLimit-Reset'),retryAfterSeconds:Number.isFinite(seconds)?seconds:null,responseType:contentType.includes('json')?'json':contentType.includes('html')?'html':'other',edgeBlock:/cloudflare|error 1015|error 1020/i.test(raw),reason:/too many requests/i.test(raw)?'too_many_requests':/rate limit/i.test(raw)?'rate_limit':'unspecified'};
+  throw error;
+ }
  return response;
 }
 async function profile(env,email){const r=await sender(env,'/subscribers/'+encodeURIComponent(email));if(r.status===404)return null;if(!r.ok)throw new SyncError('lookup_'+r.status,r.status);const j=await r.json();if(!j.data?.id||!Array.isArray(j.data.subscriber_tags))throw new SyncError('invalid_profile');return j.data;}
@@ -53,7 +62,7 @@ export async function processSenderSync(env,partner=false){
  try{result=partner?await syncPartner(env,job.partner):await syncLead(env,job.lead);}catch(error){
   const status=Number(error.status)||0;
   const blocked=status>=400&&status<500&&![408,409,429].includes(status);
-  result={state:blocked?'blocked':'pending',code:error instanceof SyncError?error.message:'unexpected',retry_ms:Math.max(error.retryMs||0,Math.min(21600000,60000*2**Math.min(job.attempts,9))),cooldown:status===429};
+  result={state:blocked?'blocked':'pending',code:error instanceof SyncError?error.message:'unexpected',retry_ms:Math.max(error.retryMs||0,Math.min(21600000,60000*2**Math.min(job.attempts,9))),cooldown:status===429,...(error.diagnostics?{diagnostics:error.diagnostics}:{})};
  }
  await queue(env,{action:'finish',...(partner?{partner_id:job.partner_id}:{lead_id:job.lead_id}),lease:job.lease,...result},partner);
  return result;
