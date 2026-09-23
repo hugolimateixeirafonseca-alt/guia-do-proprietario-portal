@@ -19,3 +19,12 @@ test('periodic recovery processes partners when lead queue is empty',async()=>{
  globalThis.fetch=async(url,options)=>{if(String(url).includes('api.sender.net'))return response({data:{id:'s',status:{email:'active'},subscriber_tags:[{id:'aOoGvG'}]}});const body=JSON.parse(options.body);if(String(url).endsWith('/api/sender-sync'))return response({job:null});if(body.action==='claim')return response({job:{partner_id:'p',attempts:1,lease:'lease',partner:{email:'company@example.test',nome:'Company'}}});assert.equal(body.partner_id,'p');assert.equal(body.state,'synced');finished=true;return response({ok:true});};
  try{assert.equal((await processSenderSync({SENDER_API_TOKEN:'x',CLEANING_DASHBOARD_API_TOKEN:'x'})).state,'synced');assert.ok(finished);}finally{globalThis.fetch=original;}
 });
+
+test('429 diagnostics expose only counters and classification, never contact or provider body',async()=>{
+ const original=globalThis.fetch;
+ globalThis.fetch=async()=>response({message:'Too Many Requests secret@example.test'},429,{'Content-Type':'application/json','Retry-After':'600','X-RateLimit-Limit':'120','X-RateLimit-Remaining':'0'});
+ try{await assert.rejects(()=>syncLead({SENDER_API_TOKEN:'private-key'},lead),e=>{
+  assert.equal(e.diagnostics.limit,120);assert.equal(e.diagnostics.remaining,0);assert.equal(e.diagnostics.operation,'lookup');assert.equal(e.diagnostics.reason,'too_many_requests');
+  assert.ok(!JSON.stringify(e.diagnostics).includes('secret@example'));assert.ok(!JSON.stringify(e.diagnostics).includes('private-key'));return true;
+ });}finally{globalThis.fetch=original;}
+});

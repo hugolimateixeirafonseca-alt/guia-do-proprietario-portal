@@ -1,3 +1,4 @@
+import {reserveSenderRequest} from '../../lib/sender-api-control.mjs';
 import {processSenderSync} from '../../lib/cleaning-sender-sync.mjs';
 import {deliverOnce,providerRetryAfter} from "../../lib/partner-email-delivery.mjs";
 interface Env {
@@ -114,6 +115,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     if (waitUntil) waitUntil(sync); else await sync;
   }
   return deliverOnce(env.EMAIL_DELIVERY_DB,eventId,partnerEmail,async (markSending: () => Promise<void>) => {
+  await reserveSenderRequest(env.EMAIL_DELIVERY_DB);
   await markSending();
   const response = await fetch(SENDER_ENDPOINT, {
     signal:AbortSignal.timeout(12000),

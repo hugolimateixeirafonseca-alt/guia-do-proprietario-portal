@@ -1,8 +1,10 @@
+import {reserveSenderRequest,pauseSender,SenderPause} from './sender-api-control.mjs';
 const API='https://api.sender.net/v2';
 export class SyncError extends Error {
  constructor(code,status=0,retryMs=300000){super(code);this.status=status;this.retryMs=retryMs;}
 }
 async function sender(env,path,method='GET',body){
+ await reserveSenderRequest(env.EMAIL_DELIVERY_DB);
  let response;
  try{response=await fetch(API+path,{method,headers:{Authorization:`Bearer ${env.SENDER_API_TOKEN}`,Accept:'application/json','Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(8000)});}catch{throw new SyncError('network');}
  if(response.status===429){
@@ -13,6 +15,7 @@ async function sender(env,path,method='GET',body){
   const contentType=response.headers.get('Content-Type')||'';
   const raw=await response.text();
   error.diagnostics={operation:method==='GET'?'lookup':path==='/subscribers'?'create':'group',limit:numeric('X-RateLimit-Limit'),remaining:numeric('X-RateLimit-Remaining'),reset:numeric('X-RateLimit-Reset'),retryAfterSeconds:Number.isFinite(seconds)?seconds:null,responseType:contentType.includes('json')?'json':contentType.includes('html')?'html':'other',edgeBlock:/cloudflare|error 1015|error 1020/i.test(raw),reason:/too many requests/i.test(raw)?'too_many_requests':/rate limit/i.test(raw)?'rate_limit':'unspecified'};
+  await pauseSender(env.EMAIL_DELIVERY_DB,Math.ceil(error.retryMs/1000));
   throw error;
  }
  return response;
@@ -62,7 +65,7 @@ export async function processSenderSync(env,partner=false){
  try{result=partner?await syncPartner(env,job.partner):await syncLead(env,job.lead);}catch(error){
   const status=Number(error.status)||0;
   const blocked=status>=400&&status<500&&![408,409,429].includes(status);
-  result={state:blocked?'blocked':'pending',code:error instanceof SyncError?error.message:'unexpected',retry_ms:Math.max(error.retryMs||0,Math.min(21600000,60000*2**Math.min(job.attempts,9))),cooldown:status===429,...(error.diagnostics?{diagnostics:error.diagnostics}:{})};
+  result={state:blocked?'blocked':'pending',code:error.diagnostics?['sender_429',error.diagnostics.operation,'l'+error.diagnostics.limit,'r'+error.diagnostics.remaining,'edge'+Number(error.diagnostics.edgeBlock)].join('_'):error instanceof SyncError||error instanceof SenderPause?error.message:'unexpected',retry_ms:Math.max(error.retryMs||0,Math.min(21600000,60000*2**Math.min(job.attempts,9))),cooldown:status===429,...(error.diagnostics?{diagnostics:error.diagnostics}:{})};
  }
  await queue(env,{action:'finish',...(partner?{partner_id:job.partner_id}:{lead_id:job.lead_id}),lease:job.lease,...result},partner);
  return result;

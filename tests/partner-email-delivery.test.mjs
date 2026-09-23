@@ -6,3 +6,13 @@ test('rate limits can retry after backoff, uncertain outcomes never resend',asyn
 test('pre-send crash recovers after lease; a crashed send needs review',async()=>{const {db,binding}=deliveryFixture();try{await deliverOnce(binding,'event-123','a@example.pt',async()=>({state:'retry'}));db.exec("UPDATE email_delivery SET state='processing',lease_until=0");let count=0;await deliverOnce(binding,'event-123','a@example.pt',async mark=>{await mark();count++;return {state:'sent'};});assert.equal(count,1);db.exec("UPDATE email_delivery SET state='sending',lease_until=0");await deliverOnce(binding,'event-123','a@example.pt',async()=>{count++;});assert.equal(count,1);}finally{db.close();}});
 test('successful email is not resent if saving provider result fails',async()=>{const {db,binding}=deliveryFixture();let fail=true,calls=0;const broken={prepare(sql){if(sql.startsWith('UPDATE email_delivery SET state=?')&&fail){fail=false;return{bind(){return this;},async run(){throw Error('storage interrupted');}};}return binding.prepare(sql);}};const send=()=>deliverOnce(broken,'event-123','a@example.pt',async mark=>{await mark();calls++;return {state:'sent'};});try{assert.equal((await send()).status,503);assert.equal((await send()).status,503);assert.equal(calls,1);assert.equal(db.prepare('SELECT state FROM email_delivery').get().state,'sending');}finally{db.close();}});
 test('Sender cooldown also pauses different recipients without spending attempts',async()=>{const {db,binding}=deliveryFixture();try{await deliverOnce(binding,'event-a','a@example.pt',async()=>({state:'retry',providerStatus:429,retryAfter:224}));let calls=0;const r=await deliverOnce(binding,'event-b','b@example.pt',async()=>{calls++;return{state:'sent'};});assert.equal((await r.json()).error,'sender_cooldown');assert.equal(calls,0);assert.equal(db.prepare('SELECT count(*) n FROM email_delivery').get().n,1);}finally{db.close();}});
+
+test('confirmed rate-limit rejection remains retryable after six attempts',async()=>{
+ const {db,binding}=deliveryFixture();try{
+ await deliverOnce(binding,'limited-event','a@example.pt',async()=>({state:'retry',providerStatus:429,error:'sender_rate_limited'}));
+ db.exec("UPDATE email_delivery SET attempts=6,next_attempt=0; DELETE FROM provider_cooldown");
+ let calls=0;
+ const result=await deliverOnce(binding,'limited-event','a@example.pt',async mark=>{await mark();calls++;return {state:'sent'};});
+ assert.equal(result.status,200);assert.equal(calls,1);assert.equal(db.prepare('SELECT state FROM email_delivery').get().state,'sent');
+ }finally{db.close();}
+});

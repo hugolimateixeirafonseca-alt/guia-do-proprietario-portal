@@ -9,7 +9,7 @@ export async function deliverOnce(db,eventId,email,deliver) {
   if(cooldown?.blocked_until>now)return response({error:'sender_cooldown',retry_after:cooldown.blocked_until-now},503);
   const claimed=await db.prepare(`INSERT INTO email_delivery(event_id,recipient_hash,state,lease_until,updated_at)
    VALUES (?,?,'processing',?,?) ON CONFLICT(event_id) DO UPDATE SET state='processing',attempts=attempts+1,lease_until=excluded.lease_until,updated_at=excluded.updated_at
-   WHERE email_delivery.recipient_hash=excluded.recipient_hash AND attempts<6 AND
+   WHERE email_delivery.recipient_hash=excluded.recipient_hash AND (attempts<6 OR (state='retry' AND provider_status=429)) AND
    ((state='retry' AND next_attempt<=excluded.updated_at) OR (state='processing' AND lease_until<excluded.updated_at)) RETURNING attempts`).bind(eventId,recipient,now+180,now).first();
   if(!claimed){
    const row=await db.prepare('SELECT recipient_hash,state,attempts FROM email_delivery WHERE event_id=?').bind(eventId).first();
@@ -23,10 +23,10 @@ export async function deliverOnce(db,eventId,email,deliver) {
     await db.prepare("UPDATE email_delivery SET state='sending',updated_at=? WHERE event_id=?").bind(now,eventId).run();
     sending=true;
    });
-  } catch {
-   outcome={state:sending?'uncertain':'retry',error:sending?'sender_response_unknown':'pre_send_unavailable',status:503};
+  } catch (error) {
+   outcome=!sending&&error?.status===429?{state:'retry',error:'sender_cooldown',providerStatus:429,retryAfter:error.retryAfter,status:503}:{state:sending?'uncertain':'retry',error:sending?'sender_response_unknown':'pre_send_unavailable',status:503};
   }
-  if(outcome.state==='retry'&&claimed.attempts>=6)outcome={...outcome,state:'failed',error:'delivery_attempts_exhausted'};
+  if(outcome.state==='retry'&&claimed.attempts>=6&&outcome.providerStatus!==429)outcome={...outcome,state:'failed',error:'delivery_attempts_exhausted'};
   const next=now+Math.max(Math.min(60*2**(claimed.attempts-1),1800),Number(outcome.retryAfter)||0);
   if(outcome.providerStatus===429){
    await db.prepare("INSERT INTO provider_cooldown(provider,blocked_until) VALUES ('sender',?) ON CONFLICT(provider) DO UPDATE SET blocked_until=MAX(blocked_until,excluded.blocked_until)").bind(next).run();
