@@ -1,4 +1,4 @@
-import {reserveSenderRequest} from '../../lib/sender-api-control.mjs';
+import {reserveSenderRequest,recordSenderRateLimit} from '../../lib/sender-api-control.mjs';
 import {processSenderSync} from '../../lib/cleaning-sender-sync.mjs';
 import {deliverOnce,providerRetryAfter} from "../../lib/partner-email-delivery.mjs";
 interface Env {
@@ -136,6 +136,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   });
 
   if (!response.ok) {
+    await recordSenderRateLimit(env.EMAIL_DELIVERY_DB,response,'email');
     // 429 is a confirmed rejection. A lost response or 5xx is ambiguous:
     // preserve for review rather than risking a duplicate email.
     return {state:response.status===429?'retry':response.status>=500?'uncertain':'failed',

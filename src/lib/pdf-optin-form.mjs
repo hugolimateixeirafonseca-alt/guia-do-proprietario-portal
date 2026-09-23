@@ -34,7 +34,7 @@ export function initPdfOptin(doc, win, options) {
       errorFor('kj-consent-error', 'Autorize o envio do PDF para receber o guia.');
       consent.setAttribute('aria-invalid', 'true'); consent.focus(); return;
     }
-    sending = true; submit.disabled = true; submitLabel.textContent = 'A ENVIAR O SEU GUIA…';
+    sending = true; submit.disabled = true; submitLabel.textContent = 'A REGISTAR O SEU PEDIDO…';
     try {
       const response = await win.fetch(endpoint, {
         method: 'POST',

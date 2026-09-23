@@ -28,13 +28,16 @@ beforeEach(async () => {
   sql = new DatabaseSync(":memory:");
   sql.exec(await readFile("migrations/kit-janelas/0001_kit_janelas.sql", "utf8"));
   sql.exec(await readFile("migrations/consent-archive/0001_consent_evidence.sql", "utf8"));
-  calls = [];
+  sql.exec(await readFile('migrations/kit-janelas/0002_pdf_delivery_jobs.sql','utf8'));
+ sql.exec(await readFile('migrations/partner-email/0001_delivery.sql','utf8'));
+ sql.exec(await readFile('migrations/partner-email/0002_provider_cooldown.sql','utf8'));
+ calls = [];
   const db = { prepare(query) { let values=[];return {
     bind(...args){values=args;return this},
-    async first(){return sql.prepare(query).get(...values)||null},
+    async first(){if(query.includes('sender_request_gate'))return {blocked_until:0};return sql.prepare(query).get(...values)||null},
     async run(){sql.prepare(query).run(...values);return {success:true}}
   }}};
-  env = { CONSENT_ARCHIVE_DB: db, CONSENT_ARCHIVE_KEY:"synthetic-archive-secret-for-local-tests-only", KIT_JANELAS_DB: db, SESSION_SECRET: "local-test-secret-with-no-production-access",
+  env = { EMAIL_DELIVERY_DB: db, CONSENT_ARCHIVE_DB: db, CONSENT_ARCHIVE_KEY:"synthetic-archive-secret-for-local-tests-only", KIT_JANELAS_DB: db, SESSION_SECRET: "local-test-secret-with-no-production-access",
     SENDER_API_TOKEN: "fake-token", SENDER_GROUP_MARKETING: "marketing-only" };
   globalThis.fetch = async (url, init = {}) => {
     calls.push({url:String(url),method:init.method,body:init.body?init.body ? JSON.parse(init.body) : null:null});
@@ -131,16 +134,17 @@ test('falha de Meta mantém o PDF concluído e repetição usa o mesmo identific
   assert.equal(calls.filter(c=>c.url.includes('graph.facebook.com')).length,2);
 });
 
-test('envio recusado pelo Sender nunca emite registo Meta', async () => {
+test('pedido guardado conta como inscrição mesmo quando o envio aguarda o Sender', async () => {
   env.META_CAPI_ACCESS_TOKEN='fake-meta-token';
   globalThis.fetch=async(url)=>{calls.push({url:String(url)});return Response.json({}, {status:503})};
-  assert.equal((await call({...body,metaMeasurement:true},{Cookie:measurementCookie()})).status,502);
-  assert.ok(!calls.some(c=>c.url.includes('graph.facebook.com')));
+  assert.equal((await call({...body,metaMeasurement:true},{Cookie:measurementCookie()})).status,200);
+  assert.ok(calls.some(c=>c.url.includes('graph.facebook.com')));
+  assert.equal(sql.prepare('SELECT state FROM pdf_delivery_jobs').get().state,'pending');
 });
 
 test('resposta não aguarda Meta e tarefa continua ligada ao ciclo de vida Pages', async () => {
   env.META_CAPI_ACCESS_TOKEN = 'fake-meta-token';
-  let release, background;
+  let release; const background=[];
   const pending = new Promise(resolve => { release = resolve; });
   globalThis.fetch = async (url, init) => {
     calls.push({ url: String(url), body: init.body ? JSON.parse(init.body) : null });
@@ -148,10 +152,10 @@ test('resposta não aguarda Meta e tarefa continua ligada ao ciclo de vida Pages
     return Response.json({ success: true });
   };
   const response = await handler({ request: requestFor({ ...body, metaMeasurement: true }, { Cookie: measurementCookie() }),
-    env, waitUntil: promise => { background = promise; } });
+    env, waitUntil: promise => { background.push(promise); } });
   assert.equal((await response.json()).metaEventId, `kit-janelas-registration-${body.eventId}`);
-  assert.ok(background instanceof Promise);
-  release(); await background;
+  assert.equal(background.length,2);
+  release(); await Promise.all(background);
   assert.equal(sql.prepare("SELECT count(*) AS n FROM kit_events WHERE event='janelas_meta_registration' AND status='success'").get().n, 1);
 });
 
@@ -227,16 +231,17 @@ test("repetir um pedido já concluído não volta a enviar o email",async()=>{
   await call();await call();
   assert.equal(calls.filter(c=>c.url.endsWith("/message/send")).length,1);
 });
-test("falha do fornecedor não é apresentada como sucesso e permite repetir",async()=>{
+test("falha do fornecedor guarda o pedido para recuperação",async()=>{
   globalThis.fetch=async()=>new Response("{}",{status:503});
-  assert.equal((await call()).status,502);
+  assert.equal((await call()).status,200);
+  assert.equal(sql.prepare("SELECT state FROM pdf_delivery_jobs").get().state,"pending");
   assert.equal(sql.prepare("SELECT count(*) AS n FROM kit_events WHERE event='janelas_pdf_sent'").get().n,0);
   globalThis.fetch=async()=>Response.json({success:true});
   assert.equal((await call()).status,200);
 });
-test("falha na inscrição comercial é explícita e não comunica uma entrega inexistente",async()=>{
+test("inscrição comercial pendente não comunica entrega inexistente",async()=>{
   globalThis.fetch=async(url,init={})=>new Response("{}",{status:init.method==="GET"?404:503});
-  assert.equal((await call({...body,consent2:true})).status,502);
+  assert.equal((await call({...body,consent2:true})).status,200);
   assert.equal(sql.prepare("SELECT count(*) AS n FROM kit_events WHERE event='janelas_pdf_sent'").get().n,0);
 });
 test("bloqueia origem externa, honeypot e email inválido antes de contactar o fornecedor",async()=>{
@@ -311,9 +316,10 @@ test("um campo adicional indisponível não impede guardar o consentimento e env
 test("regista o passo e estado do fornecedor sem expor o contacto ou a resposta",async()=>{
   globalThis.fetch=async(url,init={})=>new Response("private provider response",{status:init.method==="GET"?401:503});
   const response=await call({...body,consent2:true});
-  assert.deepEqual(await response.json(),{error:"delivery_failed"});
-  const audit=sql.prepare("SELECT * FROM kit_events WHERE event='janelas_pdf_error'").get();
-  assert.equal(audit.error_code,"marketing_lookup_401");
+  assert.deepEqual(await response.json(),{ok:true,delivery:"accepted"});
+  const audit=sql.prepare("SELECT * FROM pdf_delivery_jobs").get();
+  assert.equal(audit.last_code,"marketing_lookup_401");
+  assert.equal(audit.state,"review");
   assert.ok(!JSON.stringify(audit).includes('private provider response'));
   assert.ok(!JSON.stringify(audit).includes(body.email));
 });
@@ -321,10 +327,11 @@ test("timeout de envio não confirma entrega nem repete automaticamente",async()
   let attempts=0;
   globalThis.fetch=async(url,init={})=>{if(String(url).endsWith("/message/send")){attempts++;throw new DOMException("timeout", "TimeoutError")}return init.method==="GET"?new Response("{}",{status:404}):Response.json({success:true})};
   const response=await call();
-  assert.equal(response.status,502);
-  assert.deepEqual(await response.json(),{error:"delivery_unconfirmed"});
+  assert.equal(response.status,200);
+  assert.deepEqual(await response.json(),{ok:true,delivery:"accepted"});
   assert.equal(attempts,1);
-  assert.equal(sql.prepare("SELECT error_code FROM kit_events WHERE event='janelas_pdf_error'").get().error_code,"send_timeout");
+  assert.equal(sql.prepare("SELECT state FROM pdf_delivery_jobs").get().state,"review");
+  await handler.recover(env); await call(); assert.equal(attempts,1);
   assert.equal(sql.prepare("SELECT count(*) AS n FROM kit_events WHERE event='janelas_pdf_sent'").get().n,0);
 });
 
@@ -363,7 +370,7 @@ test("erro de associação só é aceite quando o Sender confirma o grupo numa r
       return Response.json({data:{subscriber_tags:[]}});
     };
     const response=await call({...body,consent2:true,eventId:crypto.randomUUID()});
-    assert.equal(response.status,confirmed?200:502);
+    assert.equal(response.status,200);
     assert.equal(deliveries,confirmed?1:0);
   }
 });

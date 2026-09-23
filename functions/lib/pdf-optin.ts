@@ -1,4 +1,7 @@
-import { recordConsent } from "./consent-archive.mjs";
+import { enqueuePdf, processPdfJob } from "./pdf-delivery-queue.mjs";
+import { reserveSenderRequest, pauseSender, recordSenderRateLimit } from "./sender-api-control.mjs";
+import { providerRetryAfter } from "./partner-email-delivery.mjs";
+import { recordConsent, openRecord } from "./consent-archive.mjs";
 import { CONSENT_TEXT, type ConsentVersion } from "../../src/data/consent";
 import { checkRateLimit, logEvent, sha256, PublicError, type D1Database } from "./kit-estudante";
 import { createSenderTransactionalClient, SenderTransactionalError } from "../../src/lib/verificacao-anuncio/sender-email.mjs";
@@ -9,6 +12,7 @@ import { copyLegacyKitEvents } from "../../src/lib/kit-janelas-history.mjs";
 
 interface Env {
   CONSENT_ARCHIVE_DB?: unknown;
+  EMAIL_DELIVERY_DB?: D1Database;
   CONSENT_ARCHIVE_KEY?: string;
   SENDER_API_TOKEN?: string;
   SENDER_GROUP_MARKETING?: string;
@@ -40,15 +44,23 @@ const json = (body: object, status = 200) => new Response(JSON.stringify(body), 
 const safe = (value: unknown, max: number) => typeof value === "string" && value.length <= max ? value.trim() : "";
 
 class MarketingError extends Error {
-  constructor(readonly code: string) { super(code); }
+  constructor(readonly code: string, readonly status = 0, readonly retryAfter = 0) { super(code); }
 }
 
 async function registerMarketing(env: Env, email: string, requestId: string, date: string, advertising: boolean, ip: string) {
   const headers = { Authorization: "Bearer " + env.SENDER_API_TOKEN, Accept: "application/json", "Content-Type": "application/json" };
   const api = async (path: string, method: string, body?: object) => {
+    await reserveSenderRequest(env.EMAIL_DELIVERY_DB);
     const response = await fetch("https://api.sender.net/v2" + path, {
       method, headers, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(8000)
     });
+    if(response.status===429){
+      await recordSenderRateLimit(env.EMAIL_DELIVERY_DB,response,method==='GET'?'lookup':'write');
+      const retryAfter=Math.max(60,providerRetryAfter(response.headers));
+      await pauseSender(env.EMAIL_DELIVERY_DB,retryAfter);
+      await response.body?.cancel();
+      throw new MarketingError("marketing_rate_limited",429,retryAfter);
+    }
     // Consumir a resposta liberta a ligação e permite confirmar grupos já existentes.
     const payload = await response.json().catch(() => null);
     return { ok: response.ok, status: response.status, payload };
@@ -66,7 +78,7 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
     const tags = (payload as { data?: { subscriber_tags?: { id?: string }[] } } | null)?.data?.subscriber_tags;
     return Array.isArray(tags) && tags.some(tag => tag.id === group);
   };
-  if (!lookup.ok && lookup.status !== 404) throw new MarketingError("marketing_lookup_" + lookup.status);
+  if (!lookup.ok && lookup.status !== 404) throw new MarketingError("marketing_lookup_" + lookup.status,lookup.status);
   const writeSubscriber = async (path: string, method: string, payload: Record<string, unknown>) => {
     let response = await api(path, method, payload);
     // O consentimento comercial principal mantém-se mesmo se o campo adicional ainda não existir.
@@ -82,7 +94,7 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
   if (!response.ok && response.status === 409) {
     response = await writeSubscriber("/subscribers/" + identifier, "PATCH", { fields, trigger_automation: false });
   }
-  if (!response.ok) throw new MarketingError("marketing_save_" + response.status);
+  if (!response.ok) throw new MarketingError("marketing_save_" + response.status,response.status);
   // O POST de criação já inclui o grupo. Repeti-lo pode devolver 400 no Sender.
   if (createdWithGroup) return;
   for (const group of groups) {
@@ -97,12 +109,12 @@ async function registerMarketing(env: Env, email: string, requestId: string, dat
       const confirmed = await api("/subscribers/" + identifier, "GET");
       if (confirmed.ok && hasGroup(confirmed.payload, group)) continue;
     }
-    throw new MarketingError("marketing_group_" + membership.status);
+    throw new MarketingError("marketing_group_" + membership.status,membership.status);
   }
   }
 }
 
-return async ({ request, env, waitUntil }: {
+const handler = async ({ request, env, waitUntil }: {
   request: Request; env: Env; waitUntil?: (promise: Promise<unknown>) => void
 }) => {
   const origin = request.headers.get("Origin");
@@ -125,7 +137,7 @@ return async ({ request, env, waitUntil }: {
     return json({ error: "invalid" }, 400);
   }
   const db = env[config.dbBinding];
-  if (!db || !env.SESSION_SECRET || !env.SENDER_API_TOKEN) return json({ error: "not_configured" }, 503);
+  if (!db || !env.EMAIL_DELIVERY_DB || !env.SESSION_SECRET || !env.SENDER_API_TOKEN) return json({ error: "not_configured" }, 503);
   const requestId = body.eventId as string;
   const legacy = config.legacyHistory ? env.KIT_ESTUDANTE_DB : undefined;
   if (legacy && waitUntil) {
@@ -145,7 +157,7 @@ return async ({ request, env, waitUntil }: {
         await logEvent(db, { source: SOURCE, event: `${config.eventPrefix}_meta_registration`, status: "ignored",
           requestId, error: "measurement_not_authorized" });
       } catch { /* A falta de registo não bloqueia o PDF já enviado. */ }
-      return json({ ok: true });
+      return json({ ok: true, delivery: "accepted" });
     }
     const deliver = async () => {
     try {
@@ -174,7 +186,7 @@ return async ({ request, env, waitUntil }: {
     // Pages mantém a tarefa viva após a resposta, sem atrasar o agradecimento.
     if (waitUntil) waitUntil(deliver());
     else await deliver();
-    return json({ ok: true, metaEventId });
+    return json({ ok: true, delivery: "accepted", metaEventId });
   };
   try {
     emailHash = await sha256(env.SESSION_SECRET + `:${config.hashPrefix}-email:` + email);
@@ -186,36 +198,28 @@ return async ({ request, env, waitUntil }: {
       completed = await db.prepare(completedQuery).bind(SOURCE, requestId, emailHash).first();
     }
     if (completed) return completeRegistration();
+    const queued=await db.prepare('SELECT email_hash,evidence_id FROM pdf_delivery_jobs WHERE request_id=?').bind(requestId).first();
+    if(queued){
+      if(queued.email_hash!==emailHash)return json({error:'request_conflict'},409);
+      const saved=await (env.CONSENT_ARCHIVE_DB as D1Database).prepare('SELECT id,payload FROM consent_evidence WHERE id=?').bind(queued.evidence_id).first();
+      if(!saved||(await openRecord(env,saved)).choices.c2!==marketing)return json({error:'request_conflict'},409);
+      return completeRegistration();
+    }
     ipHash = await checkRateLimit(request, db, env.SESSION_SECRET + `:${config.hashPrefix}-ip`, 6);
     const recipientRequest = new Request(request.url, { headers: { "CF-Connecting-IP": emailHash } });
     await checkRateLimit(recipientRequest, db, env.SESSION_SECRET + `:${config.hashPrefix}-recipient`, 3);
     const evidence = await recordConsent(env, request, {email, eventId:requestId, source:SOURCE,
       version:CONSENT_VERSION, text:CONSENT_TEXT[CONSENT_VERSION],
       choices:{c1:true,c2:marketing},pageUrl:PAGE_URL,urlSource:"server_defined_form"});
-    const date = evidence.received_at;
     await logEvent(db, {
       source: SOURCE, event: `${config.eventPrefix}_pdf_requested`, status: "received", requestId, ipHash, sessionHash: emailHash,
       consentVersion: CONSENT_VERSION, field: "consents",
       value: JSON.stringify({ delivery: true, newsletter: true, marketing })
     });
-    // A primeira escolha autoriza PDF + Newsletter. A segunda conserva a opção comercial.
-    await registerMarketing(env, email, requestId, date, marketing, evidence.ip || "");
-    await logEvent(db, { source: SOURCE, event: `${config.eventPrefix}_newsletter_registered`, status: "success",
-      requestId, ipHash, sessionHash: emailHash, consentVersion: CONSENT_VERSION });
-    if (marketing) {
-      await logEvent(db, { source: SOURCE, event: `${config.eventPrefix}_marketing_registered`, status: "success",
-        requestId, ipHash, sessionHash: emailHash, consentVersion: CONSENT_VERSION });
-    }
-    const client = createSenderTransactionalClient({ apiToken: env.SENDER_API_TOKEN, sendTimeoutMs: 45_000 });
-    await client.send({
-      to: email,
-      fromEmail: env.SENDER_TRANSACTIONAL_FROM_EMAIL || "geral@guiadoproprietario.pt",
-      fromName: env.SENDER_TRANSACTIONAL_FROM_NAME || "Guia do Proprietário",
-      ...config.message
-
-    });
-    await logEvent(db, { source: SOURCE, event: `${config.eventPrefix}_pdf_sent`, status: "success", requestId, ipHash,
-      sessionHash: emailHash, consentVersion: CONSENT_VERSION });
+    await enqueuePdf(db,evidence,emailHash);
+    const delivery=recover(env,requestId).catch(()=>({state:'pending'}));
+    if(waitUntil)waitUntil(delivery);
+    else await delivery;
     return completeRegistration();
   } catch (error) {
     const publicCode = error instanceof PublicError ? error.publicCode
@@ -230,4 +234,54 @@ return async ({ request, env, waitUntil }: {
   }
 };
 
+async function recover(env: Env, requestId?: string) {
+ return processPdfJob(env,config,async(evidence: any,row: any,markSending: ()=>Promise<void>)=>{
+  const db=env[config.dbBinding]!;
+  try{
+    await registerMarketing(env,evidence.email,evidence.event_id,evidence.received_at,evidence.choices.c2===true,evidence.ip||'');
+  }catch(error){
+    const status=Number((error as any)?.status)||0;
+    return {state:status===401||status===403?'failed':'retry',error:error instanceof MarketingError?error.code:'pdf_subscriber_sync_pending',providerStatus:status,retryAfter:(error as any)?.retryAfter||300,status:503};
+  }
+  await logEvent(db,{source:SOURCE,event:`${config.eventPrefix}_newsletter_registered`,status:'success',requestId:row.request_id,sessionHash:row.email_hash,consentVersion:CONSENT_VERSION});
+  if(evidence.choices.c2===true)await logEvent(db,{source:SOURCE,event:`${config.eventPrefix}_marketing_registered`,status:'success',requestId:row.request_id,sessionHash:row.email_hash,consentVersion:CONSENT_VERSION});
+  const client=createSenderTransactionalClient({apiToken:env.SENDER_API_TOKEN,sendTimeoutMs:45000,
+    fetchImpl:async(url: RequestInfo | URL,init?: RequestInit)=>{
+      await reserveSenderRequest(env.EMAIL_DELIVERY_DB);
+      await markSending();
+      const response=await fetch(url,init);
+      if(response.status===429){
+        await recordSenderRateLimit(env.EMAIL_DELIVERY_DB,response,'email');
+        const retryAfter=Math.max(60,providerRetryAfter(response.headers));
+        await pauseSender(env.EMAIL_DELIVERY_DB,retryAfter);
+        await response.body?.cancel();
+        throw new MarketingError('pdf_email_rate_limited',429,retryAfter);
+      }
+      return response;
+    }});
+  try{
+    await client.send({to:evidence.email,fromEmail:env.SENDER_TRANSACTIONAL_FROM_EMAIL||'geral@guiadoproprietario.pt',fromName:env.SENDER_TRANSACTIONAL_FROM_NAME||'Guia do Proprietário',...config.message});
+  }catch(error){
+    if((error as any)?.status===429)return {state:'retry',error:'pdf_email_rate_limited',providerStatus:429,retryAfter:(error as any).retryAfter,status:503};
+    // The request might have been delivered before a timeout or 5xx response.
+    return {state:'uncertain',error:'pdf_email_requires_review',status:503};
+  }
+  await logEvent(db,{source:SOURCE,event:`${config.eventPrefix}_pdf_sent`,status:'success',requestId:row.request_id,sessionHash:row.email_hash,consentVersion:CONSENT_VERSION});
+  return {state:'sent'};
+ },requestId);
+}
+async function backfill(env: Env,evidence: any){
+ if(evidence.source!==SOURCE||evidence.consent_version!==CONSENT_VERSION||evidence.choices?.c1!==true)return false;
+ const db=env[config.dbBinding];if(!db)return false;
+ const emailHash=await sha256(env.SESSION_SECRET+`:${config.hashPrefix}-email:`+evidence.email);
+ const last=await db.prepare(`SELECT request_id FROM kit_events WHERE source=? AND event='${config.eventPrefix}_pdf_requested' AND session_hash=? ORDER BY occurred_at DESC LIMIT 1`).bind(SOURCE,emailHash).first<any>();
+ if(last?.request_id!==evidence.event_id)return false;
+ const sent=await db.prepare(`SELECT id FROM kit_events WHERE source=? AND event='${config.eventPrefix}_pdf_sent' AND session_hash=? AND status='success' AND occurred_at>=? LIMIT 1`).bind(SOURCE,emailHash,evidence.received_at).first();
+ if(sent)return false;
+ // Recover only failures before sending. An ambiguous send needs manual review.
+ const safeFailure=await db.prepare(`SELECT id FROM kit_events WHERE source=? AND request_id=? AND event='${config.eventPrefix}_pdf_error' AND error_code LIKE 'marketing_%' LIMIT 1`).bind(SOURCE,evidence.event_id).first();
+ if(!safeFailure)return false;
+ await enqueuePdf(db,evidence,emailHash);return true;
+}
+return Object.assign(handler,{recover,backfill});
 }

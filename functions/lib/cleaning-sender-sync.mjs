@@ -1,4 +1,4 @@
-import {reserveSenderRequest,pauseSender,SenderPause} from './sender-api-control.mjs';
+import {reserveSenderRequest,pauseSender,SenderPause,recordSenderRateLimit} from './sender-api-control.mjs';
 const API='https://api.sender.net/v2';
 export class SyncError extends Error {
  constructor(code,status=0,retryMs=300000){super(code);this.status=status;this.retryMs=retryMs;}
@@ -8,6 +8,7 @@ async function sender(env,path,method='GET',body){
  let response;
  try{response=await fetch(API+path,{method,headers:{Authorization:`Bearer ${env.SENDER_API_TOKEN}`,Accept:'application/json','Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(8000)});}catch{throw new SyncError('network');}
  if(response.status===429){
+  await recordSenderRateLimit(env.EMAIL_DELIVERY_DB,response,method==='GET'?'lookup':'write');
   const retry=response.headers.get('Retry-After'),seconds=Number(retry);
   const error=new SyncError('sender_429',429,Math.max(60000,Number.isFinite(seconds)&&seconds>0?seconds*1000:(Date.parse(retry)-Date.now())||300000));
   // Only allowlisted operational metadata. Never expose provider bodies, URLs or contacts.
