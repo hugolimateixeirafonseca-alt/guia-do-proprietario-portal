@@ -416,8 +416,8 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
 
   const response = await onRequestPost({ request: requestFor(cleaningBody), env });
   assert.equal(response.status, 200);
-  assert.equal(calls.length, 4);
-  assert.deepEqual(JSON.parse(calls[3].init.body).groups,["bWv1LJ"]);
+  assert.equal(calls.length, 3);
+  assert.ok(calls[2].url.endsWith("/api/sender-sync"));
   const dashboardCall = calls[1];
   const dashboardBody = JSON.parse(dashboardCall.init.body);
   assert.equal(dashboardCall.init.headers.Authorization, "Bearer token-dashboard-teste");
@@ -430,7 +430,7 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
   assert.deepEqual(dashboardBody.preferred_time_periods, ["morning"]);
   assert.equal(dashboardBody.consent_partner_sharing, true);
   assert.equal(dashboardBody.consent_marketing, false);
-  assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", locationStored:false, dashboardStored: true });
+  assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", senderSyncQueued:true, dashboardStored: true });
 });
 
 test("recupera o concelho local do dashboard quando a confirmação externa está indisponível", async () => {
@@ -456,28 +456,17 @@ test("recupera o concelho local do dashboard quando a confirmação externa est�
   assert.deepEqual(await response.json(), {
     ok: true,
     locality: "Lisboa",
-    locationStored:false,
+    senderSyncQueued:true,
     dashboardStored: true
   });
 });
 
-test("adiciona o pedido de limpeza à newsletter apenas com autorização opcional", async () => {
-  globalThis.fetch = async (url, init = {}) => {
-    calls.push({ url: String(url), init });
-    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
-    if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-1" }, { status: 201 });
-    const status = init.method === "GET" ? 404 : 201;
-    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
-  };
-
-  const response = await onRequestPost({ request: requestFor({ ...cleaningBody, consent2: true }), env });
-  assert.equal(response.status, 200);
-  const createBody = JSON.parse(calls[3].init.body);
-  assert.deepEqual(createBody.groups, ["bWv1LJ", "egK8WG"]);
-  assert.equal(createBody.fields["{$CONSENT_MARKETING}"], "true");
-  assert.equal("phone" in createBody, false);
-  assert.equal("{$LIMPEZA_SERVICO}" in createBody.fields, false);
-  assert.equal("{$CONSENT_PARCEIROS}" in createBody.fields, false);
+test("adiciona o pedido de limpeza à newsletter apenas com autorização opcional via fila persistente", async () => {
+ globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),init});if(String(url).startsWith('https://json.geoapi.pt/'))return Response.json({Localidade:'Lisboa',Concelho:'Lisboa'});if(String(url)===env.CLEANING_DASHBOARD_API_URL)return Response.json({ok:true,lead_id:'queued'}, {status:201});return Response.json({ok:true,job:null});};
+ const response=await onRequestPost({request:requestFor({...cleaningBody,consent2:true}),env});assert.equal(response.status,200);
+ assert.equal(JSON.parse(calls.find(c=>c.url===env.CLEANING_DASHBOARD_API_URL).init.body).consent_marketing,true);
+ assert.equal((await response.json()).senderSyncQueued,true);
+ assert.ok(calls.some(c=>c.url.endsWith('/api/sender-sync')));
 });
 
 test("guarda o pedido AL no dashboard e regista o utilizador no grupo de limpeza", async () => {
@@ -501,26 +490,15 @@ test("guarda o pedido AL no dashboard e regista o utilizador no grupo de limpeza
   assert.equal(dashboardBody.origem, "landing-alojamento-local");
 });
 
-test("adiciona o contacto de alojamento local ao Sender apenas com consentimento opcional", async () => {
-  globalThis.fetch = async (url, init = {}) => {
-    calls.push({ url: String(url), init });
-    if (String(url).startsWith("https://json.geoapi.pt/")) return Response.json({ Localidade: "Porto", Concelho: "Porto" });
-    if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-al-2" }, { status: 201 });
-    const status = init.method === "GET" ? 404 : 201;
-    return new Response("{}", { status, headers: { "Content-Type": "application/json" } });
-  };
-
-  const response = await onRequestPost({ request: requestFor({ ...alojamentoLocalBody, consent2: true }), env });
-  assert.equal(response.status, 200);
-  const createBody = JSON.parse(calls[3].init.body);
-  assert.deepEqual(createBody.groups, ["bWv1LJ", "egK8WG"]);
-  assert.equal(createBody.fields["{$AL_UNIDADES}"], "2 a 3 alojamentos");
-  assert.equal(createBody.fields["{$AL_SERVICOS}"], "Limpeza entre estadias, Roupa de cama e banho");
-  assert.equal(createBody.fields["{$AL_JANELA}"], "Entre 3 e 5 horas");
-  assert.equal(createBody.fields["{$AL_ACESSO}"], "Cofre ou código");
+test("adiciona o contacto de alojamento local ao Sender apenas com consentimento opcional via fila persistente", async () => {
+ globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),init});if(String(url).startsWith('https://json.geoapi.pt/'))return Response.json({Localidade:'Lisboa',Concelho:'Lisboa'});if(String(url)===env.CLEANING_DASHBOARD_API_URL)return Response.json({ok:true,lead_id:'queued'}, {status:201});return Response.json({ok:true,job:null});};
+ const response=await onRequestPost({request:requestFor({...alojamentoLocalBody,consent2:true}),env});assert.equal(response.status,200);
+ assert.equal(JSON.parse(calls.find(c=>c.url===env.CLEANING_DASHBOARD_API_URL).init.body).consent_marketing,true);
+ assert.equal((await response.json()).senderSyncQueued,true);
+ assert.ok(calls.some(c=>c.url.endsWith('/api/sender-sync')));
 });
 
-test("preenche a localidade do Sender com a tabela postal local quando o serviço externo falha", async () => {
+test("preserva a localidade do pedido enfileirado quando o serviço externo falha", async () => {
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
     if (String(url).startsWith("https://json.geoapi.pt/")) throw new Error("serviço externo indisponível");
@@ -537,10 +515,9 @@ test("preenche a localidade do Sender com a tabela postal local quando o serviç
   });
 
   assert.equal(response.status, 200);
-  const createCall = calls.find(({ url, init }) => url.endsWith("/subscribers") && init.method === "POST");
-  const createBody = JSON.parse(createCall.init.body);
-  assert.equal(createBody.fields["{$CODIGO_POSTAL}"], "1600-014");
-  assert.equal(createBody.fields["{$LOCALIDADE}"], "Lisboa");
+  const dashboardCall = calls.find(({ url }) => url === env.CLEANING_DASHBOARD_API_URL);
+  assert.equal(JSON.parse(dashboardCall.init.body).postal_code, "1600-014");
+  assert.ok(calls.some(c=>c.url.endsWith("/api/sender-sync")));
   assert.equal((await response.json()).locality, "Lisboa");
 });
 
@@ -751,4 +728,7 @@ test("regista as submissões válidas das duas landings de limpeza como Lead no 
 test("não envia para o Sender sem guardar primeiro a evidência",async()=>{globalThis.fetch=async()=>{throw Error("Sender não deve ser contactado")};const response=await onRequestPost({request:requestFor(ebookBody),env:{...env,CONSENT_ARCHIVE_DB:undefined}});assert.equal(response.status,503);});
 test("falha do Sender conserva a evidência original",async()=>{globalThis.fetch=async()=>new Response("{}",{status:503});const response=await onRequestPost({request:requestFor(ebookBody),env});assert.equal(response.status,502);assert.equal(archiveSql.prepare("SELECT count(*) AS n FROM consent_evidence").get().n,1);});
 
-for(const body of [cleaningBody,alojamentoLocalBody])for(const consent2 of [false,true])test('existing cleaning subscriber groups '+body.source+' newsletter='+consent2,async()=>{globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),init});if(String(url).startsWith('https://json.geoapi.pt/'))return Response.json({Localidade:'Lisboa',Concelho:'Lisboa'});return Response.json({ok:true,lead_id:'test'});};const r=await onRequestPost({request:requestFor({...body,consent2}),env});assert.equal(r.status,200);const grouped=calls.filter(c=>c.url.includes('/subscribers/groups/')).map(c=>c.url.split('/').at(-1));assert.deepEqual(grouped,consent2?['bWv1LJ','egK8WG']:['bWv1LJ']);assert.ok(calls.every(c=>c.init.method!=='DELETE'));});
+for(const body of [cleaningBody,alojamentoLocalBody])for(const consent2 of [false,true])test('Sender unavailable keeps cleaning lead queued '+body.source+' newsletter='+consent2,async()=>{
+ globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),init});if(String(url).startsWith('https://json.geoapi.pt/'))return Response.json({Localidade:'Lisboa',Concelho:'Lisboa'});if(String(url).endsWith('/api/sender-sync'))throw Error('temporary failure');return Response.json({ok:true,lead_id:'test'});};
+ const r=await onRequestPost({request:requestFor({...body,consent2}),env});assert.equal(r.status,200);assert.equal((await r.json()).senderSyncQueued,true);assert.equal(JSON.parse(calls.find(c=>c.url===env.CLEANING_DASHBOARD_API_URL).init.body).consent_marketing,consent2);
+});
