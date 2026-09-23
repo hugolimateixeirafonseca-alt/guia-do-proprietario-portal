@@ -416,8 +416,9 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
 
   const response = await onRequestPost({ request: requestFor(cleaningBody), env });
   assert.equal(response.status, 200);
-  assert.equal(calls.length, 3);
   assert.ok(calls[2].url.endsWith("/api/sender-sync"));
+  assert.ok(calls[3].url.endsWith("/api/partner-sender-sync"));
+  assert.equal(calls.some(call => call.url.startsWith("https://api.sender.net/")), false);
   const dashboardCall = calls[1];
   const dashboardBody = JSON.parse(dashboardCall.init.body);
   assert.equal(dashboardCall.init.headers.Authorization, "Bearer token-dashboard-teste");
