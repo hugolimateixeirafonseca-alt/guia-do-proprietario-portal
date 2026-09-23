@@ -12,7 +12,10 @@ async function profile(env,email){const r=await sender(env,'/subscribers/'+encod
 const memberIds=p=>new Set((p?.subscriber_tags||[]).map(g=>String(g.id)));
 const suppressed=p=>p?.status?.email && p.status.email!=='active';
 export async function syncLead(env,lead){
- const required=['bWv1LJ',...(lead.consentimento_marketing===1?['egK8WG']:[])];
+ return syncContact(env,lead,['bWv1LJ',...(lead.consentimento_marketing===1?['egK8WG']:[])]);
+}
+export async function syncPartner(env,partner){return syncContact(env,partner,['aOoGvG']);}
+async function syncContact(env,lead,required){
  let current=await profile(env,lead.email),created=false,added=0;
  if(current&&suppressed(current))return {state:'suppressed',code:'existing_optout',created,added};
  if(!current){
@@ -33,24 +36,28 @@ export async function syncLead(env,lead){
  if(!current||!required.every(g=>memberIds(current).has(g)))throw new SyncError('groups_unconfirmed');
  return {state:'synced',code:created?'created':added?'groups_added':'already_present',created,added};
 }
-async function queue(env,body){
+async function queue(env,body,partner=false){
  const base=env.CLEANING_DASHBOARD_API_URL||'https://guia-do-proprietario-parceiros.pages.dev/api/leads';
- const url=new URL('/api/sender-sync',base);
+ const url=new URL(partner?'/api/partner-sender-sync':'/api/sender-sync',base);
  const r=await fetch(url,{method:'POST',headers:{Authorization:`Bearer ${env.CLEANING_DASHBOARD_API_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(10000)});
  if(!r.ok)throw new Error('queue_'+r.status);
  return r.json();
 }
-export async function processSenderSync(env){
+export async function processSenderSync(env,partner=false){
  if(!env.SENDER_API_TOKEN||!env.CLEANING_DASHBOARD_API_TOKEN)throw new Error('sync_not_configured');
- const {job}=await queue(env,{action:'claim'});
- if(!job)return {state:'idle'};
+ const {job}=await queue(env,{action:'claim'},partner);
+ if(!job)return partner?{state:'idle'}:processSenderSync(env,true);
  let result;
- try{result=await syncLead(env,job.lead);}catch(error){
+ try{result=partner?await syncPartner(env,job.partner):await syncLead(env,job.lead);}catch(error){
   const status=Number(error.status)||0;
   const blocked=status>=400&&status<500&&![408,409,429].includes(status);
   result={state:blocked?'blocked':'pending',code:error instanceof SyncError?error.message:'unexpected',retry_ms:Math.max(error.retryMs||0,Math.min(21600000,60000*2**Math.min(job.attempts,9))),cooldown:status===429};
  }
- await queue(env,{action:'finish',lead_id:job.lead_id,lease:job.lease,...result});
+ await queue(env,{action:'finish',...(partner?{partner_id:job.partner_id}:{lead_id:job.lead_id}),lease:job.lease,...result},partner);
  return result;
 }
-export async function senderSyncStats(env){return queue(env,{action:'stats'});}
+export async function senderSyncStats(env){
+ const [leads,partners]=await Promise.all([queue(env,{action:'stats'}),queue(env,{action:'stats'},true)]);
+ const totals=new Map();for(const row of [...leads.states,...partners.states])totals.set(row.state,(totals.get(row.state)||0)+row.count);
+ return {ok:true,states:[...totals].map(([state,count])=>({state,count})),partners:partners.states};
+}

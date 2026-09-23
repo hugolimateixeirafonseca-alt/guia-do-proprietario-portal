@@ -1,11 +1,15 @@
+import {processSenderSync} from '../../lib/cleaning-sender-sync.mjs';
 import {deliverOnce,providerRetryAfter} from "../../lib/partner-email-delivery.mjs";
 interface Env {
   EMAIL_DELIVERY_DB?: unknown;
+  CLEANING_DASHBOARD_API_URL?: string;
+  CLEANING_DASHBOARD_API_TOKEN?: string;
   SENDER_API_TOKEN?: string;
   MAKE_PARTNER_NOTIFICATIONS_SECRET?: string;
 }
 
 interface RequestContext {
+  waitUntil?: (promise: Promise<unknown>) => void;
   request: Request;
   env: Env;
 }
@@ -39,7 +43,7 @@ function json(body: object, status = 200) {
   });
 }
 
-export const onRequestPost = async ({ request, env }: RequestContext) => {
+export const onRequestPost = async ({ request, env, waitUntil }: RequestContext) => {
   const expected = env.MAKE_PARTNER_NOTIFICATIONS_SECRET || "";
   const supplied = request.headers.get("Authorization") || "";
   if (!expected || !secureEqual(supplied, `Bearer ${expected}`)) {
@@ -104,28 +108,12 @@ export const onRequestPost = async ({ request, env }: RequestContext) => {
     text = 'Olá, '+partnerName+'.\n\n'+message+'\n\nSe precisar de ajuda, responda a este email.';
   }
 
-  return deliverOnce(env.EMAIL_DELIVERY_DB,eventId,partnerEmail,async (markSending: () => Promise<void>) => {
-  // Register applicants, never the administrative notification recipient.
-  if (application) {
-    let stage="lookup",providerStatus=0,retryAfter=0;
-    try {
-      const headers = {Authorization: `Bearer ${env.SENDER_API_TOKEN}`, Accept:'application/json', 'Content-Type':'application/json'};
-      const existing = await fetch('https://api.sender.net/v2/subscribers/'+encodeURIComponent(partnerEmail), {headers,signal:AbortSignal.timeout(7000)});
-      providerStatus=existing.status; retryAfter=providerRetryAfter(existing.headers);
-      if (!existing.ok && existing.status !== 404) throw new Error('lookup');
-      if (existing.status === 404) {
-        stage='create'; providerStatus=0;
-        const created = await fetch('https://api.sender.net/v2/subscribers', {method:'POST',headers,signal:AbortSignal.timeout(7000),body:JSON.stringify({email:partnerEmail,firstname:partnerName,groups:['aOoGvG'],trigger_automation:false})});
-        providerStatus=created.status; retryAfter=providerRetryAfter(created.headers);
-        if (!created.ok && created.status !== 409) throw new Error('create');
-      }
-      stage='group'; providerStatus=0;
-      const grouped = await fetch('https://api.sender.net/v2/subscribers/groups/aOoGvG', {method:'POST',headers,signal:AbortSignal.timeout(7000),body:JSON.stringify({subscribers:[partnerEmail],trigger_automation:false})});
-      providerStatus=grouped.status; retryAfter=providerRetryAfter(grouped.headers);
-      if (!grouped.ok) throw new Error('group');
-    } catch { return {state:providerStatus>=400&&providerStatus<500&&providerStatus!==429?'failed':'retry',error:'partner_group_sync_failed',stage,providerStatus,retryAfter,status:502}; }
+  // Group membership has its own durable queue. Never gate the application email on it.
+  if (application && env.CLEANING_DASHBOARD_API_TOKEN) {
+    const sync = processSenderSync(env,true).catch(() => { console.error('partner_group_queue_unavailable'); });
+    if (waitUntil) waitUntil(sync); else await sync;
   }
-
+  return deliverOnce(env.EMAIL_DELIVERY_DB,eventId,partnerEmail,async (markSending: () => Promise<void>) => {
   await markSending();
   const response = await fetch(SENDER_ENDPOINT, {
     signal:AbortSignal.timeout(12000),
