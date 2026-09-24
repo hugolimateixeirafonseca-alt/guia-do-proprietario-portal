@@ -27,7 +27,21 @@ const suppressed=p=>p?.status?.email && p.status.email!=='active';
 export async function syncLead(env,lead){
  return syncContact(env,lead,['bWv1LJ',...(lead.consentimento_marketing===1?['egK8WG']:[])]);
 }
-export async function syncPartner(env,partner){return syncContact(env,partner,['aOoGvG'],true);}
+export async function syncPartner(env,partner){
+ if(!partner)return {state:'suppressed',code:'partner_removed'};
+ if(partner.bloquear_email===1 || partner.bloquear_email===true){
+  const current=await profile(env,partner.email);
+  if(!current)return {state:'suppressed',code:'admin_optout_no_profile'};
+  const r=await sender(env,'/subscribers/'+encodeURIComponent(partner.email),'PATCH',{
+   subscriber_status:'UNSUBSCRIBED',transactional_email_status:'UNSUBSCRIBED',trigger_automation:false
+  });
+  if(!r.ok)throw new SyncError('unsubscribe_'+r.status,r.status);
+  const result=await r.json();
+  if(result.success!==true)throw new SyncError('unsubscribe_unconfirmed');
+  return {state:'suppressed',code:'admin_optout_synced'};
+ }
+ return syncContact(env,partner,['aOoGvG'],true);
+}
 async function syncContact(env,lead,required,membershipOnly=false){
  let current=await profile(env,lead.email),created=false,added=0;
  if(!membershipOnly&&current&&suppressed(current))return {state:'suppressed',code:'existing_optout',created,added};

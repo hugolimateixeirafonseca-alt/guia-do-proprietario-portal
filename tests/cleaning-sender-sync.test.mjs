@@ -28,3 +28,16 @@ test('429 diagnostics expose only counters and classification, never contact or 
   assert.ok(!JSON.stringify(e.diagnostics).includes('secret@example'));assert.ok(!JSON.stringify(e.diagnostics).includes('private-key'));return true;
  });}finally{globalThis.fetch=original;}
 });
+
+test('admin optout cancels promotional and transactional email without changing groups or running automations',async()=>{
+ const original=globalThis.fetch,calls=[];
+ globalThis.fetch=async(url,options)=>{calls.push(options);if(options.method==='GET')return response({data:{id:'s',status:{email:'active'},subscriber_tags:[{id:'aOoGvG'}]}});assert.equal(options.method,'PATCH');assert.deepEqual(JSON.parse(options.body),{subscriber_status:'UNSUBSCRIBED',transactional_email_status:'UNSUBSCRIBED',trigger_automation:false});return response({success:true});};
+ try{const result=await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',bloquear_email:1});assert.deepEqual(result,{state:'suppressed',code:'admin_optout_synced'});assert.equal(calls.length,2);}finally{globalThis.fetch=original;}
+});
+test('optout does not create missing subscribers; failed cancellations remain retryable',async()=>{
+ const original=globalThis.fetch;
+ try{globalThis.fetch=async()=>response({},404);assert.equal((await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',bloquear_email:1})).code,'admin_optout_no_profile');
+ globalThis.fetch=async(url,options)=>options.method==='GET'?response({data:{id:'s',subscriber_tags:[]}}):response({},503);
+ await assert.rejects(()=>syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',bloquear_email:1}),/unsubscribe_503/);
+ }finally{globalThis.fetch=original;}
+});

@@ -1,3 +1,4 @@
+import {checkPartnerEmailPolicy} from '../../lib/partner-email-policy.mjs';
 import {reserveSenderRequest,recordSenderRateLimit} from '../../lib/sender-api-control.mjs';
 import {processSenderSync} from '../../lib/cleaning-sender-sync.mjs';
 import {deliverOnce,providerRetryAfter} from "../../lib/partner-email-delivery.mjs";
@@ -107,6 +108,12 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
       : 'A sua adesão à rede de parceiros do Guia do Proprietário está sujeita a aprovação. Vamos analisar os dados enviados. Até à aprovação não recebe pedidos nem pode carregar saldo. Assim que a candidatura for aprovada, receberá um email com a ligação de acesso à sua área de parceiro.';
     html = '<!doctype html><html lang="pt-PT"><body style="font-family:Arial,sans-serif;background:#f2f6f4;color:#203d36;padding:24px"><main style="max-width:600px;margin:auto;background:white;padding:28px;border-radius:16px"><p>GUIA DO PROPRIETÁRIO</p><h1>'+escapeHtml(subject)+'</h1><p>Olá, '+safeName+'.</p><p style="line-height:1.7">'+escapeHtml(message)+'</p><p>Se precisar de ajuda, responda a este email.</p></main></body></html>';
     text = 'Olá, '+partnerName+'.\n\n'+message+'\n\nSe precisar de ajuda, responda a este email.';
+  }
+
+  if (!adminApplication) {
+    try {
+      if (!await checkPartnerEmailPolicy(env,partnerEmail,eventId)) return json({ok:true,suppressed:true,event_id:eventId});
+    } catch { return json({error:'partner_email_policy_unavailable'},503); }
   }
 
   // Group membership has its own durable queue. Never gate the application email on it.
