@@ -17,6 +17,19 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
   if (url.protocol !== 'https:' || url.hostname !== host || url.port || url.username || url.password) throw new Error('invalid_dashboard_url');
   let subject, preview, paragraphs, button, action = url.toString();
   switch (payload.event_type) {
+    case 'approved_no_login': {
+      if(!Number.isSafeInteger(data.active_requests)||data.active_requests<0||data.free_contacts!==4||(data.active_requests>0&&!clean(data.localities,500)))throw new Error('invalid_event_data');
+      subject=data.active_requests>0?`Tem pedidos à sua espera em ${clean(data.localities,500)}`:'A sua área de parceiro já está pronta';
+      preview='O seu acesso está ativo, e os primeiros 4 contactos são gratuitos.';
+      paragraphs=[
+        'A sua conta de parceiro no Guia do Proprietário está ativa, mas ainda não entrou.',
+        data.active_requests>0?`Neste momento há ${data.active_requests} ${data.active_requests===1?'pedido nas suas zonas à espera':'pedidos nas suas zonas à espera'} de um profissional de limpeza.`:'Assim que entrar um pedido nas suas zonas, recebe um aviso por email.',
+        'Os seus 4 primeiros contactos são gratuitos. Funciona assim:\n1. Vê o pedido completo: tipo de limpeza, casa, frequência e dias.\n2. Aceita só os que lhe interessam.\n3. Recebe o contacto e fala diretamente com o cliente.',
+        'Se teve alguma dificuldade a entrar, responda a este email e ajudamos.'
+      ];
+      button='Entrar na minha área';
+      break;
+    }
     case 'contact_accepted': {
       const name=clean(data.client_name),phone=clean(data.client_phone,24).replace(/[\s()-]/g,'');
       if(!place||!name||!/^\+?[0-9]{9,15}$/.test(phone)||!['partilhada','exclusiva'].includes(data.modality)||!labels[data.cleaning_type]||!labels[data.space_type]||!labels[data.size]||!labels[data.frequency])throw new Error('invalid_event_data');

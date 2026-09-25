@@ -10,3 +10,8 @@ A fonte foi integrada em origin/main antes da publicação. Os 18 testes direcio
 
 Os botões de confirmação de contacto e aviso de novo profissional passam a Abrir a minha área de parceiro, usando o dashboard_url privado relido antes do envio. Foram removidos os destinos tel: que abriam aplicações de chamadas. Os sete modelos usam agora o dashboard como destino principal. O telefone mantém-se no conteúdo da confirmação. Emails já entregues não são modificados. Oito testes direcionados aprovados, incluindo destino dos sete modelos e atualização do acesso. Enviado para publicação pelo workflow normal do Portal; sem nova compilação integral local nem verificação automática de deployment.
 
+## Aprovação sem entrada e catálogo, 25/09/2026
+
+O oitavo modelo, approved_no_login, é elegível 48 horas após uma nova aprovação, se ainda não houve entrada real nem contacto adquirido. A aplicação ignora a pré-visualização administrativa e aprovações anteriores ao início da medição. O envio volta a validar acesso, bloqueios e ofertas compatíveis atuais. Sem ofertas, assunto e corpo não prometem pedidos existentes. Exige quatro contactos iniciais ainda disponíveis.
+
+O exportador offline cria o catálogo administrativo a partir dos modelos reais, com exemplos fictícios e sem chamadas de rede. Inclui canal, regra e texto integral, distinguindo o recibo gerido pelo Stripe e canais não configurados. Nove testes direcionados aprovados. Publicação pelo workflow normal de main; sem compilação integral local nem consulta automática do deployment.
