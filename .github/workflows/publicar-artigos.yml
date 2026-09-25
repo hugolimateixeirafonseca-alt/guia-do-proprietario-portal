@@ -44,6 +44,9 @@ jobs:
       - name: Validar texto antes de preparar a publicação
         run: npm run validate:copy
 
+      - name: Validar metadados editoriais antes de preparar a publicação
+        run: npm run validate:metadata
+
       - name: Selecionar, preparar imagem e mover 1 artigo
         shell: bash
         run: |
@@ -126,6 +129,7 @@ jobs:
 
           npm run validate:dates
           npm run validate:copy
+          npm run validate:metadata
           npm run validate:images
 
           git config user.name "github-actions[bot]"

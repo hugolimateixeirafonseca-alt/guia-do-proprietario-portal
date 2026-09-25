@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
+import { valorFrontmatter } from "./lib/frontmatter.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
 const artigosDir = path.join(root, "src", "content", "artigos");
@@ -37,7 +38,7 @@ async function titlesFromContent(directory, routeForFile) {
   return Promise.all(files.filter((file) => /\.(md|mdx)$/.test(file)).map(async (file) => {
     const source = await fs.readFile(path.join(directory, file), "utf8");
     if (/^rascunho:\s*true\s*$/mi.test(source)) return null;
-    const title = source.match(/^titulo:\s*["'](.+?)["']\s*$/m)?.[1];
+    const title = valorFrontmatter(source, "titulo");
     if (!title) throw new Error(`Título em falta em ${file}`);
     const route = routeForFile(file, source);
     const pilar = source.match(/^pilar:\s*(\S+)\s*$/m)?.[1];
