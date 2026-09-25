@@ -1,6 +1,13 @@
 const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
-const clean = (value, max = 120) => typeof value === 'string' ? value.trim().replace(/[\r\n]+/g, ' ').slice(0, max) : '';
+const clean = (value, max = 120) => typeof value === 'string' && !/^(?:null|undefined|nan|\{[^{}]+\})$/i.test(value.trim()) ? value.trim().replace(/[\r\n]+/g, ' ').slice(0, max) : '';
 const positive = value => Number.isSafeInteger(value) && value > 0;
+const labels={regular:'Limpeza regular',profunda:'Limpeza profunda','pos-obra':'Limpeza pós-obra',mudanca:'Limpeza de mudança',empresa:'Limpeza de empresa',outra:'Outra limpeza',apartamento:'Apartamento',moradia:'Moradia',escritorio:'Escritório',loja:'Loja','alojamento-local':'Alojamento local',outro:'Outro espaço','t0-t1':'T0 / T1',t2:'T2',t3:'T3','t4-mais':'T4 ou maior',pequeno:'pequeno',medio:'médio',grande:'grande','nao-sei':'por definir','uma-vez':'uma vez',semanal:'semanal',quinzenal:'quinzenal',mensal:'mensal',seg:'segunda-feira',ter:'terça-feira',qua:'quarta-feira',qui:'quinta-feira',sex:'sexta-feira',sab:'sábado',dom:'domingo',flexivel:'dia flexível',manha:'manhã',tarde:'tarde',indiferente:'horário indiferente'};
+function preferences(value,fallback) {
+  let values=value;
+  if(typeof value==='string') {try{values=JSON.parse(value);}catch{values=[value];}}
+  if(!Array.isArray(values))return fallback;
+  return [...new Set(values.map(v=>labels[v]).filter(Boolean))].join(', ')||fallback;
+}
 
 export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
@@ -10,6 +17,27 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
   if (url.protocol !== 'https:' || url.hostname !== host || url.port || url.username || url.password) throw new Error('invalid_dashboard_url');
   let subject, preview, paragraphs, button, action = url.toString();
   switch (payload.event_type) {
+    case 'contact_accepted': {
+      const name=clean(data.client_name),phone=clean(data.client_phone,24).replace(/[\s()-]/g,'');
+      if(!place||!name||!/^\+?[0-9]{9,15}$/.test(phone)||!['partilhada','exclusiva'].includes(data.modality)||!labels[data.cleaning_type]||!labels[data.space_type]||!labels[data.size]||!labels[data.frequency])throw new Error('invalid_event_data');
+      const email=clean(data.client_email,254),postal=clean(data.postal_code,20);
+      const emailLine=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)?`\n✉️ ${email}`:'';
+      const notes=clean(data.notes,5000)||'O cliente não deixou notas.';
+      subject=`Os contactos do cliente de ${place}`;
+      preview='Ligue já: quem fala primeiro costuma ficar com o serviço.';
+      paragraphs=[
+        `Aceitou o pedido de ${place}. Aqui estão os dados do cliente:`,
+        `${name}\n📞 ${phone}${emailLine}\n📍 ${postal?postal+', ':''}${place}`,
+        `O pedido: ${labels[data.cleaning_type]} · ${labels[data.space_type]}, ${labels[data.size]} · ${labels[data.frequency]} · prefere ${preferences(data.days,'dia não indicado')}, ${preferences(data.periods,'horário não indicado')}`,
+        `Notas do cliente: ${notes}`,
+        data.modality==='partilhada'?'Este é um contacto partilhado: outros profissionais podem receber os mesmos dados. Ser o primeiro a ligar faz a diferença.':'Este contacto é exclusivo: só a sua empresa recebeu estes dados através do Guia do Proprietário.',
+        'Como fazer o primeiro contacto:\n1. Ligue hoje, de preferência na próxima hora. Os nossos termos pedem o primeiro contacto nas 24 horas seguintes à aceitação.\n2. Se não atender, envie logo uma mensagem por WhatsApp ou SMS a dizer que vem do pedido feito no Guia do Proprietário.\n3. Envie o orçamento por escrito, de preferência no mesmo dia em que falar com o cliente.',
+        'Depois de falar com o cliente, atualize o estado do pedido na sua área de parceiro. Leva 10 segundos.',
+        'Use estes dados apenas para responder a este pedido.'
+      ];
+      button='Ligar ao cliente';action=`tel:${phone}`;
+      break;
+    }
     case 'shared_contact_acquired': {
       const phone = clean(data.client_phone, 24).replace(/[\s()-]/g, '');
       if (!place || !/^\+?[0-9]{9,15}$/.test(phone)) throw new Error('invalid_event_data');

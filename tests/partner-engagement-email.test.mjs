@@ -6,6 +6,7 @@ import {deliveryFixture} from './partner-email-fixture.mjs';
 
 const base = {event_id:'engagement:first_contact_feedback:partner:assignment',event_type:'first_contact_feedback',partner_email:'partner@example.pt',partner_name:'Limpezas <Norte>',dashboard_url:'https://parceiros.guiadoproprietario.pt/?t=private#mine',data:{municipality:'Porto'}};
 const cases = [
+  ['contact_accepted',{municipality:'Lisboa',client_name:'Ana Teste',client_phone:'+351912345678',client_email:'ana@example.invalid',postal_code:'1000-001',cleaning_type:'regular',space_type:'apartamento',size:'t2',frequency:'semanal',days:'["seg","dom"]',periods:'["manha","tarde"]',notes:'Porta azul',modality:'partilhada'}],
   ['shared_contact_acquired',{municipality:'Porto',client_phone:'+351 912345678'}],
   ['unused_free_contacts',{active_requests:2,free_contacts:4,localities:'Porto, Gaia'}],
   ['first_contact_feedback',{municipality:'Porto'}],
@@ -13,7 +14,7 @@ const cases = [
   ['lead_expiring',{municipality:'Porto',days_remaining:5}],
   ['inactive_buyer',{missed_requests:6}]
 ];
-test('six approved templates use one CTA, plain-text alternative and escaped customer strings', () => {
+test('seven templates use one CTA, plain-text alternative and escaped customer strings', () => {
   for (const [event_type,data] of cases) {
     const message=renderPartnerEngagementEmail({...base,event_type,data});
     assert.equal((message.html.match(/<a /g)||[]).length,1);
@@ -22,8 +23,30 @@ test('six approved templates use one CTA, plain-text alternative and escaped cus
     assert.ok(message.text.includes('Guia do Proprietário'));
     assert.ok(message.subject.length > 10);
   }
-  assert.match(renderPartnerEngagementEmail({...base,event_type:'shared_contact_acquired',data:cases[0][1]}).html,/href="tel:\+351912345678"/);
-  assert.match(renderPartnerEngagementEmail({...base,event_type:'lead_expiring',data:cases[4][1]}).text,/dentro de 5 dias/);
+  assert.match(renderPartnerEngagementEmail({...base,event_type:'shared_contact_acquired',data:cases[1][1]}).html,/href="tel:\+351912345678"/);
+  assert.match(renderPartnerEngagementEmail({...base,event_type:'lead_expiring',data:cases[5][1]}).text,/dentro de 5 dias/);
+});
+
+test('confirmation fills exact client details, both modes, multiple days and safe optional fields',()=>{
+ for(const modality of ['partilhada','exclusiva']){
+  const data={...cases[0][1],modality};const message=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data});
+  for(const value of ['Ana Teste','ana@example.invalid','1000-001','Lisboa','Limpeza regular','Apartamento, T2','semanal','segunda-feira, domingo','manhã, tarde','Porta azul'])assert.ok(message.text.includes(value),value);
+  assert.match(message.html,/href="tel:\+351912345678"/);
+  assert.ok(message.text.includes(modality==='partilhada'?'outros profissionais':'só a sua empresa'));
+  const missing=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data:{...data,client_email:null,postal_code:undefined,notes:'{notas}',days:null,periods:'null'}});
+  assert.doesNotMatch(missing.text,/undefined|null|NaN|\{\w+\}/);
+  assert.match(missing.text,/O cliente não deixou notas/);
+  assert.match(missing.text,/dia não indicado, horário não indicado/);
+ }
+});
+
+test('invalid counts and required placeholders fail closed instead of leaking into emails',()=>{
+ for(const value of [null,undefined,NaN,Infinity,-1,0,1.5,'2','{numero}']){
+  assert.throws(()=>renderPartnerEngagementEmail({...base,event_type:'unused_free_contacts',data:{active_requests:value,free_contacts:4,localities:'Lisboa'}}));
+  assert.throws(()=>renderPartnerEngagementEmail({...base,event_type:'unused_free_contacts',data:{active_requests:2,free_contacts:value,localities:'Lisboa'}}));
+ }
+ for(const value of [null,undefined,'null','undefined','{localidade}'])assert.throws(()=>renderPartnerEngagementEmail({...base,data:{municipality:value}}));
+ for(const field of ['client_name','client_phone','cleaning_type','space_type','size','frequency'])assert.throws(()=>renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data:{...cases[0][1],[field]:null}}));
 });
 test('rejects unsupported events, false scarcity, zero counts and unsafe links',()=>{
   for(const patch of [
