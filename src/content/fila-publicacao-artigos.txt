@@ -1,7 +1,6 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # Um artigo por execução. Adicionar novos pendentes a esta fila.
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
-fendas-nas-paredes.mdx
 procurar-fuga-de-agua.mdx
 manutencao-lareira-recuperador.mdx
 pouca-pressao-de-agua.mdx
