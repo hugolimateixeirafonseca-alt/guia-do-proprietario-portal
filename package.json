@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "npm run images:convert && npm run validate:data && npm run validate:dates && npm run validate:copy && npm run validate:images && npm run generate:og && npm run images:noticias && astro check && astro build && npm run validate:termo",
+    "build": "npm run images:convert && npm run validate:data && npm run validate:dates && npm run validate:copy && npm run validate:metadata && npm run validate:images && npm run generate:og && npm run images:noticias && astro check && astro build && npm run validate:termo",
     "preview": "astro preview",
     "images:convert": "node scripts/converter-imagens.mjs",
     "images:noticias": "node scripts/processar-imagens-noticias.mjs",
@@ -22,6 +22,7 @@
     "content:prepare-publish": "node scripts/preparar-publicacao-artigos.mjs",
     "validate:dates": "node scripts/preencher-chegada-artigos.mjs",
     "validate:images": "node scripts/validar-imagens-artigos.mjs",
+    "validate:metadata": "node scripts/validar-metadados-editoriais.mjs",
     "test": "npm run test:subscribe && npm run test:kit-estudante && npm run test:partner-notifications && npm run test:verificacao",
     "test:subscribe": "node --test tests/subscribe.test.mjs",
     "test:kit-estudante": "node --test tests/kit-estudante.test.mjs",
