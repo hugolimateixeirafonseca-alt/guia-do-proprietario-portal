@@ -37,6 +37,20 @@ test('rejects unsupported events, false scarcity, zero counts and unsafe links',
 const secret='internal-test-secret';
 const request=(payload=base,authorization=`Bearer ${secret}`)=>new Request('https://guiadoproprietario.pt/api/make/partner-engagement-notification',{method:'POST',headers:{Authorization:authorization,'Content-Type':'application/json'},body:JSON.stringify(payload)});
 const env=db=>({PARTNER_ENGAGEMENT_ENABLED:'true',MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,SENDER_API_TOKEN:'test-only',CLEANING_DASHBOARD_API_TOKEN:'test-only',EMAIL_DELIVERY_DB:db});
+
+test('Preview refuses any other recipient before policy, storage or Sender',async()=>{
+ const original=globalThis.fetch;let calls=0;
+ globalThis.fetch=()=>{calls++;throw new Error('unexpected request');};
+ try{
+  const config={...env(),APP_ENV:'preview',PARTNER_ENGAGEMENT_TEST_MODE:'true',PARTNER_ENGAGEMENT_TEST_EMAIL:'only@example.pt',CLEANING_DASHBOARD_API_URL:'https://engagement-test.guia-do-proprietario-parceiros.pages.dev'};
+  assert.equal((await onRequestPost({request:request(),env:config})).status,403);
+  assert.equal((await onRequestPost({request:request(),env:{...config,APP_ENV:'production'}})).status,403);
+  assert.equal(calls,0);
+  const previewPayload={...base,dashboard_url:config.CLEANING_DASHBOARD_API_URL+'/?t=test'};
+  assert.throws(()=>renderPartnerEngagementEmail(previewPayload));
+  assert.ok(renderPartnerEngagementEmail(previewPayload,{preview:true}));
+ }finally{globalThis.fetch=original;}
+});
 test('disabled flag and invalid auth never contact any service',async()=>{
   const original=globalThis.fetch; globalThis.fetch=()=>{throw new Error('unexpected request');};
   try {

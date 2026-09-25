@@ -2,11 +2,12 @@ const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({'&'
 const clean = (value, max = 120) => typeof value === 'string' ? value.trim().replace(/[\r\n]+/g, ' ').slice(0, max) : '';
 const positive = value => Number.isSafeInteger(value) && value > 0;
 
-export function renderPartnerEngagementEmail(payload) {
+export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
   const place = clean(data.municipality);
   const url = new URL(payload.dashboard_url);
-  if (url.protocol !== 'https:' || url.hostname !== 'parceiros.guiadoproprietario.pt' || url.port || url.username || url.password) throw new Error('invalid_dashboard_url');
+  const host = options.preview === true ? 'engagement-test.guia-do-proprietario-parceiros.pages.dev' : 'parceiros.guiadoproprietario.pt';
+  if (url.protocol !== 'https:' || url.hostname !== host || url.port || url.username || url.password) throw new Error('invalid_dashboard_url');
   let subject, preview, paragraphs, button, action = url.toString();
   switch (payload.event_type) {
     case 'shared_contact_acquired': {

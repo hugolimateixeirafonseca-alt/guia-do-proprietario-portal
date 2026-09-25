@@ -21,9 +21,12 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
   try { payload = await request.json(); } catch { return json({error:'invalid_json'}, 400); }
   if (!payload || typeof payload !== 'object' || typeof payload.event_id !== 'string' || !/^engagement:[a-z0-9:_-]{8,180}$/i.test(payload.event_id)) return json({error:'invalid_event_id'}, 400);
   const email = typeof payload.partner_email === 'string' ? payload.partner_email.trim().toLowerCase() : '';
+  const preview = env.APP_ENV === 'preview';
+  if (preview && (env.PARTNER_ENGAGEMENT_TEST_MODE !== 'true' || !env.PARTNER_ENGAGEMENT_TEST_EMAIL || email !== env.PARTNER_ENGAGEMENT_TEST_EMAIL.trim().toLowerCase() || env.CLEANING_DASHBOARD_API_URL !== 'https://engagement-test.guia-do-proprietario-parceiros.pages.dev')) return json({error:'test_recipient_blocked'},403);
+  if (!preview && env.PARTNER_ENGAGEMENT_TEST_MODE === 'true') return json({error:'test_environment_blocked'},403);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || typeof payload.partner_name !== 'string' || !payload.partner_name.trim() || payload.partner_name.length > 120) return json({error:'invalid_recipient'}, 400);
   let message;
-  try { message = renderPartnerEngagementEmail(payload); } catch { return json({error:'invalid_engagement_payload'}, 400); }
+  try { message = renderPartnerEngagementEmail(payload,{preview}); } catch { return json({error:'invalid_engagement_payload'}, 400); }
   try {
     if (!await checkPartnerEmailPolicy(env, email, payload.event_id)) return json({ok:true, suppressed:true, event_id:payload.event_id});
     const policyUrl = new URL('/api/partner-engagement-policy', env.CLEANING_DASHBOARD_API_URL || 'https://guia-do-proprietario-parceiros.pages.dev');
@@ -34,14 +37,14 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
     if (!result.allowed) return json({ok:true, suppressed:true, event_id:payload.event_id});
     // Use freshly checked values, not an old snapshot waiting inside Make.
     if(result.event_type!==payload.event_type || !result.data || !result.partner_name)return json({error:'engagement_policy_unavailable'},503);
-    message=renderPartnerEngagementEmail({...payload,data:result.data,partner_name:result.partner_name});
+    message=renderPartnerEngagementEmail({...payload,data:result.data,partner_name:result.partner_name},{preview});
   } catch { return json({error:'engagement_policy_unavailable'}, 503); }
   return deliverOnce(env.EMAIL_DELIVERY_DB, payload.event_id, email, async (markSending: () => Promise<void>) => {
     await reserveSenderRequest(env.EMAIL_DELIVERY_DB);
     await markSending();
     const response = await fetch('https://api.sender.net/v2/message/send', {
       method:'POST', signal:AbortSignal.timeout(12000), headers:{Authorization:`Bearer ${env.SENDER_API_TOKEN}`, Accept:'application/json','Content-Type':'application/json'},
-      body:JSON.stringify({from:{email:'geral@guiadoproprietario.pt',name:'Guia do Proprietário'}, to:{email,name:payload.partner_name}, ...message, headers:{'X-GP-Event-ID':payload.event_id,charset:'utf-8'}})
+      body:JSON.stringify({from:{email:'geral@guiadoproprietario.pt',name:'Guia do Proprietário'}, to:{email,name:payload.partner_name}, ...message, ...(preview ? {subject:`[TESTE] ${message.subject}`} : {}), headers:{'X-GP-Event-ID':payload.event_id,charset:'utf-8'}})
     });
     if (!response.ok) {
       await recordSenderRateLimit(env.EMAIL_DELIVERY_DB, response, 'email');
