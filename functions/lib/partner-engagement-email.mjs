@@ -35,7 +35,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
         'Depois de falar com o cliente, atualize o estado do pedido na sua área de parceiro. Leva 10 segundos.',
         'Use estes dados apenas para responder a este pedido.'
       ];
-      button='Ligar ao cliente';action=`tel:${phone}`;
+      button='Abrir a minha área de parceiro';
       break;
     }
     case 'shared_contact_acquired': {
@@ -49,7 +49,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
         'Se ainda não ligou, este é o momento.',
         'Dica: se o cliente não atender, envie logo uma mensagem por WhatsApp a dizer que vem do pedido feito no Guia do Proprietário. Assim reconhece quem está a ligar e é mais provável que responda.'
       ];
-      button = 'Ligar ao cliente agora'; action = `tel:${phone}`;
+      button = 'Abrir a minha área de parceiro';
       break;
     }
     case 'unused_free_contacts': {

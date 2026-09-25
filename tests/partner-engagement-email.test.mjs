@@ -18,12 +18,14 @@ test('seven templates use one CTA, plain-text alternative and escaped customer s
   for (const [event_type,data] of cases) {
     const message=renderPartnerEngagementEmail({...base,event_type,data});
     assert.equal((message.html.match(/<a /g)||[]).length,1);
+    assert.ok(message.html.includes(`href="${base.dashboard_url}"`));
+    assert.doesNotMatch(message.html,/href="tel:/);
     assert.match(message.html,/Limpezas &lt;Norte&gt;/);
     assert.doesNotMatch(message.html,/<img|<script|<table/);
     assert.ok(message.text.includes('Guia do Proprietário'));
     assert.ok(message.subject.length > 10);
   }
-  assert.match(renderPartnerEngagementEmail({...base,event_type:'shared_contact_acquired',data:cases[1][1]}).html,/href="tel:\+351912345678"/);
+  assert.ok(renderPartnerEngagementEmail({...base,event_type:'shared_contact_acquired',data:cases[1][1]}).text.includes('Abrir a minha área de parceiro: '+base.dashboard_url));
   assert.match(renderPartnerEngagementEmail({...base,event_type:'lead_expiring',data:cases[5][1]}).text,/dentro de 5 dias/);
 });
 
@@ -31,7 +33,7 @@ test('confirmation fills exact client details, both modes, multiple days and saf
  for(const modality of ['partilhada','exclusiva']){
   const data={...cases[0][1],modality};const message=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data});
   for(const value of ['Ana Teste','ana@example.invalid','1000-001','Lisboa','Limpeza regular','Apartamento, T2','semanal','segunda-feira, domingo','manhã, tarde','Porta azul'])assert.ok(message.text.includes(value),value);
-  assert.match(message.html,/href="tel:\+351912345678"/);
+  assert.ok(message.text.includes('Abrir a minha área de parceiro: '+base.dashboard_url));
   assert.ok(message.text.includes(modality==='partilhada'?'outros profissionais':'só a sua empresa'));
   const missing=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data:{...data,client_email:null,postal_code:undefined,notes:'{notas}',days:null,periods:'null'}});
   assert.doesNotMatch(missing.text,/undefined|null|NaN|\{\w+\}/);
