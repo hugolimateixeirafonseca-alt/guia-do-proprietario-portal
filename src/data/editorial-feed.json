@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-25T14:10:54.000Z",
+  "generatedAt": "2026-09-25T14:47:39.996Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 132,
-    "published": 113,
+    "published": 115,
     "newsOnline": 21
   },
   "articles": [
@@ -1680,14 +1680,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "fendas-nas-paredes.mdx",
       "arrivedAt": "2026-09-18T10:48:43+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-25T07:01:36Z",
+      "url": "https://guiadoproprietario.pt/casa/fendas-nas-paredes/"
     },
     {
       "id": "EXTRA-015",
@@ -1712,14 +1712,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "calendario-manutencao-casa.mdx",
       "arrivedAt": "2026-09-18T10:48:43+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-24T07:02:06Z",
+      "url": "https://guiadoproprietario.pt/casa/calendario-manutencao-casa/"
     },
     {
       "id": "EXTRA-011",
