@@ -32,12 +32,12 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
     const policyUrl = new URL('/api/partner-engagement-policy', env.CLEANING_DASHBOARD_API_URL || 'https://guia-do-proprietario-parceiros.pages.dev');
     const policy = await fetch(policyUrl, {method:'POST', headers:{Authorization:`Bearer ${env.CLEANING_DASHBOARD_API_TOKEN}`,'Content-Type':'application/json'}, body:JSON.stringify({event_id:payload.event_id, email}), signal:AbortSignal.timeout(8000)});
     if (!policy.ok) return json({error:'engagement_policy_unavailable'}, 503);
-    const result = await policy.json() as {ok?:boolean, allowed?:boolean, data?:unknown, event_type?:string, partner_name?:string};
+    const result = await policy.json() as {ok?:boolean, allowed?:boolean, data?:unknown, event_type?:string, partner_name?:string,dashboard_url?:string};
     if (result.ok !== true || typeof result.allowed !== 'boolean') return json({error:'engagement_policy_unavailable'}, 503);
     if (!result.allowed) return json({ok:true, suppressed:true, event_id:payload.event_id});
     // Use freshly checked values, not an old snapshot waiting inside Make.
     if(result.event_type!==payload.event_type || !result.data || !result.partner_name)return json({error:'engagement_policy_unavailable'},503);
-    message=renderPartnerEngagementEmail({...payload,data:result.data,partner_name:result.partner_name},{preview});
+    message=renderPartnerEngagementEmail({...payload,data:result.data,partner_name:result.partner_name,dashboard_url:result.dashboard_url||payload.dashboard_url},{preview});
   } catch { return json({error:'engagement_policy_unavailable'}, 503); }
   return deliverOnce(env.EMAIL_DELIVERY_DB, payload.event_id, email, async (markSending: () => Promise<void>) => {
     await reserveSenderRequest(env.EMAIL_DELIVERY_DB);

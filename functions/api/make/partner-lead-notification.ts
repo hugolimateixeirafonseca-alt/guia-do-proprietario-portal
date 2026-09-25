@@ -1,4 +1,4 @@
-import {checkPartnerEmailPolicy} from '../../lib/partner-email-policy.mjs';
+import {resolvePartnerEmailPolicy} from '../../lib/partner-email-policy.mjs';
 import {reserveSenderRequest,recordSenderRateLimit} from '../../lib/sender-api-control.mjs';
 import {processSenderSync} from '../../lib/cleaning-sender-sync.mjs';
 import {deliverOnce,providerRetryAfter} from "../../lib/partner-email-delivery.mjs";
@@ -63,7 +63,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   const eventId = clean(body.event_id, 100);
   const partnerName = clean(body.partner_name, 120);
   const partnerEmail = clean(body.partner_email, 254).toLowerCase();
-  const dashboardUrl = clean(body.dashboard_url, 1200);
+  let dashboardUrl = clean(body.dashboard_url, 1200);
   const title = clean(body.lead_title, 120);
   const municipality = clean(body.municipality, 120);
   const summary = clean(body.lead_summary, 800);
@@ -81,6 +81,18 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     return json({ error: "invalid_dashboard_url" }, 400);
   }
 
+  const adminEvent=/^application-admin:[a-f0-9-]{36}$/.test(eventId);
+  if(!adminEvent){
+    try{
+      const policy=await resolvePartnerEmailPolicy(env,partnerEmail,eventId,true);
+      if(!policy.allowed)return json({ok:true,suppressed:true,event_id:eventId});
+      if(policy.dashboard_url){
+        const fresh=new URL(policy.dashboard_url);
+        if(fresh.protocol!=='https:'||fresh.hostname!=='parceiros.guiadoproprietario.pt'||fresh.port||fresh.username||fresh.password)throw new Error('invalid_current_access');
+        dashboardUrl=fresh.toString();
+      }
+    }catch{return json({error:'partner_email_policy_unavailable'},503);}
+  }
   const safeName = escapeHtml(partnerName);
   const safeTitle = escapeHtml(title || "Novo pedido de limpeza");
   const safeMunicipality = escapeHtml(municipality || "Zona do seu perfil");
@@ -110,11 +122,6 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     text = 'Olá, '+partnerName+'.\n\n'+message+'\n\nSe precisar de ajuda, responda a este email.';
   }
 
-  if (!adminApplication) {
-    try {
-      if (!await checkPartnerEmailPolicy(env,partnerEmail,eventId)) return json({ok:true,suppressed:true,event_id:eventId});
-    } catch { return json({error:'partner_email_policy_unavailable'},503); }
-  }
 
   // Group membership has its own durable queue. Never gate the application email on it.
   if (application && env.CLEANING_DASHBOARD_API_TOKEN) {

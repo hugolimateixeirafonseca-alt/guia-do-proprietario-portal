@@ -24,6 +24,19 @@ const payload = {
   expires_at: "2 de setembro, 18:00"
 };
 
+test('queued email replaces the old access link with the current link before sending',async()=>{
+ const original=globalThis.fetch;let sent;
+ const fresh='https://parceiros.guiadoproprietario.pt/?t=new-access-after-admin-reset-12345678';
+ globalThis.fetch=async(url,init)=>{
+  if(String(url).endsWith('/api/partner-email-policy')){assert.equal(JSON.parse(init.body).refresh_link,true);return Response.json({ok:true,allowed:true,dashboard_url:fresh});}
+  sent=JSON.parse(init.body);return Response.json({ok:true});
+ };
+ const f=deliveryFixture();try{
+  assert.equal((await onRequestPost({request:request(payload),env:{EMAIL_DELIVERY_DB:f.binding,MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,CLEANING_DASHBOARD_API_TOKEN:'internal',SENDER_API_TOKEN:'test'}})).status,200);
+  assert.ok(sent.html.includes(fresh));assert.ok(sent.text.includes(fresh));assert.ok(!sent.text.includes(payload.dashboard_url));
+ }finally{globalThis.fetch=original;f.db.close();}
+});
+
 test("recusa chamadas sem o segredo do Make", async () => {
   const response = await onRequestPost({
     request: request(payload, "Bearer errado"),

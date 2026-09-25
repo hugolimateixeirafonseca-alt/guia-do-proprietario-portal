@@ -104,7 +104,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
       paragraphs = [
         `Na última semana, ${data.missed_requests} pedidos compatíveis com as suas zonas foram aceites por outros profissionais ou deixaram de estar disponíveis.`,
         'Há novos pedidos a entrar. Veja os que estão disponíveis agora, antes que outra pessoa chegue primeiro.',
-        'Os pedidos que recebe não lhe servem? Ajuste as zonas, os tipos de limpeza ou os dias na sua área de parceiro, e passamos a mostrar-lhe só o que faz sentido. Se estiver sem disponibilidade, pode pausar a receção de pedidos em vez de os deixar passar.'
+        'Os pedidos que recebe não lhe servem? Ajuste as zonas, os tipos de limpeza e de espaço na sua área de parceiro. Os dias e horários ajudam a dar prioridade aos pedidos que encaixam na sua disponibilidade. Se estiver sem disponibilidade, pode pausar a receção de pedidos.'
       ];
       button = 'Ver pedidos disponíveis';
       break;

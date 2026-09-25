@@ -102,7 +102,7 @@ test('rechecks preferences and event eligibility, suppresses stale events and fa
 test('duplicate event delivers once to its intended recipient; 502 is held for review',async()=>{
   const original=globalThis.fetch;const fixture=deliveryFixture();let sent=[],status=200;
   globalThis.fetch=async(url,init)=>{
-    if(String(url).includes('/api/partner-'))return new Response(JSON.stringify({ok:true,allowed:true,event_type:base.event_type,partner_name:base.partner_name,data:base.data}));
+    if(String(url).includes('/api/partner-'))return new Response(JSON.stringify({ok:true,allowed:true,event_type:base.event_type,partner_name:base.partner_name,data:base.data,dashboard_url:'https://parceiros.guiadoproprietario.pt/?t=current-access-reset-1234567890123456789'}));
     sent.push(JSON.parse(init.body));return new Response('{}',{status});
   };
   try {
@@ -111,6 +111,8 @@ test('duplicate event delivers once to its intended recipient; 502 is held for r
     assert.equal((await onRequestPost({request:request(),env:config})).status,200);
     assert.equal(sent.length,1);assert.equal(sent[0].to.email,base.partner_email);
     assert.match(sent[0].text,/Como|Já conseguiu/);
+    assert.ok(sent[0].text.includes('current-access-reset-1234567890123456789'));
+    assert.ok(!sent[0].text.includes(base.dashboard_url));
     fixture.db.exec("DELETE FROM provider_cooldown WHERE provider='sender_request_gate'");status=502;
     const next={...base,event_id:'engagement:first_contact_feedback:partner:other'};
     assert.equal((await (await onRequestPost({request:request(next),env:config})).json()).state,'uncertain');
