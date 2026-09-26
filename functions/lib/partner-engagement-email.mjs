@@ -17,13 +17,27 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
   if (url.protocol !== 'https:' || url.hostname !== host || url.port || url.username || url.password) throw new Error('invalid_dashboard_url');
   let subject, preview, paragraphs, button, action = url.toString();
   switch (payload.event_type) {
+    case 'request_digest': {
+      if (!positive(data.active_requests) || !Array.isArray(data.requests) || !data.requests.length || data.requests.length>3 || data.requests.length>data.active_requests || data.requests.some(item=>!clean(item.municipality)||!clean(item.title))) throw new Error('invalid_event_data');
+      subject=data.active_requests===1?'Tem um novo pedido de limpeza na sua zona':data.active_requests+' novos pedidos de limpeza nas suas zonas';
+      preview='Veja os pedidos disponíveis e escolha os que quer aceitar.';
+      paragraphs=[
+        data.active_requests===1?'Há um novo pedido compatível com o seu perfil, ainda disponível.':'Há '+data.active_requests+' novos pedidos compatíveis com o seu perfil, ainda disponíveis.',
+        ...data.requests.map(item=>clean(item.municipality)+' · '+clean(item.title)),
+        ...(data.active_requests>data.requests.length?['Estes são três dos novos pedidos. Consulte todos na sua área de parceiro.']:[]),
+        'Os pedidos podem ser aceites por outros profissionais. Veja a disponibilidade atual antes de escolher.',
+        'Pode escolher um ou dois resumos por dia, ou desligar estes avisos, em O meu perfil. As confirmações dos contactos que aceitar continuam imediatas.'
+      ];
+      button='Ver todos os pedidos disponíveis';
+      break;
+    }
     case 'approved_no_login': {
       if(!Number.isSafeInteger(data.active_requests)||data.active_requests<0||data.free_contacts!==4||(data.active_requests>0&&!clean(data.localities,500)))throw new Error('invalid_event_data');
       subject=data.active_requests>0?`Tem pedidos à sua espera em ${clean(data.localities,500)}`:'A sua área de parceiro já está pronta';
       preview='O seu acesso está ativo, e os primeiros 4 contactos são gratuitos.';
       paragraphs=[
         'A sua conta de parceiro no Guia do Proprietário está ativa, mas ainda não entrou.',
-        data.active_requests>0?`Neste momento há ${data.active_requests} ${data.active_requests===1?'pedido nas suas zonas à espera':'pedidos nas suas zonas à espera'} de um profissional de limpeza.`:'Assim que entrar um pedido nas suas zonas, recebe um aviso por email.',
+        data.active_requests>0?`Neste momento há ${data.active_requests} ${data.active_requests===1?'pedido nas suas zonas à espera':'pedidos nas suas zonas à espera'} de um profissional de limpeza.`:'Os novos pedidos aparecem logo na sua área. Recebe os resumos por email na frequência escolhida no perfil.',
         'Os seus 4 primeiros contactos são gratuitos. Funciona assim:\n1. Vê o pedido completo: tipo de limpeza, casa, frequência e dias.\n2. Aceita só os que lhe interessam.\n3. Recebe o contacto e fala diretamente com o cliente.',
         'Se teve alguma dificuldade a entrar, responda a este email e ajudamos.'
       ];

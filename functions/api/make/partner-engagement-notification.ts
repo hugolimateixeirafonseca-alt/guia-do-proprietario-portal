@@ -53,3 +53,9 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
     return {state:'sent'};
   });
 }
+
+// Version handshake: a new digest is queued only after this renderer is deployed.
+export async function onRequestGet({request,env}: {request: Request,env: Record<string,any>}) {
+ if (!env.MAKE_PARTNER_NOTIFICATIONS_SECRET || !secureEqual(request.headers.get('Authorization') || '', 'Bearer '+env.MAKE_PARTNER_NOTIFICATIONS_SECRET)) return new Response('Not Found',{status:404});
+ return json({request_digest:1});
+}

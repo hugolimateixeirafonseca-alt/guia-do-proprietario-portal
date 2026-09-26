@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {renderPartnerEngagementEmail as render} from '../functions/lib/partner-engagement-email.mjs';
+const base={event_type:'request_digest',partner_name:'Parceiro teste',dashboard_url:'https://parceiros.guiadoproprietario.pt/?t=test#pedidos',data:{active_requests:5,requests:[{municipality:'Lisboa',title:'Limpeza regular'},{municipality:'Porto',title:'Limpeza profunda'},{municipality:'Loures',title:'Limpeza pós-obra'}]}};
+test('digest shows three requests, total, preferences and one private dashboard CTA',()=>{const m=render(base);assert.match(m.subject,/5 novos pedidos/);for(const item of base.data.requests)assert.ok(m.text.includes(item.municipality+' · '+item.title));assert.match(m.text,/Ver todos os pedidos disponíveis/);assert.equal((m.html.match(/<a /g)||[]).length,1);assert.match(m.text,/O meu perfil/);assert.doesNotMatch(m.text,/undefined|null|NaN/);});
+test('digest handles singular and escapes locations without exposing client data',()=>{const m=render({...base,data:{active_requests:1,requests:[{municipality:'<Lisboa>',title:'Limpeza regular'}]}});assert.match(m.subject,/um novo pedido/);assert.match(m.html,/&lt;Lisboa&gt;/);assert.doesNotMatch(m.html,/<Lisboa>/);});
+test('digest rejects empty, inconsistent or oversized batches',()=>{for(const data of [{active_requests:0,requests:[]},{active_requests:1,requests:base.data.requests},{active_requests:5,requests:[...base.data.requests,base.data.requests[0]]},{active_requests:1,requests:[{municipality:'Lisboa'}]}])assert.throws(()=>render({...base,data}));});
+
+import {onRequestGet} from '../functions/api/make/partner-engagement-notification.ts';
+test('rollout handshake is authenticated and never sends a message',async()=>{const env={MAKE_PARTNER_NOTIFICATIONS_SECRET:'test'};assert.equal((await onRequestGet({env,request:new Request('https://test')})).status,404);const response=await onRequestGet({env,request:new Request('https://test',{headers:{Authorization:'Bearer test'}})});assert.deepEqual(await response.json(),{request_digest:1});});
