@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-26T07:02:55.069Z",
+  "generatedAt": "2026-09-26T07:05:38.547Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 132,
-    "published": 115,
+    "published": 116,
     "newsOnline": 21
   },
   "articles": [
@@ -1664,14 +1664,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "procurar-fuga-de-agua.mdx",
       "arrivedAt": "2026-09-18T10:48:43+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-26T07:01:29Z",
+      "url": "https://guiadoproprietario.pt/casa/procurar-fuga-de-agua/"
     },
     {
       "id": "EXTRA-013",
