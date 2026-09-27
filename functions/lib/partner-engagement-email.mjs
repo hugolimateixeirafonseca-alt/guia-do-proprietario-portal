@@ -46,6 +46,16 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
       break;
     }
     case 'contact_accepted': {
+      if(data.kind==='client_stop'){
+        if(!place || data.free_contacts!==1 || !['partilhada','exclusiva'].includes(data.modality))throw new Error('invalid_event_data');
+        subject=`O cliente de ${place} pediu para não receber mais contactos`;
+        preview='Atribuímos-lhe 1 contacto gratuito para outro pedido.';
+        paragraphs=[`O cliente do pedido de ${place} confirmou que não pretende receber mais contactos. Não volte a contactá-lo sobre este pedido.`,
+          `Atribuímos-lhe 1 contacto gratuito ${data.modality==='exclusiva'?'exclusivo':'sem exclusividade'}, da mesma modalidade do contacto adquirido. Já está disponível na sua conta para usar noutro pedido.`,
+          'O pedido foi retirado da venda. Esta indicação não cancela um serviço que já tenha combinado com o cliente.'];
+        button='Ver a minha área de parceiro';
+        break;
+      }
       const name=clean(data.client_name),phone=clean(data.client_phone,24).replace(/[\s()-]/g,'');
       if(!place||!name||!/^\+?[0-9]{9,15}$/.test(phone)||!['partilhada','exclusiva'].includes(data.modality)||!labels[data.cleaning_type]||!labels[data.space_type]||!labels[data.size]||!labels[data.frequency])throw new Error('invalid_event_data');
       const email=clean(data.client_email,254),postal=clean(data.postal_code,20);
