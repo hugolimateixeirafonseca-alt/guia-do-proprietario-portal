@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-27T07:03:12.821Z",
+  "generatedAt": "2026-09-27T07:05:59.924Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 132,
-    "published": 116,
+    "published": 117,
     "newsOnline": 21
   },
   "articles": [
@@ -1696,14 +1696,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "manutencao-lareira-recuperador.mdx",
       "arrivedAt": "2026-09-18T10:48:43+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-27T07:01:31Z",
+      "url": "https://guiadoproprietario.pt/casa/manutencao-lareira-recuperador/"
     },
     {
       "id": "EXTRA-012",
