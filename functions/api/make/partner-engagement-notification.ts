@@ -29,7 +29,7 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
   let message;
   try { message = renderPartnerEngagementEmail(payload,{preview}); } catch { return json({error:'invalid_engagement_payload'}, 400); }
   try {
-    if (!payload.event_id.startsWith('engagement:client_contact_accepted:') && !await checkPartnerEmailPolicy(env, email, payload.event_id)) return json({ok:true, suppressed:true, event_id:payload.event_id});
+    if (!/^engagement:client_(?:contact_accepted|interest):/.test(payload.event_id) && !await checkPartnerEmailPolicy(env, email, payload.event_id)) return json({ok:true, suppressed:true, event_id:payload.event_id});
     const policyUrl = new URL('/api/partner-engagement-policy', env.CLEANING_DASHBOARD_API_URL || 'https://guia-do-proprietario-parceiros.pages.dev');
     const policy = await fetch(policyUrl, {method:'POST', headers:{Authorization:`Bearer ${env.CLEANING_DASHBOARD_API_TOKEN}`,'Content-Type':'application/json'}, body:JSON.stringify({event_id:payload.event_id, email}), signal:AbortSignal.timeout(8000)});
     if (!policy.ok) return json({error:'engagement_policy_unavailable'}, 503);
@@ -43,7 +43,7 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
   } catch { return json({error:'engagement_policy_unavailable'}, 503); }
   return deliverOnce(env.EMAIL_DELIVERY_DB, payload.event_id, email, async (markSending: () => Promise<void>) => {
     await reserveSenderRequest(env.EMAIL_DELIVERY_DB);
-    if(!payload.event_id.startsWith('engagement:client_contact_accepted:'))await archivePartnerEmail(env,payload.event_id,email,{...message,...(preview?{subject:`[TESTE] ${message.subject}`}:{})});
+    if(!/^engagement:client_(?:contact_accepted|interest):/.test(payload.event_id))await archivePartnerEmail(env,payload.event_id,email,{...message,...(preview?{subject:`[TESTE] ${message.subject}`}:{})});
     await markSending();
     const response = await fetch('https://api.sender.net/v2/message/send', {
       method:'POST', signal:AbortSignal.timeout(12000), headers:{Authorization:`Bearer ${env.SENDER_API_TOKEN}`, Accept:'application/json','Content-Type':'application/json'},
@@ -60,5 +60,5 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
 // Version handshake: a new digest is queued only after this renderer is deployed.
 export async function onRequestGet({request,env}: {request: Request,env: Record<string,any>}) {
  if (!env.MAKE_PARTNER_NOTIFICATIONS_SECRET || !secureEqual(request.headers.get('Authorization') || '', 'Bearer '+env.MAKE_PARTNER_NOTIFICATIONS_SECRET)) return new Response('Not Found',{status:404});
- return json({request_digest:1,client_contact_notice:1,client_stop_notice:1});
+ return json({request_digest:1,client_contact_notice:1,client_stop_notice:1,client_interest:1});
 }

@@ -11,6 +11,7 @@ function preferences(value,fallback) {
 
 export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
+  if(payload.event_type==='client_interest')return renderClientInterestEmail(data,options);
   if(payload.event_type==='contact_accepted' && data.audience==='client')return renderClientContactEmail(data,options);
   const place = clean(data.municipality);
   const url = new URL(payload.dashboard_url);
@@ -166,4 +167,19 @@ export function renderClientContactEmail(data,options={}){
  const paragraphs=[`Olá ${name},`,`Boas notícias: o seu pedido de limpeza em ${place} foi aceite por um profissional da sua zona.`,`${professional}\n📞 ${phone}`,'Pedimos ao profissional que o contacte nas próximas 24 horas. Se preferir, pode também ligar diretamente.',data.modality==='partilhada'?'O seu pedido pode ser aceite por até 3 profissionais.':'Este profissional é o único a receber o seu contacto através do Guia do Proprietário.','Antes de marcar o serviço:\nPeça o orçamento por escrito.\nConfirme o que está incluído e o preço final.','O serviço é combinado diretamente entre si e o profissional. O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.','Já resolveu a limpeza ou prefere não ser contactado? Pode confirmar na ligação abaixo.'];
  const button='Não quero receber mais contactos';
  return {subject,text:[...paragraphs,button+': '+stop.toString(),'Obrigado,\nGuia do Proprietário'].join('\n\n'),html:`<!doctype html><html lang="pt-PT"><body style="font-family:Arial,sans-serif;color:#202923;line-height:1.65"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preview)}</div><main style="max-width:600px;margin:auto;padding:24px 16px">${paragraphs.map(p=>'<p>'+escapeHtml(p).replaceAll('\n','<br>')+'</p>').join('')}<p><a href="${escapeHtml(stop.toString())}" style="display:inline-block;background:#315d4d;color:white;padding:12px 18px;border-radius:5px">${button}</a></p><p>Obrigado,<br>Guia do Proprietário</p></main></body></html>`};
+}
+
+export function renderClientInterestEmail(data,options={}){
+ const name=clean(data.client_name),place=clean(data.municipality);
+ if(!name||!place||![5,15].includes(data.stage))throw Error('invalid_interest_data');
+ const host=options.preview?'engagement-test.guia-do-proprietario-parceiros.pages.dev':'parceiros.guiadoproprietario.pt';
+ for(const [value,path] of [[data.interest_url,'/pedido-interesse.html'],[data.stop_url,'/pedido-contactos.html']]){
+  const url=new URL(value);if(url.protocol!=='https:'||url.hostname!==host||url.port||url.username||url.password||url.pathname!==path||!url.hash)throw Error('invalid_interest_url');
+ }
+ const subject=`Ainda procura um profissional de limpeza em ${place}?`;
+ const preview='Diga-nos se ainda pretende ser contactado sobre o seu pedido.';
+ const paragraphs=[`Olá ${name},`,`Ainda nenhum profissional da nossa rede aceitou o seu pedido de limpeza em ${place}.`,data.stage===15?'O prazo do seu pedido terminou. Se ainda precisa da limpeza, confirme abaixo para o voltar a disponibilizar por mais 15 dias. Tem 7 dias para confirmar.':'O pedido continua disponível e ainda pode ser aceite. Para o mantermos atualizado, diga-nos: ainda pretende ser contactado?'];
+ const text=[...paragraphs,`Sim, ainda preciso da limpeza: ${data.interest_url}`,`Já não preciso de ser contactado: ${data.stop_url}`,'Se já resolveu a limpeza, pode fechar o pedido nesta ligação. Assim, deixa de estar disponível para novos profissionais.','Obrigado,','Guia do Proprietário'].join('\n\n');
+ const html=`<!doctype html><html lang="pt-PT"><body style="font-family:Arial,sans-serif;color:#243d33;line-height:1.6"><div style="display:none">${escapeHtml(preview)}</div><main style="max-width:600px;margin:24px auto;padding:20px">${paragraphs.map(p=>`<p>${escapeHtml(p)}</p>`).join('')}<p><a style="display:inline-block;background:#365f50;color:white;padding:12px 18px;border-radius:7px;text-decoration:none" href="${escapeHtml(data.interest_url)}">Sim, ainda preciso da limpeza</a></p><p><a href="${escapeHtml(data.stop_url)}">Já não preciso de ser contactado</a></p><p>Se já resolveu a limpeza, pode fechar o pedido nesta ligação. Assim, deixa de estar disponível para novos profissionais.</p><p>Obrigado,<br>Guia do Proprietário</p></main></body></html>`;
+ return {subject,html,text};
 }
