@@ -11,6 +11,7 @@ function preferences(value,fallback) {
 
 export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
+  if(payload.event_type==='contact_accepted' && data.audience==='client')return renderClientContactEmail(data,options);
   const place = clean(data.municipality);
   const url = new URL(payload.dashboard_url);
   const host = options.preview === true ? 'engagement-test.guia-do-proprietario-parceiros.pages.dev' : 'parceiros.guiadoproprietario.pt';
@@ -144,4 +145,15 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
     text: [greeting, ...paragraphs, `${button}: ${action}`, footer].join('\n\n'),
     html: `<!doctype html><html lang="pt-PT"><body style="margin:0;background:#fff;color:#202923;font-family:Arial,sans-serif;font-size:16px;line-height:1.65"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preview)}</div><main style="max-width:600px;margin:0 auto;padding:24px 16px"><p>${escapeHtml(greeting)}</p>${paragraphs.map(p => `<p>${escapeHtml(p).replaceAll('\n', '<br>')}</p>`).join('')}<p style="margin:24px 0"><a href="${escapeHtml(action)}" style="display:inline-block;background:#315d4d;color:#fff;padding:12px 20px;border-radius:5px;text-decoration:none">${escapeHtml(button)}</a></p><p style="font-size:13px;color:#606a64">${escapeHtml(footer).replaceAll('\n', '<br>')}</p></main></body></html>`
   };
+}
+
+export function renderClientContactEmail(data,options={}){
+ const name=clean(data.client_name),professional=clean(data.professional_name),place=clean(data.municipality),phone=clean(data.professional_phone,24).replace(/[\s()-]/g,'');
+ if(!name||!professional||!place||!/^\+?[0-9]{9,15}$/.test(phone)||!['partilhada','exclusiva'].includes(data.modality))throw new Error('invalid_client_data');
+ const stop=new URL(data.stop_url),host=options.preview?'engagement-test.guia-do-proprietario-parceiros.pages.dev':'parceiros.guiadoproprietario.pt';
+ if(stop.protocol!=='https:'||stop.hostname!==host||stop.pathname!=='/pedido-contactos.html'||stop.username||stop.password||stop.port||!stop.hash)throw new Error('invalid_client_link');
+ const subject=`${professional} vai contactá-lo sobre a sua limpeza`,preview='Guarde este contacto para reconhecer a chamada.';
+ const paragraphs=[`Olá ${name},`,`Boas notícias: o seu pedido de limpeza em ${place} foi aceite por um profissional da sua zona.`,`${professional}\n📞 ${phone}`,'Pedimos ao profissional que o contacte nas próximas 24 horas. Se preferir, pode também ligar diretamente.',data.modality==='partilhada'?'O seu pedido pode ser aceite por até 3 profissionais.':'Este profissional é o único a receber o seu contacto através do Guia do Proprietário.','Antes de marcar o serviço:\nPeça o orçamento por escrito.\nConfirme o que está incluído e o preço final.','O serviço é combinado diretamente entre si e o profissional. O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.','Já resolveu a limpeza ou prefere não ser contactado? Pode confirmar na ligação abaixo.'];
+ const button='Não quero receber mais contactos';
+ return {subject,text:[...paragraphs,button+': '+stop.toString(),'Obrigado,\nGuia do Proprietário'].join('\n\n'),html:`<!doctype html><html lang="pt-PT"><body style="font-family:Arial,sans-serif;color:#202923;line-height:1.65"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preview)}</div><main style="max-width:600px;margin:auto;padding:24px 16px">${paragraphs.map(p=>'<p>'+escapeHtml(p).replaceAll('\n','<br>')+'</p>').join('')}<p><a href="${escapeHtml(stop.toString())}" style="display:inline-block;background:#315d4d;color:white;padding:12px 18px;border-radius:5px">${button}</a></p><p>Obrigado,<br>Guia do Proprietário</p></main></body></html>`};
 }

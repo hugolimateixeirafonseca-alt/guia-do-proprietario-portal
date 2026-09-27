@@ -1,0 +1,6 @@
+// Update only this model, preserving the existing operational catalogue.
+import fs from 'node:fs';import {renderClientContactEmail} from '../functions/lib/partner-engagement-email.mjs';
+const path=process.argv[2];if(!path)throw Error('catalogue path required');const catalog=JSON.parse(fs.readFileSync(path,'utf8'));
+const data={client_name:'Cliente de exemplo',professional_name:'Profissional de exemplo',professional_phone:'912000000',municipality:'Lisboa',stop_url:'https://parceiros.guiadoproprietario.pt/pedido-contactos.html#id=exemplo&expires=1800000000&token=EXEMPLO_SEM_ACESSO'};
+const item={id:'client_contact_accepted',name:'Cliente: profissional aceitou o pedido',when:'Após cada nova aceitação, gratuita ou paga, apenas com autorização explícita do profissional. O cliente pode confirmar que não quer mais contactos e retirar o pedido da venda.',channel:'Email',provider:'Sender / fila com recuperação Make',active:true,variants:['partilhada','exclusiva'].map(modality=>({label:modality==='partilhada'?'Sem exclusividade':'Exclusivo',...renderClientContactEmail({...data,modality})}))};
+catalog.items=catalog.items.filter(x=>x.id!==item.id);catalog.items.unshift(item);fs.writeFileSync(path,JSON.stringify(catalog,null,2)+'\n');
