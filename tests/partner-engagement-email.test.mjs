@@ -1,3 +1,4 @@
+import {readArchivedEmail} from '../functions/lib/partner-email-archive.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {renderPartnerEngagementEmail} from '../functions/lib/partner-engagement-email.mjs';
@@ -112,6 +113,8 @@ test('duplicate event delivers once to its intended recipient; 502 is held for r
     assert.equal((await onRequestPost({request:request(),env:config})).status,200);
     assert.equal((await onRequestPost({request:request(),env:config})).status,200);
     assert.equal(sent.length,1);assert.equal(sent[0].to.email,base.partner_email);
+    const snapshot=fixture.db.prepare('SELECT content_ciphertext FROM email_message_archive WHERE event_id=?').get(base.event_id);
+    const actual=await readArchivedEmail(secret,base.event_id,snapshot.content_ciphertext);assert.equal(actual.text,sent[0].text);assert.equal(actual.subject,sent[0].subject);
     assert.match(sent[0].text,/Como|Já conseguiu/);
     assert.ok(sent[0].text.includes('current-access-reset-1234567890123456789'));
     assert.ok(!sent[0].text.includes(base.dashboard_url));

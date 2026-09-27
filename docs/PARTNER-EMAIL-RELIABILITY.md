@@ -25,3 +25,6 @@ Make confirmado no job 35792744390: execuções incompletas ativas, sem descarte
 Pausa global acrescentada em a05e5dc, migração 0002 aplicada apenas na base dedicada. Novos destinatários aguardam o prazo imposto pelo Sender, sem gastar tentativas enquanto a pausa está ativa. Publicação em curso no job 35793222397. Testes direcionados passaram; nenhuma verificação pública posterior nem envio de email de teste.
 
 Pausa global a05e5dc publicada com sucesso no job 35793222397. Sem confirmação online posterior. O registo e a recuperação estão ativos; isto não garante ausência de falhas externas nem confirma entrega na caixa de entrada.
+
+## Arquivo de mensagens, 27/09/2026
+A partir desta alteração, email_message_archive guarda assunto, corpo de texto e destinatário cifrados com AES-GCM derivado de MAKE_PARTNER_NOTIFICATIONS_SECRET. Só o admin acede através de proxy autenticado, por identificadores pertencentes ao parceiro. Rodar esse segredo sem migrar o arquivo torna cópias anteriores ilegíveis. Mensagens antigas sem cópia não são reconstruídas. Só estado sent é mostrado, significando aceite pelo fornecedor e não leitura/entrega na caixa. Falha de arquivo não bloqueia envio; fica indicado conteúdo indisponível. Não são arquivados por este fluxo emails ao cliente, notificações ao admin ou PDFs.

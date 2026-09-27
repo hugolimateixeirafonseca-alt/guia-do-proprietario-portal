@@ -1,3 +1,4 @@
+import {archivePartnerEmail} from '../../lib/partner-email-archive.mjs';
 import {checkPartnerEmailPolicy} from '../../lib/partner-email-policy.mjs';
 import {reserveSenderRequest, recordSenderRateLimit} from '../../lib/sender-api-control.mjs';
 import {deliverOnce, providerRetryAfter} from '../../lib/partner-email-delivery.mjs';
@@ -42,6 +43,7 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
   } catch { return json({error:'engagement_policy_unavailable'}, 503); }
   return deliverOnce(env.EMAIL_DELIVERY_DB, payload.event_id, email, async (markSending: () => Promise<void>) => {
     await reserveSenderRequest(env.EMAIL_DELIVERY_DB);
+    if(!payload.event_id.startsWith('engagement:client_contact_accepted:'))await archivePartnerEmail(env,payload.event_id,email,{...message,...(preview?{subject:`[TESTE] ${message.subject}`}:{})});
     await markSending();
     const response = await fetch('https://api.sender.net/v2/message/send', {
       method:'POST', signal:AbortSignal.timeout(12000), headers:{Authorization:`Bearer ${env.SENDER_API_TOKEN}`, Accept:'application/json','Content-Type':'application/json'},

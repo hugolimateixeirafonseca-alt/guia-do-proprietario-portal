@@ -1,3 +1,4 @@
+import {archivePartnerEmail} from '../../lib/partner-email-archive.mjs';
 import {resolvePartnerEmailPolicy} from '../../lib/partner-email-policy.mjs';
 import {reserveSenderRequest,recordSenderRateLimit} from '../../lib/sender-api-control.mjs';
 import {processSenderSync} from '../../lib/cleaning-sender-sync.mjs';
@@ -130,6 +131,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   }
   return deliverOnce(env.EMAIL_DELIVERY_DB,eventId,partnerEmail,async (markSending: () => Promise<void>) => {
   await reserveSenderRequest(env.EMAIL_DELIVERY_DB);
+  if(!adminEvent)await archivePartnerEmail(env,eventId,partnerEmail,{subject,text});
   await markSending();
   const response = await fetch(SENDER_ENDPOINT, {
     signal:AbortSignal.timeout(12000),
