@@ -43,10 +43,10 @@ export async function syncPartner(env,partner){
  const result=await syncContact(env,partner,['aOoGvG'],true);
  if(partner.consentimento_email!==1)return result;
  const current=await profile(env,partner.email);
- // Sender represents never-subscribed channels as null. Unknown and opt-out
+ // Sender omits channels with no subscription, or returns null. Unknown and opt-out
  // states are never eligible for activation. Transactional/SMS are untouched.
- if(!current?.status || !Object.hasOwn(current.status,'email'))throw new SyncError('email_status_unknown');
- const status=current.status.email;
+ if(!current?.status || typeof current.status!=='object' || Array.isArray(current.status))throw new SyncError('email_status_unknown');
+ const status=current.status.email ?? null;
  if(Object.values(current.status).some(value=>['unsubscribed','bounced','spam_reported','reported_spam'].includes(value)))return result;
  if(status!==null && !['non_subscribed','non-subscribed','not_subscribed'].includes(status))return result;
  const r=await sender(env,'/subscribers/'+encodeURIComponent(partner.email),'PATCH',{subscriber_status:'ACTIVE',trigger_automation:false});

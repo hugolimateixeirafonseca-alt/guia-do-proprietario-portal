@@ -1,12 +1,12 @@
-# Grupos Sender para limpeza
-
-Pedido de 22/09/2026. Novas candidaturas de empresas e profissionais independentes entram no grupo aOoGvG ao processar application no circuito autenticado Make → portal → Sender, antes do email de candidatura. O aviso administrativo não subscreve o administrador. Lookup/criação e associação de grupo suportam contactos existentes e repetições; não alteram o estado de subscrição nem disparam automações de grupo. Falhas devolvem 502 para o circuito de reenvio.
-
-Nas duas landings de limpeza, após guardar o consentimento e o pedido no dashboard, o primeiro opt-in associa bWv1LJ. Consentimento opcional de newsletter associa também egK8WG. Mantêm-se os outros grupos de contactos existentes e os percursos dos restantes produtos. Não é criada autorização de newsletter quando apenas o primeiro opt-in foi aceite. Não há importação retroativa nem contactos reais de teste nesta tarefa.
-
-Validação local: testes de novos e existentes, ambos os consentimentos, falha de sincronização, destinatários e preservação dos outros percursos. Publicação pelo workflow normal do portal, sem verificação online posterior.
-
-
-## Corre��o de subscri��o dos parceiros, 28/09/2026
-
-A fila autenticada fornece consentimento_email derivado do registo de ades�o. Contactos do parceiro sem subscri��o de email podem passar a ACTIVE com consentimento, sem disparar automa��es. Cancelamentos, devolu��es e den�ncias de spam s�o preservados, bem como os estados transacionais e SMS. O grupo continua a ser aOoGvG. Uma rejei��o 400 do endpoint de grupos usa PATCH individual com uni�o dos grupos existentes e confirma��o posterior. A recupera��o autenticada suporta partnersOnly e at� cinco tarefas por chamada, sem processar leads ou PDFs. A aus�ncia de metadados novos em parceiros aprovados anteriores a 24/09 segue a confirma��o do titular de que consentiram na ades�o; n�o � criado um consentimento retroativo na base.
+# Grupos Sender para limpeza
+
+Pedido de 22/09/2026. Novas candidaturas de empresas e profissionais independentes entram no grupo aOoGvG ao processar application no circuito autenticado Make → portal → Sender, antes do email de candidatura. O aviso administrativo não subscreve o administrador. Lookup/criação e associação de grupo suportam contactos existentes e repetições; não alteram o estado de subscrição nem disparam automações de grupo. Falhas devolvem 502 para o circuito de reenvio.
+
+Nas duas landings de limpeza, após guardar o consentimento e o pedido no dashboard, o primeiro opt-in associa bWv1LJ. Consentimento opcional de newsletter associa também egK8WG. Mantêm-se os outros grupos de contactos existentes e os percursos dos restantes produtos. Não é criada autorização de newsletter quando apenas o primeiro opt-in foi aceite. Não há importação retroativa nem contactos reais de teste nesta tarefa.
+
+Validação local: testes de novos e existentes, ambos os consentimentos, falha de sincronização, destinatários e preservação dos outros percursos. Publicação pelo workflow normal do portal, sem verificação online posterior.
+
+
+## Correção de subscrição dos parceiros, 28/09/2026
+
+A fila autenticada fornece consentimento_email derivado do registo de adesão. Contactos do parceiro sem subscrição de email podem passar a ACTIVE com consentimento, sem disparar automações. Cancelamentos, devoluções e denúncias de spam são preservados, bem como os estados transacionais e SMS. O grupo continua a ser aOoGvG. Uma rejeição 400 do endpoint de grupos usa PATCH individual com união dos grupos existentes e confirmação posterior. A recuperação autenticada suporta partnersOnly e até cinco tarefas por chamada, sem processar leads ou PDFs. A ausência de metadados novos em parceiros aprovados anteriores a 24/09 segue a confirmação do titular de que consentiram na adesão; não é criado um consentimento retroativo na base.

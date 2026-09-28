@@ -57,3 +57,13 @@ test('bulk group rejection uses subscriber update preserving groups and optout',
  globalThis.fetch=async(url,options)=>{if(options.method==='GET')return response({data:saved});if(options.method==='POST')return response({},400);const b=JSON.parse(options.body);assert.deepEqual(b,{groups:['other','aOoGvG'],trigger_automation:false});saved.subscriber_tags=b.groups.map(id=>({id}));return response({success:true});};
  try{const r=await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',consentimento_email:1});assert.equal(r.state,'synced');assert.equal(saved.status.email,'unsubscribed');}finally{globalThis.fetch=original;}
 });
+
+test('Sender transactional-only profile omits email status and is activated with consent',async()=>{
+ const original=globalThis.fetch;let saved={id:'s',status:{temail:'active'},subscriber_tags:[{id:'aOoGvG'}]},writes=0;
+ globalThis.fetch=async(url,options)=>{if(options.method==='GET')return response({data:saved});writes++;assert.deepEqual(JSON.parse(options.body),{subscriber_status:'ACTIVE',trigger_automation:false});saved.status.email='active';return response({success:true});};
+ try{assert.equal((await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',consentimento_email:1})).code,'subscription_activated');assert.equal(writes,1);}finally{globalThis.fetch=original;}
+});
+test('transactional optout prevents promotion from an absent email status',async()=>{
+ const original=globalThis.fetch;globalThis.fetch=async(url,options)=>{assert.equal(options.method,'GET');return response({data:{id:'s',status:{temail:'unsubscribed'},subscriber_tags:[{id:'aOoGvG'}]}});};
+ try{await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',consentimento_email:1});}finally{globalThis.fetch=original;}
+});
