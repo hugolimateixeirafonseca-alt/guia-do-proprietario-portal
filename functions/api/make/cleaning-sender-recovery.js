@@ -9,6 +9,15 @@ export async function onRequestPost({request,env}){
  try{
   let backfilled=0,nextCursor=null;
   const body=await request.json().catch(()=>({}));
+  if(body.partnersOnly===true){
+   const limit=Math.max(1,Math.min(5,Number(body.maxJobs)||1)),results=[];
+   for(let i=0;i<limit;i++){
+    const result=await processSenderSync(env,true);results.push(result);
+    if(['idle','pending','blocked'].includes(result.state))break;
+   }
+   const stats=await senderSyncStats(env);
+   return json({ok:!results.some(r=>r.state==='blocked'),results,partners:stats.partners});
+  }
   if(body.backfillPdfSince){
    const since=Date.parse(body.backfillPdfSince);
    if(!Number.isFinite(since)||since<Date.now()-7*86400000||since>Date.now())return json({error:'invalid_recovery_window'},400);

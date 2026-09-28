@@ -40,7 +40,20 @@ export async function syncPartner(env,partner){
   if(result.success!==true)throw new SyncError('unsubscribe_unconfirmed');
   return {state:'suppressed',code:'admin_optout_synced'};
  }
- return syncContact(env,partner,['aOoGvG'],true);
+ const result=await syncContact(env,partner,['aOoGvG'],true);
+ if(partner.consentimento_email!==1)return result;
+ const current=await profile(env,partner.email);
+ // Sender represents never-subscribed channels as null. Unknown and opt-out
+ // states are never eligible for activation. Transactional/SMS are untouched.
+ if(!current?.status || !Object.hasOwn(current.status,'email'))throw new SyncError('email_status_unknown');
+ const status=current.status.email;
+ if(Object.values(current.status).some(value=>['unsubscribed','bounced','spam_reported','reported_spam'].includes(value)))return result;
+ if(status!==null && !['non_subscribed','non-subscribed','not_subscribed'].includes(status))return result;
+ const r=await sender(env,'/subscribers/'+encodeURIComponent(partner.email),'PATCH',{subscriber_status:'ACTIVE',trigger_automation:false});
+ if(!r.ok)throw new SyncError('subscribe_'+r.status,r.status);
+ const confirmed=await profile(env,partner.email);
+ if(confirmed?.status?.email!=='active'||!memberIds(confirmed).has('aOoGvG'))throw new SyncError('subscription_unconfirmed');
+ return {...result,code:'subscription_activated'};
 }
 async function syncContact(env,lead,required,membershipOnly=false){
  let current=await profile(env,lead.email),created=false,added=0;
@@ -57,7 +70,15 @@ async function syncContact(env,lead,required,membershipOnly=false){
  const originalStatus=JSON.stringify(current.status);
  for(const group of required.filter(g=>!memberIds(current).has(g))){
   const r=await sender(env,'/subscribers/groups/'+group,'POST',{subscribers:[lead.email],trigger_automation:false});
-  if(!r.ok)throw new SyncError('group_'+r.status,r.status);
+  if(!r.ok){
+   if(!membershipOnly||r.status!==400)throw new SyncError('group_'+r.status,r.status);
+   // Some transactional-only profiles reject the bulk group endpoint.
+   // Use the documented per-subscriber update, preserving all existing groups.
+   const latest=await profile(env,lead.email);
+   if(!latest)throw new SyncError('profile_missing');
+   const patch=await sender(env,'/subscribers/'+encodeURIComponent(lead.email),'PATCH',{groups:[...new Set([...memberIds(latest),...required])],trigger_automation:false});
+   if(!patch.ok)throw new SyncError('group_patch_'+patch.status,patch.status);
+  }
   added++;
  }
  if(added)current=await profile(env,lead.email);

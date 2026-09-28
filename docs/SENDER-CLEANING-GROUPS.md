@@ -5,3 +5,8 @@ Pedido de 22/09/2026. Novas candidaturas de empresas e profissionais independent
 Nas duas landings de limpeza, apÃ³s guardar o consentimento e o pedido no dashboard, o primeiro opt-in associa bWv1LJ. Consentimento opcional de newsletter associa tambÃ©m egK8WG. MantÃªm-se os outros grupos de contactos existentes e os percursos dos restantes produtos. NÃ£o Ã© criada autorizaÃ§Ã£o de newsletter quando apenas o primeiro opt-in foi aceite. NÃ£o hÃ¡ importaÃ§Ã£o retroativa nem contactos reais de teste nesta tarefa.
 
 ValidaÃ§Ã£o local: testes de novos e existentes, ambos os consentimentos, falha de sincronizaÃ§Ã£o, destinatÃ¡rios e preservaÃ§Ã£o dos outros percursos. PublicaÃ§Ã£o pelo workflow normal do portal, sem verificaÃ§Ã£o online posterior.
+
+
+## Correção de subscrição dos parceiros, 28/09/2026
+
+A fila autenticada fornece consentimento_email derivado do registo de adesão. Contactos do parceiro sem subscrição de email podem passar a ACTIVE com consentimento, sem disparar automações. Cancelamentos, devoluções e denúncias de spam são preservados, bem como os estados transacionais e SMS. O grupo continua a ser aOoGvG. Uma rejeição 400 do endpoint de grupos usa PATCH individual com união dos grupos existentes e confirmação posterior. A recuperação autenticada suporta partnersOnly e até cinco tarefas por chamada, sem processar leads ou PDFs. A ausência de metadados novos em parceiros aprovados anteriores a 24/09 segue a confirmação do titular de que consentiram na adesão; não é criado um consentimento retroativo na base.

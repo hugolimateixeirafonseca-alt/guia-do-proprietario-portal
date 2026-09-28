@@ -41,3 +41,19 @@ test('optout does not create missing subscribers; failed cancellations remain re
  await assert.rejects(()=>syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',bloquear_email:1}),/unsubscribe_503/);
  }finally{globalThis.fetch=original;}
 });
+
+for(const status of [null,'non-subscribed','non_subscribed','active','unsubscribed','bounced','spam_reported','unknown'])test('partner activation respects status '+status,async()=>{
+ const original=globalThis.fetch;let saved={id:'s',status:{email:status,transactional_email:'active'},subscriber_tags:[{id:'aOoGvG'}]},writes=0;
+ globalThis.fetch=async(url,options)=>{if(options.method==='GET')return response({data:saved});writes++;assert.equal(options.method,'PATCH');assert.deepEqual(JSON.parse(options.body),{subscriber_status:'ACTIVE',trigger_automation:false});saved.status.email='active';return response({success:true});};
+ try{await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',consentimento_email:1});assert.equal(writes,[null,'non-subscribed','non_subscribed'].includes(status)?1:0);assert.equal(saved.status.transactional_email,'active');}finally{globalThis.fetch=original;}
+});
+test('missing consent never activates and unconfirmed activation remains retryable',async()=>{
+ const original=globalThis.fetch;const saved={id:'s',status:{email:null},subscriber_tags:[{id:'aOoGvG'}]};let writes=0;
+ globalThis.fetch=async(url,options)=>{if(options.method==='GET')return response({data:saved});writes++;return response({success:true});};
+ try{await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test'});assert.equal(writes,0);await assert.rejects(()=>syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',consentimento_email:1}),/subscription_unconfirmed/);}finally{globalThis.fetch=original;}
+});
+test('bulk group rejection uses subscriber update preserving groups and optout',async()=>{
+ const original=globalThis.fetch;let saved={id:'s',status:{email:'unsubscribed'},subscriber_tags:[{id:'other'}]};
+ globalThis.fetch=async(url,options)=>{if(options.method==='GET')return response({data:saved});if(options.method==='POST')return response({},400);const b=JSON.parse(options.body);assert.deepEqual(b,{groups:['other','aOoGvG'],trigger_automation:false});saved.subscriber_tags=b.groups.map(id=>({id}));return response({success:true});};
+ try{const r=await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',consentimento_email:1});assert.equal(r.state,'synced');assert.equal(saved.status.email,'unsubscribed');}finally{globalThis.fetch=original;}
+});
