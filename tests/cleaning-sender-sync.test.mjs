@@ -67,3 +67,9 @@ test('transactional optout prevents promotion from an absent email status',async
  const original=globalThis.fetch;globalThis.fetch=async(url,options)=>{assert.equal(options.method,'GET');return response({data:{id:'s',status:{temail:'unsubscribed'},subscriber_tags:[{id:'aOoGvG'}]}});};
  try{await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',consentimento_email:1});}finally{globalThis.fetch=original;}
 });
+
+test('empty channel map serialized as an empty array is non-subscribed',async()=>{
+ const original=globalThis.fetch;let saved={id:'s',status:[],subscriber_tags:[{id:'aOoGvG'}]};
+ globalThis.fetch=async(url,options)=>{if(options.method==='GET')return response({data:saved});assert.deepEqual(JSON.parse(options.body),{subscriber_status:'ACTIVE',trigger_automation:false});saved.status={email:'active'};return response({success:true});};
+ try{assert.equal((await syncPartner({SENDER_API_TOKEN:'test'},{email:'partner@example.test',consentimento_email:1})).code,'subscription_activated');}finally{globalThis.fetch=original;}
+});

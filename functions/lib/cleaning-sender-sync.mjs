@@ -45,7 +45,7 @@ export async function syncPartner(env,partner){
  const current=await profile(env,partner.email);
  // Sender omits channels with no subscription, or returns null. Unknown and opt-out
  // states are never eligible for activation. Transactional/SMS are untouched.
- if(!current?.status || typeof current.status!=='object' || Array.isArray(current.status))throw new SyncError('email_status_unknown');
+ if(!current?.status || typeof current.status!=='object' || (Array.isArray(current.status)&&current.status.length))throw new SyncError('email_status_unknown_'+(current?.status===null?'null':Array.isArray(current?.status)?'array':typeof current?.status));
  const status=current.status.email ?? null;
  if(Object.values(current.status).some(value=>['unsubscribed','bounced','spam_reported','reported_spam'].includes(value)))return result;
  if(status!==null && !['non_subscribed','non-subscribed','not_subscribed'].includes(status))return result;
