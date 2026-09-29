@@ -92,6 +92,13 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
       break;
     }
     case 'unused_free_contacts': {
+      if(data.kind==='video_tutorial'){
+        if(!/^engagement:video_tutorial:20260929:[a-z0-9_-]+$/i.test(payload.event_id)||url.hash!=='#video')throw new Error('invalid_video_event');
+        subject='Como funciona a plataforma? Veja este vídeo';
+        preview='Em menos de 2 minutos: contactos, orçamento e pagamento do serviço.';
+        paragraphs=['Preparámos um vídeo curto para esclarecer as dúvidas mais comuns sobre a plataforma.','Veja como obter um contacto, falar com o cliente e apresentar o seu orçamento. É você quem define o preço e combina o pagamento diretamente com o cliente.','Na plataforma, obtém o contacto. O serviço fica combinado quando o cliente aceita a sua proposta.','O vídeo também mostra como adicionar a plataforma ao telemóvel.','Se ficar com alguma dúvida, responda a este email.'];
+        button='Ver o vídeo explicativo';break;
+      }
       if (!positive(data.active_requests) || !positive(data.free_contacts) || !clean(data.localities, 500)) throw new Error('invalid_event_data');
       const localities = clean(data.localities, 500);
       subject = `${data.active_requests} pedidos de limpeza em ${localities}, e ${data.free_contacts} contactos por nossa conta`;
