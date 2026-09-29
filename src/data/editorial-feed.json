@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-29T07:03:10.496Z",
+  "generatedAt": "2026-09-29T07:05:52.966Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 132,
-    "published": 118,
+    "published": 119,
     "newsOnline": 21
   },
   "articles": [
@@ -1536,14 +1536,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "mau-cheiro-casa-de-banho.mdx",
       "arrivedAt": "2026-09-20T12:08:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-09-29T07:01:37Z",
+      "url": "https://guiadoproprietario.pt/casa/mau-cheiro-casa-de-banho/"
     },
     {
       "id": "EXTRA-023",
