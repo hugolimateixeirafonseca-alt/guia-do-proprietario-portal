@@ -48,9 +48,9 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
             <span class="step-dot" data-dot="2">2</span><i></i>
             <span class="step-dot" data-dot="3">3</span><i></i>
             <span class="step-dot" data-dot="4">4</span><i></i>
-            <span class="step-dot" data-dot="5">5</span>
+            <span class="step-dot" data-dot="5">5</span><i></i><span class="step-dot" data-dot="6">6</span>
           </div>
-          <p class="sr-only" id="stepLabel">Passo 1 de 5</p>
+          <p class="sr-only" id="stepLabel">Passo 1 de 6</p>
 
           <form id="quoteForm" data-consent-version={LIMPEZA_CONSENT_VERSION} novalidate>
             <section class="form-step is-active" data-step="1">
@@ -216,6 +216,14 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
               </fieldset>
               <div id="requestSummary" class="summary"></div>
               <div class="form-actions"><button class="btn btn-light prev-step" type="button">Voltar</button><button class="btn btn-primary" type="submit">Pedir preço e disponibilidade</button></div>
+            </section>
+            <section class="form-step" data-step="6" aria-labelledby="confirmationTitle">
+              <h3 id="confirmationTitle" tabindex="-1">Confirme o seu pedido</h3>
+              <p id="confirmationSummary" class="summary"></p>
+              <label class="consent-box"><input id="confirmPreferences" type="checkbox" name="confirm_preferences"><span>Confirmo as preferências e comprometo-me a responder aos profissionais que me contactarem.</span></label>
+              <button id="confirmRequest" class="btn btn-primary btn-block" type="submit" disabled>Confirmar e receber orçamentos</button>
+              <button id="editPreferences" class="btn btn-light btn-block" type="button">Alterar preferências</button>
+              <p class="legal-note">Gratuito e sem obrigação de contratar.</p>
             </section>
           </form>
 

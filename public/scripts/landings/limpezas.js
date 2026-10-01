@@ -12,6 +12,9 @@
   const sendingState = document.getElementById("sendingState");
   const successState = document.getElementById("successState");
   const errorState = document.getElementById("technicalErrorState");
+  const confirmation = document.getElementById("confirmPreferences");
+  const confirmButton = document.getElementById("confirmRequest");
+  const resetConfirmation = () => { confirmation.checked = false; confirmButton.disabled = true; };
   let currentStep = 1;
 
   const labels = {
@@ -47,14 +50,16 @@
   };
 
   const showStep = (number) => {
-    currentStep = Math.max(1, Math.min(5, number));
+    currentStep = Math.max(1, Math.min(6, number));
     steps.forEach((step) => step.classList.toggle("is-active", Number(step.dataset.step) === currentStep));
     dots.forEach((dot, index) => {
       dot.classList.toggle("is-active", index + 1 === currentStep);
       dot.classList.toggle("is-done", index + 1 < currentStep);
     });
-    stepLabel.textContent = `Passo ${currentStep} de 5`;
-    if (currentStep === 5) updateSummary();
+    stepLabel.textContent = `Passo ${currentStep} de 6`;
+    if (currentStep >= 5) updateSummary();
+    if (currentStep !== 6) resetConfirmation();
+    if (currentStep === 6) document.getElementById("confirmationTitle")?.focus({preventScroll:true});
     document.getElementById("pedido")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -104,9 +109,12 @@
   const updateSummary = () => {
     const service = labels.service_type[getValue("service_type")] || "";
     const frequency = labels.service_frequency[getValue("service_frequency")] || "";
-    const day = getValues("preferred_weekdays").map(value => labels.preferred_weekday[value]).filter(Boolean).join(", ");
+    const day = ["weekly", "fortnightly", "monthly"].includes(getValue("service_frequency")) ? getValues("preferred_weekdays").map(value => labels.preferred_weekday[value]).filter(Boolean).join(", ") : "";
     const period = getValues("preferred_time_periods").map(value => labels.preferred_time_period[value]).filter(Boolean).join(", ");
-    summary.textContent = `Resumo: ${[service, frequency, day, period, getValue("postal_code")].filter(Boolean).join(" · ")}`;
+    const timing = getValue("service_frequency") === "one_time" ? (getValue("one_time_timing") === "specific_date" ? getValue("preferred_date").split("-").reverse().join("/") : ({asap:"O mais breve possível",this_week:"Esta semana",next_week:"Próxima semana",flexible:"Data flexível"})[getValue("one_time_timing")] || "") : "";
+    const text = [service, frequency, timing, day, period, getValue("postal_code")].filter(Boolean).join(" · ");
+    summary.textContent = "Resumo: " + text;
+    document.getElementById("confirmationSummary").textContent = text;
   };
 
   const eventId = () => globalThis.crypto?.randomUUID?.() || `limpeza-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -134,8 +142,11 @@
   }));
   document.querySelectorAll(".prev-step").forEach((button) => button.addEventListener("click", () => showStep(currentStep - 1)));
 
-  form.addEventListener("input", (event) => setError(event.target.name, ""));
+  form.addEventListener("input", (event) => { setError(event.target.name, ""); if(event.target !== confirmation) resetConfirmation(); });
+  confirmation.addEventListener("change", () => { confirmButton.disabled = !confirmation.checked; });
+  document.getElementById("editPreferences").addEventListener("click", () => showStep(1));
   form.addEventListener("change", (event) => {
+    if (event.target !== confirmation) resetConfirmation();
     if (event.target.name === "service_frequency") updateConditional();
     if (event.target.name === "one_time_timing") updateDate();
     if (["preferred_weekdays", "preferred_time_periods"].includes(event.target.name)) {
@@ -160,7 +171,11 @@
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (submissionInFlight) return;
-    if (!validateStep(5)) return;
+    for (let step = 1; step <= 5; step++) {
+      if (!validateStep(step)) { showStep(step); return; }
+    }
+    if (currentStep !== 6) { resetConfirmation(); showStep(6); return; }
+    if (!confirmation.checked) { confirmation.focus(); return; }
 
     let submissionId = eventId();
     const payload = {
