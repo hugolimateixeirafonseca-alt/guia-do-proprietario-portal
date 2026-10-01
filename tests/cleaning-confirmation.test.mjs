@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
-const full=readFileSync(new URL('../public/scripts/landings/limpezas.js',import.meta.url),'utf8');
+const full=readFileSync(new URL('../src/scripts/landings/limpezas.js',import.meta.url),'utf8');
 function fixture(){
  const node={classList:{add(){},remove(){},toggle(){}}};const handlers={};const sent=[];
  const elements={consent_partner_sharing:{checked:true},consent_marketing:{checked:false}};

@@ -31,7 +31,7 @@ on:
       - 'src/pages/tribera-olaias.astro'
       - 'tests/kit-estudante.test.mjs'
       - 'public/social/**'
-      - 'public/scripts/landings/limpezas.js'
+      - 'src/scripts/landings/limpezas.js'
       - 'public/scripts/landings/alojamento-local-cleaning.js'
       - 'public/scripts/verificacao-intake.js'
       - 'src/pages/verificacao/enviar.astro'

@@ -713,7 +713,7 @@ test("não apresenta sucesso quando o Sender falha", async () => {
 
 test("regista as submissões válidas das duas landings de limpeza como Lead no Meta", async () => {
   const [generalLanding, localAccommodationLanding, deployWorkflow] = await Promise.all([
-    readFile(path.resolve("public/scripts/landings/limpezas.js"), "utf8"),
+    readFile(path.resolve("src/scripts/landings/limpezas.js"), "utf8"),
     readFile(path.resolve("public/scripts/landings/alojamento-local-cleaning.js"), "utf8"),
     readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8")
   ]);
@@ -722,7 +722,7 @@ test("regista as submissões válidas das duas landings de limpeza como Lead no 
   assert.match(localAccommodationLanding, /fbq\("track", "Lead", \{ content_name: "limpeza-alojamento-local" \}, \{ eventID: submissionId \}\)/);
   assert.doesNotMatch(generalLanding, /fbq\("track", "Contact"/);
   assert.doesNotMatch(localAccommodationLanding, /fbq\("track", "Contact"/);
-  assert.match(deployWorkflow, /public\/scripts\/landings\/limpezas\.js/);
+  assert.match(deployWorkflow, /src\/scripts\/landings\/limpezas\.js/);
   assert.match(deployWorkflow, /public\/scripts\/landings\/alojamento-local-cleaning\.js/);
 });
 
