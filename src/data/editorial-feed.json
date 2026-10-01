@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-29T12:40:25.615Z",
+  "generatedAt": "2026-10-01T13:13:29.287Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 132,
-    "published": 119,
+    "published": 120,
     "newsOnline": 21
   },
   "articles": [
@@ -1600,14 +1600,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "silicone-duche.mdx",
       "arrivedAt": "2026-09-20T12:08:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-01T13:08:11Z",
+      "url": "https://guiadoproprietario.pt/casa/silicone-duche/"
     },
     {
       "id": "EXTRA-027",
