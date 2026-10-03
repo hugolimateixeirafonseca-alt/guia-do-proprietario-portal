@@ -113,7 +113,7 @@
     const period = getValues("preferred_time_periods").map(value => labels.preferred_time_period[value]).filter(Boolean).join(", ");
     const timing = (getValue("one_time_timing") === "specific_date" ? getValue("preferred_date").split("-").reverse().join("/") : ({asap:"O mais breve possível",this_week:"Esta semana",next_week:"Próxima semana",compare_prices:"Só comparar preços",flexible:"Data flexível"})[getValue("one_time_timing")] || "");
     const text = [service, frequency, timing, day, period, getValue("postal_code")].filter(Boolean).join(" · ");
-    const comparing=getValue("one_time_timing")==="compare_prices";confirmation.nextElementSibling.textContent=comparing?"Confirmo que pretendo apenas comparar preços. Este pedido não será enviado a profissionais.":"Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.";confirmButton.textContent=comparing?"Guardar preferências":"Confirmar e receber orçamentos";summary.textContent = "Resumo: " + text;
+    const comparing=getValue("one_time_timing")==="compare_prices";confirmation.nextElementSibling.textContent=comparing?"Confirmo que pretendo comparar preços e que aceito ser contactado(a) por profissionais da minha zona.":"Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.";confirmButton.textContent="Confirmar e receber orçamentos";summary.textContent = "Resumo: " + text;
     document.getElementById("confirmationSummary").textContent = text;
   };
 
@@ -230,7 +230,7 @@
       }
 
       sendingState.classList.add("is-hidden");
-      successState.classList.remove("is-hidden");successState.querySelector("h3").textContent=result.comparisonOnly?"Preferências guardadas":"Pedido enviado com sucesso";successState.querySelector("p").textContent=result.comparisonOnly?"Indicou que só pretende comparar preços. Este pedido não será disponibilizado a profissionais. Quando quiser avançar, faça um novo pedido.":"Recebemos os seus dados e vamos encaminhar o pedido de acordo com a sua zona e preferência de disponibilidade.";
+      successState.classList.remove("is-hidden");successState.querySelector("h3").textContent="Pedido enviado com sucesso";successState.querySelector("p").textContent="Recebemos os seus dados e vamos encaminhar o pedido de acordo com a sua zona e preferência de disponibilidade.";
       if (window.fbq) window.fbq("track", "Lead", { content_name: "servicos-limpeza" }, { eventID: submissionId });
     } catch {
       sendingState.classList.add("is-hidden");

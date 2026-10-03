@@ -485,7 +485,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     // The lead transaction queued Sender sync durably. Provider failures cannot lose it.
     const delivery = processSenderSync(env).catch(() => ({state:"pending"}));
     if (waitUntil) waitUntil(delivery); else await delivery;
-    return json({ok:true,...(!isCleaningAlLead&&timingCode==="compare_prices"?{comparisonOnly:true}:{}),dashboardStored:true,senderSyncQueued:true,locality:resolvedPostalLookup?.locality},200);
+    return json({ok:true,dashboardStored:true,senderSyncQueued:true,locality:resolvedPostalLookup?.locality},200);
   }
 
   if (!env.SENDER_API_TOKEN) {

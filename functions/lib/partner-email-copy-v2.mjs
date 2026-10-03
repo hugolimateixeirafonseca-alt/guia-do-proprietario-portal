@@ -8,6 +8,7 @@ function personal(value){const u=new URL(value);if(u.protocol!=='https:'||!['par
 const path=(value,hash)=>{const u=personal(value);u.hash=hash;return u.toString();};
 function badges(r,{registrationConfirmationReady=false,whatsappReady=false}={}){
  const badges=[];
+ if(r.comparingPrices===true)badges.push({label:'A comparar preços',style:'background:#F4F6F3;color:#1E4634;border:1px solid #dce6de'});
  if(registrationConfirmationReady&&r.registrationConfirmed===true)badges.push({label:'✓ Pedido confirmado pelo cliente no registo',style:'background:#EEF5F0;color:#1E4634;border:1px solid #EEF5F0'});
  if(whatsappReady&&r.whatsappVerified===true)badges.push({label:'◉ WhatsApp verificado',style:'background:#FFFFFF;color:#1E4634;border:1px solid #1E4634'});
  if(whatsappReady&&r.interestConfirmed===true)badges.push({label:'✓ Interesse confirmado pelo cliente por WhatsApp',style:'background:#1E4634;color:#FFFFFF!important;border:1px solid #1E4634'});
