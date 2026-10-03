@@ -35,7 +35,7 @@ test('confirmation fills exact client details, both modes, multiple days and saf
   const data={...cases[0][1],modality};const message=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data});
   for(const value of ['Ana Teste','ana@example.invalid','1000-001','Lisboa','Limpeza regular','Apartamento, T2','semanal','segunda-feira, domingo','manhã, tarde','Porta azul'])assert.ok(message.text.includes(value),value);
   assert.ok(message.text.includes('Abrir a minha área de parceiro: '+base.dashboard_url));
-  assert.ok(message.text.includes(modality==='partilhada'?'outros profissionais':'só você'));
+  assert.ok(message.text.includes(modality==='partilhada'?'outros profissionais':'Só você recebe este contacto através do Guia do Proprietário.'));
   const missing=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data:{...data,client_email:null,postal_code:undefined,notes:'{notas}',days:null,periods:'null'}});
   assert.doesNotMatch(missing.text,/undefined|null|NaN|\{\w+\}/);
   assert.match(missing.text,/O cliente não deixou notas/);

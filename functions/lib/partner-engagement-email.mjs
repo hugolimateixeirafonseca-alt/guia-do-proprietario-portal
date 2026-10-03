@@ -31,13 +31,13 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
     case 'request_digest': {
       if (!positive(data.active_requests) || !Array.isArray(data.requests) || !data.requests.length || data.requests.length>3 || data.requests.length>data.active_requests || data.requests.some(item=>!clean(item.municipality)||!clean(item.title))) throw new Error('invalid_event_data');
       subject=data.active_requests===1?'Tem um novo pedido de limpeza na sua zona':data.active_requests+' novos pedidos de limpeza nas suas zonas';
-      preview='Veja os pedidos disponíveis e escolha os que quer aceitar.';
+      preview='Veja os pedidos disponíveis e escolha os contactos que quer obter.';
       paragraphs=[
         data.active_requests===1?'Há um novo pedido compatível com o seu perfil, ainda disponível.':'Há '+data.active_requests+' novos pedidos compatíveis com o seu perfil, ainda disponíveis.',
         ...data.requests.map(item=>clean(item.municipality)+' · '+clean(item.title)),
         ...(data.active_requests>data.requests.length?['Estes são três dos novos pedidos. Consulte todos na sua área de parceiro.']:[]),
-        'Os pedidos podem ser aceites por outros profissionais. Veja a disponibilidade atual antes de escolher.',
-        'Pode escolher um ou dois resumos por dia, ou desligar estes avisos, em O meu perfil. As confirmações dos contactos que aceitar continuam imediatas.'
+        'Outros profissionais podem obter os contactos destes pedidos. Veja a disponibilidade atual antes de escolher.',
+        'Pode escolher um ou dois resumos por dia, ou desligar estes avisos, em O meu perfil. As confirmações dos contactos que obtiver continuam imediatas.'
       ];
       button='Ver todos os pedidos disponíveis';
       break;
@@ -74,12 +74,12 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
       subject=`Os contactos do cliente de ${place}`;
       preview='Contacte o cliente e apresente o seu orçamento.';
       paragraphs=[
-        `Aceitou o pedido de ${place}. Aqui estão os dados do cliente:`,
+        `Obteve o contacto do pedido de ${place}. Aqui estão os dados do cliente:`,
         `${name}\n📞 ${phone}${emailLine}\n📍 ${postal?postal+', ':''}${place}`,
         `O pedido: ${labels[data.cleaning_type]} · ${labels[data.space_type]}, ${labels[data.size]} · ${labels[data.frequency]} · prefere ${preferences(data.days,'dia não indicado')}, ${preferences(data.periods,'horário não indicado')}`,
         `Notas do cliente: ${notes}`,
-        data.modality==='partilhada'?'Este é um contacto partilhado: outros profissionais podem receber os mesmos dados. Ser o primeiro a ligar faz a diferença.':'Este contacto é exclusivo: só você recebeu estes dados através do Guia do Proprietário enquanto a exclusividade estiver ativa.',
-        'Como fazer o primeiro contacto:\n1. Ligue hoje, de preferência na próxima hora. Os nossos termos pedem o primeiro contacto nas 24 horas seguintes à aceitação.\n2. Se não atender, envie logo uma mensagem por WhatsApp a dizer que vem do pedido feito no Guia do Proprietário.\n3. Envie o orçamento por escrito, de preferência no mesmo dia em que falar com o cliente.',
+        data.modality==='partilhada'?'Este é um contacto partilhado: outros profissionais podem receber os mesmos dados. Ser o primeiro a ligar faz a diferença.':'Só você recebe este contacto através do Guia do Proprietário.',
+        'Como fazer o primeiro contacto:\n1. Ligue hoje, de preferência na próxima hora. Os nossos termos pedem o primeiro contacto nas 24 horas seguintes à obtenção do contacto.\n2. Se não atender, envie logo uma mensagem por WhatsApp a dizer que vem do pedido feito no Guia do Proprietário.\n3. Envie o orçamento por escrito, de preferência no mesmo dia em que falar com o cliente.',
         'Depois de falar com o cliente, atualize o estado do pedido na sua área de parceiro. Leva 10 segundos.',
         'Use estes dados apenas para responder a este pedido.'
       ];
@@ -116,7 +116,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
         `Há neste momento ${data.active_requests} pedidos ativos nas suas zonas: ${localities}.`,
         `E ainda tem ${data.free_contacts} contactos grátis na sua conta. Ou seja, pode falar com clientes que pediram mesmo uma limpeza e apresentar-lhes a sua proposta sem pagar nada.`,
         'É simples:\n1. Vê o pedido completo: tipo de limpeza, casa, frequência e dias preferidos.\n2. Aceita só os que lhe interessam.\n3. Recebe o contacto e liga ao cliente.',
-        'Os pedidos não ficam à espera. Quando outros profissionais os aceitam, as vagas esgotam.'
+        'Os pedidos não ficam à espera. Quando outros profissionais obtêm os contactos, as vagas esgotam.'
       ];
       button = 'Usar os meus contactos grátis';offer=true;
       break;
@@ -135,17 +135,17 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
       preview='Consulte o saldo, os contactos grátis por usar e os preços atuais.';
       paragraphs=['Já usou os contactos grátis iniciais da sua conta. Os outros contactos grátis por usar e o seu saldo mantêm-se.',
         'Partilhado: '+euro(data.prices.partilhada)+'. Até 3 profissionais podem receber o mesmo contacto.',
-        'Exclusivo: '+euro(data.prices.exclusiva)+'. Só você recebe o contacto enquanto a exclusividade estiver ativa. Disponível enquanto ninguém tiver obtido o contacto.',
+        'Exclusivo: '+euro(data.prices.exclusiva)+'. Só você recebe este contacto através do Guia do Proprietário. Disponível enquanto ninguém tiver obtido o contacto.',
         data.payments_ready?'Para continuar, pode usar o saldo que já tem ou carregar a sua conta. Consulte as opções disponíveis na sua área.':'Pode continuar a usar o saldo e os contactos grátis que ainda tem. Os carregamentos estão temporariamente indisponíveis.',
         'Sem mensalidade. O saldo é descontado quando obtém um contacto pago.'];
       button=data.payments_ready?'Carregar saldo':'Ver o meu saldo';break;
     }
     case 'lead_expiring':
       if (!place || data.days_remaining !== 5) throw new Error('invalid_event_data');
-      subject = `Ninguém aceitou ainda o pedido de ${place}`;
+      subject = `Ainda ninguém obteve o contacto do pedido de ${place}`;
       preview = 'Pode ficar com ele em exclusivo. Faltam 5 dias.';
       paragraphs = [
-        `O pedido de ${place} ainda não foi aceite por ninguém.`,
+        `O pedido de ${place} ainda não teve o contacto obtido por ninguém.`,
         'O contacto ainda não foi obtido através do Guia. Pode escolher o exclusivo enquanto essa opção estiver disponível.',
         'O pedido termina dentro de 5 dias. Depois disso, deixa de estar disponível.'
       ];
@@ -156,7 +156,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
       subject = `${data.missed_requests} pedidos na sua zona passaram-lhe ao lado`;
       preview = 'Veja os que ainda estão disponíveis.';
       paragraphs = [
-        `Na última semana, ${data.missed_requests} pedidos compatíveis com as suas zonas foram aceites por outros profissionais ou deixaram de estar disponíveis.`,
+        `Na última semana, ${data.missed_requests} pedidos compatíveis com as suas zonas tiveram os contactos obtidos por outros profissionais ou deixaram de estar disponíveis.`,
         'Há novos pedidos a entrar. Veja os que estão disponíveis agora, antes que outra pessoa chegue primeiro.',
         'Os pedidos que recebe não lhe servem? Ajuste as zonas, os tipos de limpeza e de espaço na sua área de parceiro. Os dias e horários ajudam a dar prioridade aos pedidos que encaixam na sua disponibilidade. Se estiver sem disponibilidade, pode pausar a receção de pedidos.'
       ];
