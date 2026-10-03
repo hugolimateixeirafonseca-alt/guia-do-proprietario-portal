@@ -113,7 +113,7 @@
     const period = getValues("preferred_time_periods").map(value => labels.preferred_time_period[value]).filter(Boolean).join(", ");
     const timing = (getValue("one_time_timing") === "specific_date" ? getValue("preferred_date").split("-").reverse().join("/") : ({asap:"O mais breve possível",this_week:"Esta semana",next_week:"Próxima semana",compare_prices:"Só comparar preços",flexible:"Data flexível"})[getValue("one_time_timing")] || "");
     const text = [service, frequency, timing, day, period, getValue("postal_code")].filter(Boolean).join(" · ");
-    const comparing=getValue("one_time_timing")==="compare_prices";confirmation.nextElementSibling.textContent=comparing?"Confirmo que pretendo apenas comparar preços. Este pedido não será enviado a profissionais.":"Confirmo que preciso deste serviço e que aceito ser contactado por profissionais da minha zona.";confirmButton.textContent=comparing?"Guardar preferências":"Confirmar e receber orçamentos";summary.textContent = "Resumo: " + text;
+    const comparing=getValue("one_time_timing")==="compare_prices";confirmation.nextElementSibling.textContent=comparing?"Confirmo que pretendo apenas comparar preços. Este pedido não será enviado a profissionais.":"Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.";confirmButton.textContent=comparing?"Guardar preferências":"Confirmar e receber orçamentos";summary.textContent = "Resumo: " + text;
     document.getElementById("confirmationSummary").textContent = text;
   };
 

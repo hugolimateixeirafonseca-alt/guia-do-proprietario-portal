@@ -60,7 +60,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
         if(!place || data.free_contacts!==1 || !['partilhada','exclusiva'].includes(data.modality))throw new Error('invalid_event_data');
         subject=`O cliente de ${place} pediu para não receber mais contactos`;
         preview='Atribuímos-lhe 1 contacto grátis para outro pedido.';
-        paragraphs=[`O cliente do pedido de ${place} confirmou que não pretende receber mais contactos. Não volte a contactá-lo sobre este pedido.`,
+        paragraphs=[`O cliente do pedido de ${place} confirmou que não pretende receber mais contactos. Não volte a contactá-lo(a) sobre este pedido.`,
           `Atribuímos-lhe 1 contacto grátis ${data.modality==='exclusiva'?'exclusivo':'sem exclusividade'}, do mesmo tipo do contacto adquirido. Já está disponível na sua conta para usar noutro pedido.`,
           'O pedido foi retirado da venda. Esta indicação não cancela um serviço que já tenha combinado com o cliente.'];
         button='Ver a minha área de parceiro';
@@ -173,10 +173,10 @@ export function renderClientContactEmail(data,options={}){
  if(!name||!professional||!place||!/^\+?[0-9]{9,15}$/.test(phone)||!['partilhada','exclusiva'].includes(data.modality))throw new Error('invalid_client_data');
  const stop=new URL(data.stop_url),host=options.preview?'engagement-test.guia-do-proprietario-parceiros.pages.dev':'parceiros.guiadoproprietario.pt';
  if(stop.protocol!=='https:'||stop.hostname!==host||stop.pathname!=='/pedido-contactos.html'||stop.username||stop.password||stop.port||!stop.hash)throw new Error('invalid_client_link');
- const subject=`${professional} vai contactá-lo sobre a sua limpeza`,preview='Guarde este contacto para reconhecer a chamada.';
- const paragraphs=[`Olá ${name},`,`Boas notícias: o seu pedido de limpeza em ${place} foi aceite por um profissional da sua zona.`,`${professional}\n📞 ${phone}`,'Pedimos ao profissional que o contacte nas próximas 24 horas. Se preferir, pode também ligar diretamente.',data.modality==='partilhada'?'O seu pedido pode ser aceite por até 3 profissionais.':'Este profissional é o único a receber o seu contacto através do Guia do Proprietário.','Antes de marcar o serviço:\nPeça o orçamento por escrito.\nConfirme o que está incluído e o preço final.','O serviço é combinado diretamente entre si e o profissional. O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.','Já resolveu a limpeza ou prefere não ser contactado? Pode confirmar na ligação abaixo.'];
+ const subject=`${professional} vai contactá-lo(a) sobre a sua limpeza`,preview='Guarde este contacto para reconhecer a chamada.';
+ const paragraphs=[`Olá ${name},`,`Boas notícias: o seu pedido de limpeza em ${place} foi aceite por um profissional da sua zona.`,`${professional}\n📞 ${phone}`,'Pedimos ao profissional que o(a) contacte nas próximas 24 horas. Se preferir, pode também ligar diretamente.',data.modality==='partilhada'?'O seu pedido pode ser aceite por até 3 profissionais.':'Este profissional é o único a receber o seu contacto através do Guia do Proprietário.','Antes de marcar o serviço:\nPeça o orçamento por escrito.\nConfirme o que está incluído e o preço final.','O serviço é combinado diretamente entre si e o profissional. O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.','Já resolveu a limpeza ou prefere não ser contactado(a)? Pode confirmar na ligação abaixo.'];
  const button='Não quero receber mais contactos';
- return renderEmailLayout({subject,preview,title:'Um profissional vai contactá-lo.',name,audience:'client',paragraphs:paragraphs.slice(1),secondary:[{label:button,url:stop.toString()}],signature:false});
+ return renderEmailLayout({subject,preview,title:'Um profissional vai contactá-lo(a).',name,audience:'client',paragraphs:paragraphs.slice(1),secondary:[{label:button,url:stop.toString()}],signature:false});
 }
 
 export function renderClientInterestEmail(data,options={}){
@@ -186,9 +186,9 @@ export function renderClientInterestEmail(data,options={}){
  for(const [value,path] of [[data.interest_url,'/pedido-interesse.html'],[data.stop_url,'/pedido-contactos.html']]){
   const url=new URL(value);if(url.protocol!=='https:'||url.hostname!==host||url.port||url.username||url.password||url.pathname!==path||!url.hash)throw Error('invalid_interest_url');
  }
- const subject='Ainda procura um profissional de limpeza em '+place+'?',preview='Diga-nos se ainda pretende ser contactado sobre o seu pedido.';
- const paragraphs=['Ainda nenhum profissional da nossa rede aceitou o seu pedido de limpeza em '+place+'.',data.stage===15?'O prazo do seu pedido terminou. Se ainda precisa da limpeza, confirme abaixo para o voltar a disponibilizar por mais 15 dias. Tem 7 dias para confirmar.':'O pedido continua disponível e ainda pode ser aceite. Para o mantermos atualizado, diga-nos: ainda pretende ser contactado?'];
- return renderEmailLayout({subject,preview,name,audience:'client',paragraphs,button:{label:'Sim, ainda preciso da limpeza',url:data.interest_url},secondary:[{label:'Já não preciso de ser contactado',url:data.stop_url}],signature:false});
+ const subject='Ainda procura um profissional de limpeza em '+place+'?',preview='Diga-nos se ainda pretende ser contactado(a) sobre o seu pedido.';
+ const paragraphs=['Ainda nenhum profissional da nossa rede aceitou o seu pedido de limpeza em '+place+'.',data.stage===15?'O prazo do seu pedido terminou. Se ainda precisa da limpeza, confirme abaixo para o voltar a disponibilizar por mais 15 dias. Tem 7 dias para confirmar.':'O pedido continua disponível e ainda pode ser aceite. Para o mantermos atualizado, diga-nos: ainda pretende ser contactado(a)?'];
+ return renderEmailLayout({subject,preview,name,audience:'client',paragraphs,button:{label:'Sim, ainda preciso da limpeza',url:data.interest_url},secondary:[{label:'Já não preciso de ser contactado(a)',url:data.stop_url}],signature:false});
 }
 
 function renderV2Engagement(payload){

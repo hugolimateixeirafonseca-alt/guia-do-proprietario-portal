@@ -15,7 +15,7 @@ export function renderPlannedPartnerEmail(id,data){
  const dashboard=client?null:access(data.url);
  switch(id){
  case 'P4':{
-  if(!['novo','anterior'].includes(data.model))throw Error('invalid_partner_model');subject='A sua conta foi aprovada';title='Bem-vindo.\nA sua conta está aprovada.';
+  if(!['novo','anterior'].includes(data.model))throw Error('invalid_partner_model');subject='A sua conta foi aprovada';title='Bem-vindo(a).\nA sua conta está aprovada.';
   paragraphs.push('Já pode ver os pedidos de limpeza da sua zona.');
   if(data.model==='novo'&&data.firstTopupDone===true){
    return renderEmailLayout({subject,preview:'A sua área de parceiro está pronta.',title,name:data.name,paragraphs:['A sua conta foi aprovada e o primeiro carregamento já está registado. Consulte o saldo e os contactos disponíveis na sua área.'],button:{label:'Ver pedidos disponíveis',url:access(data.url,'pedidos')}});
@@ -49,7 +49,7 @@ export function renderPlannedPartnerEmail(id,data){
  case 'P11':subject='Sobre o seu pedido de outro contacto';preview='Veja o resultado da análise do cliente de '+place+'.';
   if(!['contactado','contratacao_posterior','outro'].includes(data.reason))throw Error('invalid_refusal_reason');
   if(data.reason!=='outro'&&data.clientConfirmed!==true)throw Error('client_response_not_confirmed');
-  paragraphs.push(data.reason==='contactado'?'Falámos com o cliente de '+place+'. O cliente disse-nos que foi contactado.':data.reason==='contratacao_posterior'?'Falámos com o cliente de '+place+'. O cliente disse-nos que ainda não tinha contratado ninguém quando comprou este contacto.':required(data.reasonText),'Por isso, desta vez não podemos dar outro contacto.','Se achar que há um engano, responda a este email e vemos o seu caso.');break;
+  paragraphs.push(data.reason==='contactado'?'Falámos com o cliente de '+place+'. O cliente disse-nos que foi contactado(a).':data.reason==='contratacao_posterior'?'Falámos com o cliente de '+place+'. O cliente disse-nos que ainda não tinha contratado ninguém quando comprou este contacto.':required(data.reasonText),'Por isso, desta vez não podemos dar outro contacto.','Se achar que há um engano, responda a este email e vemos o seu caso.');break;
  case 'P12':if(data.clientConfirmed!==true)throw Error('hire_not_confirmed');subject='Parabéns! O cliente de '+place+' contratou-o';preview='O cliente confirmou que contratou os seus serviços.';title='Parabéns! 🎉';paragraphs.push('O cliente do pedido de '+place+' disse-nos que contratou os seus serviços.','Gostou da experiência? Responda a este email com uma frase sobre como correu. Com a sua autorização, podemos partilhá-la com outros profissionais.');button={label:'Ver pedidos disponíveis',url:access(data.url,'pedidos')};break;
  case 'C2':case 'C3':{
   if(!Array.isArray(data.professionals)||!data.professionals.length||data.professionals.length>3)throw Error('invalid_professionals');
