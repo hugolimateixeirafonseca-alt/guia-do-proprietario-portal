@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-03T07:02:55.913Z",
+  "generatedAt": "2026-10-03T07:05:50.319Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 132,
-    "published": 120,
+    "published": 121,
     "newsOnline": 21
   },
   "articles": [
@@ -1472,14 +1472,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "reparar-estores.mdx",
       "arrivedAt": "2026-09-20T12:08:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-03T07:01:14Z",
+      "url": "https://guiadoproprietario.pt/casa/reparar-estores/"
     },
     {
       "id": "EXTRA-021",
