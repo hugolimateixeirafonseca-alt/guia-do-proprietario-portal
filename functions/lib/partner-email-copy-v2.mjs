@@ -128,8 +128,15 @@ export function renderEmailCopyV2Addition(id,data){
  }
  if(id==='Interesse-5'||id==='Interesse-15'){
   const place=required(data.place),interest=clientLink(data.interestUrl,'/pedido-interesse.html'),stop=clientLink(data.stopUrl,'/pedido-contactos.html');
-  const paragraphs=id==='Interesse-5'?['O seu pedido de limpeza em '+place+' continua disponível para os profissionais da sua zona.','Ainda precisa da limpeza?']:['O seu pedido de limpeza em '+place+' chegou ao fim do prazo.','Ainda precisa da limpeza? Confirme abaixo e voltamos a disponibilizá-lo por mais 15 dias.'];
-  return renderEmailLayout({subject:'Ainda precisa da limpeza em '+place+'?',preview:id==='Interesse-5'?'Diga-nos com um clique.':'Confirme e voltamos a disponibilizar o seu pedido.',name:data.name,audience:'client',paragraphs,button:{label:'Sim, ainda preciso da limpeza',url:interest},secondary:[{label:'Já não precisa? Avise-nos aqui.',url:stop}],signature:false});
+  const rawDate=String(data.requestedAt||''),date=new Date(/(?:Z|[+-]\d{2}:?\d{2})$/.test(rawDate)?rawDate:rawDate.replace(' ','T')+'Z');
+  const day=Number.isNaN(date.getTime())?'':date.toLocaleDateString('pt-PT',{timeZone:'Europe/Lisbon'});
+  const service=String(data.cleaningType||'limpeza').trim().replace(/^Limpeza/, 'limpeza');
+  const intro=(day?'No dia '+day+' pediu-nos preço para ':'Pediu-nos preço para ')+(service.startsWith('limpeza')?'uma ':'')+service+' em ';
+  const availability=id==='Interesse-5'?'O seu pedido continua disponível para os profissionais da sua zona.':'O prazo do seu pedido terminou. Confirme que ainda precisa da limpeza para o voltarmos a disponibilizar por mais 15 dias.';
+  const instruction='Clique no botão abaixo. Na página seguinte, confirme que ainda precisa da limpeza.';
+  const content=p(esc(intro)+'<strong>'+esc(place)+'</strong>.')+p(esc(availability))+p('<strong>Ainda precisa da limpeza?</strong>')+p(esc(instruction))+emailButton('Sim, ainda preciso',interest)+p('Já resolveu ou já não precisa? '+emailLink('Avise-nos aqui',stop))+p('Obrigado,<br>Guia do Proprietário');
+  const textContent=[intro+place+'.',availability,'Ainda precisa da limpeza?',instruction,'Sim, ainda preciso: '+interest,'Já resolveu ou já não precisa? Avise-nos aqui: '+stop,'Obrigado,\nGuia do Proprietário'].join('\n\n');
+  return renderEmailLayout({subject:'Ainda precisa da limpeza em '+place+'?',preview:'Abra o botão e confirme na página seguinte.',name:String(data.name||'').trim().split(/\s+/)[0],audience:'client',content,textContent,signature:false});
  }
  if(id==='Candidatura-admin'){
   const candidate=required(data.candidateName),zones=required(data.zones),type=required(data.partnerType),proof=required(data.proofStatus);

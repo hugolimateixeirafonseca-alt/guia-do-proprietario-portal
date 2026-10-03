@@ -194,7 +194,7 @@ export function renderClientInterestEmail(data,options={}){
 function renderV2Engagement(payload){
  const d=payload.data,input={...d,name:payload.partner_name,url:payload.dashboard_url,total:d.total||d.active_requests,missedRequests:d.missed_requests,daysRemaining:d.days_remaining,clientName:d.client_name,clientPhone:d.client_phone,clientEmail:d.client_email,clientPostalCode:d.postal_code,notes:d.notes,modality:d.modality};
  if(d.workflowKind)return renderEmailCopyV2(d.workflowKind,input);
- if(payload.event_type==='client_interest')return renderEmailCopyV2(d.stage===15?'Interesse-15':'Interesse-5',{name:d.client_name,place:d.municipality,interestUrl:d.interest_url,stopUrl:d.stop_url});
+ if(payload.event_type==='client_interest')return renderEmailCopyV2(d.stage===15?'Interesse-15':'Interesse-5',{name:d.client_name,place:d.municipality,requestedAt:d.request_created_at,cleaningType:d.cleaning_type,interestUrl:d.interest_url,stopUrl:d.stop_url});
  if(d.audience==='client')return renderEmailCopyV2(d.modality==='exclusiva'?'C1-exclusiva':'C1-partilhada',{name:d.client_name,place:d.municipality,professional:d.professional_name,professionalPhone:d.professional_phone,resolveUrl:d.resolve_url,stopUrl:d.stop_url});
  const kind=d.kind==='commercial_news_v1'?'P1':d.kind==='client_stop'?'Cliente-sem-contactos':d.kind==='zone_unlocked'?'Z1':{request_digest:'Resumo',approved_no_login:'Sem-acesso',contact_accepted:'P6',shared_contact_acquired:'Partilhado-outro',unused_free_contacts:'Gratis-por-usar',first_contact_feedback:'Feedback-atual',free_contacts_exhausted:d.zoneBlocked?'Carregamentos-pausados':'Gratis-esgotados',lead_expiring:'Pedido-termina',inactive_buyer:'Inativo'}[payload.event_type];
  if(!kind)throw Error('unsupported_v2_event');

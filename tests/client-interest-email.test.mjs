@@ -16,3 +16,9 @@ test('client interest uses fresh policy data and idempotent delivery without par
  const req=()=>new Request('https://test.invalid',{method:'POST',headers:{Authorization:'Bearer secret','Content-Type':'application/json'},body:JSON.stringify(payload)});
  try{for(let i=0;i<2;i++)assert.equal((await onRequestPost({request:req(),env})).status,200);assert.equal(sent.length,1);assert.match(sent[0].text,/Gaia/);allowed=false;assert.equal((await(await onRequestPost({request:req(),env})).json()).suppressed,true);assert.equal(sent.length,1);}finally{globalThis.fetch=original;f.db.close();}
 });
+
+test('V2 delivery includes original date, service and explicit second confirmation',async()=>{
+ const {renderPartnerEngagementEmail}=await import('../functions/lib/partner-engagement-email.mjs');
+ const message=renderPartnerEngagementEmail({event_type:'client_interest',data:{...data,copyVersion:'v2',client_name:'Ana Maria',request_created_at:'2026-09-26T14:25:46Z',cleaning_type:'Limpeza profunda'}});
+ assert.match(message.text,/Olá Ana,/);assert.match(message.text,/No dia 26\/09\/2026 pediu-nos preço para uma limpeza profunda em Porto/);assert.match(message.text,/Na página seguinte, confirme/);assert.match(message.html,/class="email-cta"/);
+});
