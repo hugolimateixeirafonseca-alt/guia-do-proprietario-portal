@@ -6,3 +6,16 @@ test('V2 acquired contact and stop notice use exact request identity and verifie
 test('V2 client action retains signed client link and never leaks partner access',()=>{const e=render({...payload,event_type:'contact_accepted',data:{copyVersion:'v2',audience:'client',modality:'partilhada',client_name:'Ana exemplo',municipality:'Lisboa',professional_name:'Empresa exemplo',professional_phone:'910000000',resolve_url:'https://parceiros.guiadoproprietario.pt/pedido-resposta.html#token=SIGNED',stop_url:'https://parceiros.guiadoproprietario.pt/pedido-contactos.html#token=SIGNED'}});assert.match(e.text,/Já resolveu a limpeza/);assert.doesNotMatch(e.html,/PERSONAL/);});
 
 test('workflow adapter renders warranty confirmations and signed customer questions without partner credentials',()=>{const answer='https://parceiros.guiadoproprietario.pt/pedido-resposta.html?t=SIGNED';const c=render({...payload,event_type:'C5',dashboard_url:'',data:{copyVersion:'v2',workflowKind:'C5',specificProfessional:false,name:'Ana exemplo',place:'Lisboa',responses:{yes:answer+'&resposta=sim',no:answer+'&resposta=nao'}}});assert.match(c.text,/algum profissional/i);assert.doesNotMatch(c.text,/PERSONAL/);const g=render({...payload,event_type:'P10',data:{...payload.data,workflowKind:'P10',rightGranted:true,contactType:'partilhado'}});assert.match(g.text,/Não expira/);});
+
+
+import {renderEmailRequestCard as card} from '../functions/lib/partner-email-copy-v2.mjs';
+const r={id:'7f3k2a-example',cleaningType:'Limpeza regular',place:'Lisboa',postalCode:'1000-001',typology:'Apartamento T2',frequency:'Semanal',when:'A combinar',day:'segunda-feira',period:'manhã',remaining:3,obtained:0,registrationConfirmed:true,whatsappVerified:true,interestConfirmed:true,client_name:'PRIVATE-NAME',client_phone:'PRIVATE-PHONE',client_email:'private@example.invalid'};
+const d={name:'Parceiro <exemplo>',url:'https://parceiros.guiadoproprietario.pt/?t=PERSONAL',prices:{partilhada:280,exclusiva:500},freeContacts:0,requests:[r],registrationConfirmationReady:true,whatsappReady:true,model:'novo',total:1};
+test('request card leads with service and locality and explains timing and available free entitlement',()=>{
+ const c=card(r,{...d,freeContacts:2});
+ for(const format of ['html','text']){assert.ok(c[format].indexOf('Limpeza regular')<c[format].indexOf('Lisboa (1000)'));assert.ok(c[format].indexOf('Lisboa (1000)')<c[format].indexOf('Pedido confirmado'));}
+ assert.match(c.text,/Dia: segunda-feira/);assert.match(c.text,/Horário: manhã/);assert.doesNotMatch(c.text,/prefere segunda-feira, manhã/);assert.match(c.text,/Pode usar 1 contacto partilhado grátis da sua conta neste pedido/);
+ assert.match(card(r,{...d,freeSharedContacts:0,freeExclusiveContacts:1}).text,/1 contacto exclusivo grátis/);
+ assert.doesNotMatch(card({...r,obtained:1,remaining:2},{...d,freeSharedContacts:0,freeExclusiveContacts:1}).text,/GRÁTIS|Pode usar/);
+ assert.doesNotMatch(card(r,{...d,freeContacts:2},{candidate:true}).text,/GRÁTIS|Pode usar/);
+});
