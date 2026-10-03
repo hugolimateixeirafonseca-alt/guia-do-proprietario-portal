@@ -21,6 +21,7 @@ interface Env {
 }
 
 interface SubscribeBody {
+  requestConfirmed?: unknown;
   email?: unknown;
   consent1?: unknown;
   consent2?: unknown;
@@ -84,7 +85,7 @@ const CLEANING_LABELS = {
   },
   timing: {
     asap: "O mais rápido possível", this_week: "Esta semana", next_week: "Próxima semana",
-    specific_date: "Data específica"
+    specific_date: "Data específica", compare_prices: "Só comparar preços"
   },
   weekday: {
     monday: "Segunda-feira", tuesday: "Terça-feira", wednesday: "Quarta-feira",
@@ -182,6 +183,7 @@ async function sendCleaningLead(
       },
       body: JSON.stringify({
         event_id: cleanText(body.eventId, 128),
+        request_confirmed: body.requestConfirmed === true,
         service_type: cleanText(body.serviceType, 32),
         space_type: cleanText(body.spaceType, 32),
         space_size: cleanText(body.spaceSize, 32),
@@ -405,7 +407,8 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   const alAccess = AL_LABELS.access[alAccessCode] || "";
 
   if (!emailOk) return json({ error: "invalid_email" }, 400);
-  if (body.consent1 !== true) return json({ error: "invalid_consent" }, 400);
+  if (isCleaningLead && body.requestConfirmed !== true) return json({ ok: false, error: 'request-not-confirmed' }, 400);
+    if (body.consent1 !== true) return json({ error: "invalid_consent" }, 400);
   if (!consentText || !source || consentVersion !== expectedVersion) {
     return json({ error: "invalid" }, 400);
   }
@@ -427,14 +430,14 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     } else {
       if (!serviceType) return json({ error: "invalid_service_type" }, 400);
       if (!spaceType) return json({ error: "invalid_space_type" }, 400);
-      if (!spaceSize) return json({ error: "invalid_space_size" }, 400);
-      if (!serviceFrequency) return json({ error: "invalid_service_frequency" }, 400);
+      if (!spaceSize || spaceSizeCode === "unknown") return json({ error: "invalid_space_size" }, 400);
+      if (!serviceFrequency || frequencyCode === "undecided") return json({ error: "invalid_service_frequency" }, 400);
     }
     if (!preferredTimePeriods.length || preferredTimePeriods.length !== periodCodes.length || (periodCodes.includes("flexible") && periodCodes.length > 1)) {
       return json({ error: "invalid_preferred_time_period" }, 400);
     }
-    if (!isCleaningAlLead && frequencyCode === "one_time" && !oneTimeTiming) return json({ error: "invalid_one_time_timing" }, 400);
-    if (!isCleaningAlLead && frequencyCode === "one_time" && timingCode === "specific_date" && !/^\d{4}-\d{2}-\d{2}$/.test(preferredDate)) {
+    if (!isCleaningAlLead && !oneTimeTiming) return json({ error: "invalid_one_time_timing" }, 400);
+    if (!isCleaningAlLead && timingCode === "specific_date" && !/^\d{4}-\d{2}-\d{2}$/.test(preferredDate)) {
       return json({ error: "invalid_preferred_date" }, 400);
     }
     if (!isCleaningAlLead && ["weekly", "fortnightly", "monthly"].includes(frequencyCode) && (!preferredWeekdays.length || preferredWeekdays.length !== weekdayCodes.length || (weekdayCodes.includes("flexible") && weekdayCodes.length > 1))) {
@@ -482,7 +485,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     // The lead transaction queued Sender sync durably. Provider failures cannot lose it.
     const delivery = processSenderSync(env).catch(() => ({state:"pending"}));
     if (waitUntil) waitUntil(delivery); else await delivery;
-    return json({ok:true,dashboardStored:true,senderSyncQueued:true,locality:resolvedPostalLookup?.locality},200);
+    return json({ok:true,...(!isCleaningAlLead&&timingCode==="compare_prices"?{comparisonOnly:true}:{}),dashboardStored:true,senderSyncQueued:true,locality:resolvedPostalLookup?.locality},200);
   }
 
   if (!env.SENDER_API_TOKEN) {

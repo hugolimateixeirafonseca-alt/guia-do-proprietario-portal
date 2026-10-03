@@ -5,7 +5,7 @@ import {onRequestPost} from '../functions/api/make/partner-engagement-notificati
 import {deliveryFixture} from './partner-email-fixture.mjs';
 const data={audience:'client',client_name:'Ana',municipality:'Porto',stage:5,interest_url:'https://parceiros.guiadoproprietario.pt/pedido-interesse.html#id=test&expires=1900000000&token=test',stop_url:'https://parceiros.guiadoproprietario.pt/pedido-contactos.html#id=test&expires=1900000000&token=test'};
 test('interest copy escapes data and rejects placeholders and unsafe links',()=>{
- const message=renderClientInterestEmail({...data,client_name:'Ana & Maria'});assert.match(message.html,/Ana &amp; Maria/);assert.match(message.text,/ainda pode ser aceite/);assert.equal((message.html.match(/<a /g)||[]).length,2);assert.doesNotMatch(message.text,/undefined|null|\{\w+\}/);
+ const message=renderClientInterestEmail({...data,client_name:'Ana & Maria'});assert.match(message.html,/Ana &amp; Maria/);assert.match(message.text,/ainda pode ser aceite/);assert.equal((message.html.match(/href="https:[^"]*pedido-/g)||[]).length,2);assert.doesNotMatch(message.text,/undefined|null|\{\w+\}/);
  for(const patch of [{municipality:null},{client_name:'{nome}'},{stage:3},{interest_url:'https://evil.invalid/pedido-interesse.html#test'}])assert.throws(()=>renderClientInterestEmail({...data,...patch}));
 });
 test('client interest uses fresh policy data and idempotent delivery without partner-only lookup',async()=>{

@@ -35,7 +35,7 @@ test('an invalid earlier field returns to its step without sending',async()=>{
 });
 test('one-time summary shows the chosen date without stale recurring weekdays',()=>{
  const result={};const summary={};const values={service_type:'regular',service_frequency:'one_time',one_time_timing:'specific_date',preferred_date:'2026-10-15',postal_code:'1900-096'};
- const ctx={summary,document:{getElementById:()=>result},getValue:k=>values[k]||'',getValues:k=>k==='preferred_weekdays'?['monday']:['morning']};
+ const ctx={summary,confirmation:{nextElementSibling:{}},confirmButton:{},document:{getElementById:()=>result},getValue:k=>values[k]||'',getValues:k=>k==='preferred_weekdays'?['monday']:['morning']};
  const labels=full.slice(full.indexOf('  const labels'),full.indexOf('  const getValue'));
  const update=full.slice(full.indexOf('  const updateSummary'),full.indexOf('  const eventId'));
  vm.runInNewContext(labels+update+'updateSummary();',ctx);

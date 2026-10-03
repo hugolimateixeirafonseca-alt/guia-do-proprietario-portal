@@ -1,3 +1,6 @@
+import {renderEmailCopyV2} from '../../lib/partner-email-copy-v2.mjs';
+import {renderEmailLayout} from '../../lib/partner-email-layout.mjs';
+import {renderPlannedPartnerEmail} from '../../lib/partner-planned-emails.mjs';
 import {archivePartnerEmail} from '../../lib/partner-email-archive.mjs';
 import {resolvePartnerEmailPolicy} from '../../lib/partner-email-policy.mjs';
 import {reserveSenderRequest,recordSenderRateLimit} from '../../lib/sender-api-control.mjs';
@@ -18,7 +21,7 @@ interface RequestContext {
 }
 
 const SENDER_ENDPOINT = "https://api.sender.net/v2/message/send";
-const FROM = { email: "geral@guiadoproprietario.pt", name: "Guia do Proprietário" };
+const FROM = { email: "geral@guiadoproprietario.pt", name: "Hugo · Guia do Proprietário" };
 
 function clean(value: unknown, max: number) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
@@ -64,6 +67,8 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   const eventId = clean(body.event_id, 100);
   const partnerName = clean(body.partner_name, 120);
   const partnerEmail = clean(body.partner_email, 254).toLowerCase();
+  let applicationData;
+  let commercialData: any;
   let dashboardUrl = clean(body.dashboard_url, 1200);
   const title = clean(body.lead_title, 120);
   const municipality = clean(body.municipality, 120);
@@ -86,6 +91,8 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   if(!adminEvent){
     try{
       const policy=await resolvePartnerEmailPolicy(env,partnerEmail,eventId,true);
+      commercialData=policy.commercial_data;
+      applicationData=policy.application_data;
       if(!policy.allowed)return json({ok:true,suppressed:true,event_id:eventId});
       if(policy.dashboard_url){
         const fresh=new URL(policy.dashboard_url);
@@ -94,35 +101,26 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
       }
     }catch{return json({error:'partner_email_policy_unavailable'},503);}
   }
-  const safeName = escapeHtml(partnerName);
-  const safeTitle = escapeHtml(title || "Novo pedido de limpeza");
-  const safeMunicipality = escapeHtml(municipality || "Zona do seu perfil");
-  const safeSummary = escapeHtml(summary || "Existe um novo pedido compatível com o seu perfil.");
-  const safeUrl = escapeHtml(dashboardUrl);
-  const safeExpiry = escapeHtml(expiresAt);
   const welcome = /^welcome:[a-f0-9-]{36}$/.test(eventId);
-  let subject = `${title || "Novo pedido de limpeza"} em ${municipality || "uma zona onde trabalha"}`;
-  let html = `<!doctype html><html lang="pt"><body style="margin:0;background:#f2f6f4;font-family:Arial,sans-serif;color:#10221d"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border:1px solid #d8e2de;border-radius:16px"><tr><td style="padding:32px"><p style="margin:0 0 24px;font-size:14px;color:#397562;font-weight:700">GUIA DO PROPRIETÁRIO</p><h1 style="margin:0 0 16px;font-size:28px;line-height:1.2">Tem um novo pedido compatível</h1><p style="margin:0 0 18px;font-size:17px;line-height:1.6">Olá, ${safeName}.</p><div style="padding:20px;background:#f2f6f4;border-radius:12px"><strong style="font-size:18px">${safeTitle}</strong><p style="margin:8px 0 0;line-height:1.6">${safeMunicipality}<br>${safeSummary}</p></div><p style="margin:22px 0;line-height:1.6">Os dados pessoais do cliente continuam protegidos até concluir a compra. Os pedidos são disponibilizados aos parceiros da zona. Contacto por 4,50 €: recebe os dados do cliente para apresentar a sua proposta. Até mais 2 empresas podem receber o mesmo contacto. Contacto exclusivo por 7 €: só a sua empresa recebe os dados deste cliente através do Guia do Proprietário. A opção exclusiva está disponível enquanto ninguém tiver comprado o contacto. Consulte as modalidades disponíveis no cartão.</p><p style="margin:0 0 24px"><a href="${safeUrl}" style="display:inline-block;padding:15px 22px;background:#397562;color:#fff;text-decoration:none;border-radius:10px;font-weight:700">Ver pedido no dashboard</a></p>${safeExpiry ? `<p style="margin:0;color:#63736d;font-size:13px">Pedido disponível até ${safeExpiry}.</p>` : ""}</td></tr></table></td></tr></table></body></html>`;
-  let text = `Olá, ${partnerName}.\n\nTem um novo pedido compatível: ${title || "Novo pedido de limpeza"}, ${municipality || "zona do seu perfil"}.\n${summary}\n\nOs dados pessoais do cliente ficam visíveis após concluir a compra. Os pedidos são disponibilizados aos parceiros da zona. Contacto por 4,50 €: recebe os dados do cliente para apresentar a sua proposta. Até mais 2 empresas podem receber o mesmo contacto. Contacto exclusivo por 7 €: só a sua empresa recebe os dados deste cliente através do Guia do Proprietário. A opção exclusiva está disponível enquanto ninguém tiver comprado o contacto. Consulte as modalidades disponíveis no cartão.\n\nVer pedido: ${dashboardUrl}${expiresAt ? `\n\nPedido disponível até ${expiresAt}.` : ""}`;
-
-  if (welcome) {
-    subject = "A sua adesão ao Guia do Proprietário foi aprovada";
-    html = `<!doctype html><html lang="pt-PT"><body style="margin:0;background:#f2f6f4;font-family:Arial,sans-serif;color:#10221d"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#fff;border:1px solid #d8e2de;border-radius:16px"><tr><td style="padding:32px"><p style="color:#397562;font-weight:700">GUIA DO PROPRIETÁRIO</p><h1 style="font-size:28px;line-height:1.2">A sua adesão foi aprovada</h1><p>Olá, ${safeName}.</p><p style="line-height:1.6">Bem-vindo à rede de parceiros do Guia do Proprietário. A sua adesão foi aprovada pela nossa equipa. Na sua área pode consultar novos pedidos, acompanhar os contactos aceites e atualizar as zonas e serviços onde trabalha.</p><p style="margin:24px 0"><a href="${safeUrl}" style="display:inline-block;padding:15px 22px;background:#397562;color:#fff;text-decoration:none;border-radius:10px;font-weight:700">Entrar na minha área de parceiro</a></p><p style="line-height:1.6">Nas novas adesões, os primeiros quatro contactos são gratuitos, com ou sem exclusividade, à sua escolha, sem limite diário. Os preços são 4,50 € por contacto ou 7 € por contacto exclusivo. O valor é descontado do saldo em euros apenas numa compra concluída. Cada contacto inicial aceite desconta um dos quatro gratuitos, qualquer que seja a modalidade escolhida. A opção exclusiva depende da disponibilidade do pedido.</p><p style="line-height:1.6">Os pedidos são disponibilizados aos parceiros da zona. Contacto por 4,50 €: recebe os dados do cliente para apresentar a sua proposta. Até mais 2 empresas podem receber o mesmo contacto. Contacto exclusivo por 7 €: só a sua empresa recebe os dados deste cliente através do Guia do Proprietário. A opção exclusiva está disponível enquanto ninguém tiver comprado o contacto. Consulte as modalidades disponíveis no cartão.</p><p style="line-height:1.6">Guarde este email para voltar a entrar. Esta ligação é pessoal: não a partilhe, pois dá acesso à sua área.</p><p style="font-size:13px;line-height:1.6">Se o botão não abrir, copie esta ligação para o navegador:<br><a href="${safeUrl}" style="color:#397562;word-break:break-all">${safeUrl}</a></p><p style="font-size:13px;line-height:1.6">Precisa de ajuda? Responda a este email.</p></td></tr></table></td></tr></table></body></html>`;
-    text = `Olá, ${partnerName}.\n\nBem-vindo à rede de parceiros do Guia do Proprietário. A sua adesão foi aprovada.\n\nEntrar na minha área de parceiro: ${dashboardUrl}\n\nAqui pode consultar novos pedidos, acompanhar os contactos aceites e atualizar as zonas e serviços onde trabalha.\n\nNas novas adesões, os primeiros quatro contactos são gratuitos, com ou sem exclusividade, à sua escolha, sem limite diário. Os preços são 4,50 € por contacto ou 7 € por contacto exclusivo. O valor é descontado do saldo em euros apenas numa compra concluída. Cada contacto inicial aceite desconta um dos quatro gratuitos, qualquer que seja a modalidade escolhida. A opção exclusiva depende da disponibilidade do pedido.\n\nOs pedidos são disponibilizados aos parceiros da zona. Contacto por 4,50 €: recebe os dados do cliente para apresentar a sua proposta. Até mais 2 empresas podem receber o mesmo contacto. Contacto exclusivo por 7 €: só a sua empresa recebe os dados deste cliente através do Guia do Proprietário. A opção exclusiva está disponível enquanto ninguém tiver comprado o contacto. Consulte as modalidades disponíveis no cartão.\n\nGuarde este email para voltar a entrar. Esta ligação é pessoal: não a partilhe, pois dá acesso à sua área.\n\nPrecisa de ajuda? Responda a este email.`;
-  }
-
   const application = /^application:[a-f0-9-]{36}$/.test(eventId);
   const adminApplication = /^application-admin:[a-f0-9-]{36}$/.test(eventId);
   if (adminApplication && partnerEmail !== 'hugo.lima.teixeira.fonseca@gmail.com') return json({error:'invalid_admin_recipient'},400);
-  if (application || adminApplication) {
-    subject = adminApplication ? 'Nova adesão de parceiro para aprovação' : 'Recebemos o seu pedido de adesão';
-    const message = adminApplication
-      ? summary + ' A candidatura está pendente. Use a sua ligação privada de administração para consultar os dados e aprovar.'
-      : 'A sua adesão à rede de parceiros do Guia do Proprietário está sujeita a aprovação. Vamos analisar os dados enviados. Até à aprovação não recebe pedidos nem pode carregar saldo. Assim que a candidatura for aprovada, receberá um email com a ligação de acesso à sua área de parceiro.';
-    html = '<!doctype html><html lang="pt-PT"><body style="font-family:Arial,sans-serif;background:#f2f6f4;color:#203d36;padding:24px"><main style="max-width:600px;margin:auto;background:white;padding:28px;border-radius:16px"><p>GUIA DO PROPRIETÁRIO</p><h1>'+escapeHtml(subject)+'</h1><p>Olá, '+safeName+'.</p><p style="line-height:1.7">'+escapeHtml(message)+'</p><p>Se precisar de ajuda, responda a este email.</p></main></body></html>';
-    text = 'Olá, '+partnerName+'.\n\n'+message+'\n\nSe precisar de ajuda, responda a este email.';
+  let message;
+  if(welcome){
+    // Current policy owns model and entitlements; never trust an old queued offer.
+    if(!commercialData)return json({error:'commercial_policy_unavailable'},503);
+    try { message=commercialData.copyVersion==='v2'?renderEmailCopyV2('P4',{...commercialData,name:partnerName,url:dashboardUrl}):renderPlannedPartnerEmail('P4',{...commercialData,name:partnerName,url:dashboardUrl}); }
+    catch {return json({error:'commercial_policy_unavailable'},503);}
+  } else if(application&&applicationData?.copyVersion==='v2'){
+    try{message=renderEmailCopyV2('Candidatura',{...applicationData,name:partnerName});}catch{return json({error:'application_policy_unavailable'},503);}
+  } else if(application||adminApplication){
+    const subject=adminApplication?'Nova adesão de parceiro para aprovação':'Recebemos o seu pedido de adesão';
+    const paragraphs=[adminApplication?summary+' A candidatura está pendente. Use a sua ligação privada de administração para consultar os dados e aprovar.':'Vamos analisar os dados enviados. Até à aprovação não recebe pedidos nem pode carregar saldo. Assim que a candidatura for aprovada, receberá um email com a ligação de acesso à sua área.'];
+    message=renderEmailLayout({subject,preview:'Vamos analisar os dados enviados.',title:subject,name:partnerName,audience:adminApplication?'admin':'partner',paragraphs});
+  } else {
+    message=renderEmailLayout({subject:(title||'Novo pedido de limpeza')+' em '+(municipality||'uma zona onde trabalha'),preview:'Veja o pedido e escolha como obter o contacto.',title:'Tem um novo pedido compatível',name:partnerName,paragraphs:[title||'Novo pedido de limpeza',municipality||'Zona do seu perfil',summary||'Existe um novo pedido compatível com o seu perfil.','Os dados do cliente ficam disponíveis quando obtém o contacto. Consulte os preços e as opções partilhado e exclusivo no pedido.'],button:{label:'Ver pedido na minha área',url:dashboardUrl}});
   }
-
+  const {subject,html,text}=message;
 
   // Group membership has its own durable queue. Never gate the application email on it.
   if (application && env.CLEANING_DASHBOARD_API_TOKEN) {

@@ -41,6 +41,7 @@ const ebookBody = {
 };
 
 const cleaningBody = {
+  requestConfirmed: true,
   email: "limpeza@exemplo.pt",
   name: "Marta Silva",
   phone: "912 345 678",
@@ -552,7 +553,7 @@ test("recusa pedidos de limpeza incompletos ou com disponibilidade incompatível
   const missingTiming = await onRequestPost({ request: requestFor({ ...cleaningBody, oneTimeTiming: "" }), env });
   const missingDate = await onRequestPost({ request: requestFor({ ...cleaningBody, oneTimeTiming: "specific_date", preferredDate: "" }), env });
   const missingWeekday = await onRequestPost({
-    request: requestFor({ ...cleaningBody, serviceFrequency: "weekly", oneTimeTiming: "", preferredWeekdays: [] }), env
+    request: requestFor({ ...cleaningBody, serviceFrequency: "weekly", oneTimeTiming: "next_week", preferredWeekdays: [] }), env
   });
   assert.deepEqual(await missingService.json(), { error: "invalid_service_type" });
   assert.deepEqual(await missingTiming.json(), { error: "invalid_one_time_timing" });
@@ -571,8 +572,7 @@ test("envia vários dias e períodos para o matching", async () => {
   const response = await onRequestPost({
     request: requestFor({
       ...cleaningBody,
-      serviceFrequency: "weekly",
-      oneTimeTiming: "",
+      serviceFrequency: "weekly", oneTimeTiming: "next_week",
       preferredWeekdays: ["monday", "wednesday", "friday"],
       preferredTimePeriods: ["morning", "afternoon"]
     }),
@@ -732,4 +732,11 @@ test("falha do Sender conserva a evidência original",async()=>{globalThis.fetch
 for(const body of [cleaningBody,alojamentoLocalBody])for(const consent2 of [false,true])test('Sender unavailable keeps cleaning lead queued '+body.source+' newsletter='+consent2,async()=>{
  globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),init});if(String(url).startsWith('https://json.geoapi.pt/'))return Response.json({Localidade:'Lisboa',Concelho:'Lisboa'});if(String(url).endsWith('/api/sender-sync'))throw Error('temporary failure');return Response.json({ok:true,lead_id:'test'});};
  const r=await onRequestPost({request:requestFor({...body,consent2}),env});assert.equal(r.status,200);assert.equal((await r.json()).senderSyncQueued,true);assert.equal(JSON.parse(calls.find(c=>c.url===env.CLEANING_DASHBOARD_API_URL).init.body).consent_marketing,consent2);
+});
+
+test('cleaning requests cannot bypass the final confirmation, including AL',async()=>{
+ for(const body of [cleaningBody,alojamentoLocalBody])for(const requestConfirmed of [false,undefined]){
+  globalThis.fetch=async()=>{throw Error('No external service should be called');};
+  const r=await onRequestPost({request:requestFor({...body,requestConfirmed}),env});assert.equal(r.status,400);assert.equal((await r.json()).error,'request-not-confirmed');
+ }
 });

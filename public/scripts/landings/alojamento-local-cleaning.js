@@ -101,6 +101,7 @@
       source: "guia_limpeza_alojamento_local",
       consentVersion: form.dataset.consentVersion,
       consent1: form.elements.consent_partner_sharing.checked,
+      requestConfirmed: form.elements.request_confirmed.checked,
       consent2: form.elements.consent_marketing.checked,
       pageUrl: window.location.href,
       eventId: submissionId,

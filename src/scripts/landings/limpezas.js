@@ -78,7 +78,7 @@
     if (number === 3 && !getValue("service_frequency")) fail("service_frequency", "Escolha a frequência pretendida.");
     if (number === 4) {
       const frequency = getValue("service_frequency");
-      if (frequency === "one_time") {
+      {
         if (!getValue("one_time_timing")) fail("one_time_timing", "Escolha quando precisa da limpeza.");
         if (getValue("one_time_timing") === "specific_date" && !getValue("preferred_date")) fail("preferred_date", "Escolha uma data.");
       }
@@ -100,7 +100,7 @@
 
   const updateConditional = () => {
     const frequency = getValue("service_frequency");
-    oneTimeFields.classList.toggle("is-hidden", frequency !== "one_time");
+    oneTimeFields.classList.remove("is-hidden");
     recurringFields.classList.toggle("is-hidden", !["weekly", "fortnightly", "monthly"].includes(frequency));
   };
 
@@ -111,9 +111,9 @@
     const frequency = labels.service_frequency[getValue("service_frequency")] || "";
     const day = ["weekly", "fortnightly", "monthly"].includes(getValue("service_frequency")) ? getValues("preferred_weekdays").map(value => labels.preferred_weekday[value]).filter(Boolean).join(", ") : "";
     const period = getValues("preferred_time_periods").map(value => labels.preferred_time_period[value]).filter(Boolean).join(", ");
-    const timing = getValue("service_frequency") === "one_time" ? (getValue("one_time_timing") === "specific_date" ? getValue("preferred_date").split("-").reverse().join("/") : ({asap:"O mais breve possível",this_week:"Esta semana",next_week:"Próxima semana",flexible:"Data flexível"})[getValue("one_time_timing")] || "") : "";
+    const timing = (getValue("one_time_timing") === "specific_date" ? getValue("preferred_date").split("-").reverse().join("/") : ({asap:"O mais breve possível",this_week:"Esta semana",next_week:"Próxima semana",compare_prices:"Só comparar preços",flexible:"Data flexível"})[getValue("one_time_timing")] || "");
     const text = [service, frequency, timing, day, period, getValue("postal_code")].filter(Boolean).join(" · ");
-    summary.textContent = "Resumo: " + text;
+    const comparing=getValue("one_time_timing")==="compare_prices";confirmation.nextElementSibling.textContent=comparing?"Confirmo que pretendo apenas comparar preços. Este pedido não será enviado a profissionais.":"Confirmo que preciso deste serviço e que aceito ser contactado por profissionais da minha zona.";confirmButton.textContent=comparing?"Guardar preferências":"Confirmar e receber orçamentos";summary.textContent = "Resumo: " + text;
     document.getElementById("confirmationSummary").textContent = text;
   };
 
@@ -182,6 +182,7 @@
       source: "guia_limpeza_preco_disponibilidade",
       consentVersion: form.dataset.consentVersion,
       consent1: form.elements.consent_partner_sharing.checked,
+      requestConfirmed: confirmation.checked,
       consent2: form.elements.consent_marketing.checked,
       pageUrl: window.location.href,
       eventId: submissionId,
@@ -229,7 +230,7 @@
       }
 
       sendingState.classList.add("is-hidden");
-      successState.classList.remove("is-hidden");
+      successState.classList.remove("is-hidden");successState.querySelector("h3").textContent=result.comparisonOnly?"Preferências guardadas":"Pedido enviado com sucesso";successState.querySelector("p").textContent=result.comparisonOnly?"Indicou que só pretende comparar preços. Este pedido não será disponibilizado a profissionais. Quando quiser avançar, faça um novo pedido.":"Recebemos os seus dados e vamos encaminhar o pedido de acordo com a sua zona e preferência de disponibilidade.";
       if (window.fbq) window.fbq("track", "Lead", { content_name: "servicos-limpeza" }, { eventID: submissionId });
     } catch {
       sendingState.classList.add("is-hidden");
@@ -242,7 +243,7 @@
     form.reset();
     successState.classList.add("is-hidden");
     form.classList.remove("is-hidden");
-    oneTimeFields.classList.add("is-hidden");
+    oneTimeFields.classList.remove("is-hidden");
     recurringFields.classList.add("is-hidden");
     dateBlock.classList.add("is-hidden");
     showStep(1);

@@ -62,7 +62,7 @@ test("envia o aviso transacional pelo Sender sem incluir dados pessoais do clien
     assert.equal(sent.url, "https://api.sender.net/v2/message/send");
     assert.equal(sent.body.to.email, payload.partner_email);
     assert.equal(sent.body.from.email, "geral@guiadoproprietario.pt");
-    assert.match(sent.body.html, /Ver pedido no dashboard/);
+    assert.match(sent.body.html, /Ver pedido na minha área/);
     assert.doesNotMatch(sent.body.html, /telefone|email do cliente|nome do cliente/i);
   } finally {
     globalThis.fetch = originalFetch;
@@ -81,7 +81,7 @@ test("aceita apenas ligações do dashboard oficial", async () => {
 test("boas-vindas incluem o acesso permanente e condições sem anunciar um pedido inexistente", async () => {
   let sent;
   const originalFetch=globalThis.fetch;
-  globalThis.fetch=async(_url,init)=>{if(String(_url).endsWith('/api/partner-email-policy'))return new Response('{"ok":true,"allowed":true}');if(init.body)sent=JSON.parse(init.body);return new Response('{}',{status:200});};
+  globalThis.fetch=async(_url,init)=>{if(String(_url).endsWith('/api/partner-email-policy'))return Response.json({ok:true,allowed:true,commercial_data:{model:'anterior',freeContacts:4}});if(init.body)sent=JSON.parse(init.body);return new Response('{}',{status:200});};
   try {
     const welcome={...payload,event_id:'welcome:12345678-1234-1234-1234-123456789abc',partner_name:'Empresa <teste>',expires_at:null};
     const response=await onRequestPost({request:request(welcome),env:{EMAIL_DELIVERY_DB:deliveryFixture().binding,MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,CLEANING_DASHBOARD_API_TOKEN:'internal',SENDER_API_TOKEN:'sender-test'}});
@@ -90,8 +90,8 @@ test("boas-vindas incluem o acesso permanente e condições sem anunciar um pedi
     for(const body of [sent.html,sent.text]){
       assert.ok(body.includes(payload.dashboard_url));
       assert.match(body,/Entrar na minha área de parceiro/);
-      assert.match(body,/quatro contactos são gratuitos/);
-      assert.match(body,/4,50 €/);assert.match(body,/7 €/);assert.match(body,/sem limite diário/);assert.match(body,/Até mais 2 empresas podem receber o mesmo contacto/);assert.match(body,/só a sua empresa recebe os dados deste cliente através do Guia do Proprietário/);assert.doesNotMatch(body,/Contacto partilhado|para partilhar/);
+      assert.match(body,/4 contactos grátis/);
+      assert.match(body,/continuam a poder ser usados como antes/); assert.doesNotMatch(body,/Carregue 15|60 dias|4,50 €/);
       assert.doesNotMatch(body,/Tem um novo pedido|Pedido disponível até/);
     }
     assert.ok(sent.html.includes('Empresa &lt;teste&gt;'));
@@ -100,7 +100,7 @@ test("boas-vindas incluem o acesso permanente e condições sem anunciar um pedi
 });
 
 
-test('candidatura pendente confirma aprovação necessária, sem link de acesso',async()=>{const original=globalThis.fetch;let sent;globalThis.fetch=async(_url,init)=>{if(String(_url).endsWith('/api/partner-email-policy'))return new Response('{"ok":true,"allowed":true}');if(init.body)sent=JSON.parse(init.body);return new Response('{}');};try{const r=await onRequestPost({request:request({...payload,event_id:'application:12345678-1234-1234-1234-123456789abc',dashboard_url:'https://parceiros.guiadoproprietario.pt/aderir'}),env:{EMAIL_DELIVERY_DB:deliveryFixture().binding,MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,CLEANING_DASHBOARD_API_TOKEN:'internal',SENDER_API_TOKEN:'test'}});assert.equal(r.status,200);assert.match(sent.text,/sujeita a aprovação/);assert.doesNotMatch(sent.html,/Tem um novo pedido|Entrar na minha área|\?t=/);}finally{globalThis.fetch=original;}});
+test('candidatura pendente confirma aprovação necessária, sem link de acesso',async()=>{const original=globalThis.fetch;let sent;globalThis.fetch=async(_url,init)=>{if(String(_url).endsWith('/api/partner-email-policy'))return new Response('{"ok":true,"allowed":true}');if(init.body)sent=JSON.parse(init.body);return new Response('{}');};try{const r=await onRequestPost({request:request({...payload,event_id:'application:12345678-1234-1234-1234-123456789abc',dashboard_url:'https://parceiros.guiadoproprietario.pt/aderir'}),env:{EMAIL_DELIVERY_DB:deliveryFixture().binding,MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,CLEANING_DASHBOARD_API_TOKEN:'internal',SENDER_API_TOKEN:'test'}});assert.equal(r.status,200);assert.match(sent.text,/Até à aprovação/);assert.doesNotMatch(sent.html,/Tem um novo pedido|Entrar na minha área|\?t=/);}finally{globalThis.fetch=original;}});
 test('aviso de aprovação vai para o administrador designado',async()=>{const original=globalThis.fetch;let sent;globalThis.fetch=async(_url,init)=>{if(String(_url).endsWith('/api/partner-email-policy'))return new Response('{"ok":true,"allowed":true}');if(init.body)sent=JSON.parse(init.body);return new Response('{}');};try{const body={...payload,event_id:'application-admin:12345678-1234-1234-1234-123456789abc',partner_email:'hugo.lima.teixeira.fonseca@gmail.com',dashboard_url:'https://parceiros.guiadoproprietario.pt/admin'};const r=await onRequestPost({request:request(body),env:{EMAIL_DELIVERY_DB:deliveryFixture().binding,MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,CLEANING_DASHBOARD_API_TOKEN:'internal',SENDER_API_TOKEN:'test'}});assert.equal(r.status,200);assert.equal(sent.to.email,body.partner_email);assert.match(sent.subject,/aprovação/);const denied=await onRequestPost({request:request({...body,partner_email:'other@example.pt'}),env:{EMAIL_DELIVERY_DB:deliveryFixture().binding,MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,CLEANING_DASHBOARD_API_TOKEN:'internal',SENDER_API_TOKEN:'test'}});assert.equal(denied.status,400);}finally{globalThis.fetch=original;}});
 
 

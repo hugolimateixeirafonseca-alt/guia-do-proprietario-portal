@@ -11,18 +11,18 @@ const cases = [
   ['shared_contact_acquired',{municipality:'Porto',client_phone:'+351 912345678'}],
   ['unused_free_contacts',{active_requests:2,free_contacts:4,localities:'Porto, Gaia'}],
   ['first_contact_feedback',{municipality:'Porto'}],
-  ['free_contacts_exhausted',{}],
+  ['free_contacts_exhausted',{prices:{partilhada:280,exclusiva:500},payments_ready:true}],
   ['lead_expiring',{municipality:'Porto',days_remaining:5}],
   ['inactive_buyer',{missed_requests:6}]
 ];
 test('seven templates use one CTA, plain-text alternative and escaped customer strings', () => {
   for (const [event_type,data] of cases) {
     const message=renderPartnerEngagementEmail({...base,event_type,data});
-    assert.equal((message.html.match(/<a /g)||[]).length,1);
+    assert.equal((message.html.match(/class="email-cta"/g)||[]).length,1);
     assert.ok(message.html.includes(`href="${base.dashboard_url}"`));
     assert.doesNotMatch(message.html,/href="tel:/);
     assert.match(message.html,/Limpezas &lt;Norte&gt;/);
-    assert.doesNotMatch(message.html,/<img|<script|<table/);
+    assert.doesNotMatch(message.html,/<img|<script/);
     assert.ok(message.text.includes('Guia do Proprietário'));
     assert.ok(message.subject.length > 10);
   }
@@ -35,7 +35,7 @@ test('confirmation fills exact client details, both modes, multiple days and saf
   const data={...cases[0][1],modality};const message=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data});
   for(const value of ['Ana Teste','ana@example.invalid','1000-001','Lisboa','Limpeza regular','Apartamento, T2','semanal','segunda-feira, domingo','manhã, tarde','Porta azul'])assert.ok(message.text.includes(value),value);
   assert.ok(message.text.includes('Abrir a minha área de parceiro: '+base.dashboard_url));
-  assert.ok(message.text.includes(modality==='partilhada'?'outros profissionais':'só a sua empresa'));
+  assert.ok(message.text.includes(modality==='partilhada'?'outros profissionais':'só você'));
   const missing=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data:{...data,client_email:null,postal_code:undefined,notes:'{notas}',days:null,periods:'null'}});
   assert.doesNotMatch(missing.text,/undefined|null|NaN|\{\w+\}/);
   assert.match(missing.text,/O cliente não deixou notas/);

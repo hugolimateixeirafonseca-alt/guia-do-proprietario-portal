@@ -97,7 +97,6 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
                       <option value="small_space">Espaço pequeno</option>
                       <option value="medium_space">Espaço médio</option>
                       <option value="large_space">Espaço grande</option>
-                      <option value="unknown">Não sei indicar</option>
                     </select>
                     <p class="field-error" data-error-for="space_size"></p>
                   </div>
@@ -119,7 +118,6 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
                   <label class="row-option"><input type="radio" name="service_frequency" value="weekly"><span><b>Todas as semanas</b><small>Serviço semanal</small></span></label>
                   <label class="row-option"><input type="radio" name="service_frequency" value="fortnightly"><span><b>De 15 em 15 dias</b><small>Serviço quinzenal</small></span></label>
                   <label class="row-option"><input type="radio" name="service_frequency" value="monthly"><span><b>Uma vez por mês</b><small>Serviço mensal</small></span></label>
-                  <label class="row-option"><input type="radio" name="service_frequency" value="undecided"><span><b>Ainda não sei</b><small>Quero perceber primeiro preço e opções</small></span></label>
                 </div>
                 <p class="field-error" data-error-for="service_frequency"></p>
               </fieldset>
@@ -131,7 +129,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
                 <legend>Qual é a sua disponibilidade?</legend>
                 <p class="question-help">Indique a sua preferência. A empresa que receber o pedido confirmará a disponibilidade final.</p>
 
-                <div id="oneTimeFields" class="conditional is-hidden">
+                <div id="oneTimeFields" class="conditional">
                   <div class="field-block">
                     <span class="field-label">Quando precisa da limpeza?</span>
                     <div class="option-grid option-grid-2 compact-options">
@@ -140,7 +138,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
                       <label class="option-card"><input type="radio" name="one_time_timing" value="next_week"><b>Próxima semana</b></label>
                       <label class="option-card"><input type="radio" name="one_time_timing" value="specific_date"><b>Tenho uma data</b></label>
                     </div>
-                    <p class="field-error" data-error-for="one_time_timing"></p>
+                    <label class="option-card"><input type="radio" name="one_time_timing" value="compare_prices"><b>Só quero comparar preços</b><small>Não será enviado a profissionais.</small></label><p class="field-error" data-error-for="one_time_timing"></p>
                   </div>
                   <div id="dateBlock" class="field-block is-hidden">
                     <label class="field-label" for="preferred_date">Data preferencial</label>
@@ -220,7 +218,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
             <section class="form-step" data-step="6" aria-labelledby="confirmationTitle">
               <h3 id="confirmationTitle" tabindex="-1">Confirme o seu pedido</h3>
               <p id="confirmationSummary" class="summary"></p>
-              <label class="consent-box"><input id="confirmPreferences" type="checkbox" name="confirm_preferences"><span>Confirmo as preferências e comprometo-me a responder aos profissionais que me contactarem.</span></label>
+              <aside id="priceReference" class="summary" hidden></aside><label class="consent-box"><input id="confirmPreferences" type="checkbox" name="confirm_preferences" required><span>Confirmo que preciso deste serviço e que aceito ser contactado por profissionais da minha zona.</span></label>
               <button id="confirmRequest" class="btn btn-primary btn-block" type="submit" disabled>Confirmar e receber orçamentos</button>
               <button id="editPreferences" class="btn btn-light btn-block" type="button">Alterar preferências</button>
               <p class="legal-note">Gratuito e sem obrigação de contratar.</p>
