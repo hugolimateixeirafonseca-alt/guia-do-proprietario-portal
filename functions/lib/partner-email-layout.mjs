@@ -11,6 +11,9 @@ export function emailButton(label,url,{offer=false,outline=false}={}){
  const bg=outline?'#FFFFFF':offer?'#E8B23A':'#1E4634',color=outline||offer?'#1E4634':'#FFFFFF';
  return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px"><tr><td align="center" bgcolor="'+bg+'" style="border:1px solid #1E4634;border-radius:8px"><a class="email-cta" href="'+escapeEmailHtml(url)+'" style="display:block;padding:16px 12px;min-height:16px;font-size:16px;line-height:1.6;font-weight:bold;text-decoration:none;background:'+bg+';color:'+color+';border-radius:8px">'+escapeEmailHtml(label)+'</a></td></tr></table>';
 }
+/**
+ * @param {{subject:string,preview:string,title?:string,subtitle?:string,name?:string,audience?:string,paragraphs?:string[],content?:string,textContent?:string,button?:{label:string,url:string},secondary?:Array<{label:string,url:string}>,offer?:boolean,signature?:boolean}} options
+ */
 export function renderEmailLayout({subject,preview,title='',subtitle='',name='',audience='partner',paragraphs=[],content='',textContent='',button,secondary=[],offer=false,signature=true}){
  if(!subject||!preview||!['partner','client','admin'].includes(audience)||audience==='client'&&offer)throw Error('invalid_email_layout');
  const esc=escapeEmailHtml,greeting=emailGreeting(name),why=audience==='client'?'Recebe este email porque fez um pedido de limpeza no Guia do Proprietário.':audience==='admin'?'Recebe este email porque administra a plataforma do Guia do Proprietário.':'Recebe este email porque é parceiro do Guia do Proprietário.';
