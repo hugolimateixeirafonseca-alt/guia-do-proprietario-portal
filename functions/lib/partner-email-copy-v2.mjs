@@ -123,7 +123,7 @@ export function renderEmailCopyV2Addition(id,data){
   const timing='Pedimos ao profissional que o contacte nas próximas 24 horas. Se preferir, pode também ligar diretamente.';
   const mode=id==='C1-partilhada'?'O seu pedido pode ser aceite por até 3 profissionais.':'Este profissional é o único a receber o seu contacto através do Guia do Proprietário.';
   const conditions='Antes de marcar o serviço:\nPeça o orçamento por escrito.\nConfirme o que está incluído e o preço final.';
-  const service='O serviço é combinado diretamente entre si e o profissional. O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.';
+  const service='O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.';
   const content=p(esc(intro))+emailCard(professional,p('📞 '+esc(phone)))+p(esc(recognize))+p(esc(timing))+p(esc(mode))+emailCard('Antes de marcar o serviço:',p('Peça o orçamento por escrito.')+p('Confirme o que está incluído e o preço final.'),{rules:true})+p(esc(service))+p('<strong>'+emailLink('Já resolveu a limpeza? Avise-nos aqui.',resolve)+'</strong>')+'<p style="margin:24px 0 0;font-size:14px;line-height:1.6">'+emailLink('Não quero receber mais contactos',stop)+'</p>';
   return renderEmailLayout({subject:professional+' vai contactá-lo sobre a sua limpeza',preview:'Guarde este contacto para reconhecer a chamada.',title:'Um profissional vai contactá-lo.',name:data.name,audience:'client',signature:false,content,textContent:[intro,professional+'\n📞 '+phone,recognize,timing,mode,conditions,service,'Já resolveu a limpeza? Avise-nos aqui.: '+resolve,'Não quero receber mais contactos: '+stop].join('\n\n')});
  }
