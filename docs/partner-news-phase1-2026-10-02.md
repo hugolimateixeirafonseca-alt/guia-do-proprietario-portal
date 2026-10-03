@@ -36,3 +36,7 @@ Galeria atual com 45 variantes. Motores de garantia, seguimentos P5/P7/P8/P9/P10
 ## Conclusão do formulário e dos emails, 03/10/2026
 
 Formulário geral sem dimensão/frequência indefinida e com início obrigatório, incluindo serviços regulares. Comparação de preços é registada sem distribuição na plataforma; agradecimento próprio. Referência pública de preço vem da configuração administrativa e permanece oculta enquanto vazia. Modelos P4/P5 com ligação pessoal para dicas; P1/P4/P5 podem apresentar apenas testemunho real autorizado obtido na política do servidor. Pergunta de garantia identifica o profissional quando autorizado, preservando o caso genérico. Serviço de emails sincronizado com a plataforma. Verificações locais direcionadas aprovadas. Continua local, sem publicação ou envio. Fonte atual: parceiros/docs/partner-completion-2026-10-03.md.
+
+## Publicação autorizada, 03/10/2026
+
+Plataforma e migrações 0053–0056 autorizadas para publicação pelo proprietário. Este portal integra os formulários de qualidade e os modelos de emails; envio para main pelo fluxo normal. Novos modelos, campanha de novidades, seguimentos e pagamentos continuam desligados até validação e ativação próprias. Galeria atual: 46 variantes. Contas antigas mantêm acesso, saldo e gratuitos; preços novos sem adesão obrigatória. Conclusão do deployment do portal e confirmação online ficam por confirmar pelo proprietário. Fonte: parceiros/docs/partner-completion-2026-10-03.md.
