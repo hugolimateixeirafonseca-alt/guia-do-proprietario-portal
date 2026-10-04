@@ -13,8 +13,8 @@ const r={id:'7f3k2a-example',cleaningType:'Limpeza regular',place:'Lisboa',posta
 const d={name:'Parceiro <exemplo>',url:'https://parceiros.guiadoproprietario.pt/?t=PERSONAL',prices:{partilhada:280,exclusiva:500},freeContacts:0,requests:[r],registrationConfirmationReady:true,whatsappReady:true,model:'novo',total:1};
 test('request card leads with service and locality and explains timing and available free entitlement',()=>{
  const c=card(r,{...d,freeContacts:2});
- for(const format of ['html','text']){assert.ok(c[format].indexOf('Limpeza regular')<c[format].indexOf('Lisboa (1000)'));assert.ok(c[format].indexOf('Lisboa (1000)')<c[format].indexOf('Pedido confirmado'));}
- assert.match(c.text,/Dia: segunda-feira/);assert.match(c.text,/Horário: manhã/);assert.doesNotMatch(c.text,/prefere segunda-feira, manhã/);assert.match(c.text,/Pode usar 1 contacto partilhado grátis da sua conta neste pedido/);
+ for(const format of ['html','text']){assert.ok(c[format].indexOf('Limpeza regular')<c[format].indexOf('Lisboa · 1000'));assert.ok(c[format].indexOf('Lisboa · 1000')<c[format].indexOf('WhatsApp verificado'));}
+ assert.match(c.text,/Dias: segunda-feira/);assert.match(c.text,/Períodos: manhã/);assert.doesNotMatch(c.text,/prefere segunda-feira, manhã/);assert.match(c.text,/Pode usar 1 contacto partilhado grátis da sua conta neste pedido/);
  assert.match(card(r,{...d,freeSharedContacts:0,freeExclusiveContacts:1}).text,/1 contacto exclusivo grátis/);
  assert.doesNotMatch(card({...r,obtained:1,remaining:2},{...d,freeSharedContacts:0,freeExclusiveContacts:1}).text,/GRÁTIS|Pode usar/);
  assert.doesNotMatch(card(r,{...d,freeContacts:2},{candidate:true}).text,/GRÁTIS|Pode usar/);
