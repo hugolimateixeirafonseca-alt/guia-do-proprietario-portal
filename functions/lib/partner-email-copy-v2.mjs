@@ -62,7 +62,7 @@ function renderEmailCopyV2Core(id,data){
   const priceCell=(label,amount,description)=>'<td class="request-column" width="50%" valign="top" style="padding:16px;background:#EEF5F0;border-radius:8px"><p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:#1E4634">'+label+'</p><p style="margin:0 0 14px;font-size:40px;font-weight:bold;line-height:1.2;color:#1E4634">'+euro(amount)+'</p>'+p(description)+'</td>';
   add(emailCard('2. Contactos mais baratos','<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed"><tr>'+priceCell('Partilhado',data.prices.partilhada,'Até <strong>3 profissionais</strong> podem receber o mesmo contacto.')+priceCell('Exclusivo',data.prices.exclusiva,'<strong>Só você</strong> recebe este contacto através do Guia do Proprietário.')+'</tr></table>'+p('Disponível enquanto ninguém tiver obtido o contacto.')),'2. Contactos mais baratos\n'+priceText);
   const u=personal(data.url);u.pathname='/regras-garantia.html';u.hash='';
-  const guarantee='Tente 3 vezes, em 2 dias diferentes, pelos botões da plataforma. Depois, carregue em “Pedir outro contacto”.\nO cliente já tinha contratado outra pessoa antes de comprar o seu contacto? Também lhe damos outro contacto.\nNós confirmamos com o cliente. Só para contactos pagos.';
+  const guarantee='Tente 3 vezes, em 2 dias úteis diferentes, pelos botões da plataforma. Depois, carregue em “Pedir outro contacto”.\nO cliente já tinha contratado outra pessoa antes de comprar o seu contacto? Também lhe damos outro contacto.\nNós confirmamos com o cliente. Só para contactos pagos.';
   add(emailCard('3. O cliente não atende? Damos-lhe outro contacto.',guarantee.split('\n').map(v=>p(esc(v))).join('')+p(emailLink('Ver as regras',u.toString())),{rules:true}),'3. O cliente não atende? Damos-lhe outro contacto.\n'+guarantee+'\nVer as regras: '+u);
   if(requests.length){add('<h2 style="font-size:24px;color:#1E4634">Pedidos na sua zona agora</h2>','Pedidos na sua zona agora');grid();}main('Ver os pedidos da minha zona');
   const offer='Num carregamento de 15 € ou mais, recebe 2 contactos partilhados grátis, uma única vez.\nOs 15 € ficam no seu saldo para os contactos seguintes.\nA oferta é opcional.';
@@ -125,7 +125,7 @@ export function renderEmailCopyV2Addition(id,data){
   const place=required(data.place),professional=required(data.professional),phone=required(data.professionalPhone);if(!/^\+?[\d ()-]{9,24}$/.test(phone))throw Error('invalid_professional_phone');
   const resolve=clientLink(data.resolveUrl,'/pedido-resposta.html'),stop=clientLink(data.stopUrl,'/pedido-contactos.html');
   const intro='Boas notícias: o seu pedido de limpeza em '+place+' foi aceite por um profissional da sua zona.',recognize='Se receber uma chamada de um número desconhecido nas próximas horas, atenda: pode ser este profissional.';
-  const timing='Pedimos ao profissional que o(a) contacte nas próximas 24 horas. Se preferir, pode também ligar diretamente.';
+  const timing='Pedimos ao profissional que o(a) contacte até ao próximo dia útil. Se preferir, pode também ligar diretamente.';
   const mode=id==='C1-partilhada'?'O seu pedido pode ser aceite por até 3 profissionais.':'Este profissional é o único a receber o seu contacto através do Guia do Proprietário.';
   const conditions='Antes de marcar o serviço:\nPeça o orçamento por escrito.\nConfirme o que está incluído e o preço final.';
   const service='O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.';

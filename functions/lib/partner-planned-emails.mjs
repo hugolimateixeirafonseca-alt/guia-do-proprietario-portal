@@ -29,7 +29,7 @@ export function renderPlannedPartnerEmail(id,data){
    if(data.freeContacts){offer=true;add('🎁 Tem '+data.freeContacts+' contactos grátis','Os contactos grátis anteriores continuam a poder ser usados como antes. A opção exclusiva depende da disponibilidade do pedido.',{offer:true});}
    button={label:'Entrar na minha área de parceiro',url:dashboard};
   }
-  add('Como funciona',steps);if(data.guaranteeReady===true)add('O cliente não atende? Damos-lhe outro contacto.','Tente 3 vezes, em 2 dias diferentes, pelos botões da plataforma. Depois, carregue em Pedir outro contacto. Verificamos cada caso. Só para contactos pagos.\nVer as regras: '+access(data.url).replace('/?','/regras-garantia.html?').split('#')[0],{rules:true});paragraphs.push('Guarde este email para voltar a entrar. Esta ligação é pessoal: não a partilhe.');secondary.push({label:'Ver os pedidos da minha zona',url:access(data.url,'pedidos')});break;
+  add('Como funciona',steps);if(data.guaranteeReady===true)add('O cliente não atende? Damos-lhe outro contacto.','Tente 3 vezes, em 2 dias úteis diferentes, pelos botões da plataforma. Depois, carregue em Pedir outro contacto. Verificamos cada caso. Só para contactos pagos.\nVer as regras: '+access(data.url).replace('/?','/regras-garantia.html?').split('#')[0],{rules:true});paragraphs.push('Guarde este email para voltar a entrar. Esta ligação é pessoal: não a partilhe.');secondary.push({label:'Ver os pedidos da minha zona',url:access(data.url,'pedidos')});break;
  }
  case 'P5':{
   if(data.bonusGranted!==true||!['novo','anterior'].includes(data.model))throw Error('bonus_not_confirmed');subject='Tem 2 contactos grátis na sua conta';preview='São partilhados e podem ser usados antes do seu saldo.';title='Tudo pronto.\nTem 2 contactos grátis.';
