@@ -86,7 +86,7 @@ const CLEANING_LABELS = {
   },
   timing: {
     asap: "O mais rápido possível", this_week: "Esta semana", next_week: "Próxima semana",
-    specific_date: "Data específica", compare_prices: "Só comparar preços"
+    specific_date: "Data específica", compare_prices: "Estou só curioso(a) sobre os preços"
   },
   weekday: {
     monday: "Segunda-feira", tuesday: "Terça-feira", wednesday: "Quarta-feira",

@@ -112,9 +112,9 @@
     const frequency = labels.service_frequency[getValue("service_frequency")] || "";
     const day = ["weekly", "fortnightly", "monthly"].includes(getValue("service_frequency")) ? getValues("preferred_weekdays").map(value => labels.preferred_weekday[value]).filter(Boolean).join(", ") : "";
     const period = getValues("preferred_time_periods").map(value => labels.preferred_time_period[value]).filter(Boolean).join(", ");
-    const timing = (getValue("one_time_timing") === "specific_date" ? getValue("preferred_date").split("-").reverse().join("/") : ({asap:"O mais breve possível",this_week:"Esta semana",next_week:"Próxima semana",flexible:"Data flexível"})[getValue("one_time_timing")] || "");
+    const timing = (getValue("one_time_timing") === "specific_date" ? getValue("preferred_date").split("-").reverse().join("/") : ({asap:"O mais breve possível",this_week:"Esta semana",next_week:"Próxima semana",flexible:"Data flexível",compare_prices:"Estou só curioso(a) sobre os preços"})[getValue("one_time_timing")] || "");
     const text = [service, frequency, timing, day, period, getValue("postal_code")].filter(Boolean).join(" · ");
-    confirmation.nextElementSibling.textContent="Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.";confirmButton.textContent="Confirmar e receber orçamentos";summary.textContent = "Resumo: " + text;
+    confirmation.nextElementSibling.textContent=getValue("one_time_timing")==="compare_prices"?"Confirmo que quero receber propostas para conhecer os preços e que aceito ser contactado(a) por profissionais da minha zona.":"Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.";confirmButton.textContent="Confirmar e receber propostas";summary.textContent = "Resumo: " + text;
     document.getElementById("confirmationSummary").textContent = text;
   };
 

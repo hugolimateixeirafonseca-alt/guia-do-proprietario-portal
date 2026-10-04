@@ -4,7 +4,7 @@ import { LIMPEZA_CONSENT_VERSION } from "../../data/consent";
 import "../../styles/limpezas.css";
 
 const titulo = "Serviços de limpeza | Guia do Proprietário";
-const descricao = "Peça preço e disponibilidade para serviços de limpeza na sua zona, em Portugal.";
+const descricao = "Receba propostas de profissionais de limpeza da sua zona, sem compromisso.";
 const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
 ---
 
@@ -29,7 +29,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
         <div class="hero-copy">
           <span class="eyebrow">Serviços de limpeza</span>
           <h1>Precisa de serviços de <em>limpeza regulares</em> ou ocasionais para a sua casa ou empresa?</h1>
-          <p class="hero-sub">Peça <strong>preço e disponibilidade</strong>. Até 3 empresas da sua zona, com disponibilidade compatível com a sua preferência, podem receber os dados do pedido e contactá-lo(a).</p>
+          <p class="hero-sub">Receba <strong>propostas de profissionais de limpeza da sua zona</strong>, sem compromisso. Até 3 empresas da sua zona, com disponibilidade compatível com a sua preferência, podem receber os dados do pedido e contactá-lo(a).</p>
           <ul class="hero-bullets">
             <li>Limpeza regular, profunda e pós-obra</li>
             <li>Casas, apartamentos, escritórios e lojas</li>
@@ -39,7 +39,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
 
         <section class="form-card" id="pedido" aria-labelledby="form-title">
           <header class="form-card-head">
-            <h2 id="form-title">Peça o seu preço e disponibilidade</h2>
+            <h2 id="form-title">Receba propostas de profissionais da sua zona</h2>
             <p>Responda a algumas perguntas rápidas.</p>
           </header>
 
@@ -137,6 +137,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
                       <label class="option-card"><input type="radio" name="one_time_timing" value="this_week"><b>Esta semana</b></label>
                       <label class="option-card"><input type="radio" name="one_time_timing" value="next_week"><b>Próxima semana</b></label>
                       <label class="option-card"><input type="radio" name="one_time_timing" value="specific_date"><b>Tenho uma data</b></label>
+                      <label class="option-card"><input type="radio" name="one_time_timing" value="compare_prices"><b>Estou só curioso(a) sobre os preços</b></label>
                     </div>
                     <p class="field-error" data-error-for="one_time_timing"></p>
                   </div>
@@ -224,13 +225,13 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
                 <p class="legal-note">Consulte a <a href="/privacidade/">Política de Privacidade</a>, os <a href="/termos/">Termos</a> e a <a href="/parceiros/">Lista de Parceiros</a>.</p>
               </fieldset>
               <div id="requestSummary" class="summary"></div>
-              <div class="form-actions"><button class="btn btn-light prev-step" type="button">Voltar</button><button class="btn btn-primary" type="submit">Pedir preço e disponibilidade</button></div>
+              <div class="form-actions"><button class="btn btn-light prev-step" type="button">Voltar</button><button class="btn btn-primary" type="submit">Pedir propostas</button></div>
             </section>
             <section class="form-step" data-step="6" aria-labelledby="confirmationTitle">
               <h3 id="confirmationTitle" tabindex="-1">Confirme o seu pedido</h3>
               <p id="confirmationSummary" class="summary"></p>
               <aside id="priceReference" class="summary" hidden></aside><label class="consent-box"><input id="confirmPreferences" type="checkbox" name="confirm_preferences" required><span>Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.</span></label>
-              <button id="confirmRequest" class="btn btn-primary btn-block" type="submit" disabled>Confirmar e receber orçamentos</button>
+              <button id="confirmRequest" class="btn btn-primary btn-block" type="submit" disabled>Confirmar e receber propostas</button>
               <button id="editPreferences" class="btn btn-light btn-block" type="button">Alterar preferências</button>
               <p class="legal-note">Gratuito e sem obrigação de contratar.</p>
             </section>
@@ -249,10 +250,10 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
       <div class="container">
         <div class="section-heading"><h2>Escolha o serviço de que precisa</h2><span></span></div>
         <div class="services-grid">
-          <article class="service-card"><img src="/imagens/landings/limpezas/service-regular.jpg" alt="Pessoa a realizar uma limpeza regular numa sala"><div><h3>Limpeza Regular</h3><p>Manutenção semanal, quinzenal ou conforme a sua necessidade.</p><a href="#pedido">Pedir preço →</a></div></article>
-          <article class="service-card"><img src="/imagens/landings/limpezas/service-deep.jpg" alt="Casa de banho limpa após uma limpeza profunda"><div><h3>Limpeza Profunda</h3><p>Uma intervenção mais completa quando o espaço precisa de maior detalhe.</p><a href="#pedido">Pedir preço →</a></div></article>
-          <article class="service-card"><img src="/imagens/landings/limpezas/service-postwork.jpg" alt="Divisão em obras a necessitar de limpeza pós-obra"><div><h3>Limpeza Pós-Obra</h3><p>Remoção de pó, resíduos e sujidade depois de obras ou remodelações.</p><a href="#pedido">Pedir preço →</a></div></article>
-          <article class="service-card"><img src="/imagens/landings/limpezas/service-office.jpg" alt="Escritório preparado para serviço de limpeza"><div><h3>Empresas</h3><p>Limpeza de escritórios, lojas e outros espaços profissionais.</p><a href="#pedido">Pedir preço →</a></div></article>
+          <article class="service-card"><img src="/imagens/landings/limpezas/service-regular.jpg" alt="Pessoa a realizar uma limpeza regular numa sala"><div><h3>Limpeza Regular</h3><p>Manutenção semanal, quinzenal ou conforme a sua necessidade.</p><a href="#pedido">Pedir propostas →</a></div></article>
+          <article class="service-card"><img src="/imagens/landings/limpezas/service-deep.jpg" alt="Casa de banho limpa após uma limpeza profunda"><div><h3>Limpeza Profunda</h3><p>Uma intervenção mais completa quando o espaço precisa de maior detalhe.</p><a href="#pedido">Pedir propostas →</a></div></article>
+          <article class="service-card"><img src="/imagens/landings/limpezas/service-postwork.jpg" alt="Divisão em obras a necessitar de limpeza pós-obra"><div><h3>Limpeza Pós-Obra</h3><p>Remoção de pó, resíduos e sujidade depois de obras ou remodelações.</p><a href="#pedido">Pedir propostas →</a></div></article>
+          <article class="service-card"><img src="/imagens/landings/limpezas/service-office.jpg" alt="Escritório preparado para serviço de limpeza"><div><h3>Empresas</h3><p>Limpeza de escritórios, lojas e outros espaços profissionais.</p><a href="#pedido">Pedir propostas →</a></div></article>
         </div>
       </div>
     </section>
@@ -267,7 +268,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
           <article><h3>Pós-obra</h3><img src="/imagens/landings/limpezas/before-after-postwork-clean.jpg" alt="Antes e depois ilustrativo de uma limpeza pós-obra"></article>
           <article><h3>Janelas e vidros</h3><img src="/imagens/landings/limpezas/before-after-windows-clean.jpg" alt="Antes e depois ilustrativo de janelas e vidros"></article>
         </div>
-        <div class="center-cta"><a href="#pedido" class="btn btn-outline">Quero pedir preço e disponibilidade para a minha limpeza →</a></div>
+        <div class="center-cta"><a href="#pedido" class="btn btn-outline">Quero receber propostas para a minha limpeza →</a></div>
       </div>
     </section>
 
@@ -301,8 +302,8 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
     <section class="final-cta">
       <div class="container final-grid">
         <div class="final-photo"><img src="/imagens/landings/limpezas/cleaning-kit-clean.jpg" alt="Produtos e utensílios de limpeza"></div>
-        <div class="final-copy"><h2>Peça já o seu preço e disponibilidade</h2><p>Indique o que precisa e a sua preferência de horário. O pedido demora cerca de 1 minuto.</p><div class="final-points"><span>✓ Sem compromisso</span><span>✓ Pedido gratuito</span><span>✓ Todo o país</span></div></div>
-        <div class="final-card"><span class="mini-pill">Rápido e simples</span><h3>Demora cerca de 1 minuto</h3><a href="#pedido" class="btn btn-primary btn-block">Pedir preço e disponibilidade →</a><small>Pedido gratuito e sem compromisso.</small></div>
+        <div class="final-copy"><h2>Receba propostas de profissionais da sua zona</h2><p>Indique o que precisa e a sua preferência de horário. O pedido demora cerca de 1 minuto.</p><div class="final-points"><span>✓ Sem compromisso</span><span>✓ Pedido gratuito</span><span>✓ Todo o país</span></div></div>
+        <div class="final-card"><span class="mini-pill">Rápido e simples</span><h3>Demora cerca de 1 minuto</h3><a href="#pedido" class="btn btn-primary btn-block">Pedir propostas →</a><small>Pedido gratuito e sem compromisso.</small></div>
       </div>
     </section>
   </main>
