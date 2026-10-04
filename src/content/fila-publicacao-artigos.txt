@@ -1,7 +1,6 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # Um artigo por execução. Adicionar novos pendentes a esta fila.
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
-ventilacao-mecanica-vmc.mdx
 isolamento-acustico-vizinhos.mdx
 remodelar-casa-por-fases.mdx
 orcamento-de-obras.mdx
