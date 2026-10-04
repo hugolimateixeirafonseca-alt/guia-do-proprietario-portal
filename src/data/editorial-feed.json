@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-04T07:02:50.717Z",
+  "generatedAt": "2026-10-04T07:05:19.069Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 132,
-    "published": 121,
+    "published": 122,
     "newsOnline": 21
   },
   "articles": [
@@ -1648,14 +1648,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "ventilacao-mecanica-vmc.mdx",
       "arrivedAt": "2026-09-20T12:08:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-04T07:01:19Z",
+      "url": "https://guiadoproprietario.pt/casa/ventilacao-mecanica-vmc/"
     },
     {
       "id": "EXTRA-014",
