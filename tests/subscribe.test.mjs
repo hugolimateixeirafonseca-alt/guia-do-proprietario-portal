@@ -781,3 +781,35 @@ test("encaminha curiosidade sobre preços mantendo a autorização e as preferê
   assert.equal(dashboardBody.consent_marketing, false);
   assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", senderSyncQueued:true, dashboardStored: true });
 });
+
+test("encaminha a data a combinar mantendo a autorização e as preferências", async () => {
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url: String(url), init });
+    if (String(url).startsWith("https://json.geoapi.pt/")) {
+      return Response.json({ Localidade: "Lisboa", Concelho: "Lisboa" });
+    }
+    if (String(url) === env.CLEANING_DASHBOARD_API_URL) return Response.json({ ok: true, lead_id: "lead-1" }, { status: 201 });
+    return new Response("{}", {status:init.method === "GET" ? 404 : 201});
+  };
+
+  const response = await onRequestPost({ request: requestFor({...cleaningBody, contactPreferences:["whatsapp","email"], oneTimeTiming:"flexible"}), env });
+  assert.equal(response.status, 200);
+  assert.ok(calls[2].url.endsWith("/api/sender-sync"));
+  assert.ok(calls[3].url.endsWith("/api/partner-sender-sync"));
+  assert.equal(calls.some(call => call.url.startsWith("https://api.sender.net/")), false);
+  const dashboardCall = calls[1];
+  const dashboardBody = JSON.parse(dashboardCall.init.body);
+  assert.equal(dashboardCall.init.headers.Authorization, "Bearer token-dashboard-teste");
+  assert.equal(dashboardBody.event_id, "limpeza-123");
+  assert.equal(dashboardBody.municipality, "Lisboa");
+  assert.equal(dashboardBody.service_type, "profunda");
+  assert.equal(dashboardBody.one_time_timing, "flexible");
+  assert.equal(dashboardBody.name, "Marta Silva");
+  assert.equal(dashboardBody.phone, "912 345 678");
+  assert.deepEqual(dashboardBody.preferred_weekdays, []);
+  assert.deepEqual(dashboardBody.preferred_time_periods, ["morning"]);
+  assert.deepEqual(dashboardBody.contact_preferences, ["whatsapp","email"]);
+  assert.equal(dashboardBody.consent_partner_sharing, true);
+  assert.equal(dashboardBody.consent_marketing, false);
+  assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", senderSyncQueued:true, dashboardStored: true });
+});

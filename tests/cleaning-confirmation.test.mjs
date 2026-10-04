@@ -41,3 +41,14 @@ test('one-time summary shows the chosen date without stale recurring weekdays',(
  vm.runInNewContext(labels+update+'updateSummary();',ctx);
  assert.equal(result.textContent,'Limpeza regular · Uma vez · 15/10/2026 · Manhã · 1900-096');
 });
+
+
+test('flexible start is included in the summary and still requires service confirmation',()=>{
+ const result={};const values={service_type:'regular',service_frequency:'one_time',one_time_timing:'flexible',postal_code:'4000-123'};
+ const ctx={summary:{},confirmation:{nextElementSibling:{}},confirmButton:{},document:{getElementById:()=>result},getValue:k=>values[k]||'',getValues:()=>[]};
+ const labels=full.slice(full.indexOf('  const labels'),full.indexOf('  const getValue'));
+ const update=full.slice(full.indexOf('  const updateSummary'),full.indexOf('  const eventId'));
+ vm.runInNewContext(labels+update+'updateSummary();',ctx);
+ assert.match(result.textContent,/A combinar com o profissional de limpeza/);
+ assert.match(ctx.confirmation.nextElementSibling.textContent,/Confirmo que preciso deste serviço/);
+});
