@@ -201,6 +201,17 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
                   </div>
                 </div>
                 <div class="field-block">
+                  <span class="field-label" id="contact-preferences-label">Como prefere ser contactado(a) pelos profissionais de limpeza?</span>
+                  <p class="question-help" id="contact-preferences-help">Pode escolher uma ou mais opções.</p>
+                  <div class="option-grid option-grid-2 compact-options" role="group" aria-labelledby="contact-preferences-label" aria-describedby="contact-preferences-help">
+                    <label class="option-card"><input type="checkbox" name="contact_preferences" value="phone"><b>Chamada telefónica</b></label>
+                    <label class="option-card"><input type="checkbox" name="contact_preferences" value="sms"><b>SMS</b></label>
+                    <label class="option-card"><input type="checkbox" name="contact_preferences" value="whatsapp"><b>WhatsApp</b></label>
+                    <label class="option-card"><input type="checkbox" name="contact_preferences" value="email"><b>Email</b></label>
+                  </div>
+                  <p class="field-error" data-error-for="contact_preferences"></p>
+                </div>
+                <div class="field-block">
                   <label class="field-label" for="additional_notes">Alguma informação importante? <span class="optional">opcional</span></label>
                   <textarea id="additional_notes" name="additional_notes" rows="3" maxlength="500" placeholder="Ex.: animais em casa, muitas janelas, urgência..."></textarea>
                 </div>

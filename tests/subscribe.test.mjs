@@ -415,7 +415,7 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
     return new Response("{}", {status:init.method === "GET" ? 404 : 201});
   };
 
-  const response = await onRequestPost({ request: requestFor(cleaningBody), env });
+  const response = await onRequestPost({ request: requestFor({...cleaningBody, contactPreferences:["whatsapp","email"]}), env });
   assert.equal(response.status, 200);
   assert.ok(calls[2].url.endsWith("/api/sender-sync"));
   assert.ok(calls[3].url.endsWith("/api/partner-sender-sync"));
@@ -430,6 +430,7 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
   assert.equal(dashboardBody.phone, "912 345 678");
   assert.deepEqual(dashboardBody.preferred_weekdays, []);
   assert.deepEqual(dashboardBody.preferred_time_periods, ["morning"]);
+  assert.deepEqual(dashboardBody.contact_preferences, ["whatsapp","email"]);
   assert.equal(dashboardBody.consent_partner_sharing, true);
   assert.equal(dashboardBody.consent_marketing, false);
   assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", senderSyncQueued:true, dashboardStored: true });
@@ -738,5 +739,13 @@ test('cleaning requests cannot bypass the final confirmation, including AL',asyn
  for(const body of [cleaningBody,alojamentoLocalBody])for(const requestConfirmed of [false,undefined]){
   globalThis.fetch=async()=>{throw Error('No external service should be called');};
   const r=await onRequestPost({request:requestFor({...body,requestConfirmed}),env});assert.equal(r.status,400);assert.equal((await r.json()).error,'request-not-confirmed');
+ }
+});
+
+test("recusa preferências de contacto inválidas antes de encaminhar o pedido", async () => {
+ globalThis.fetch = async () => { throw new Error("Não deve encaminhar dados inválidos"); };
+ for(const contactPreferences of [[], ["telegram"], "whatsapp"]){
+  const response=await onRequestPost({request:requestFor({...cleaningBody,contactPreferences}),env});
+  assert.equal(response.status,400);assert.deepEqual(await response.json(),{error:"invalid_contact_preferences"});
  }
 });

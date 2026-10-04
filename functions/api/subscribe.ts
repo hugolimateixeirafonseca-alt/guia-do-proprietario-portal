@@ -43,6 +43,7 @@ interface SubscribeBody {
   preferredTimePeriod?: unknown;
   preferredWeekdays?: unknown;
   preferredTimePeriods?: unknown;
+  contactPreferences?: unknown;
   additionalNotes?: unknown;
   alUnits?: unknown;
   alServices?: unknown;
@@ -198,6 +199,7 @@ async function sendCleaningLead(
         name: cleanText(body.name, 80),
         phone: cleanText(body.phone, 32),
         email: cleanText(body.email, 254).toLowerCase(),
+        ...(body.contactPreferences !== undefined ? {contact_preferences: cleanChoiceList(body.contactPreferences, 4)} : {}),
         additional_notes: cleanText(body.additionalNotes, 500),
         consent_partner_sharing: true,
         consent_partner_sharing_text: consentText.c1,
@@ -397,6 +399,10 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   const preferredTimePeriods = periodCodes.map(code => CLEANING_LABELS.period[code]).filter(Boolean);
   const preferredDate = cleanText(body.preferredDate, 10);
   const additionalNotes = cleanText(body.additionalNotes, 500);
+  if (body.contactPreferences !== undefined && (!Array.isArray(body.contactPreferences) || !body.contactPreferences.length || body.contactPreferences.length > 4 || body.contactPreferences.some(value => !["phone", "sms", "whatsapp", "email"].includes(String(value))))) {
+    return json({ error: "invalid_contact_preferences" }, 400);
+  }
+
   const alUnitsCode = cleanText(body.alUnits, 32) as keyof typeof AL_LABELS.units;
   const alServiceCodes = cleanChoiceList(body.alServices, 5) as Array<keyof typeof AL_LABELS.service>;
   const alTurnaroundCode = cleanText(body.alTurnaround, 32) as keyof typeof AL_LABELS.turnaround;

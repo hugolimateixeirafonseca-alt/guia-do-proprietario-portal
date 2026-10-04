@@ -86,6 +86,7 @@
       if (!getValues("preferred_time_periods").length) fail("preferred_time_periods", "Escolha pelo menos um período.");
     }
     if (number === 5) {
+      if (!getValues("contact_preferences").length) fail("contact_preferences", "Escolha pelo menos uma forma de contacto.");
       const name = getValue("name").replace(/\s+/g, " ");
       const phone = getValue("phone");
       const localPhone = phone.replace(/\D/g, "").replace(/^(00351|351)/, "");
@@ -120,6 +121,7 @@
   const eventId = () => globalThis.crypto?.randomUUID?.() || `limpeza-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   const errorMap = {
+    invalid_contact_preferences: ["contact_preferences", "Escolha uma ou mais formas de contacto válidas."],
     invalid_name: ["name", "Use apenas letras, espaços, apóstrofos ou hífenes no nome."],
     invalid_phone: ["phone", "Introduza um telemóvel português com 9 algarismos, começado por 9."],
     invalid_email: ["email", "Introduza um endereço de email válido."],
@@ -198,6 +200,7 @@
       name: getValue("name"),
       phone: getValue("phone"),
       email: getValue("email"),
+      contactPreferences: getValues("contact_preferences"),
       additionalNotes: getValue("additional_notes")
     };
 
