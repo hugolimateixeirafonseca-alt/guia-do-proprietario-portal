@@ -203,12 +203,12 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
                 </div>
                 <div class="field-block">
                   <span class="field-label" id="contact-preferences-label">Como prefere ser contactado(a) pelos profissionais de limpeza?</span>
-                  <p class="question-help" id="contact-preferences-help">Pode escolher uma ou mais opções.</p>
-                  <div class="option-grid option-grid-2 compact-options" role="group" aria-labelledby="contact-preferences-label" aria-describedby="contact-preferences-help">
-                    <label class="option-card"><input type="checkbox" name="contact_preferences" value="phone"><b>Chamada telefónica</b></label>
-                    <label class="option-card"><input type="checkbox" name="contact_preferences" value="sms"><b>SMS</b></label>
-                    <label class="option-card"><input type="checkbox" name="contact_preferences" value="whatsapp"><b>WhatsApp</b></label>
-                    <label class="option-card"><input type="checkbox" name="contact_preferences" value="email"><b>Email</b></label>
+                  <p class="question-help" id="contact-preferences-help">Selecione todas as opções que lhe dão jeito. <strong>Pode escolher mais do que uma.</strong></p>
+                  <div class="contact-preferences" role="group" aria-labelledby="contact-preferences-label" aria-describedby="contact-preferences-help">
+                    <label class="contact-preference"><input type="checkbox" name="contact_preferences" value="phone"><span>Chamada telefónica</span></label>
+                    <label class="contact-preference"><input type="checkbox" name="contact_preferences" value="sms"><span>SMS</span></label>
+                    <label class="contact-preference"><input type="checkbox" name="contact_preferences" value="whatsapp"><span>WhatsApp</span></label>
+                    <label class="contact-preference"><input type="checkbox" name="contact_preferences" value="email"><span>Email</span></label>
                   </div>
                   <p class="field-error" data-error-for="contact_preferences"></p>
                 </div>

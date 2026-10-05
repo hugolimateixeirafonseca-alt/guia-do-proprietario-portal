@@ -23,3 +23,12 @@ a{color:inherit}button,input,select,textarea{font:inherit}.container{width:min(1
 @media(max-width:680px){.container{width:min(100% - 24px,1180px)}.site-header{position:static}.header-inner{height:70px}.brand-icon{width:40px;height:40px}.brand-text{font-size:17px}.header-proof{display:none}.header-cta{font-size:12px;padding:9px 12px}.hero{min-height:0}.hero-grid{padding:28px 0 38px}.hero h1{font-size:41px}.hero-sub{font-size:16px}.hero-proofbar{grid-template-columns:1fr}.hero-proofbar>div{border-right:0;border-bottom:1px solid #e8ecea}.hero-proofbar>div:last-child{border-bottom:0}.form-card{padding:18px;border-radius:18px}.form-card-head h2{font-size:21px}.option-grid-3,.option-grid-2{grid-template-columns:repeat(2,1fr)}.two-cols{grid-template-columns:1fr}.weekday-grid{grid-template-columns:repeat(4,1fr)}.weekday-grid .wide{grid-column:span 2}.services-grid,.results-grid,.how-grid{grid-template-columns:1fr}.service-card img{height:210px}.results-grid img{height:210px}.section{padding:54px 0}.section-heading h2{font-size:28px}.trust-box{padding:24px}.trust-copy h2{font-size:28px}.final-grid{grid-template-columns:1fr}.final-photo{grid-row:auto}.final-photo img{height:180px}.footer-inner{flex-direction:column;align-items:flex-start}}
 
 #confirmRequest:disabled{opacity:.5;cursor:not-allowed}#editPreferences{margin-top:12px}
+
+/* Visible independent checkboxes make multiple contact choices explicit. */
+.contact-preferences{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.contact-preference{display:flex;align-items:center;gap:10px;min-height:48px;padding:12px;border:1px solid #dfe6e2;border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;text-align:left}
+.contact-preference input[type=checkbox]{position:static;opacity:1;appearance:auto;width:20px;height:20px;margin:0;flex:0 0 20px;accent-color:var(--green);cursor:pointer}
+.contact-preference span{font-size:14px;font-weight:700;line-height:1.35}
+.contact-preference:has(input:checked){border-color:var(--green);background:var(--green-soft)}
+.contact-preference:focus-within{outline:2px solid var(--green);outline-offset:2px}
+@media(max-width:360px){.contact-preferences{grid-template-columns:1fr}}
