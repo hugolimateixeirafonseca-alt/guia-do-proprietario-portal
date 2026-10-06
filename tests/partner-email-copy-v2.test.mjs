@@ -19,3 +19,10 @@ test('request card leads with service and locality and explains timing and avail
  assert.doesNotMatch(card({...r,obtained:1,remaining:2},{...d,freeSharedContacts:0,freeExclusiveContacts:1}).text,/GRÁTIS|Pode usar/);
  assert.doesNotMatch(card(r,{...d,freeContacts:2},{candidate:true}).text,/GRÁTIS|Pode usar/);
 });
+
+
+test('expiry digest adapter renders several pending requests in one email with individual deadlines',()=>{
+ const data={...payload.data,kind:'expiry_digest',total:2,requests:[{...request,id:'request-one',daysRemaining:5},{...request,id:'request-two',daysRemaining:4}]};
+ const e=render({...payload,event_type:'lead_expiring',data});assert.match(e.subject,/2 pedidos/);assert.match(e.text,/5 dias/);assert.match(e.text,/4 dias/);assert.match(e.text,/t=PERSONAL/);assert.equal((e.html.match(/class="request-cta"/g)||[]).length,2);
+ assert.throws(()=>render({...payload,event_type:'lead_expiring',data:{...data,requests:[{...request,obtained:1,daysRemaining:5}],total:1}}));
+});
