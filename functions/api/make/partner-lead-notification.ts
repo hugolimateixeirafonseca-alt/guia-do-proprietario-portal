@@ -158,5 +158,5 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
       providerStatus:response.status,retryAfter:providerRetryAfter(response.headers),status:503};
   }
   return {state:'sent'};
-  });
+  },{acknowledgeReview:true});
 };

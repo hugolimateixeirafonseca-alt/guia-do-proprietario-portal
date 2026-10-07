@@ -16,3 +16,20 @@ test('confirmed rate-limit rejection remains retryable after six attempts',async
  assert.equal(result.status,200);assert.equal(calls,1);assert.equal(db.prepare('SELECT state FROM email_delivery').get().state,'sent');
  }finally{db.close();}
 });
+
+
+test('webhook review acknowledgement preserves terminal states and recipient isolation',async()=>{
+ const {db,binding}=deliveryFixture();try{
+  await deliverOnce(binding,'review-event','a@example.pt',async()=>({state:'failed',error:'sender_rejected'}),{acknowledgeReview:true});
+  for(const state of ['sending','uncertain','failed']){
+   db.prepare('UPDATE email_delivery SET state=? WHERE event_id=?').run(state,'review-event');
+   db.exec("INSERT INTO provider_cooldown VALUES ('sender',9999999999) ON CONFLICT(provider) DO UPDATE SET blocked_until=excluded.blocked_until");
+   const r=await deliverOnce(binding,'review-event','a@example.pt',async()=>{throw Error('must not resend')},{acknowledgeReview:true});
+   assert.equal(r.status,200);assert.equal((await r.json()).review_required,true);
+   assert.equal(db.prepare('SELECT state FROM email_delivery').get().state,state);
+  }
+  db.exec('DELETE FROM provider_cooldown');
+  assert.equal((await deliverOnce(binding,'review-event','b@example.pt',async()=>{throw Error('must not send')},{acknowledgeReview:true})).status,409);
+  assert.equal((await deliverOnce(binding,'review-event','a@example.pt',async()=>{throw Error('must not send')})).status,503);
+ }finally{db.close();}
+});

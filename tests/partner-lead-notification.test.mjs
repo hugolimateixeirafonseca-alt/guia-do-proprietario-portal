@@ -126,3 +126,22 @@ test('queued notifications respect optout; unavailable policy never sends',async
  }finally{f.db.close();}
  }}finally{globalThis.fetch=original;}
 });
+
+
+test('Make acknowledges a lost Sender response for review and never resends it',async()=>{
+ const original=globalThis.fetch,f=deliveryFixture();let sends=0;
+ globalThis.fetch=async(url)=>{
+  if(String(url).endsWith('/api/partner-email-policy'))return Response.json({ok:true,allowed:true});
+  sends++;throw new Error('Sender response timed out');
+ };
+ const env={EMAIL_DELIVERY_DB:f.binding,MAKE_PARTNER_NOTIFICATIONS_SECRET:secret,CLEANING_DASHBOARD_API_TOKEN:'internal',SENDER_API_TOKEN:'test'};
+ try{
+  for(let i=0;i<3;i++){
+   const r=await onRequestPost({request:request(payload),env});assert.equal(r.status,200);
+   const body=await r.json();assert.equal(body.ok,false);assert.equal(body.review_required,true);assert.equal(body.retryable,false);assert.equal(body.state,'uncertain');
+  }
+  assert.equal(sends,1);
+  const row=f.db.prepare('SELECT state,attempts,error_code FROM email_delivery WHERE event_id=?').get(payload.event_id);
+  assert.equal(row.state,'uncertain');assert.equal(row.attempts,1);assert.equal(row.error_code,'sender_response_unknown');
+ }finally{globalThis.fetch=original;f.db.close();}
+});
