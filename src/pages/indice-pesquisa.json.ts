@@ -7,7 +7,6 @@ export const prerender = true;
 
 export const GET: APIRoute = async () => {
   const artigos = await getCollection("artigos", ({ data }) => !data.rascunho);
-  const notas = await getCollection("notas");
 
   const entradas = [
     { titulo: "Limpeza da casa: serviços, preços e como escolher", descricao: "Guias para pedir uma limpeza e candidaturas de empresas e profissionais independentes à rede de parceiros.", pilar: "Casa e obras", url: "/limpeza/" },
@@ -16,12 +15,6 @@ export const GET: APIRoute = async () => {
       descricao: artigo.data.descricao,
       pilar: pilares.find((item) => item.slug === artigo.data.pilar)?.nome ?? artigo.data.pilar,
       url: `/${artigo.data.pilar}/${artigo.id}/`
-    })),
-    ...notas.map((nota) => ({
-      titulo: nota.data.titulo,
-      descricao: nota.data.resumo,
-      pilar: "Novidades",
-      url: `/novidades/${nota.id}/`
     })),
     ...pilares.map((pilar) => ({
       titulo: pilar.nome,
@@ -48,7 +41,6 @@ export const GET: APIRoute = async () => {
     { titulo: "Simulador de IMI", descricao: "Estime o IMI anual a partir do concelho e do valor patrimonial.", pilar: "Ferramentas", url: "/simuladores/imi/" },
     { titulo: "Simulador do valor líquido da venda", descricao: "Estime quanto pode sobrar depois dos principais custos de vender uma casa.", pilar: "Ferramentas", url: "/simuladores/valor-liquido-venda/" },
     { titulo: "Glossário", descricao: "Definições simples dos termos usados no portal.", pilar: "Informação", url: "/glossario/" },
-    { titulo: "Novidades", descricao: "Atualizações recentes para proprietários em Portugal.", pilar: "Novidades", url: "/novidades/" },
     { titulo: "Sobre o Guia do Proprietário", descricao: "Quem está por trás do portal e qual é o seu objetivo.", pilar: "Informação", url: "/sobre/" },
     { titulo: "Como produzimos os conteúdos", descricao: "Fontes, verificação, atualizações e correções editoriais.", pilar: "Informação", url: "/metodologia/" }
   ];

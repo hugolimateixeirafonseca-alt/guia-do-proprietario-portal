@@ -14,23 +14,19 @@ test("a coleção de novidades aceita Markdown e MDX", () => {
 });
 
 test("as novidades são ordenadas da mais recente para a mais antiga", () => {
-  assert.match(home, /sort\(compararNotasRecentes\)/);
   assert.match(newsIndex, /sort\(compararNotasRecentes\)/);
   assert.match(newsSorting, /b\.data\.data\.valueOf\(\) - a\.data\.data\.valueOf\(\)/);
   assert.match(newsSorting, /b\.id\.localeCompare\(a\.id/);
 });
 
 test("cada notícia apresenta o botão Ver mais", () => {
-  assert.match(home, /class="news-more"[^>]*>Ver mais<\/a>/);
   assert.match(newsIndex, /class="news-more"[^>]*>Ver mais<\/a>/);
 });
 
-test("a página inicial mantém a lista automática sem o quadro de última novidade", () => {
-  assert.match(home, /getCollection\("notas"\)/);
-  assert.match(home, /notas\.slice\(0, 3\)/);
-  assert.doesNotMatch(home, /Última novidade|notaRecente|latest-note/);
-  assert.ok(home.indexOf('id="novidades"') > home.indexOf('aria-labelledby="mais-recentes-titulo"'));
-  assert.ok(home.indexOf('id="novidades"') < home.indexOf('id="perguntas-dia"'));
+test("a página inicial deixa de apresentar a secção e o atalho de novidades", () => {
+  assert.doesNotMatch(home, /getCollection\("notas"\)|notas\.slice|id="novidades"|href="#novidades"|href="\/novidades\/"/);
+  assert.match(home, /id="mais-recentes"/);
+  assert.match(home, /id="perguntas-dia"/);
 });
 
 test("o modelo contém os campos obrigatórios da novidade", () => {

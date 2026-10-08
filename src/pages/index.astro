@@ -4,10 +4,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import Newsletter from "../components/Newsletter.astro";
 import ProximosPrazos from "../components/ProximosPrazos.astro";
-import { formatarData, NEWSLETTER_ATIVA, pilares } from "../config";
+import { NEWSLETTER_ATIVA, pilares } from "../config";
 import { obterImagensArtigo } from "../lib/imagens-artigos";
 import { compararPorPublicacao, organizarArtigosRecentes } from "../lib/artigos";
-import { compararNotasRecentes } from "../lib/notas";
 
 const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
 const artigos = todosArtigos
@@ -15,7 +14,6 @@ const artigos = todosArtigos
   .sort(compararPorPublicacao);
 const artigosRecentes = organizarArtigosRecentes(todosArtigos).slice(0, 8);
 const nomesPilares = new Map(pilares.map((pilar) => [pilar.slug, pilar.nome]));
-const notas = (await getCollection("notas")).sort(compararNotasRecentes);
 const pilarCasa = pilares.find((pilar) => pilar.slug === "casa")!;
 const situacoes = [
   { titulo: "Vou vender a casa.", url: "/vender/", imagem: "situacao-vender", alt: "Casa portuguesa com placa de venda" },
@@ -52,9 +50,7 @@ const perguntasDoDia = [
         <h1>Tudo o que precisa de saber sobre a sua casa, num só sítio.</h1>
         <p class="hero-copy">Comprar, vender, arrendar, procurar casa, fazer obras ou tratar de impostos. Tudo o que dá trabalho numa casa, explicado.</p>
         <div class="hero-actions">
-          <a class="button" href="#sua-situacao">A sua situação</a>
-          <a class="button secondary" href="#novidades">Novidades</a>
-          <a class="button secondary" href="#mais-recentes">Artigos mais recentes</a>
+          <a class="button" href="#sua-situacao">A sua situação</a>          <a class="button secondary" href="#mais-recentes">Artigos mais recentes</a>
           <a class="button secondary" href="#este-mes">Calendário</a>
         </div>
       </div>
@@ -97,24 +93,6 @@ const perguntasDoDia = [
     </div>
   </section>
 
-  <section class="section soft" id="novidades">
-    <div class="container">
-      <div class="section-heading"><p class="eyebrow">Atualidade</p><h2>Novidades</h2></div>
-      <div class="notes-grid">
-        {notas.slice(0, 3).map((nota) => (
-          <article>
-            <time datetime={nota.data.data.toISOString()}>{formatarData(nota.data.data)}</time>
-            <h3><a href={`/novidades/${nota.id}/`}>{nota.data.titulo}</a></h3>
-            <p>{nota.data.resumo}</p>
-            <a class="news-more" href={`/novidades/${nota.id}/`}>Ver mais</a>
-          </article>
-        ))}
-      </div>
-      <div class="section-actions">
-        <a class="button" href="/novidades/">Ver todas as novidades</a>
-      </div>
-    </div>
-  </section>
 
   <section class="section daily-questions-section" id="perguntas-dia">
     <div class="container">
