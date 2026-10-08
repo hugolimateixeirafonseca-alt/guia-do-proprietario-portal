@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-08T10:16:49.363Z",
+  "generatedAt": "2026-10-08T10:21:04.465Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 137,
-    "published": 126,
+    "published": 131,
     "newsOnline": 21
   },
   "articles": [
@@ -1424,14 +1424,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "orcamento-limpeza-claro.mdx",
       "arrivedAt": "2026-10-08T10:05:00.876Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-08T10:05:00.876Z",
+      "url": "https://guiadoproprietario.pt/casa/orcamento-limpeza-claro/"
     },
     {
       "id": "EXTRA-105",
@@ -1440,14 +1440,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "conseguir-clientes-limpeza.mdx",
       "arrivedAt": "2026-10-08T10:05:00.876Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-08T10:05:00.876Z",
+      "url": "https://guiadoproprietario.pt/casa/conseguir-clientes-limpeza/"
     },
     {
       "id": "EXTRA-104",
@@ -1456,14 +1456,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "empresa-ou-profissional-limpeza.mdx",
       "arrivedAt": "2026-10-08T10:05:00.876Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-08T10:05:00.876Z",
+      "url": "https://guiadoproprietario.pt/casa/empresa-ou-profissional-limpeza/"
     },
     {
       "id": "EXTRA-103",
@@ -1472,14 +1472,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "limpeza-pos-obra-orcamento.mdx",
       "arrivedAt": "2026-10-08T10:05:00.876Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-08T10:05:00.876Z",
+      "url": "https://guiadoproprietario.pt/casa/limpeza-pos-obra-orcamento/"
     },
     {
       "id": "EXTRA-102",
@@ -1488,14 +1488,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "quanto-custa-limpeza-domestica.mdx",
       "arrivedAt": "2026-10-08T10:05:00.876Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-08T10:05:00.876Z",
+      "url": "https://guiadoproprietario.pt/casa/quanto-custa-limpeza-domestica/"
     },
     {
       "id": "EXTRA-024",
