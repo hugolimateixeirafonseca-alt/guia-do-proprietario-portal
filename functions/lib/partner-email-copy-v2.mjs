@@ -108,6 +108,11 @@ export function renderEmailCopyV2Addition(id,data){
   if(id==='C4'){
    e.subject='Contratou '+required(data.professional)+' para a sua limpeza?';
    e.html=e.html.replace('Uma pergunta rápida sobre a sua limpeza.','Uma pergunta rápida, com um clique.');
+   if(data.serviceWon){
+    const old=data.professional+' também recebeu o seu pedido de limpeza em '+data.place+'. Contratou este profissional?';
+    const question=data.professional+' indicou-nos que ficou com o seu serviço de limpeza em '+data.place+'. Confirma que contratou este profissional?';
+    e.html=e.html.replace(esc(old),esc(question));e.text=e.text.replace(old,question);
+   }
   }
   return e;
  }
