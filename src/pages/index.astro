@@ -6,16 +6,14 @@ import Newsletter from "../components/Newsletter.astro";
 import ProximosPrazos from "../components/ProximosPrazos.astro";
 import { formatarData, NEWSLETTER_ATIVA, pilares } from "../config";
 import { obterImagensArtigo } from "../lib/imagens-artigos";
-import { compararPorPublicacao } from "../lib/artigos";
+import { compararPorPublicacao, organizarArtigosRecentes } from "../lib/artigos";
 import { compararNotasRecentes } from "../lib/notas";
 
 const todosArtigos = await getCollection("artigos", ({ data }) => !data.rascunho);
 const artigos = todosArtigos
   .filter((artigo) => artigo.data.destaque && artigo.data.nivel === "essencial")
   .sort(compararPorPublicacao);
-const artigosRecentes = [...todosArtigos]
-  .sort(compararPorPublicacao)
-  .slice(0, 8);
+const artigosRecentes = organizarArtigosRecentes(todosArtigos).slice(0, 8);
 const nomesPilares = new Map(pilares.map((pilar) => [pilar.slug, pilar.nome]));
 const notas = (await getCollection("notas")).sort(compararNotasRecentes);
 const pilarCasa = pilares.find((pilar) => pilar.slug === "casa")!;
@@ -68,7 +66,7 @@ const perguntasDoDia = [
       <div class="section-heading">
         <p class="eyebrow">ACABADO DE PUBLICAR</p>
         <h2 id="mais-recentes-titulo">Mais recentes</h2>
-        <p>Os últimos artigos do Guia do Proprietário, de todos os temas.</p>
+        <p>Publicações recentes do Guia do Proprietário sobre todos os temas da casa.</p>
       </div>
       <div class="recent-articles-grid">
         {artigosRecentes.map((artigo) => (

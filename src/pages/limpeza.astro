@@ -1,0 +1,102 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+
+const todos = await getCollection("artigos", ({ data }) => !data.rascunho);
+const clientes = ["quanto-custa-limpeza-domestica", "empresa-limpeza-mensal", "limpeza-profunda-casa", "limpeza-pos-obra-orcamento", "empresa-ou-profissional-limpeza"];
+const parceiros = ["conseguir-clientes-limpeza", "orcamento-limpeza-claro"];
+const selecionar = (ids: string[]) => ids.flatMap((id) => {
+  const artigo = todos.find((item) => item.id === id && item.data.pilar === "casa");
+  return artigo ? [artigo] : [];
+});
+const tipos = [
+  { nome: "Limpeza regular", texto: "Para manter cozinha, casas de banho, chão e superfícies com uma frequência combinada.", url: "/casa/empresa-limpeza-mensal/", link: "Planear a limpeza mensal" },
+  { nome: "Limpeza profunda", texto: "Para tratar tarefas que ficam fora da rotina, como gordura acumulada, rodapés ou armários por dentro.", url: "/casa/limpeza-profunda-casa/", link: "Definir uma limpeza profunda" },
+  { nome: "Limpeza pós-obra", texto: "Para preparar a casa depois dos trabalhos, com atenção ao pó, resíduos e materiais novos.", url: "/casa/limpeza-pos-obra-orcamento/", link: "Preparar o pedido pós-obra" },
+  { nome: "Limpeza de mudança", texto: "Para deixar o espaço preparado antes de entrar ou depois de retirar os móveis. Combine as tarefas e o acesso à casa.", url: "/servicos-limpeza/", link: "Pedir uma limpeza de mudança" }
+];
+---
+<BaseLayout titulo="Limpeza da casa: serviços, preços e como escolher" descricao="Escolha o serviço de limpeza para a sua casa e prepare um pedido de orçamento. Empresas e profissionais independentes podem candidatar-se à rede de parceiros." imagemOg="https://guiadoproprietario.pt/og-1200x630.png">
+  <section class="hero cleaning-intro">
+    <div class="container cleaning-hero-grid">
+      <div>
+        <Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: "Casa e obras", url: "/casa/" }, { nome: "Limpeza" }]} />
+        <p class="eyebrow">Limpeza da casa</p>
+        <h1>Escolha a limpeza certa. Peça uma proposta para a sua casa.</h1>
+        <p class="hero-copy">Uma visita regular, uma limpeza a fundo ou o fim de uma obra: perceba o que pedir, compare as condições e avance com o serviço de que precisa.</p>
+        <div class="hero-actions">
+          <a class="button" href="/servicos-limpeza/">Pedir orçamento de limpeza</a>
+          <a class="button secondary" href="#para-profissionais">Sou empresa ou profissional independente</a>
+        </div>
+      </div>
+      <picture class="cleaning-picture">
+        <source srcset="/imagens/artigos/limpeza-profunda-casa.avif" type="image/avif" />
+        <img src="/imagens/artigos/limpeza-profunda-casa.webp" alt="Cozinha e sala com material preparado para uma limpeza" width="1200" height="675" fetchpriority="high" />
+      </picture>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="servico-titulo">
+    <div class="container">
+      <div class="section-heading"><p class="eyebrow">Comece pelo que precisa</p><h2 id="servico-titulo">Que tipo de limpeza procura?</h2><p>O serviço certo depende do estado do espaço e das tarefas que quer resolver. Defina a lista antes de comparar preços.</p></div>
+      <div class="cleaning-services">
+        {tipos.map((tipo) => <article><h3>{tipo.nome}</h3><p>{tipo.texto}</p><a href={tipo.url}>{tipo.link} →</a></article>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section soft" aria-labelledby="comparar-titulo">
+    <div class="container cleaning-columns">
+      <div><p class="eyebrow">Compare com clareza</p><h2 id="comparar-titulo">Quanto custa limpar a casa?</h2><p>O preço muda com a área, o estado da casa, a frequência e as tarefas. Pode ser apresentado à hora ou por serviço. Produtos, equipamento, vidros e deslocação também devem ficar claros.</p><p>Compare o total para a mesma lista de trabalho. Uma referência publicada ajuda a preparar o pedido; a proposta para a sua casa é apresentada pelo prestador.</p><a href="/casa/quanto-custa-limpeza-domestica/">Ver como comparar preços de limpeza →</a></div>
+      <div class="cleaning-box"><h3>O que indicar no pedido</h3><ul><li>Concelho, tipo e dimensão do espaço.</li><li>Limpeza pretendida e estado da casa.</li><li>Frequência e disponibilidade.</li><li>Tarefas prioritárias e trabalhos adicionais.</li><li>Produtos e equipamentos disponíveis.</li></ul><a class="button" href="/servicos-limpeza/">Descrever a limpeza e pedir orçamento</a></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="escolher-titulo">
+    <div class="container cleaning-columns">
+      <div><p class="eyebrow">Empresas e profissionais independentes</p><h2 id="escolher-titulo">Escolha por aquilo que precisa.</h2><p>Tanto uma empresa como um profissional independente podem prestar o serviço que procura. Confirme experiência no trabalho, disponibilidade, referências e condições.</p><p>Se precisa de uma equipa ou de substituição em caso de falta, pergunte por essa possibilidade. Se valoriza continuidade com a mesma pessoa, combine-a. Nenhuma destas condições deve ser presumida.</p><a href="/casa/empresa-ou-profissional-limpeza/">Ver o que perguntar antes de escolher →</a></div>
+      <div class="cleaning-box"><h3>Antes de aceitar uma proposta</h3><p>Confirme tarefas, preço total, produtos, faturação, acesso à casa e como são tratados trabalhos extra ou imprevistos.</p><p>O Guia do Proprietário encaminha pedidos. O serviço, o preço e a data são combinados com a empresa ou com o profissional que apresentar a proposta.</p><a class="button" href="/servicos-limpeza/">Pedir orçamento para a minha casa</a></div>
+    </div>
+  </section>
+
+  <section class="section soft" aria-labelledby="guias-clientes-titulo">
+    <div class="container"><div class="section-heading"><p class="eyebrow">Para quem procura uma limpeza</p><h2 id="guias-clientes-titulo">Prepare o pedido e compare melhor.</h2><p>Preços, frequência e tarefas explicados para avançar com mais informação.</p></div><div class="article-grid">{selecionar(clientes).map((artigo) => <ArticleCard artigo={artigo} />)}</div></div>
+  </section>
+
+  <section class="section cleaning-partners" id="para-profissionais" aria-labelledby="parceiros-titulo">
+    <div class="container">
+      <div class="cleaning-columns">
+        <div><p class="eyebrow">Para quem presta serviços de limpeza</p><h2 id="parceiros-titulo">Tem uma empresa de limpeza ou trabalha como profissional independente?</h2><p>Apresente a sua atividade e as zonas onde trabalha. Candidate-se à rede do Guia do Proprietário para consultar pedidos compatíveis com os seus serviços, após aprovação e conforme a disponibilidade.</p><p>Escolha oportunidades que façam sentido para a sua agenda e apresente a sua proposta ao cliente.</p><a class="button" href="https://parceiros.guiadoproprietario.pt/aderir">Ver condições e candidatar-me à rede</a></div>
+        <div class="cleaning-box"><h3>Como começar</h3><ol><li>Indique a empresa ou a atividade independente.</li><li>Escolha zonas, serviços e disponibilidade.</li><li>Envie a candidatura para análise.</li></ol><p>A candidatura é gratuita e está sujeita a aprovação. Existem custos e condições para obter contactos, apresentados na página de adesão. Um pedido não garante contratação.</p></div>
+      </div>
+      <div class="cleaning-professional-guides"><h3>Faça crescer a atividade com propostas claras.</h3><div class="article-grid">{selecionar(parceiros).map((artigo) => <ArticleCard artigo={artigo} />)}</div></div>
+    </div>
+  </section>
+
+  <section class="section soft" aria-labelledby="duvidas-titulo">
+    <div class="container cleaning-faq"><h2 id="duvidas-titulo">Antes de avançar</h2><details><summary>Posso pedir uma limpeza pontual ou regular?</summary><p>Na página de pedidos pode indicar o tipo de limpeza e a frequência pretendida. A disponibilidade e as condições são confirmadas com o prestador.</p></details><details><summary>O Guia do Proprietário executa a limpeza?</summary><p>O Guia encaminha pedidos para prestadores. O trabalho é combinado com a empresa ou com o profissional independente, incluindo preço, tarefas e horário.</p></details><details><summary>A adesão é só para empresas?</summary><p>Não. Empresas de limpeza e profissionais independentes podem apresentar uma candidatura. Consulte os dados pedidos e as condições na página de adesão.</p></details><details><summary>Tenho um negócio de limpeza. Onde me candidato?</summary><p>Use a <a href="https://parceiros.guiadoproprietario.pt/aderir">página de adesão à rede de parceiros</a> para indicar a atividade, as zonas e os serviços que presta.</p></details></div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cleaning-intro { padding-block: 52px; }
+  .cleaning-hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: center; }
+  .cleaning-intro h1 { font-size: clamp(36px, 4.6vw, 62px); }
+  .cleaning-picture img { display: block; width: 100%; border-radius: 8px; }
+  .cleaning-services { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  .cleaning-services article, .cleaning-box { padding: 28px; border: 1px solid var(--line); background: var(--paper); border-radius: 6px; }
+  .cleaning-services h3, .cleaning-box h3 { margin-top: 0; }
+  .cleaning-columns { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: start; }
+  .cleaning-columns h2 { margin-top: 0; }
+  .cleaning-services a, .cleaning-columns > div > a:not(.button) { color: var(--green-dark); font-weight: 750; }
+  .cleaning-box ul, .cleaning-box ol { padding-left: 22px; }
+  .cleaning-box li { margin-bottom: 10px; }
+  .cleaning-partners { scroll-margin-top: 24px; }
+  .cleaning-professional-guides { margin-top: 44px; }
+  .cleaning-faq { max-width: 880px; }
+  .cleaning-faq details { padding-block: 18px; border-bottom: 1px solid var(--line); }
+  .cleaning-faq summary { cursor: pointer; font-weight: 750; }
+  @media (max-width: 800px) { .cleaning-hero-grid, .cleaning-columns, .cleaning-services { grid-template-columns: 1fr; gap: 24px; } .cleaning-intro { padding-block: 32px; } .cleaning-picture { max-width: 560px; } }
+</style>

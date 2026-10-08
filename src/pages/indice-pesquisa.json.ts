@@ -10,6 +10,7 @@ export const GET: APIRoute = async () => {
   const notas = await getCollection("notas");
 
   const entradas = [
+    { titulo: "Limpeza da casa: serviços, preços e como escolher", descricao: "Guias para pedir uma limpeza e candidaturas de empresas e profissionais independentes à rede de parceiros.", pilar: "Casa e obras", url: "/limpeza/" },
     ...artigos.map((artigo) => ({
       titulo: artigo.data.titulo,
       descricao: artigo.data.descricao,

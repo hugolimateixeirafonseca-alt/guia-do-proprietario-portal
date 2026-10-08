@@ -3,10 +3,9 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ArticleCard from "../../components/ArticleCard.astro";
 import { pilares } from "../../config";
-import { compararPorPublicacao } from "../../lib/artigos";
+import { organizarArtigosRecentes } from "../../lib/artigos";
 
-const artigos = (await getCollection("artigos", ({ data }) => !data.rascunho))
-  .sort(compararPorPublicacao);
+const artigos = organizarArtigosRecentes(await getCollection("artigos", ({ data }) => !data.rascunho));
 ---
 <BaseLayout
   titulo="Todos os artigos"
@@ -19,6 +18,7 @@ const artigos = (await getCollection("artigos", ({ data }) => !data.rascunho))
       <p class="hero-copy">Encontre respostas práticas para cuidar da casa, tomar decisões e cumprir obrigações sem perder tempo.</p>
       <nav class="topic-links" aria-label="Explorar artigos por tema">
         {pilares.map((pilar) => <a href={`/${pilar.slug}/`}>{pilar.nome}</a>)}
+        <a href="/limpeza/">Limpeza</a>
       </nav>
     </div>
   </section>
@@ -28,7 +28,7 @@ const artigos = (await getCollection("artigos", ({ data }) => !data.rascunho))
       <div class="section-heading">
         <p class="eyebrow">ARQUIVO COMPLETO</p>
         <h2 id="arquivo-artigos-titulo">Explore os artigos mais recentes</h2>
-        <p>{artigos.length} artigos publicados, dos mais recentes para os mais antigos.</p>
+        <p>{artigos.length} artigos publicados. Explore as novidades sobre casa, obras, impostos, arrendamento e venda.</p>
       </div>
       <div class="article-grid">
         {artigos.map((artigo) => <ArticleCard artigo={artigo} />)}

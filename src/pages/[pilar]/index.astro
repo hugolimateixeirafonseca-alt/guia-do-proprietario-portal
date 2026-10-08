@@ -18,6 +18,7 @@ const artigos = (await getCollection("artigos", ({ data }) => data.pilar === pil
 ---
 <BaseLayout titulo={pilar.nome} descricao={pilar.descricao}>
   <section class="page-hero"><div class="container pillar-hero"><div><Breadcrumbs itens={[{ nome: "Início", url: "/" }, { nome: pilar.nome }]} /><p class="eyebrow">Guia por tema</p><h1>{pilar.nome}</h1><p>{pilar.descricao}</p></div><picture><source srcset={pilar.imagemAvif} type="image/avif" /><img src={pilar.imagemWebp} alt={pilar.alt} width="1200" height="675" loading="lazy" /></picture></div></section>
+  {pilar.slug === "casa" && <div class="container"><p>Precisa de uma limpeza ou presta este serviço? <a href="/limpeza/">Veja os guias e os próximos passos para clientes, empresas e profissionais independentes.</a></p></div>}
   <section class="section"><div class="container"><div class="article-grid">{artigos.map((artigo) => <ArticleCard artigo={artigo} />)}</div></div></section>
   {NEWSLETTER_ATIVA && <Newsletter />}
 </BaseLayout>

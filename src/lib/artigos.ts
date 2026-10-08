@@ -89,3 +89,21 @@ export function obterArtigosSemelhantes(artigo: Artigo, artigos: Artigo[], quant
     .slice(0, quantidade)
     .map((item) => item.artigo);
 }
+
+// Espaçamento editorial exclusivo das listas visuais; feeds mantêm a cronologia.
+export function organizarArtigosRecentes(artigos: Artigo[]) {
+  const pendentes = [...artigos].sort(compararPorPublicacao);
+  const resultado: Artigo[] = [];
+  let intervalo = 2;
+  while (pendentes.length) {
+    const primeiroLimpeza = pendentes[0].data.temas?.includes("limpeza-servicos");
+    const alternativa = primeiroLimpeza && intervalo < 2
+      ? pendentes.findIndex((artigo) => !artigo.data.temas?.includes("limpeza-servicos"))
+      : 0;
+    const indice = alternativa < 0 ? 0 : alternativa;
+    const [artigo] = pendentes.splice(indice, 1);
+    resultado.push(artigo);
+    intervalo = artigo.data.temas?.includes("limpeza-servicos") ? 0 : intervalo + 1;
+  }
+  return resultado;
+}
