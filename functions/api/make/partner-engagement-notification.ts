@@ -60,5 +60,5 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
 // Version handshake: a new digest is queued only after this renderer is deployed.
 export async function onRequestGet({request,env}: {request: Request,env: Record<string,any>}) {
  if (!env.MAKE_PARTNER_NOTIFICATIONS_SECRET || !secureEqual(request.headers.get('Authorization') || '', 'Bearer '+env.MAKE_PARTNER_NOTIFICATIONS_SECRET)) return new Response('Not Found',{status:404});
- return json({expiry_digest:1,request_digest:1,client_contact_notice:1,client_stop_notice:1,client_interest:1,video_tutorial:0,email_copy_v2:1,workflow_v2:1,zone_unlocked:1,commercial_news:1});
+ return json({topup_restored:1,expiry_digest:1,request_digest:1,client_contact_notice:1,client_stop_notice:1,client_interest:1,video_tutorial:0,email_copy_v2:1,workflow_v2:1,zone_unlocked:1,commercial_news:1});
 }

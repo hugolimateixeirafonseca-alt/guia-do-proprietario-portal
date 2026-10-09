@@ -1,5 +1,5 @@
 import {renderEmailCopyV2} from './partner-email-copy-v2.mjs';
-import {renderEmailLayout,emailCard,emailParagraph,escapeEmailHtml as esc} from './partner-email-layout.mjs';
+import {renderEmailLayout,emailCard,emailParagraph,emailButton,escapeEmailHtml as esc} from './partner-email-layout.mjs';
 import {renderPartnerNewsEmail,NEWS_VERSION} from './partner-news-email.mjs';
 const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const clean = (value, max = 120) => typeof value === 'string' && !/^(?:null|undefined|nan|\{[^{}]+\})$/i.test(value.trim()) ? value.trim().replace(/[\r\n]+/g, ' ').slice(0, max) : '';
@@ -14,6 +14,15 @@ function preferences(value,fallback) {
 
 export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
+  if(data.kind==='topup_restored_20261009'){
+    if(payload.event_type!=='unused_free_contacts'||!/^engagement:topup_restored:20261009:[a-z0-9-]+$/i.test(payload.event_id))throw Error('invalid_event_data');
+    const action=new URL(payload.dashboard_url);if(action.protocol!=='https:'||action.hostname!=='parceiros.guiadoproprietario.pt'||action.port||action.username||action.password||!action.searchParams.get('t'))throw Error('invalid_dashboard_url');action.hash='saldo';
+    const intro='Um problema técnico momentâneo dificultou alguns carregamentos de saldo.';
+    const resolved='A situação já foi resolvida e os carregamentos estão operacionais.';
+    const next='Se tentou carregar e não conseguiu, pode voltar a tentar na sua área de parceiro. O saldo fica disponível após a confirmação do pagamento e só é descontado quando obtém um contacto.';
+    const thanks='Obrigado pela sua paciência,';
+    return renderEmailLayout({subject:'Tentou carregar saldo? Já pode tentar novamente',preview:resolved,name:'',signature:false,content:emailParagraph(esc(intro)+' <strong>'+esc(resolved)+'</strong>')+emailParagraph(esc(next))+emailButton('Entrar e carregar saldo',action.toString())+emailParagraph(esc(thanks)+'<br>Guia do Proprietário'),textContent:[intro+' '+resolved,next,'Entrar e carregar saldo: '+action.toString(),thanks+'\nGuia do Proprietário'].join('\n\n')});
+  }
   if(data.kind==='video_tutorial')throw Error('retired_video_email');
   if(data.copyVersion==='v2')return renderV2Engagement(payload);
   if(payload.event_type==='client_interest')return renderClientInterestEmail(data,options);
