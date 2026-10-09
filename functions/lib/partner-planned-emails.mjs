@@ -32,9 +32,11 @@ export function renderPlannedPartnerEmail(id,data){
   add('Como funciona',steps);if(data.guaranteeReady===true)add('O cliente não atende? Damos-lhe outro contacto.','Tente 3 vezes, em 2 dias úteis diferentes, pelos botões da plataforma. Depois, carregue em Pedir outro contacto. Verificamos cada caso. Só para contactos pagos.\nVer as regras: '+access(data.url).replace('/?','/regras-garantia.html?').split('#')[0],{rules:true});paragraphs.push('Guarde este email para voltar a entrar. Esta ligação é pessoal: não a partilhe.');secondary.push({label:'Ver os pedidos da minha zona',url:access(data.url,'pedidos')});break;
  }
  case 'P5':{
-  if(data.bonusGranted!==true||!['novo','anterior'].includes(data.model))throw Error('bonus_not_confirmed');subject='Tem 2 contactos grátis na sua conta';preview='São partilhados e podem ser usados antes do seu saldo.';title='Tudo pronto.\nTem 2 contactos grátis.';
-  paragraphs.push('Recebemos o seu carregamento de '+money(data.amount)+'.'+(data.model==='novo'?' A sua conta está ativa.':''));offer=true;
-  add('🎁 Tem 2 contactos grátis.','Servem para contactos partilhados e são usados antes do seu saldo. A oferta é única. Os contactos grátis que já tinha mantêm-se.\nSe sair nos primeiros 60 dias após receber este bónus, descontamos apenas os contactos do novo bónus que usou. Os contactos grátis anteriores ficam fora deste desconto.',{offer:true});
+  if(data.bonusGranted!==true||!['novo','anterior'].includes(data.model))throw Error('bonus_not_confirmed');
+  if(!Number.isSafeInteger(data.freeContacts)||data.freeContacts<0)throw Error('invalid_free_count');
+  subject='Recebemos o seu carregamento de '+money(data.amount);preview='O seu carregamento foi confirmado.';title='Carregamento confirmado.';
+  paragraphs.push('Recebemos o seu carregamento de '+money(data.amount)+'.'+(data.model==='novo'?' A sua conta está ativa.':''));
+  if(data.freeContacts>0){offer=true;add('🎁 Tem '+data.freeContacts+(data.freeContacts===1?' contacto grátis disponível.':' contactos grátis disponíveis.'),'Os contactos grátis são usados antes do saldo quando escolhe o tipo de contacto correspondente.',{offer:true});}
   if(data.guaranteeReady===true)add('Lembre-se','Se houver um problema real num contacto pago, pode pedir outro contacto. Verificamos cada caso.\nVer as regras: '+access(data.url).replace('/?','/regras-garantia.html?').split('#')[0],{rules:true});
   if(data.confirmedRequestsReady===true)add('Dica','Procure os pedidos com esta etiqueta:\n✓ Interesse confirmado pelo cliente\nSão clientes com quem já falámos e que estão à espera do seu contacto.');
   button={label:'Ver pedidos disponíveis',url:access(data.url,'pedidos')};break;

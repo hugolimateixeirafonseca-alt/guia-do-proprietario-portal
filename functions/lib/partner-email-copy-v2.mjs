@@ -187,9 +187,14 @@ export function renderEmailCopyV2Remaining(id,data){
  switch(id){
  case 'P5':
   if(data.bonusGranted!==true||!Number.isSafeInteger(data.amount)||data.amount<1500)throw Error('bonus_not_confirmed');
-  subject='Tem 2 contactos grátis na sua conta';preview='São partilhados e são usados antes do seu saldo.';title='Tudo pronto.\nTem 2 contactos grátis.';
+  if(!Number.isSafeInteger(data.freeContacts)||data.freeContacts<0)throw Error('invalid_free_count');
+  subject='Recebemos o seu carregamento de '+euro(data.amount);preview='O seu carregamento foi confirmado.';title='Carregamento confirmado.';
   paragraph('Recebemos o seu carregamento de '+euro(data.amount)+'. A sua conta está ativa.');
-  block('🎁 Tem 2 contactos grátis.','São partilhados e são usados antes do seu saldo.\nOs contactos grátis que já tinha mantêm-se.\nSe sair nos primeiros 60 dias depois de receber esta oferta, descontamos apenas os contactos desta oferta que usou. Os contactos grátis anteriores ficam fora deste desconto.',{offer:true});
+  if(data.freeContacts>0){
+   const label='Tem '+data.freeContacts+(data.freeContacts===1?' contacto grátis disponível.':' contactos grátis disponíveis.');
+   const modes=[['freeSharedContacts','partilhado'],['freeExclusiveContacts','exclusivo']].filter(([key])=>data[key]>0).map(([key,mode])=>data[key]+' '+(data[key]===1?'contacto '+mode:'contactos '+mode+'s')+' grátis.').join('\n');
+   block('🎁 '+label,(modes?modes+'\n':'')+'Os contactos grátis são usados antes do saldo quando escolhe o tipo de contacto correspondente.',{offer:true});
+  }
   if(data.guaranteeReady===true){block('Lembre-se','O cliente de um contacto pago não atende? Damos-lhe outro contacto. Verificamos cada caso.',{rules:true});const u=personal(data.url);u.pathname='/regras-garantia.html';u.hash='';content+=p(emailLink('Ver as regras',u.toString()));textContent+='\nVer as regras: '+u;}
   block('Dica','Os clientes submetem pedidos para encontrar um profissional de limpeza.'+(data.whatsappReady===true?' Os pedidos com “✓ Interesse confirmado pelo cliente por WhatsApp” são clientes com quem já falámos.':''));action('Ver pedidos disponíveis');break;
  case 'P6':
