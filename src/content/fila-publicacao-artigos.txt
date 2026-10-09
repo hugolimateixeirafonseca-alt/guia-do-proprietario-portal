@@ -1,7 +1,6 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # Um artigo por execução. Adicionar novos pendentes a esta fila.
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
-limpeza-pos-obras.mdx
 reparar-ou-trocar-eletrodomestico.mdx
 trocar-gas-por-inducao.mdx
 carregar-carro-eletrico-em-casa.mdx
