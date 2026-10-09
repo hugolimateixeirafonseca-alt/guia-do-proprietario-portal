@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-09T07:03:15.384Z",
+  "generatedAt": "2026-10-09T07:06:02.672Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 137,
-    "published": 131,
+    "published": 132,
     "newsOnline": 21
   },
   "articles": [
@@ -1600,14 +1600,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "limpeza-pos-obras.mdx",
       "arrivedAt": "2026-09-20T12:08:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-09T07:01:30Z",
+      "url": "https://guiadoproprietario.pt/casa/limpeza-pos-obras/"
     },
     {
       "id": "EXTRA-017",
