@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-13T07:03:06.617Z",
+  "generatedAt": "2026-10-13T07:05:57.586Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 137,
-    "published": 135,
+    "published": 136,
     "newsOnline": 21
   },
   "articles": [
@@ -1584,14 +1584,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "bateria-para-paineis-solares.mdx",
       "arrivedAt": "2026-09-20T12:08:39+01:00",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-13T07:01:35Z",
+      "url": "https://guiadoproprietario.pt/casa/bateria-para-paineis-solares/"
     },
     {
       "id": "EXTRA-025",
