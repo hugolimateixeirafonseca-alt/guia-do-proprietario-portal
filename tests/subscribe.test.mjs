@@ -431,6 +431,9 @@ test("guarda o pedido de limpeza no dashboard e não envia dados operacionais ao
   assert.deepEqual(dashboardBody.preferred_weekdays, []);
   assert.deepEqual(dashboardBody.preferred_time_periods, ["morning"]);
   assert.deepEqual(dashboardBody.contact_preferences, ["whatsapp","email"]);
+  const {clientIpKey}=await import("../functions/lib/client-ip-key.mjs");
+  assert.equal(dashboardBody.client_ip_key,await clientIpKey(env.CONSENT_ARCHIVE_KEY,"192.0.2.10"));
+  assert.equal(dashboardBody.client_ip,undefined);
   assert.equal(dashboardBody.consent_partner_sharing, true);
   assert.equal(dashboardBody.consent_marketing, false);
   assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", senderSyncQueued:true, dashboardStored: true });

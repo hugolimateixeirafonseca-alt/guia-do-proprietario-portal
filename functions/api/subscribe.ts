@@ -1,3 +1,4 @@
+import {clientIpKey} from "../lib/client-ip-key.mjs";
 import { processSenderSync } from "../lib/cleaning-sender-sync.mjs";
 import { cleaningAttribution } from "../lib/cleaning-attribution.mjs";
 import { recordConsent } from "../lib/consent-archive.mjs";
@@ -170,7 +171,8 @@ async function sendCleaningLead(
   postalCode: string,
   municipality: string,
   locality: string,
-  consentText: { readonly c1: string; readonly c2: string }
+  consentText: { readonly c1: string; readonly c2: string },
+  ipKey: string | null
 ) {
   if (!env.CLEANING_DASHBOARD_API_TOKEN) return { ok: false, status: 503, code: "not_configured" };
   const endpoint = env.CLEANING_DASHBOARD_API_URL || "https://guia-do-proprietario-parceiros.pages.dev/api/leads";
@@ -184,6 +186,7 @@ async function sendCleaningLead(
       },
       body: JSON.stringify({
         event_id: cleanText(body.eventId, 128),
+        client_ip_key: ipKey,
         request_confirmed: body.requestConfirmed === true,
         service_type: cleanText(body.serviceType, 32),
         space_type: cleanText(body.spaceType, 32),
@@ -473,7 +476,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   } catch { return json({error:"consent_archive_unavailable"},503); }
 
   if (isCleaningLead) {
-    const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup?.municipality || "Por confirmar", postalLookup?.status === "found" ? postalLookup.locality : "", consentText);
+    const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup?.municipality || "Por confirmar", postalLookup?.status === "found" ? postalLookup.locality : "", consentText, await clientIpKey(env.CONSENT_ARCHIVE_KEY,evidence.ip));
     if (!dashboardResult.ok) {
       return json({ error: "dashboard_error", code: dashboardResult.code }, dashboardResult.status === 503 ? 503 : 502);
     }
