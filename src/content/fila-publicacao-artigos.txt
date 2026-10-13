@@ -1,5 +1,4 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # Um artigo por execução. Adicionar novos pendentes a esta fila.
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
-bateria-para-paineis-solares.mdx
 visitar-casa-usada.mdx
