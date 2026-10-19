@@ -56,13 +56,14 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
             <section class="form-step is-active" data-step="1">
               <fieldset>
                 <legend>Que tipo de limpeza procura?</legend>
+                <p class="question-help">Pode escolher mais do que uma modalidade, por exemplo regular e profunda.</p>
                 <div class="option-grid option-grid-3">
-                  <label class="option-card"><input type="radio" name="service_type" value="regular" required><span class="option-icon">⌂</span><b>Regular</b><small>semanal ou recorrente</small></label>
-                  <label class="option-card"><input type="radio" name="service_type" value="profunda"><span class="option-icon">✦</span><b>Profunda</b><small>mais completa</small></label>
-                  <label class="option-card"><input type="radio" name="service_type" value="pos_obra"><span class="option-icon">⌁</span><b>Pós-obra</b><small>pó e resíduos</small></label>
-                  <label class="option-card"><input type="radio" name="service_type" value="mudanca"><span class="option-icon">□</span><b>Mudança</b><small>entrada ou saída</small></label>
-                  <label class="option-card"><input type="radio" name="service_type" value="empresarial"><span class="option-icon">▦</span><b>Empresa</b><small>escritório ou loja</small></label>
-                  <label class="option-card"><input type="radio" name="service_type" value="outra"><span class="option-icon">•••</span><b>Outra</b><small>explique no final</small></label>
+                  <label class="option-card"><input type="checkbox" name="service_type" value="regular"><span class="option-icon">⌂</span><b>Regular</b><small>semanal ou recorrente</small></label>
+                  <label class="option-card"><input type="checkbox" name="service_type" value="profunda"><span class="option-icon">✦</span><b>Profunda</b><small>mais completa</small></label>
+                  <label class="option-card"><input type="checkbox" name="service_type" value="pos_obra"><span class="option-icon">⌁</span><b>Pós-obra</b><small>pó e resíduos</small></label>
+                  <label class="option-card"><input type="checkbox" name="service_type" value="mudanca"><span class="option-icon">□</span><b>Mudança</b><small>entrada ou saída</small></label>
+                  <label class="option-card"><input type="checkbox" name="service_type" value="empresarial"><span class="option-icon">▦</span><b>Empresa</b><small>escritório ou loja</small></label>
+                  <label class="option-card"><input type="checkbox" name="service_type" value="outra"><span class="option-icon">•••</span><b>Outra</b><small>explique no final</small></label>
                 </div>
                 <p class="field-error" data-error-for="service_type"></p>
               </fieldset>
@@ -113,6 +114,7 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
             <section class="form-step" data-step="3">
               <fieldset>
                 <legend>Com que frequência precisa?</legend>
+                  <p class="question-help">Se as modalidades tiverem frequências diferentes, explique no campo de informação adicional.</p>
                 <div class="stack-options">
                   <label class="row-option"><input type="radio" name="service_frequency" value="one_time" required><span><b>Apenas uma vez</b><small>Limpeza pontual</small></span></label>
                   <label class="row-option"><input type="radio" name="service_frequency" value="weekly"><span><b>Todas as semanas</b><small>Serviço semanal</small></span></label>

@@ -35,6 +35,7 @@ interface SubscribeBody {
   name?: unknown;
   saleTimeline?: unknown;
   serviceType?: unknown;
+  serviceTypes?: unknown;
   spaceType?: unknown;
   spaceSize?: unknown;
   serviceFrequency?: unknown;
@@ -189,6 +190,7 @@ async function sendCleaningLead(
         client_ip_key: ipKey,
         request_confirmed: body.requestConfirmed === true,
         service_type: cleanText(body.serviceType, 32),
+        ...(body.serviceTypes !== undefined ? {service_types: body.serviceTypes} : {}),
         space_type: cleanText(body.spaceType, 32),
         space_size: cleanText(body.spaceSize, 32),
         postal_code: postalCode,
@@ -386,7 +388,11 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   const partnerConsent = isDirectValueLead || isCleaningLead ? body.consent1 === true : !isNewsletter && body.consent2 === true;
   const marketingConsent = isDirectValueLead || isCleaningLead ? body.consent2 === true : body.consent1 === true;
   const advertisingConsent = isNewsletter && body.consent2 === true;
-  const serviceTypeCode = cleanText(body.serviceType, 32) as keyof typeof CLEANING_LABELS.serviceType;
+  const rawServiceTypes = body.serviceTypes === undefined ? [body.serviceType] : body.serviceTypes;
+  const serviceTypeValues: unknown[] = Array.isArray(rawServiceTypes) ? rawServiceTypes.map(value=>typeof value==='string'?value.trim():value) : [];
+  const validServiceTypes = Array.isArray(rawServiceTypes) && serviceTypeValues.length>0 && serviceTypeValues.length<=6 && serviceTypeValues.every(value=>typeof value==='string' && Object.hasOwn(CLEANING_LABELS.serviceType,value));
+  const serviceTypeCodes = validServiceTypes ? Object.keys(CLEANING_LABELS.serviceType).filter(code=>serviceTypeValues.includes(code)) as Array<keyof typeof CLEANING_LABELS.serviceType> : [];
+  const serviceTypeCode = serviceTypeCodes[0];
   const spaceTypeCode = cleanText(body.spaceType, 32) as keyof typeof CLEANING_LABELS.spaceType;
   const spaceSizeCode = cleanText(body.spaceSize, 32) as keyof typeof CLEANING_LABELS.spaceSize;
   const frequencyCode = cleanText(body.serviceFrequency, 32) as keyof typeof CLEANING_LABELS.frequency;
@@ -437,7 +443,9 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
       if (!alTurnaround) return json({ error: "invalid_al_turnaround" }, 400);
       if (!alAccess) return json({ error: "invalid_al_access" }, 400);
     } else {
-      if (!serviceType) return json({ error: "invalid_service_type" }, 400);
+      if (!validServiceTypes || !serviceType || (body.serviceTypes!==undefined && body.serviceType!==undefined && !serviceTypeCodes.includes(cleanText(body.serviceType,32) as keyof typeof CLEANING_LABELS.serviceType))) return json({ error: "invalid_service_type" }, 400);
+      body.serviceType=serviceTypeCode;
+      if(body.serviceTypes!==undefined)body.serviceTypes=serviceTypeCodes;
       if (!spaceType) return json({ error: "invalid_space_type" }, 400);
       if (!spaceSize || spaceSizeCode === "unknown") return json({ error: "invalid_space_size" }, 400);
       if (!serviceFrequency || frequencyCode === "undecided") return json({ error: "invalid_service_frequency" }, 400);

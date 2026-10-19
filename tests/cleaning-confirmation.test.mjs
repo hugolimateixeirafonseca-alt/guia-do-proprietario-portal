@@ -10,7 +10,7 @@ function fixture(){
  const ctx={currentStep:5,confirmation:{checked:false,focus(){}},confirmButton:{disabled:true},
  steps:[1,2,3,4,5,6].map(step=>({...node,dataset:{step}})),dots:[],stepLabel:{},updateSummary(){},document:{getElementById:id=>nodes[id]},
  form:{...node,elements,dataset:{consentVersion:'v1'},addEventListener:(name,fn)=>handlers[name]=fn},window:{location:{href:'https://test/'}},
- eventId:()=>crypto.randomUUID(),getValue:()=> 'value',getValues:()=>[],validateStep:()=>true,
+ eventId:()=>crypto.randomUUID(),getValue:()=> 'value',getValues:k=>k==='service_type'?['regular']:[],validateStep:()=>true,
  sendingState:node,errorState:node,successState:node,errorMap:{},fetch:async(_,init)=>{sent.push(JSON.parse(init.body));return new Response('{}');}};
  vm.createContext(ctx);
  const reset=full.slice(full.indexOf('  const resetConfirmation'),full.indexOf('  let currentStep'));
@@ -35,7 +35,7 @@ test('an invalid earlier field returns to its step without sending',async()=>{
 });
 test('one-time summary shows the chosen date without stale recurring weekdays',()=>{
  const result={};const summary={};const values={service_type:'regular',service_frequency:'one_time',one_time_timing:'specific_date',preferred_date:'2026-10-15',postal_code:'1900-096'};
- const ctx={summary,confirmation:{nextElementSibling:{}},confirmButton:{},document:{getElementById:()=>result},getValue:k=>values[k]||'',getValues:k=>k==='preferred_weekdays'?['monday']:['morning']};
+ const ctx={summary,confirmation:{nextElementSibling:{}},confirmButton:{},document:{getElementById:()=>result},getValue:k=>values[k]||'',getValues:k=>k==='service_type'?[values.service_type]:k==='preferred_weekdays'?['monday']:['morning']};
  const labels=full.slice(full.indexOf('  const labels'),full.indexOf('  const getValue'));
  const update=full.slice(full.indexOf('  const updateSummary'),full.indexOf('  const eventId'));
  vm.runInNewContext(labels+update+'updateSummary();',ctx);
@@ -45,10 +45,24 @@ test('one-time summary shows the chosen date without stale recurring weekdays',(
 
 test('flexible start is included in the summary and still requires service confirmation',()=>{
  const result={};const values={service_type:'regular',service_frequency:'one_time',one_time_timing:'flexible',postal_code:'4000-123'};
- const ctx={summary:{},confirmation:{nextElementSibling:{}},confirmButton:{},document:{getElementById:()=>result},getValue:k=>values[k]||'',getValues:()=>[]};
+ const ctx={summary:{},confirmation:{nextElementSibling:{}},confirmButton:{},document:{getElementById:()=>result},getValue:k=>values[k]||'',getValues:k=>k==='service_type'?[values.service_type]:[]};
  const labels=full.slice(full.indexOf('  const labels'),full.indexOf('  const getValue'));
  const update=full.slice(full.indexOf('  const updateSummary'),full.indexOf('  const eventId'));
  vm.runInNewContext(labels+update+'updateSummary();',ctx);
  assert.match(result.textContent,/A combinar com o profissional de limpeza/);
  assert.match(ctx.confirmation.nextElementSibling.textContent,/Confirmo que preciso deste serviço/);
+});
+
+
+test('combined services are shown together and submitted once after confirmation',async()=>{
+ const f=fixture();f.ctx.getValues=k=>k==='service_type'?['regular','profunda']:[];
+ await f.submit();assert.equal(f.sent.length,0);f.ctx.confirmation.checked=true;await f.submit();
+ assert.equal(f.sent.length,1);assert.deepEqual(f.sent[0].serviceTypes,['regular','profunda']);assert.equal(f.sent[0].serviceType,'regular');
+ const result={};const values={service_frequency:'weekly',one_time_timing:'next_week',postal_code:'1600-014'};
+ const ctx={summary:{},confirmation:{nextElementSibling:{}},confirmButton:{},document:{getElementById:()=>result},getValue:k=>values[k]||'',getValues:k=>k==='service_type'?['regular','profunda']:[]};
+ const labels=full.slice(full.indexOf('  const labels'),full.indexOf('  const getValue'));
+ const update=full.slice(full.indexOf('  const updateSummary'),full.indexOf('  const eventId'));
+ vm.runInNewContext(labels+update+'updateSummary();',ctx);assert.match(result.textContent,/Limpeza regular \+ Limpeza profunda/);
+ const html=readFileSync(new URL('../src/pages/servicos-limpeza/index.astro',import.meta.url),'utf8');
+ const choices=[...html.matchAll(/<input[^>]*name="service_type"[^>]*>/g)].map(m=>m[0]);assert.equal(choices.length,6);assert.ok(choices.every(c=>c.includes('type="checkbox"')&&!c.includes('required')));
 });

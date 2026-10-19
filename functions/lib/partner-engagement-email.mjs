@@ -76,6 +76,9 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
         break;
       }
       const name=clean(data.client_name),phone=clean(data.client_phone,24).replace(/[\s()-]/g,'');
+      const cleaningTypes=data.cleaning_types===undefined?[data.cleaning_type]:data.cleaning_types;
+      if(!Array.isArray(cleaningTypes)||!cleaningTypes.length||cleaningTypes.length>6||cleaningTypes.some(value=>!labels[value]))throw new Error('invalid_event_data');
+      const cleaningLabel=[...new Set(cleaningTypes)].map(value=>labels[value]).join(' + ');
       if(!place||!name||!/^\+?[0-9]{9,15}$/.test(phone)||!['partilhada','exclusiva'].includes(data.modality)||!labels[data.cleaning_type]||!labels[data.space_type]||!labels[data.size]||!labels[data.frequency])throw new Error('invalid_event_data');
       const email=clean(data.client_email,254),postal=clean(data.postal_code,20);
       const emailLine=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)?`\n✉️ ${email}`:'';
@@ -85,7 +88,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
       paragraphs=[
         `Obteve o contacto do pedido de ${place}. Aqui estão os dados do cliente:`,
         `${name}\n📞 ${phone}${emailLine}\n📍 ${postal?postal+', ':''}${place}`,
-        `O pedido: ${labels[data.cleaning_type]} · ${labels[data.space_type]}, ${labels[data.size]} · ${labels[data.frequency]} · prefere ${preferences(data.days,'dia não indicado')}, ${preferences(data.periods,'horário não indicado')}`,
+        `O pedido: ${cleaningLabel} · ${labels[data.space_type]}, ${labels[data.size]} · ${labels[data.frequency]} · prefere ${preferences(data.days,'dia não indicado')}, ${preferences(data.periods,'horário não indicado')}`,
         `Notas do cliente: ${notes}`,
         data.modality==='partilhada'?'Este é um contacto partilhado: outros profissionais podem receber os mesmos dados. Ser o primeiro a ligar faz a diferença.':'Só você recebe este contacto através do Guia do Proprietário.',
         'Como fazer o primeiro contacto:\n1. Ligue hoje, de preferência na próxima hora. Os nossos termos pedem o primeiro contacto nas 24 horas seguintes à obtenção do contacto.\n2. Se não atender, envie logo uma mensagem por WhatsApp a dizer que vem do pedido feito no Guia do Proprietário.\n3. Envie o orçamento por escrito, de preferência no mesmo dia em que falar com o cliente.',

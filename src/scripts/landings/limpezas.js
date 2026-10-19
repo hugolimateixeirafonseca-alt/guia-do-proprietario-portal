@@ -69,7 +69,7 @@
     let valid = true;
     const fail = (name, message) => { setError(name, message); valid = false; };
 
-    if (number === 1 && !getValue("service_type")) fail("service_type", "Escolha uma opção para continuar.");
+    if (number === 1 && !getValues("service_type").length) fail("service_type", "Escolha pelo menos uma modalidade para continuar.");
     if (number === 2) {
       if (!getValue("space_type")) fail("space_type", "Escolha o tipo de espaço.");
       if (!getValue("space_size")) fail("space_size", "Indique a dimensão aproximada.");
@@ -108,7 +108,7 @@
   const updateDate = () => dateBlock.classList.toggle("is-hidden", getValue("one_time_timing") !== "specific_date");
 
   const updateSummary = () => {
-    const service = labels.service_type[getValue("service_type")] || "";
+    const service = getValues("service_type").map(value=>labels.service_type[value]).filter(Boolean).join(" + ");
     const frequency = labels.service_frequency[getValue("service_frequency")] || "";
     const day = ["weekly", "fortnightly", "monthly"].includes(getValue("service_frequency")) ? getValues("preferred_weekdays").map(value => labels.preferred_weekday[value]).filter(Boolean).join(", ") : "";
     const period = getValues("preferred_time_periods").map(value => labels.preferred_time_period[value]).filter(Boolean).join(", ");
@@ -188,7 +188,8 @@
       consent2: form.elements.consent_marketing.checked,
       pageUrl: window.location.href,
       eventId: submissionId,
-      serviceType: getValue("service_type"),
+      serviceType: getValues("service_type")[0],
+      serviceTypes: getValues("service_type"),
       spaceType: getValue("space_type"),
       spaceSize: getValue("space_size"),
       postalCode: getValue("postal_code"),

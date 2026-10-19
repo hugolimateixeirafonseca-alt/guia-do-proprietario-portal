@@ -125,3 +125,11 @@ test('duplicate event delivers once to its intended recipient; 502 is held for r
     assert.equal(sent.length,2);
   }finally{globalThis.fetch=original;fixture.db.close();}
 });
+
+
+test('contact confirmation includes every selected cleaning modality',()=>{
+ const data={...cases[0][1],cleaning_types:['regular','profunda']};
+ const message=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data});
+ assert.match(message.text,/Limpeza regular \+ Limpeza profunda/);
+ assert.throws(()=>renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data:{...data,cleaning_types:['regular','unsupported']}}));
+});

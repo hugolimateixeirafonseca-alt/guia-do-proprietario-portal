@@ -816,3 +816,26 @@ test("encaminha a data a combinar mantendo a autorização e as preferências", 
   assert.equal(dashboardBody.consent_marketing, false);
   assert.deepEqual(await response.json(), { ok: true, locality: "Lisboa", senderSyncQueued:true, dashboardStored: true });
 });
+
+
+test("encaminha várias modalidades num único pedido, mantendo notas e consentimentos", async () => {
+ globalThis.fetch=async (url,init={})=>{
+  calls.push({url:String(url),init});
+  if(String(url).startsWith("https://json.geoapi.pt/"))return Response.json({Localidade:"Lisboa"});
+  if(String(url)===env.CLEANING_DASHBOARD_API_URL)return Response.json({ok:true,lead_id:"one-combined-request",municipality:"Lisboa"},{status:201});
+  return Response.json({ok:true});
+ };
+ const response=await onRequestPost({env,request:requestFor({...cleaningBody,serviceTypes:["profunda","regular","regular"],additionalNotes:"Profunda inicial e manutenção semanal"})});
+ assert.equal(response.status,200);
+ const stored=calls.filter(c=>c.url===env.CLEANING_DASHBOARD_API_URL);assert.equal(stored.length,1);
+ const body=JSON.parse(stored[0].init.body);assert.deepEqual(body.service_types,["regular","profunda"]);assert.equal(body.service_type,"regular");
+ assert.equal(body.additional_notes,"Profunda inicial e manutenção semanal");assert.equal(body.consent_partner_sharing,true);assert.equal(body.request_confirmed,true);
+});
+
+test("recusa listas vazias, inválidas ou contraditórias antes de criar o pedido", async () => {
+ globalThis.fetch=async()=>{throw Error("No external call expected");};
+ for(const serviceTypes of [[],["profunda","unknown"],"profunda",null,Array(7).fill("profunda")]){
+  const response=await onRequestPost({env,request:requestFor({...cleaningBody,serviceTypes})});assert.equal(response.status,400);assert.equal((await response.json()).error,"invalid_service_type");
+ }
+ const conflicting=await onRequestPost({env,request:requestFor({...cleaningBody,serviceType:"mudanca",serviceTypes:["regular","profunda"]})});assert.equal(conflicting.status,400);
+});
