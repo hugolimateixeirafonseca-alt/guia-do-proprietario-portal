@@ -1,3 +1,4 @@
+import {fetchOpenAI} from './openai-overload-retry.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -91,12 +92,11 @@ async function openai({model,prompt,purpose,web=false,effort='low',allowedDomain
     body.tool_choice='required';
     body.include=['web_search_call.action.sources'];
   }
-  const res=await fetch('https://api.openai.com/v1/responses',{
+  const {res,raw}=await fetchOpenAI('https://api.openai.com/v1/responses',{
     method:'POST',
     headers:{Authorization:`Bearer ${process.env.OPENAI_API_KEY}`,'Content-Type':'application/json'},
     body:JSON.stringify(body)
-  });
-  const raw=await res.text();
+  },{onRetry:event=>log({stage:'openai_overload_retry',purpose,...event})});
   if (!res.ok) throw new Error(`OpenAI ${res.status}: ${raw.slice(0,1000)}`);
   const data=JSON.parse(raw);
   const text=data.output_text||(data.output||[]).flatMap(item=>item.content||[]).map(content=>content.text||'').join('\n');
