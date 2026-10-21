@@ -1,3 +1,25 @@
 # Ordem de publicação. Uma linha por ficheiro, sem caminho.
 # Um artigo por execução. Adicionar novos pendentes a esta fila.
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
+
+# Lote editorial de 21-10-2026. Manter a publicação de um artigo por execução.
+empreiteiro-abandonou-obra.mdx
+reclamar-defeitos-depois-obra.mdx
+trocar-canalizacoes-antigas.mdx
+quadro-eletrico-antigo.mdx
+impermeabilizar-terraco-orcamento.mdx
+inspecao-tecnica-antes-comprar-casa.mdx
+videoporteiro-reparar-substituir.mdx
+agua-quente-demora-chegar.mdx
+autoclismo-sempre-correr.mdx
+extrator-casa-banho-sem-janela.mdx
+exaustor-nao-tira-cheiros.mdx
+roupeiros-medida-ou-modulares.mdx
+restaurar-ou-trocar-portas-interiores.mdx
+entulho-residuos-obras.mdx
+limpeza-faltou-ou-causou-danos.mdx
+limpeza-colchoes-contratar.mdx
+instalar-redes-mosquiteiras.mdx
+comprar-casa-obras-regularizadas.mdx
+contrato-imobiliaria-exclusividade-comissao.mdx
+seguro-recusou-dano-casa.mdx
