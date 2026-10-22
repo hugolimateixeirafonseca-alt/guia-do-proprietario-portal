@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-22T07:03:20.692Z",
+  "generatedAt": "2026-10-22T07:06:14.615Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 137,
+    "published": 138,
     "newsOnline": 21
   },
   "articles": [
@@ -1456,14 +1456,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "empreiteiro-abandonou-obra.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-22T07:01:37Z",
+      "url": "https://guiadoproprietario.pt/casa/empreiteiro-abandonou-obra/"
     },
     {
       "id": "EXTRA-202",
