@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-23T07:03:06.127Z",
+  "generatedAt": "2026-10-23T07:05:09.239Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 138,
+    "published": 139,
     "newsOnline": 21
   },
   "articles": [
@@ -1472,14 +1472,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "reclamar-defeitos-depois-obra.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-23T07:01:15Z",
+      "url": "https://guiadoproprietario.pt/casa/reclamar-defeitos-depois-obra/"
     },
     {
       "id": "EXTRA-209",
