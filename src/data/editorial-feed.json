@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-24T07:02:56.810Z",
+  "generatedAt": "2026-10-24T07:05:08.894Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 139,
+    "published": 140,
     "newsOnline": 21
   },
   "articles": [
@@ -1712,14 +1712,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "trocar-canalizacoes-antigas.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-24T07:01:18Z",
+      "url": "https://guiadoproprietario.pt/casa/trocar-canalizacoes-antigas/"
     },
     {
       "id": "EXTRA-207",
