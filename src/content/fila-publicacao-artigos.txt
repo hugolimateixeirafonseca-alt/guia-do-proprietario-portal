@@ -3,7 +3,6 @@
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
 
 # Lote editorial de 21-10-2026. Manter a publicação de um artigo por execução.
-quadro-eletrico-antigo.mdx
 impermeabilizar-terraco-orcamento.mdx
 inspecao-tecnica-antes-comprar-casa.mdx
 videoporteiro-reparar-substituir.mdx
