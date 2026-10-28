@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-27T15:54:17.457Z",
+  "generatedAt": "2026-10-28T08:06:19.730Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 143,
+    "published": 144,
     "newsOnline": 21
   },
   "articles": [
@@ -1728,14 +1728,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "videoporteiro-reparar-substituir.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-28T08:01:27Z",
+      "url": "https://guiadoproprietario.pt/casa/videoporteiro-reparar-substituir/"
     },
     {
       "id": "EXTRA-106",
