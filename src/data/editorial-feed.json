@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-29T08:03:13.406Z",
+  "generatedAt": "2026-10-29T08:05:55.362Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 144,
+    "published": 145,
     "newsOnline": 21
   },
   "articles": [
@@ -1424,14 +1424,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "agua-quente-demora-chegar.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-29T08:01:27Z",
+      "url": "https://guiadoproprietario.pt/casa/agua-quente-demora-chegar/"
     },
     {
       "id": "EXTRA-215",
