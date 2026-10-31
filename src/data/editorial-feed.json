@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-31T08:03:17.095Z",
+  "generatedAt": "2026-10-31T08:06:42.425Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 146,
+    "published": 147,
     "newsOnline": 21
   },
   "articles": [
@@ -1552,14 +1552,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "extrator-casa-banho-sem-janela.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-10-31T08:01:11Z",
+      "url": "https://guiadoproprietario.pt/casa/extrator-casa-banho-sem-janela/"
     },
     {
       "id": "EXTRA-205",
