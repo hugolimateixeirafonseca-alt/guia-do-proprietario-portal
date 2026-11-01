@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-01T08:04:08.687Z",
+  "generatedAt": "2026-11-01T08:06:46.111Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 147,
+    "published": 148,
     "newsOnline": 21
   },
   "articles": [
@@ -1536,14 +1536,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "exaustor-nao-tira-cheiros.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-11-01T08:01:22Z",
+      "url": "https://guiadoproprietario.pt/casa/exaustor-nao-tira-cheiros/"
     },
     {
       "id": "EXTRA-210",
