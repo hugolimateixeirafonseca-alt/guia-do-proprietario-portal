@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-02T08:04:47.710Z",
+  "generatedAt": "2026-11-02T08:07:57.690Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 148,
+    "published": 149,
     "newsOnline": 21
   },
   "articles": [
@@ -1680,14 +1680,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "roupeiros-medida-ou-modulares.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-11-02T08:02:03Z",
+      "url": "https://guiadoproprietario.pt/casa/roupeiros-medida-ou-modulares/"
     },
     {
       "id": "EXTRA-220",
