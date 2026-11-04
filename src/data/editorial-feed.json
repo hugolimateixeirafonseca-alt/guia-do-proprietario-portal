@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-04T08:05:32.187Z",
+  "generatedAt": "2026-11-04T08:08:12.194Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 150,
+    "published": 151,
     "newsOnline": 21
   },
   "articles": [
@@ -1648,14 +1648,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "entulho-residuos-obras.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-11-04T08:03:21Z",
+      "url": "https://guiadoproprietario.pt/casa/entulho-residuos-obras/"
     },
     {
       "id": "EXTRA-213",
