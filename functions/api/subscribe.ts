@@ -1,3 +1,4 @@
+import {recordCleaningMeasurement} from '../lib/cleaning-measurement-diagnostics.mjs';
 import {clientIpKey} from "../lib/client-ip-key.mjs";
 import { processSenderSync } from "../lib/cleaning-sender-sync.mjs";
 import { cleaningAttribution } from "../lib/cleaning-attribution.mjs";
@@ -22,6 +23,7 @@ interface Env {
 }
 
 interface SubscribeBody {
+  measurementPixelState?: unknown;
   requestConfirmed?: unknown;
   email?: unknown;
   consent1?: unknown;
@@ -499,6 +501,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   }
 
   if (isCleaningLead) {
+    await recordCleaningMeasurement(env, request, evidence, body);
     // The lead transaction queued Sender sync durably. Provider failures cannot lose it.
     const delivery = processSenderSync(env).catch(() => ({state:"pending"}));
     if (waitUntil) waitUntil(delivery); else await delivery;

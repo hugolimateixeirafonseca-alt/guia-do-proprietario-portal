@@ -1,3 +1,4 @@
+import {cleaningPixelState, trackCleaningLead} from '../../lib/cleaning-measurement.mjs';
 (() => {
   const form = document.getElementById("quoteForm");
   if (!form) return;
@@ -182,6 +183,7 @@
     let submissionId = eventId();
     const payload = {
       source: "guia_limpeza_preco_disponibilidade",
+      measurementPixelState: cleaningPixelState(window),
       consentVersion: form.dataset.consentVersion,
       consent1: form.elements.consent_partner_sharing.checked,
       requestConfirmed: confirmation.checked,
@@ -209,7 +211,7 @@
     sendingState.classList.remove("is-hidden");
     errorState.classList.add("is-hidden");
 
-    const identity = JSON.stringify({...payload, eventId:undefined});
+    const identity = JSON.stringify({...payload, eventId:undefined, measurementPixelState:undefined});
     if (pendingSubmission?.identity === identity) submissionId = pendingSubmission.id;
     pendingSubmission = {identity, id:submissionId};
     payload.eventId = submissionId;
@@ -235,7 +237,7 @@
 
       sendingState.classList.add("is-hidden");
       successState.classList.remove("is-hidden");successState.querySelector("h3").textContent="Pedido enviado com sucesso";successState.querySelector("p").textContent="Recebemos os seus dados e vamos encaminhar o pedido de acordo com a sua zona e preferência de disponibilidade.";
-      if (window.fbq) window.fbq("track", "Lead", { content_name: "servicos-limpeza" }, { eventID: submissionId });
+      trackCleaningLead(window, submissionId);
     } catch {
       sendingState.classList.add("is-hidden");
       errorState.classList.remove("is-hidden");

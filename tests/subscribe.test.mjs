@@ -96,6 +96,7 @@ beforeEach(async () => {
   archiveSql?.close();
   archiveSql = new DatabaseSync(":memory:");
   archiveSql.exec(await readFile("migrations/consent-archive/0001_consent_evidence.sql","utf8"));
+  archiveSql.exec(await readFile('migrations/consent-archive/0002_cleaning_measurement_diagnostics.sql','utf8'));
   env.CONSENT_ARCHIVE_KEY="synthetic-archive-secret-for-local-tests-only";
   env.CONSENT_ARCHIVE_DB={prepare(query){let values=[];return {bind(...args){values=args;return this},async first(){return archiveSql.prepare(query).get(...values)||null},async run(){archiveSql.prepare(query).run(...values);return {success:true}}}}};
   calls = [];
@@ -722,7 +723,7 @@ test("regista as submissões válidas das duas landings de limpeza como Lead no 
     readFile(path.resolve(".github/workflows/deploy-pages-functions-direct.yml"), "utf8")
   ]);
 
-  assert.match(generalLanding, /fbq\("track", "Lead", \{ content_name: "servicos-limpeza" \}, \{ eventID: submissionId \}\)/);
+  assert.match(generalLanding, /trackCleaningLead\(window, submissionId\)/);
   assert.match(localAccommodationLanding, /fbq\("track", "Lead", \{ content_name: "limpeza-alojamento-local" \}, \{ eventID: submissionId \}\)/);
   assert.doesNotMatch(generalLanding, /fbq\("track", "Contact"/);
   assert.doesNotMatch(localAccommodationLanding, /fbq\("track", "Contact"/);
@@ -838,4 +839,14 @@ test("recusa listas vazias, inválidas ou contraditórias antes de criar o pedid
   const response=await onRequestPost({env,request:requestFor({...cleaningBody,serviceTypes})});assert.equal(response.status,400);assert.equal((await response.json()).error,"invalid_service_type");
  }
  const conflicting=await onRequestPost({env,request:requestFor({...cleaningBody,serviceType:"mudanca",serviceTypes:["regular","profunda"]})});assert.equal(conflicting.status,400);
+});
+
+test('successful cleaning lead records measurement choice separately from newsletter permission',async()=>{
+ globalThis.fetch=async(url,init={})=>{calls.push({url:String(url),init});if(String(url).startsWith('https://json.geoapi.pt/'))return Response.json({Localidade:'Lisboa',Concelho:'Lisboa'});if(String(url).endsWith('/api/sender-sync'))throw Error('temporary failure');return Response.json({ok:true,lead_id:'test'});};
+ const request=requestFor({...cleaningBody,consent2:false,measurementPixelState:'callable'});
+ request.headers.set('Cookie','gp_cookie_preferences='+encodeURIComponent(JSON.stringify({version:'2026-09-01-1',measurement:true,savedAt:new Date().toISOString()})));
+ const response=await onRequestPost({request,env});assert.equal(response.status,200);
+ const row=archiveSql.prepare('SELECT * FROM cleaning_measurement_diagnostics').get();assert.equal(row.measurement_choice,'accepted');assert.equal(row.browser_pixel_state,'callable');
+ const invalid=await onRequestPost({request:requestFor({...cleaningBody,eventId:'invalid-attempt',requestConfirmed:false}),env});assert.equal(invalid.status,400);
+ assert.equal(archiveSql.prepare('SELECT count(*) n FROM cleaning_measurement_diagnostics').get().n,1);
 });
