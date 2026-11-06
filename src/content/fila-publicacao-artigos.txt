@@ -3,7 +3,6 @@
 # Fila reconciliada em 2026-09-09 pela chegada verificável no Git.
 
 # Lote editorial de 21-10-2026. Manter a publicação de um artigo por execução.
-limpeza-colchoes-contratar.mdx
 instalar-redes-mosquiteiras.mdx
 comprar-casa-obras-regularizadas.mdx
 contrato-imobiliaria-exclusividade-comissao.mdx
