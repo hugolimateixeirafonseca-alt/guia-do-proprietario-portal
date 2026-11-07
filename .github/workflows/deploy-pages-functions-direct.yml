@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'functions/**'
+      - 'public/limpeza-regular-lisboa-margem-sul/**'
+      - 'src/pages/limpeza-regular-lisboa-margem-sul/**'
       - 'src/pages/pdf-casa-de-banho/**'
       - 'src/lib/pdf-*.mjs'
       - 'src/styles/pdf-casa-banho.css'

@@ -1,0 +1,22 @@
+---
+import CookieConsent from "../../components/CookieConsent.astro";
+---
+<!doctype html>
+<html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f8f5ed"><title>Limpezas em Lisboa e Margem Sul | Guia do Proprietário</title><link rel="icon" href="/limpeza-regular-lisboa-margem-sul/img/guia.svg"><link rel="stylesheet" href="/limpeza-regular-lisboa-margem-sul/estilo.css"><script is:inline src="/limpeza-regular-lisboa-margem-sul/codigos-postais.js" defer></script><script is:inline src="/limpeza-regular-lisboa-margem-sul/pedido-normal.js" defer></script><script is:inline src="/limpeza-regular-lisboa-margem-sul/landing.js" defer></script></head>
+<body>
+<header class="mast"><div class="wrap topline"><a href="#inicio" class="brand" aria-label="Guia do Proprietário, início"><img src="/limpeza-regular-lisboa-margem-sul/img/guia.svg" width="39" height="39" alt="">Guia do Proprietário</a><span class="section-name">Limpezas domésticas</span></div></header>
+<main id="main"><section class="wrap start" aria-labelledby="main-title">
+<div class="hero"><div class="intro"><p class="area">Lisboa e Margem Sul</p><h1 id="main-title" tabindex="-1">Procura limpeza regular para a sua <em>casa?</em></h1><p class="lead">Compare preços por hora, veja o que cada serviço inclui e escolha quem pode tratar da sua casa.</p></div><div class="hero-img"><img src="/limpeza-regular-lisboa-margem-sul/img/casa.webp" alt="Limpeza de uma bancada numa cozinha iluminada pelo sol" width="906" height="578"></div></div>
+<div class="finder"><div class="finder-title"><p class="step">Passo 1 de 3</p><h2>Onde precisa de limpeza?</h2></div>
+<form id="zoneForm"><label>Concelho<select id="zone" required><option value="">Escolha o concelho</option></select></label><label>Frequência<select id="frequency"><option>Semanal</option><option>Quinzenal</option></select></label><button class="primary" type="submit">Continuar <span aria-hidden="true">→</span></button></form>
+<p class="helper">Veja os parceiros disponíveis para os seus dias e escolha a quem pedir contacto.</p></div></section></main>
+<footer><div class="wrap foot"><span>Guia do Proprietário</span><span>Lisboa e Margem Sul</span></div></footer>
+<noscript>Ative o JavaScript para experimentar a comparação de orçamentos.</noscript>
+<CookieConsent />
+<script>
+  import {trackCleaningLead} from "../../lib/cleaning-measurement.mjs";
+  window.addEventListener("gp:premium-request-sent", event => {
+    trackCleaningLead(window,(event as CustomEvent<string>).detail);
+  });
+</script>
+</body></html>

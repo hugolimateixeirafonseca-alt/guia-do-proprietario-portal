@@ -23,6 +23,10 @@ interface Env {
 }
 
 interface SubscribeBody {
+  premiumPartner?: unknown;
+  premiumName?: unknown;
+  premiumVersion?: unknown;
+  premiumProducts?: unknown;
   measurementPixelState?: unknown;
   requestConfirmed?: unknown;
   email?: unknown;
@@ -178,7 +182,9 @@ async function sendCleaningLead(
   ipKey: string | null
 ) {
   if (!env.CLEANING_DASHBOARD_API_TOKEN) return { ok: false, status: 503, code: "not_configured" };
-  const endpoint = env.CLEANING_DASHBOARD_API_URL || "https://guia-do-proprietario-parceiros.pages.dev/api/leads";
+  const dashboard = env.CLEANING_DASHBOARD_API_URL || "https://guia-do-proprietario-parceiros.pages.dev/api/leads";
+  const directed = body.source === "guia_limpeza_premium";
+  const endpoint = directed ? new URL("/api/premium", dashboard).href : dashboard;
   try {
     const response = await fetch(endpoint, {
       method: "POST",
@@ -188,6 +194,7 @@ async function sendCleaningLead(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        ...(directed ? {premium_partner:body.premiumPartner,premium_version:body.premiumVersion,premium_name:body.premiumName,premium_products:body.premiumProducts} : {}),
         event_id: cleanText(body.eventId, 128),
         client_ip_key: ipKey,
         request_confirmed: body.requestConfirmed === true,
@@ -218,7 +225,7 @@ async function sendCleaningLead(
         al_turnaround: cleanText(body.alTurnaround, 32),
         al_access: cleanText(body.alAccess, 32),
         ...cleaningAttribution(body.pageUrl),
-        origem: cleanText(body.source, 64) === "guia_limpeza_alojamento_local" ? "landing-alojamento-local" : "landing-servicos-limpeza"
+        origem: directed ? "landing-limpeza-premium" : body.source === "guia_limpeza_regular_lisboa" ? "landing-limpeza-premium-normal" : cleanText(body.source, 64) === "guia_limpeza_alojamento_local" ? "landing-alojamento-local" : "landing-servicos-limpeza"
       })
     });
     if (!response.ok) return { ok: false, status: response.status, code: `dashboard_${response.status}`, municipality: "" };
@@ -357,13 +364,14 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   const email = cleanText(body.email, 254).toLowerCase();
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   const consentVersion = cleanText(body.consentVersion, 64);
-  const consentText = CONSENT_TEXT[consentVersion as ConsentVersion];
-  const source = body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" || body.source === "valor-liquido-venda-direct" || body.source === "guia_limpeza_preco_disponibilidade" || body.source === "guia_limpeza_alojamento_local" || body.source === "verificacao-anuncio-direct" ? body.source : "";
+  const baseText = CONSENT_TEXT[consentVersion as ConsentVersion];
+  const consentText = consentVersion === "limpeza-premium-2026-11" ? {...baseText,c1:baseText.c1.replace("{nome}",()=>cleanText(body.premiumName,100))} : baseText;
+  const source = body.source === "guia_limpeza_premium" || body.source === "guia_limpeza_regular_lisboa" || body.source === "newsletter" || body.source === "ebook-vender-casa" || body.source === "ebook-vender-casa-partner" || body.source === "valor-liquido-venda-direct" || body.source === "guia_limpeza_preco_disponibilidade" || body.source === "guia_limpeza_alojamento_local" || body.source === "verificacao-anuncio-direct" ? body.source : "";
   const isNewsletter = source === "newsletter";
   const isPartnerFollowup = source === "ebook-vender-casa-partner";
   const isDirectValueLead = source === "valor-liquido-venda-direct";
   const isCleaningAlLead = source === "guia_limpeza_alojamento_local";
-  const isCleaningLead = source === "guia_limpeza_preco_disponibilidade" || isCleaningAlLead;
+  const isCleaningLead = source === "guia_limpeza_premium" || source === "guia_limpeza_regular_lisboa" || source === "guia_limpeza_preco_disponibilidade" || isCleaningAlLead;
   const isQualifiedLead = isPartnerFollowup || isDirectValueLead || isCleaningLead;
   const expectedVersion = isNewsletter
     ? NEWSLETTER_CONSENT_VERSION
@@ -372,7 +380,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     : isDirectValueLead
       ? "valor-liquido-2026-08-a"
       : isCleaningLead
-        ? isCleaningAlLead ? "alojamento-local-2026-09-b" : "limpeza-2026-09-c"
+        ? source === "guia_limpeza_premium" ? "limpeza-premium-2026-11" : isCleaningAlLead ? "alojamento-local-2026-09-b" : "limpeza-2026-09-c"
       : "2026-08-k";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");
@@ -488,7 +496,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   if (isCleaningLead) {
     const dashboardResult = await sendCleaningLead(env, body, postalCode, postalLookup?.municipality || "Por confirmar", postalLookup?.status === "found" ? postalLookup.locality : "", consentText, await clientIpKey(env.CONSENT_ARCHIVE_KEY,evidence.ip));
     if (!dashboardResult.ok) {
-      return json({ error: "dashboard_error", code: dashboardResult.code }, dashboardResult.status === 503 ? 503 : 502);
+      return json({ error: "dashboard_error", code: dashboardResult.code }, dashboardResult.status === 409 ? 409 : dashboardResult.status === 503 ? 503 : 502);
     }
     if (dashboardResult.municipality && postalLookup?.status !== "found") {
       resolvedPostalLookup = {

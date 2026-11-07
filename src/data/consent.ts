@@ -82,6 +82,11 @@ export const CONSENT_TEXT = {
     c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade, para que me possam contactar com informações, disponibilidade e propostas relacionadas com este pedido. Consulte os parceiros que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
     c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
   },
+  "limpeza-premium-2026-11": {
+    c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com o prestador que escolhi ({nome}), para que me possa contactar com informações, disponibilidade e propostas relacionadas com este pedido. Consulte os parceiros que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
+    c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."
+  },
+
   "limpeza-2026-09-c": {
     c1: "Autorizo o Guia do Proprietário a partilhar os dados deste pedido com até 3 parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade, para que me possam contactar com informações, disponibilidade e propostas relacionadas com este pedido. Consulte os parceiros que podem receber pedidos na nossa Lista de Parceiros e saiba mais na Política de Privacidade.",
     c2: "Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados. As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento."

@@ -106,7 +106,9 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   const adminApplication = /^application-admin:[a-f0-9-]{36}$/.test(eventId);
   if (adminApplication && partnerEmail !== 'hugo.lima.teixeira.fonseca@gmail.com') return json({error:'invalid_admin_recipient'},400);
   let message;
-  if(welcome){
+  if(/^premium:[a-f0-9-]{36}$/.test(eventId)){
+    message=renderEmailLayout({subject:'Um cliente escolheu o seu orçamento',preview:'Consulte os dados na área de parceiro.',title:'Recebeu um pedido Premium',name:partnerName,paragraphs:['Um cliente escolheu o seu serviço em '+municipality+'. Contacte-o nas próximas 24 horas, contando apenas os dias úteis.'],button:{label:'Abrir Pedidos Premium',url:dashboardUrl}});
+  }else if(welcome){
     // Current policy owns model and entitlements; never trust an old queued offer.
     if(!commercialData)return json({error:'commercial_policy_unavailable'},503);
     try { message=commercialData.copyVersion==='v2'?renderEmailCopyV2('P4',{...commercialData,name:partnerName,url:dashboardUrl}):renderPlannedPartnerEmail('P4',{...commercialData,name:partnerName,url:dashboardUrl}); }
