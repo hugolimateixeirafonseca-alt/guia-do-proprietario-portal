@@ -27,12 +27,10 @@ function matches(){return profiles.filter(p=>p.spaces.includes(request.space)&&p
   (!homeTypes.includes(request.space)||p.sizes.includes(request.size))&&
   (request.products!=='A equipa leva os produtos'||p.products!=='client')&&
   (!request.periods.length||request.periods.some(t=>p.periods.includes(t)))&&availableDays(p));}
-function scope(){return homeTypes.includes(request.space)?'Cozinha, casas de banho, chão e superfícies.':'Casas de banho, chão e superfícies acessíveis.'}
 function summary(){
   return [request.zone,request.space==='Outro'?request.other:request.space,homeTypes.includes(request.space)?request.size:request.area,'Limpeza '+request.frequency.toLowerCase(),request.days.join(', ')||'Qualquer dia'].join(' · ');
 }
 function hourlyPrice(p){return money(p.rate)+'/h'+(p.rateUnit?' '+p.rateUnit:'')}
-function what(p){return ({partner:'O prestador leva os produtos',client:'Produtos do cliente',flexible:'Produtos a combinar'})[p.products]+'. '+({partner:'O prestador leva o equipamento',client:'Equipamento do cliente',flexible:'Equipamento a combinar'})[p.equipment]}
 function field(id,label,values){return '<label>'+label+'<select id="'+id+'" name="'+id+'">'+options(values)+'</select></label>'}
 function setValues(ids){for(const id of ids){document.getElementById(id).value=request[id]}}
 function collect(ids){for(const id of ids){request[id]=document.getElementById(id).value}}
@@ -99,7 +97,33 @@ function qualify(){
 function card(p){const active=p.id===request.selected;
   return '<button type="button" class="offer '+(active?'selected':'')+'" data-id="'+html(p.id)+'" aria-pressed="'+active+'" aria-controls="perfil"><img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'"><span class="info"><span class="type">'+html(p.name)+'</span><span class="person">'+p.type+(p.people>1?' · '+p.people+' profissionais':'')+'</span><span class="price">'+hourlyPrice(p)+'</span><span class="slot">'+availableDays(p)+'</span><span class="open">'+(active?'Perfil aberto':'Ver perfil')+'</span></span></button>';
 }
-function profile(p){return '<img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'"><div class="profile-copy"><p class="kicker">'+p.type+'</p><h2 id="profile-title" tabindex="-1">'+html(p.name)+'</h2><p>'+html(p.bio)+'</p><h3>Serviço incluído</h3><p>'+scope()+' '+what(p)+'.</p><hr class="rule"><p class="total">'+hourlyPrice(p)+'</p><p class="details">'+availableDays(p)+' · disponibilidade a confirmar</p><button class="primary full" id="choose">Pedir contacto sobre esta proposta</button><p class="note">Escolha o canal e a altura em que prefere receber o contacto.</p></div>'}
+function profile(p){
+  const list=new Intl.ListFormat('pt-PT',{style:'long',type:'conjunction'});
+  const days=p.days;
+  let schedule=list.format(days);
+  if(days.length===7)schedule='Todos os dias da semana';
+  else if(days.length===5&&!days.includes('Sábado')&&!days.includes('Domingo'))schedule='De segunda a sexta-feira';
+  const team=p.type==='Equipa de Limpeza';
+  const identity=team?p.type+' · '+p.people+(p.people===1?' profissional':' profissionais')+' por serviço':p.type;
+  const provider={flexible:'A combinar',partner:'O prestador leva',client:'O cliente fornece'};
+  const details=[
+    ['Dias disponíveis',schedule],
+    ['Períodos de serviço',list.format(p.periods)],
+    ['Concelhos',list.format(p.zones)],
+    ['Espaços',list.format(p.spaces)],
+    ['Tipologias',p.spaces.some(space=>homeTypes.includes(space))?list.format(p.sizes):''],
+    ['Frequência',list.format(p.frequencies)],
+    ['Produtos',provider[p.products]],
+    ['Equipamento',provider[p.equipment]]
+  ];
+  const rows=details.filter(([,value])=>value).map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+html(value)+'</dd></div>').join('');
+  return '<img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'">'+
+    '<h2 id="profile-title" tabindex="-1">'+html(p.name)+'</h2><p>'+html(identity)+'</p><p>'+html(p.bio)+'</p>'+
+    '<div class="quote-price"><strong>'+html(hourlyPrice(p))+'</strong></div>'+
+    '<dl class="quote-details">'+rows+'</dl><p>Contacto em 24 horas, contando apenas os dias úteis.</p>'+
+    '<button class="primary full" id="choose">Pedir contacto sobre esta proposta</button>'+
+    '<p class="note">Escolha o canal e a altura em que prefere receber o contacto.</p>';
+}
 async function results(){
   let lookupFailed=false;
   const zone=request.zone;
