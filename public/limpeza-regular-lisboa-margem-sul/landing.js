@@ -94,8 +94,17 @@ function qualify(){
     request.selected='';confirmed=false;normal=false;go('propostas');
   };
 }
+function introExcerpt(bio){
+  const text=(bio||'').trim().replace(/\s+/g,' ');
+  const chars=Array.from(text);
+  if(chars.length<=95)return text;
+  const prefix=chars.slice(0,94).join('');
+  const end=chars[94]===' '?prefix:prefix.replace(/ [^ ]*$/,'');
+  return end.trimEnd()+'…';
+}
 function card(p){const active=p.id===request.selected;
-  return '<button type="button" class="offer '+(active?'selected':'')+'" data-id="'+html(p.id)+'" aria-pressed="'+active+'" aria-controls="perfil"><img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'"><span class="info"><span class="type">'+html(p.name)+'</span><span class="person">'+p.type+(p.people>1?' · '+p.people+' profissionais':'')+'</span><span class="price">'+hourlyPrice(p)+'</span><span class="slot">'+availableDays(p)+'</span><span class="open">'+(active?'Perfil aberto':'Ver perfil')+'</span></span></button>';
+  const excerpt=introExcerpt(p.bio);
+  return '<button type="button" class="offer '+(active?'selected':'')+'" data-id="'+html(p.id)+'" aria-pressed="'+active+'" aria-controls="perfil"><img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'"><span class="info"><span class="type">'+html(p.name)+'</span><span class="person">'+p.type+(p.people>1?' · '+p.people+' profissionais':'')+'</span><span class="price">'+hourlyPrice(p)+'</span>'+(excerpt?'<span class="offer-intro">'+html(excerpt)+'</span>':'')+'<span class="open">'+(active?'Perfil aberto':'Ver perfil')+'</span></span></button>';
 }
 function profile(p){
   const list=new Intl.ListFormat('pt-PT',{style:'long',type:'conjunction'});
