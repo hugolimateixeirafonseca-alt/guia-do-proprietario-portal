@@ -9,6 +9,7 @@ const homeTypes=['Apartamento','Moradia','Alojamento local'];
 const weekdays=['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado','Domingo'];
 const spaceAreas=['Até 50 m²','51 a 100 m²','101 a 150 m²','Mais de 150 m²'];
 let profiles=[];
+const offerRanks=new Map();
 let lastSubmission=null;
 let sending=false;
 let delivered=false;
@@ -91,6 +92,7 @@ function qualify(){
     request.other=request.space==='Outro'?otherInput.value.trim():'';
     request.days=selectedValues(form,'days').filter(d=>d!=='Qualquer dia');
     request.periods=selectedValues(form,'periods').filter(t=>t!=='Qualquer período');
+    offerRanks.clear();
     request.selected='';confirmed=false;normal=false;go('propostas');
   };
 }
@@ -114,7 +116,12 @@ async function results(){
     profiles=[];
     lookupFailed=true;
   }
-  const found=matches();if(!found.some(p=>p.id===request.selected))request.selected=found[0]?.id||'';
+  const found=matches();
+  for(const partner of found){
+    if(!offerRanks.has(partner.id))offerRanks.set(partner.id,Math.random());
+  }
+  found.sort((a,b)=>offerRanks.get(a.id)-offerRanks.get(b.id));
+  if(!found.some(p=>p.id===request.selected))request.selected=found[0]?.id||'';
   const description='<p id="request-summary"></p>';
   main.innerHTML='<section class="wrap page"><div class="bar"><a class="back" href="#pedido">← Alterar pedido</a></div>'+head(found.length?'Compare as propostas para a sua limpeza':'Pode pedir contacto a outros parceiros da sua zona',description,3)+(found.length?'<div class="results"><div class="offers" aria-label="Propostas de limpeza"></div><article id="perfil" class="profile" aria-labelledby="profile-title"></article></div>':'<div class="box"><p>Os parceiros Premium apresentam aqui o seu perfil, preço por hora e dias disponíveis. '+(lookupFailed?'De momento, não conseguimos consultar esses perfis.':'De momento, nenhum tem uma proposta compatível com as suas preferências.')+'</p><p>Quer receber outras propostas? Aproveitamos os dados que já preencheu. Complete os dados em falta e escolha como quer ser contactado por até três parceiros da sua zona.</p><div class="actions"><button type="button" class="primary" id="fallback">Pedir contacto a outros parceiros</button><a href="#pedido" class="secondary">Ajustar preferências</a>'+(lookupFailed?'<button type="button" class="secondary" id="retry-profiles">Voltar a consultar parceiros Premium</button>':'')+'</div></div>')+'</section>';
   if(lookupFailed)document.getElementById('retry-profiles').onclick=results;
