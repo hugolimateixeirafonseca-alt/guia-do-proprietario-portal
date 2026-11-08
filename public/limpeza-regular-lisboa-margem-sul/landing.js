@@ -126,8 +126,10 @@ async function results(){
       offers.innerHTML=found.map(card).join('');
       detail.innerHTML=profile(p);
       const frame=(img,partner)=>{
-        const y=Number.isInteger(partner.photoY) ? Math.min(100,Math.max(0,partner.photoY)) : 50;
-        img.style.objectPosition='50% '+y+'%';
+        const position=value=>Number.isInteger(value)?Math.min(100,Math.max(0,value)):50;
+        const fit=partner.photoFit==='contain'?'contain':'cover';
+        img.style.objectFit=fit;
+        img.style.objectPosition=fit==='contain'?'50% 50%':position(partner.photoX)+'% '+position(partner.photoY)+'%';
       };
       offers.querySelectorAll('.offer img').forEach((img,index)=>frame(img,found[index]));
       frame(detail.querySelector('img'),p);
