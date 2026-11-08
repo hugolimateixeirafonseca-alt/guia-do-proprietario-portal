@@ -260,7 +260,7 @@ function done(){
     '<div class="box"><h2>'+(normal?'Contacto com outros parceiros':proposalLabel(p))+'</h2>'+
     (normal?'':'<p class="total details">'+hourlyPrice(p)+'</p><p>'+availableDays(p)+'</p>')+
     '<p id="final-summary" class="summary-line details"></p><p id="final-contact" class="details"></p>'+
-    (normal?'':'<div class="tint details"><strong>Quando vai receber o contacto?</strong><p>'+contactDeadline()+'</p>'+
+    (normal?'':'<div class="tint details"><p>Vai receber por email o telefone e o email profissional do parceiro que escolheu.</p><strong>Quando vai receber o contacto?</strong><p>'+contactDeadline()+'</p>'+
     '<p class="details">Se esse prazo passar sem receber contacto, <a href="'+supportWhatsApp+'">avise o Guia pelo WhatsApp</a>.</p></div>')+
     '<p class="note details">O pedido foi registado. A data da limpeza é combinada diretamente com o prestador.</p>'+
     '<div class="actions"><button class="primary" id="restart">Fazer outro pedido</button></div></div></section>';

@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {renderClientContactEmail} from '../functions/lib/partner-engagement-email.mjs';
+import {renderClientContactEmail,renderPartnerEngagementEmail} from '../functions/lib/partner-engagement-email.mjs';
 import {onRequestPost} from '../functions/api/make/partner-engagement-notification.ts';
 import {deliveryFixture} from './partner-email-fixture.mjs';
 const data={audience:'client',client_name:'Ana',professional_name:'Limpezas Norte',professional_phone:'+351912345678',municipality:'Porto',modality:'partilhada',stop_url:'https://parceiros.guiadoproprietario.pt/pedido-contactos.html#id=sample&expires=1800000000&token=example'};
@@ -19,4 +19,13 @@ test('customer delivery rechecks exact event and destination, uses fresh data, a
  try{for(let i=0;i<2;i++)assert.equal((await onRequestPost({request:req(),env})).status,200);assert.equal(sent.length,1);assert.equal(sent[0].to.email,'client@example.invalid');assert.match(sent[0].text,/912999999/);assert.doesNotMatch(sent[0].text,/dashboard|\?t=/);allowed=false;assert.equal((await(await onRequestPost({request:req(),env})).json()).suppressed,true);assert.equal(sent.length,1);
  assert.equal((await onRequestPost({request:req(),env:{...env,APP_ENV:'preview',PARTNER_ENGAGEMENT_TEST_MODE:'true',PARTNER_ENGAGEMENT_TEST_EMAIL:'other@example.invalid'}})).status,403);
  }finally{globalThis.fetch=original;f.db.close();}
+});
+
+test('Premium confirmation includes the selected professional contacts',()=>{
+ const message=renderPartnerEngagementEmail({...payload,event_id:'engagement:client_premium:request-01',data:{audience:'client',kind:'premium_contact',professional_name:'Casa & Jardim',professional_email:'equipa@example.invalid',professional_phone:'+351211234567'}});
+ assert.match(message.subject,/Casa & Jardim/);
+ assert.match(message.html,/Casa &amp; Jardim/);
+ assert.match(message.text,/equipa@example.invalid/);
+ assert.match(message.text,/211234567/);
+ assert.doesNotMatch(message.text,/\?t=|pedido-contactos/);
 });

@@ -14,6 +14,17 @@ function preferences(value,fallback) {
 
 export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
+  if(data.kind==='premium_contact'){
+    if(payload.event_type!=='contact_accepted'||!/^engagement:client_premium:[a-z0-9-]+$/i.test(payload.event_id)||data.audience!=='client')throw Error('invalid_event_data');
+    const professional=clean(data.professional_name),phone=clean(data.professional_phone,25),email=clean(data.professional_email,254);
+    if(!professional||!/^\+?\d{9,15}$/.test(phone)||!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email))throw Error('invalid_public_contact');
+    const subject='Os contactos de '+professional;
+    return renderEmailLayout({subject,title:subject,preview:'Guarde o telefone e o email do parceiro que escolheu.',name:clean(payload.partner_name),audience:'client',signature:false,paragraphs:[
+      'O seu pedido de contacto foi enviado a '+professional+'. O parceiro entrará em contacto consigo no prazo de 24 horas, contando apenas os dias úteis.',
+      'Telefone: '+phone+'\nEmail: '+email,
+      'Pode usar estes contactos para combinar a data da limpeza diretamente com o parceiro.'
+    ]});
+  }
   if(data.kind==='topup_restored_20261009'){
     if(payload.event_type!=='unused_free_contacts'||!/^engagement:topup_restored:20261009:[a-z0-9-]+$/i.test(payload.event_id))throw Error('invalid_event_data');
     const action=new URL(payload.dashboard_url);if(action.protocol!=='https:'||action.hostname!=='parceiros.guiadoproprietario.pt'||action.port||action.username||action.password||!action.searchParams.get('t'))throw Error('invalid_dashboard_url');action.hash='saldo';
