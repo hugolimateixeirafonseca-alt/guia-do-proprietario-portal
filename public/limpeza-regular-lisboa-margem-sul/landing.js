@@ -99,6 +99,7 @@ function card(p){const active=p.id===request.selected;
 }
 function profile(p){return '<img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'"><div class="profile-copy"><p class="kicker">'+p.type+'</p><h2 id="profile-title" tabindex="-1">'+html(p.name)+'</h2><p>'+html(p.bio)+'</p><h3>Serviço incluído</h3><p>'+scope()+' '+what(p)+'.</p><hr class="rule"><p class="total">'+hourlyPrice(p)+'</p><p class="details">'+availableDays(p)+' · disponibilidade a confirmar</p><button class="primary full" id="choose">Pedir contacto sobre esta proposta</button><p class="note">Escolha o canal e a altura em que prefere receber o contacto.</p></div>'}
 async function results(){
+  let lookupFailed=false;
   const zone=request.zone;
   main.innerHTML='<section class="wrap page"><p role="status">A consultar os parceiros disponíveis…</p></section>';
   try{
@@ -106,15 +107,17 @@ async function results(){
     if(!response.ok)throw Error();
     const data=await response.json();
     if(location.hash!=='#propostas'||request.zone!==zone)return;
+    if(!data.ok||!Array.isArray(data.profiles))throw Error();
     profiles=data.profiles;
   }catch{
-    if(location.hash!=='#propostas')return;
-    main.innerHTML='<section class="wrap page"><h1>Não foi possível consultar os parceiros</h1><button class="primary" id="retry-profiles">Tentar novamente</button></section>';
-    document.getElementById('retry-profiles').onclick=results;return;
+    if(location.hash!=='#propostas'||request.zone!==zone)return;
+    profiles=[];
+    lookupFailed=true;
   }
   const found=matches();if(!found.some(p=>p.id===request.selected))request.selected=found[0]?.id||'';
   const description='<p id="request-summary"></p>';
-  main.innerHTML='<section class="wrap page"><div class="bar"><a class="back" href="#pedido">← Alterar pedido</a></div>'+head(found.length?'Compare as propostas para a sua limpeza':'Pode pedir contacto a outros parceiros da sua zona',description,3)+(found.length?'<div class="results"><div class="offers" aria-label="Propostas de limpeza"></div><article id="perfil" class="profile" aria-labelledby="profile-title"></article></div>':'<div class="box"><p>Os parceiros Premium apresentam aqui o seu perfil, preço por hora e dias disponíveis. De momento, nenhum tem uma proposta compatível com as suas preferências.</p><p>Quer receber outras propostas? Aproveitamos os dados que já preencheu. Complete os dados em falta e escolha como quer ser contactado por até três parceiros da sua zona.</p><div class="actions"><button type="button" class="primary" id="fallback">Pedir contacto a outros parceiros</button><a href="#pedido" class="secondary">Ajustar preferências</a></div></div>')+'</section>';
+  main.innerHTML='<section class="wrap page"><div class="bar"><a class="back" href="#pedido">← Alterar pedido</a></div>'+head(found.length?'Compare as propostas para a sua limpeza':'Pode pedir contacto a outros parceiros da sua zona',description,3)+(found.length?'<div class="results"><div class="offers" aria-label="Propostas de limpeza"></div><article id="perfil" class="profile" aria-labelledby="profile-title"></article></div>':'<div class="box"><p>Os parceiros Premium apresentam aqui o seu perfil, preço por hora e dias disponíveis. '+(lookupFailed?'De momento, não conseguimos consultar esses perfis.':'De momento, nenhum tem uma proposta compatível com as suas preferências.')+'</p><p>Quer receber outras propostas? Aproveitamos os dados que já preencheu. Complete os dados em falta e escolha como quer ser contactado por até três parceiros da sua zona.</p><div class="actions"><button type="button" class="primary" id="fallback">Pedir contacto a outros parceiros</button><a href="#pedido" class="secondary">Ajustar preferências</a>'+(lookupFailed?'<button type="button" class="secondary" id="retry-profiles">Voltar a consultar parceiros Premium</button>':'')+'</div></div>')+'</section>';
+  if(lookupFailed)document.getElementById('retry-profiles').onclick=results;
   document.getElementById('request-summary').textContent=summary();
   if(found.length){
     const display=move=>{const p=found.find(i=>i.id===request.selected);document.querySelector('.offers').innerHTML=found.map(card).join('');document.getElementById('perfil').innerHTML=profile(p);document.getElementById('choose').onclick=()=>{normal=false;confirmed=false;go('contacto')};if(move){document.getElementById('profile-title').focus({preventScroll:true});if(matchMedia('(max-width:780px)').matches)document.getElementById('perfil').scrollIntoView({block:'start'})}};
