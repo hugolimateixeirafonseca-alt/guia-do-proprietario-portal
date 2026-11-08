@@ -37,6 +37,7 @@ on:
       - 'tests/kit-estudante.test.mjs'
       - 'public/social/**'
       - 'src/scripts/landings/limpezas.js'
+      - 'src/pages/servicos-limpeza/**'
       - 'public/scripts/landings/alojamento-local-cleaning.js'
       - 'public/scripts/verificacao-intake.js'
       - 'src/pages/verificacao/enviar.astro'
