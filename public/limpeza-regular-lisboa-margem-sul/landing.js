@@ -120,7 +120,23 @@ async function results(){
   if(lookupFailed)document.getElementById('retry-profiles').onclick=results;
   document.getElementById('request-summary').textContent=summary();
   if(found.length){
-    const display=move=>{const p=found.find(i=>i.id===request.selected);document.querySelector('.offers').innerHTML=found.map(card).join('');document.getElementById('perfil').innerHTML=profile(p);document.getElementById('choose').onclick=()=>{normal=false;confirmed=false;go('contacto')};if(move){document.getElementById('profile-title').focus({preventScroll:true});if(matchMedia('(max-width:780px)').matches)document.getElementById('perfil').scrollIntoView({block:'start'})}};
+    const display=move=>{
+      const p=found.find(i=>i.id===request.selected);
+      const offers=document.querySelector('.offers'), detail=document.getElementById('perfil');
+      offers.innerHTML=found.map(card).join('');
+      detail.innerHTML=profile(p);
+      const frame=(img,partner)=>{
+        const y=Number.isInteger(partner.photoY) ? Math.min(100,Math.max(0,partner.photoY)) : 50;
+        img.style.objectPosition='50% '+y+'%';
+      };
+      offers.querySelectorAll('.offer img').forEach((img,index)=>frame(img,found[index]));
+      frame(detail.querySelector('img'),p);
+      document.getElementById('choose').onclick=()=>{normal=false;confirmed=false;go('contacto')};
+      if(move){
+        document.getElementById('profile-title').focus({preventScroll:true});
+        if(matchMedia('(max-width:780px)').matches)detail.scrollIntoView({block:'start'});
+      }
+    };
     document.querySelector('.offers').onclick=e=>{const button=e.target.closest('button[data-id]');if(button){request.selected=button.dataset.id;display(true)}};display(false);
   }else document.getElementById('fallback').onclick=()=>{normal=true;confirmed=false;go('contacto')};
 }
