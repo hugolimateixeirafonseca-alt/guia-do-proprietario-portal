@@ -158,7 +158,6 @@ function contact(){
 
     '<div class="optins"><label class="permission"><input type="checkbox" name="allowContact" required><span><strong>'+permission+'</strong><small>Consulte os parceiros que podem receber pedidos na nossa <a href="https://guiadoproprietario.pt/parceiros/">Lista de Parceiros</a> e saiba mais na <a href="https://guiadoproprietario.pt/privacidade/">Política de Privacidade</a>.</small></span></label>'+
     '<label class="permission"><input type="checkbox" name="marketing"><span><strong>Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados.</strong><small>As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento.</small></span></label></div>'+
-    (normal?'<label class="permission"><input type="checkbox" name="confirmPreferences" required><span>Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.</span></label>':'')+
     '<div class="actions"><button type="submit" class="primary">'+(normal?'Confirmar pedido a outros parceiros':'Confirmar pedido de contacto')+'</button></div></form></section>';
   document.getElementById('contact-summary').textContent=summary();
   setValues(normal?['contactName','email','phone']:['contactName','email','phone','contactTime']);

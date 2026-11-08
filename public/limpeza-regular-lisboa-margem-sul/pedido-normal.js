@@ -17,7 +17,7 @@ function normalSelect(name, label, values) {
 
 function normalFields() {
   return '<fieldset class="contact-fields"><legend>Complete o seu pedido</legend><div class="field-grid">'+
-    '<label>Código postal da limpeza<input name="postalCode" autocomplete="postal-code" inputmode="numeric" maxlength="8" placeholder="1234-567" required></label>'+
+    '<label>Código postal da limpeza<input type="text" name="postalCode" autocomplete="postal-code" inputmode="numeric" maxlength="8" placeholder="1234-567" required></label>'+
     (homeTypes.includes(request.space) ? '' : normalSelect('spaceSize','Dimensão do espaço',normalSizes))+
     normalSelect('timing','Quando pretende começar?',normalTiming)+
     '<label hidden>Em que data?<input type="date" name="preferredDate"></label></div>'+
