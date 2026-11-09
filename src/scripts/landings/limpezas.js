@@ -115,7 +115,10 @@ import {cleaningPixelState, trackCleaningLead} from '../../lib/cleaning-measurem
     const period = getValues("preferred_time_periods").map(value => labels.preferred_time_period[value]).filter(Boolean).join(", ");
     const timing = (getValue("one_time_timing") === "specific_date" ? getValue("preferred_date").split("-").reverse().join("/") : ({asap:"O mais breve possível",this_week:"Esta semana",next_week:"Próxima semana",flexible:"A combinar com o profissional de limpeza"})[getValue("one_time_timing")] || "");
     const text = [service, frequency, timing, day, period, getValue("postal_code")].filter(Boolean).join(" · ");
-    confirmation.nextElementSibling.textContent="Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.";confirmButton.textContent="Confirmar e receber propostas";summary.textContent = "Resumo: " + text;
+    confirmation.nextElementSibling.textContent="Confirmo que o número de telemóvel/WhatsApp está correto, que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.";confirmButton.textContent="Confirmar e receber propostas";summary.textContent = "Resumo: " + text;
+    const phoneDigits = getValue("phone").replace(/\D/g, "").replace(/^(00351|351)/, "");
+    const phoneReview = document.getElementById("confirmationPhoneNumber");
+    if (phoneReview) phoneReview.textContent = /^9\d{8}$/.test(phoneDigits) ? "+351 " + phoneDigits.replace(/(\d{3})(?=\d)/g, "$1 ") : getValue("phone");
     document.getElementById("confirmationSummary").textContent = text;
   };
 
@@ -148,6 +151,7 @@ import {cleaningPixelState, trackCleaningLead} from '../../lib/cleaning-measurem
   form.addEventListener("input", (event) => { setError(event.target.name, ""); if(event.target !== confirmation) resetConfirmation(); });
   confirmation.addEventListener("change", () => { confirmButton.disabled = !confirmation.checked; });
   document.getElementById("editPreferences").addEventListener("click", () => showStep(1));
+  document.getElementById("editPhoneNumber")?.addEventListener("click", () => { showStep(5); form.elements.phone?.focus(); });
   form.addEventListener("change", (event) => {
     if (event.target !== confirmation) resetConfirmation();
     if (event.target.name === "service_frequency") updateConditional();

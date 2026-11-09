@@ -230,7 +230,8 @@ const imagemOg = "/imagens/landings/limpezas/hero-home-clean.jpg";
             <section class="form-step" data-step="6" aria-labelledby="confirmationTitle">
               <h3 id="confirmationTitle" tabindex="-1">Confirme o seu pedido</h3>
               <p id="confirmationSummary" class="summary"></p>
-              <aside id="priceReference" class="summary" hidden></aside><label class="consent-box"><input id="confirmPreferences" type="checkbox" name="confirm_preferences" required><span>Confirmo que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.</span></label>
+              <div class="summary"><strong>Confirme o seu telemóvel / WhatsApp</strong><p id="confirmationPhoneNumber" aria-live="polite" style="font-size:1.25rem;font-weight:700;margin:.4rem 0"></p><button id="editPhoneNumber" class="btn btn-light" type="button">Corrigir número</button></div>
+              <aside id="priceReference" class="summary" hidden></aside><label class="consent-box"><input id="confirmPreferences" type="checkbox" name="confirm_preferences" required><span>Confirmo que o número de telemóvel/WhatsApp está correto, que preciso deste serviço e que aceito ser contactado(a) por profissionais da minha zona.</span></label>
               <button id="confirmRequest" class="btn btn-primary btn-block" type="submit" disabled>Confirmar e receber propostas</button>
               <button id="editPreferences" class="btn btn-light btn-block" type="button">Alterar preferências</button>
               <p class="legal-note">Gratuito e sem obrigação de contratar.</p>

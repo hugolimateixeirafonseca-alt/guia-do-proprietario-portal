@@ -1,15 +1,16 @@
+import {cleaningPixelState,trackCleaningLead} from '../src/lib/cleaning-measurement.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const full=readFileSync(new URL('../src/scripts/landings/limpezas.js',import.meta.url),'utf8');
 function fixture(){
- const node={classList:{add(){},remove(){},toggle(){}}};const handlers={};const sent=[];
+ const node={querySelector:()=>({}),classList:{add(){},remove(){},toggle(){}}};const handlers={};const sent=[];
  const elements={consent_partner_sharing:{checked:true},consent_marketing:{checked:false}};
  const nodes={confirmationTitle:{focus(){}},pedido:{scrollIntoView(){}}};
- const ctx={currentStep:5,confirmation:{checked:false,focus(){}},confirmButton:{disabled:true},
+ const ctx={cleaningPixelState,trackCleaningLead,currentStep:5,confirmation:{checked:false,focus(){}},confirmButton:{disabled:true},
  steps:[1,2,3,4,5,6].map(step=>({...node,dataset:{step}})),dots:[],stepLabel:{},updateSummary(){},document:{getElementById:id=>nodes[id]},
- form:{...node,elements,dataset:{consentVersion:'v1'},addEventListener:(name,fn)=>handlers[name]=fn},window:{location:{href:'https://test/'}},
+ form:{...node,elements,dataset:{consentVersion:'v1'},addEventListener:(name,fn)=>handlers[name]=fn},window:{document:{cookie:''},location:{href:'https://test/'}},
  eventId:()=>crypto.randomUUID(),getValue:()=> 'value',getValues:k=>k==='service_type'?['regular']:[],validateStep:()=>true,
  sendingState:node,errorState:node,successState:node,errorMap:{},fetch:async(_,init)=>{sent.push(JSON.parse(init.body));return new Response('{}');}};
  vm.createContext(ctx);
@@ -50,7 +51,7 @@ test('flexible start is included in the summary and still requires service confi
  const update=full.slice(full.indexOf('  const updateSummary'),full.indexOf('  const eventId'));
  vm.runInNewContext(labels+update+'updateSummary();',ctx);
  assert.match(result.textContent,/A combinar com o profissional de limpeza/);
- assert.match(ctx.confirmation.nextElementSibling.textContent,/Confirmo que preciso deste serviço/);
+ assert.match(ctx.confirmation.nextElementSibling.textContent,/que preciso deste serviço/);
 });
 
 
@@ -65,4 +66,24 @@ test('combined services are shown together and submitted once after confirmation
  vm.runInNewContext(labels+update+'updateSummary();',ctx);assert.match(result.textContent,/Limpeza regular \+ Limpeza profunda/);
  const html=readFileSync(new URL('../src/pages/servicos-limpeza/index.astro',import.meta.url),'utf8');
  const choices=[...html.matchAll(/<input[^>]*name="service_type"[^>]*>/g)].map(m=>m[0]);assert.equal(choices.length,6);assert.ok(choices.every(c=>c.includes('type="checkbox"')&&!c.includes('required')));
+});
+
+test('final review displays the entered phone and refreshes it after a correction',()=>{
+ const nodes={confirmationSummary:{},confirmationPhoneNumber:{}};
+ const values={phone:'00351 912 345 678',service_frequency:'one_time',one_time_timing:'next_week',postal_code:'7005-140'};
+ const ctx={summary:{},confirmation:{nextElementSibling:{}},confirmButton:{},document:{getElementById:id=>nodes[id]},getValue:k=>values[k]||'',getValues:k=>k==='service_type'?['regular']:[]};
+ const labels=full.slice(full.indexOf('  const labels'),full.indexOf('  const getValue'));
+ const update=full.slice(full.indexOf('  const updateSummary'),full.indexOf('  const eventId'));
+ vm.createContext(ctx);vm.runInContext(labels+update+'updateSummary();',ctx);
+ assert.equal(nodes.confirmationPhoneNumber.textContent,'+351 912 345 678');
+ assert.match(ctx.confirmation.nextElementSibling.textContent,/número de telemóvel\/WhatsApp está correto/);
+ values.phone='919000111';vm.runInContext('updateSummary();',ctx);assert.equal(nodes.confirmationPhoneNumber.textContent,'+351 919 000 111');
+ const html=readFileSync(new URL('../src/pages/servicos-limpeza/index.astro',import.meta.url),'utf8');assert.match(html,/id="editPhoneNumber"[^>]*type="button"/);
+});
+
+test('correct-number shortcut goes straight to contact fields and clears confirmation',()=>{
+ const line=full.split('\n').find(line=>line.includes('getElementById("editPhoneNumber")'));
+ let handler,step,focused=false;const confirmation={checked:true};
+ const ctx={document:{getElementById:()=>({addEventListener:(_,fn)=>handler=fn})},showStep:n=>{step=n;confirmation.checked=false},form:{elements:{phone:{focus(){focused=true}}}}};
+ vm.runInNewContext(line,ctx);handler();assert.equal(step,5);assert.equal(confirmation.checked,false);assert.equal(focused,true);
 });
