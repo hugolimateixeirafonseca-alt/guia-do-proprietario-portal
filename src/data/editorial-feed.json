@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-09T08:05:04.681Z",
+  "generatedAt": "2026-11-09T08:09:27.625Z",
   "description": "Estado editorial público do Guia do Proprietário. Exclui as páginas programáticas de IMI e preços por concelho.",
   "summary": {
     "planned": 88,
     "written": 157,
-    "published": 154,
+    "published": 155,
     "newsOnline": 21
   },
   "articles": [
@@ -1504,14 +1504,14 @@
       "priority": null,
       "channel": null,
       "level": "essencial",
-      "status": "written",
+      "status": "published",
       "planned": false,
       "written": true,
-      "published": false,
+      "published": true,
       "file": "comprar-casa-obras-regularizadas.mdx",
       "arrivedAt": "2026-10-21T13:18:06Z",
-      "publishedAt": null,
-      "url": null
+      "publishedAt": "2026-11-09T08:02:44Z",
+      "url": "https://guiadoproprietario.pt/vender/comprar-casa-obras-regularizadas/"
     },
     {
       "id": "EXTRA-219",
