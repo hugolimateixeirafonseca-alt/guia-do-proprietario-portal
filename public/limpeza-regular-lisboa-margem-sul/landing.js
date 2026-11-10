@@ -16,7 +16,7 @@ let delivered=false;
 const html=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const main=document.querySelector('#main');
 const startMarkup=main.innerHTML;
-const initial={zone:'',frequency:'Semanal',size:'T2',space:'',other:'',area:'51 a 100 m²',days:[],periods:[],products:'Sem preferência',selected:'',contactName:'',email:'',phone:'',channels:['Chamada','WhatsApp'],contactTime:'Sem preferência',consents:null};
+const initial={zone:'',frequency:'Semanal',size:'T2',space:'',other:'',area:'51 a 100 m²',days:[],periods:[],products:'Sem preferência',selected:'',planId:'',contactName:'',email:'',phone:'',channels:['Chamada','WhatsApp'],contactTime:'Sem preferência',consents:null};
 let request={...initial};
 let confirmed=false,normal=false,pendingPhone='';
 const options=arr=>arr.map(s=>'<option>'+s+'</option>').join('');
@@ -26,11 +26,38 @@ function availableDays(p){return p.days.filter(day=>!request.days.length||reques
 function matches(){return profiles.filter(p=>p.spaces.includes(request.space)&&p.zones.includes(request.zone)&&p.frequencies.includes(request.frequency)&&
   (!homeTypes.includes(request.space)||p.sizes.includes(request.size))&&
   (request.products!=='A equipa leva os produtos'||p.products!=='client')&&
-  (!request.periods.length||request.periods.some(t=>p.periods.includes(t)))&&availableDays(p));}
+  (!request.periods.length||request.periods.some(t=>p.periods.includes(t)))&&availableDays(p)&&compatiblePlans(p).length);}
 function summary(){
   return [request.zone,request.space==='Outro'?request.other:request.space,homeTypes.includes(request.space)?request.size:request.area,'Limpeza '+request.frequency.toLowerCase(),request.days.join(', ')||'Qualquer dia'].join(' · ');
 }
-function hourlyPrice(p){return money(p.rate)+'/h'+(p.rateUnit?' '+p.rateUnit:'')}
+function compatiblePlans(p){
+  if(!p.plans){
+    const price=money(p.rate)+'/h'+(p.rateUnit?' '+p.rateUnit:'');
+    return [{id:'base',amount:p.rate,billing:'hora',rateUnit:p.rateUnit,price,title:'À hora',summary:price,details:[]}];
+  }
+  return p.plans.filter(plan=>(!plan.frequency||plan.frequency===request.frequency)&&
+    (!plan.spaces.length||plan.spaces.includes(request.space))&&
+    (!homeTypes.includes(request.space)||!plan.sizes.length||plan.sizes.includes(request.size)))
+    .map(plan=>plan.frequency?plan:{...plan,title:plan.title.replace(/^Limpeza regular/,request.frequency),summary:plan.summary.replace(/^Limpeza regular/,request.frequency)});
+}
+function selectedPlan(p){return compatiblePlans(p).find(plan=>plan.id===request.planId);}
+function cardPrice(p){
+  const plans=compatiblePlans(p);
+  if(plans.length===1)return plans[0].price;
+  const minimums=new Map();
+  for(const plan of plans){
+    const unit=plan.billing==='mensal'?'mensal':(p.people>1||p.type==='Equipa de Limpeza'?plan.rateUnit:'hora');
+    if(!minimums.has(unit)||plan.amount<minimums.get(unit).amount)minimums.set(unit,plan);
+  }
+  return [...minimums.values()].map(plan=>'Desde '+plan.price).join(' · ')+' · '+plans.length+' opções';
+}
+function planChoices(p){
+  const plans=compatiblePlans(p);
+  return '<fieldset class="quote-plans"><legend>'+(plans.length===1?'Plano de limpeza':'Escolha o seu plano')+'</legend>'+plans.map(plan=>{
+    const terms=plan.details.map(term=>'<small>'+html(term)+'</small>').join('');
+    return '<label><input type="radio" name="quote-plan" value="'+html(plan.id)+'" '+(plan.id===request.planId?'checked':'')+'><span><b>'+html(plan.title)+'</b><strong>'+html(plan.price)+'</strong>'+terms+'</span></label>';
+  }).join('')+'</fieldset>';
+}
 function field(id,label,values){return '<label>'+label+'<select id="'+id+'" name="'+id+'">'+options(values)+'</select></label>'}
 function setValues(ids){for(const id of ids){document.getElementById(id).value=request[id]}}
 function collect(ids){for(const id of ids){request[id]=document.getElementById(id).value}}
@@ -91,7 +118,7 @@ function qualify(){
     request.days=selectedValues(form,'days').filter(d=>d!=='Qualquer dia');
     request.periods=selectedValues(form,'periods').filter(t=>t!=='Qualquer período');
     offerRanks.clear();
-    request.selected='';confirmed=false;normal=false;go('propostas');
+    request.selected='';request.planId='';confirmed=false;normal=false;go('propostas');
   };
 }
 function introExcerpt(bio){
@@ -104,7 +131,7 @@ function introExcerpt(bio){
 }
 function card(p){const active=p.id===request.selected;
   const excerpt=introExcerpt(p.bio);
-  return '<button type="button" class="offer '+(active?'selected':'')+'" data-id="'+html(p.id)+'" aria-pressed="'+active+'" aria-controls="perfil"><img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'"><span class="info"><span class="type">'+html(p.name)+'</span><span class="person">'+p.type+(p.people>1?' · '+p.people+' profissionais':'')+'</span><span class="price">'+hourlyPrice(p)+'</span>'+(excerpt?'<span class="offer-intro">'+html(excerpt)+'</span>':'')+'<span class="open">'+(active?'Perfil aberto':'Ver perfil')+'</span></span></button>';
+  return '<button type="button" class="offer '+(active?'selected':'')+'" data-id="'+html(p.id)+'" aria-pressed="'+active+'" aria-controls="perfil"><img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'"><span class="info"><span class="type">'+html(p.name)+'</span><span class="person">'+p.type+(p.people>1?' · '+p.people+' profissionais':'')+'</span><span class="price">'+html(cardPrice(p))+'</span>'+(excerpt?'<span class="offer-intro">'+html(excerpt)+'</span>':'')+'<span class="open">'+(active?'Perfil aberto':'Ver perfil')+'</span></span></button>';
 }
 function profile(p){
   const list=new Intl.ListFormat('pt-PT',{style:'long',type:'conjunction'});
@@ -128,9 +155,9 @@ function profile(p){
   const rows=details.filter(([,value])=>value).map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+html(value)+'</dd></div>').join('');
   return '<img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'">'+
     '<h2 id="profile-title" tabindex="-1">'+html(p.name)+'</h2><p>'+html(identity)+'</p><p>'+html(p.bio)+'</p>'+
-    '<div class="quote-price"><strong>'+html(hourlyPrice(p))+'</strong></div>'+
+    planChoices(p)+
     '<dl class="quote-details">'+rows+'</dl><p>Contacto em 24 horas, contando apenas os dias úteis.</p>'+
-    '<button class="primary full" id="choose">Pedir contacto sobre esta proposta</button>'+
+    '<button class="primary full" id="choose">Pedir contacto sobre este plano</button>'+
     '<p class="note">Escolha o canal e a altura em que prefere receber o contacto.</p>';
 }
 async function results(){
@@ -138,7 +165,7 @@ async function results(){
   const zone=request.zone;
   main.innerHTML='<section class="wrap page"><p role="status">A consultar os parceiros disponíveis…</p></section>';
   try{
-    const response=await fetch('/api/perfis-limpeza-premium?zone='+encodeURIComponent(zone),{cache:'no-store'});
+    const response=await fetch('/api/perfis-limpeza-premium?plans=1&zone='+encodeURIComponent(zone),{cache:'no-store'});
     if(!response.ok)throw Error();
     const data=await response.json();
     if(location.hash!=='#propostas'||request.zone!==zone)return;
@@ -154,12 +181,12 @@ async function results(){
     if(!offerRanks.has(partner.id))offerRanks.set(partner.id,Math.random());
   }
   found.sort((a,b)=>offerRanks.get(a.id)-offerRanks.get(b.id));
-  if(!found.some(p=>p.id===request.selected))request.selected=found[0]?.id||'';
+  if(!found.some(p=>p.id===request.selected)){request.selected=found[0]?.id||'';request.planId='';}
   let title='Pode pedir contacto a outros parceiros da sua zona';
   if(found.length===1)title='Veja a proposta para a sua limpeza';
   if(found.length>1)title='Compare as propostas para a sua limpeza';
   const description='<p id="request-summary"></p>';
-  main.innerHTML='<section class="wrap page"><div class="bar"><a class="back" href="#pedido">← Alterar pedido</a></div>'+head(title,description,3)+(found.length?'<div class="results"><div class="offers" aria-label="Propostas de limpeza"></div><article id="perfil" class="profile" aria-labelledby="profile-title"></article></div>':'<div class="box"><p>Os parceiros Premium apresentam aqui o seu perfil, preço por hora e dias disponíveis. '+(lookupFailed?'De momento, não conseguimos consultar esses perfis.':'De momento, nenhum tem uma proposta compatível com as suas preferências.')+'</p><p>Quer receber outras propostas? Aproveitamos os dados que já preencheu. Complete os dados em falta e escolha como quer ser contactado por até três parceiros da sua zona.</p><div class="actions"><button type="button" class="primary" id="fallback">Pedir contacto a outros parceiros</button><a href="#pedido" class="secondary">Ajustar preferências</a>'+(lookupFailed?'<button type="button" class="secondary" id="retry-profiles">Voltar a consultar parceiros Premium</button>':'')+'</div></div>')+'</section>';
+  main.innerHTML='<section class="wrap page"><div class="bar"><a class="back" href="#pedido">← Alterar pedido</a></div>'+head(title,description,3)+(found.length?'<div class="results"><div class="offers" aria-label="Propostas de limpeza"></div><article id="perfil" class="profile" aria-labelledby="profile-title"></article></div>':'<div class="box"><p>Os parceiros Premium apresentam aqui o seu perfil, planos de limpeza e dias disponíveis. '+(lookupFailed?'De momento, não conseguimos consultar esses perfis.':'De momento, nenhum tem uma proposta compatível com as suas preferências.')+'</p><p>Quer receber outras propostas? Aproveitamos os dados que já preencheu. Complete os dados em falta e escolha como quer ser contactado por até três parceiros da sua zona.</p><div class="actions"><button type="button" class="primary" id="fallback">Pedir contacto a outros parceiros</button><a href="#pedido" class="secondary">Ajustar preferências</a>'+(lookupFailed?'<button type="button" class="secondary" id="retry-profiles">Voltar a consultar parceiros Premium</button>':'')+'</div></div>')+'</section>';
   if(lookupFailed)document.getElementById('retry-profiles').onclick=results;
   document.getElementById('request-summary').textContent=summary();
   if(found.length){
@@ -167,7 +194,14 @@ async function results(){
       const p=found.find(i=>i.id===request.selected);
       const offers=document.querySelector('.offers'), detail=document.getElementById('perfil');
       offers.innerHTML=found.map(card).join('');
+      const plans=compatiblePlans(p);
+      if(!selectedPlan(p))request.planId=plans.length===1?plans[0].id:'';
       detail.innerHTML=profile(p);
+      const choose=detail.querySelector('#choose');
+      choose.disabled=!request.planId;
+      detail.querySelector('.quote-plans').onchange=e=>{
+        request.planId=e.target.value;choose.disabled=!selectedPlan(p);
+      };
       const frame=(img,partner)=>{
         const position=value=>Number.isInteger(value)?Math.min(100,Math.max(0,value)):50;
         const fit=partner.photoFit==='contain'?'contain':'cover';
@@ -182,7 +216,7 @@ async function results(){
         if(matchMedia('(max-width:780px)').matches)detail.scrollIntoView({block:'start'});
       }
     };
-    document.querySelector('.offers').onclick=e=>{const button=e.target.closest('button[data-id]');if(button){request.selected=button.dataset.id;display(true)}};display(false);
+    document.querySelector('.offers').onclick=e=>{const button=e.target.closest('button[data-id]');if(button){if(request.selected!==button.dataset.id)request.planId='';request.selected=button.dataset.id;display(true)}};display(false);
   }else document.getElementById('fallback').onclick=()=>{normal=true;confirmed=false;go('contacto')};
 }
 function phoneNumber(value){
@@ -202,14 +236,14 @@ const lateContactMessage='Olá! Fiz um pedido de limpeza através do Guia do Pro
 const supportWhatsApp='https://wa.me/351913857414?text='+encodeURIComponent(lateContactMessage);
 function contact(){
   const p=matches().find(profile=>profile.id===request.selected);
-  if(!normal&&!p){go('propostas');return}
+  if(!normal&&(!p||!selectedPlan(p))){go('propostas');return}
   const recipient=normal?'Pedido a parceiros de '+request.zone:proposalLabel(p);
-  const title=normal?'Pedir contacto a outros parceiros':'Pedir contacto sobre esta proposta';
+  const title=normal?'Pedir contacto a outros parceiros':'Pedir contacto sobre este plano';
   const authorisedPartner=normal?'até 3 parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade':'o prestador que escolhi ('+html(p.name)+')';
   const permission='Autorizo o Guia do Proprietário a partilhar os dados deste pedido com '+authorisedPartner+(normal?', para que me possam contactar':', para que me possa contactar')+' com informações, disponibilidade e propostas relacionadas com este pedido.';
   request.consents=null;
   main.innerHTML='<section class="wrap page narrow"><div class="bar"><a href="#propostas" class="back">← Voltar às propostas</a></div>'+head(title)+
-    '<form class="contact-box" id="finish" method="dialog"><div class="tint"><strong>'+recipient+'</strong>'+(normal?'':'<p>'+hourlyPrice(p)+' · '+availableDays(p)+'</p>')+
+    '<form class="contact-box" id="finish" method="dialog"><div class="tint"><strong>'+recipient+'</strong>'+(normal?'':'<p>'+html(selectedPlan(p).summary)+' · '+availableDays(p)+'</p>')+
     '<p id="contact-summary" class="summary-line"></p>'+(normal?'':'<p class="details">'+contactDeadline()+'</p>')+'</div>'+normalFields()+'<fieldset class="contact-fields"><legend>Os seus dados de contacto</legend><div class="field-grid">'+
     '<label>Nome<input id="contactName" name="contactName" autocomplete="name" type="text" maxlength="80" required></label>'+
     '<label>Email<input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required></label>'+
@@ -275,13 +309,13 @@ function confirmPhone(){
 async function sendRequest(){
   if(sending||delivered||!pendingPhone||!request.consents?.partnerSharing)return;
   const profile=normal?null:matches().find(p=>p.id===request.selected);
-  if(!normal&&!profile){go('propostas');return;}
+  if(!normal&&(!profile||!selectedPlan(profile))){go('propostas');return;}
   const note=[request.notes,request.other&&'Espaço: '+request.other,!homeTypes.includes(request.space)&&'Área: '+request.area,
     'Produtos: '+request.products,!normal&&'Preferência de contacto: '+request.contactTime].filter(Boolean).join(' · ');
   const body={...normalRequestData(),additionalNotes:note.slice(0,500),requestConfirmed:true,
     source:normal?'guia_limpeza_regular_lisboa':'guia_limpeza_premium',consentVersion:normal?'limpeza-2026-09-c':'limpeza-premium-2026-11',
     pageUrl:location.origin+location.pathname+location.search};
-  if(profile)Object.assign(body,{premiumPartner:profile.id,premiumName:profile.name,premiumVersion:profile.version,premiumProducts:request.products==='A equipa leva os produtos'?'partner':'any'});
+  if(profile)Object.assign(body,{premiumPartner:profile.id,premiumPlan:selectedPlan(profile).id,premiumName:profile.name,premiumVersion:profile.version,premiumProducts:request.products==='A equipa leva os produtos'?'partner':'any'});
   const signature=JSON.stringify(body);
   if(lastSubmission?.signature!==signature)lastSubmission={signature,id:crypto.randomUUID()};
   body.eventId=lastSubmission.id;body.measurementPixelState=typeof window.fbq==='function'?'callable':'missing';
@@ -300,10 +334,10 @@ async function sendRequest(){
 }
 function done(){
   const p=normal?null:matches().find(profile=>profile.id===request.selected);
-  if(!normal&&!p){go('propostas');return}
+  if(!normal&&(!p||!selectedPlan(p))){go('propostas');return}
   main.innerHTML='<section class="wrap page narrow">'+head('Pedido enviado')+
     '<div class="box"><h2>'+(normal?'Contacto com outros parceiros':proposalLabel(p))+'</h2>'+
-    (normal?'':'<p class="total details">'+hourlyPrice(p)+'</p><p>'+availableDays(p)+'</p>')+
+    (normal?'':'<p class="total details">'+html(selectedPlan(p).summary)+'</p><p>'+availableDays(p)+'</p>')+
     '<p id="final-summary" class="summary-line details"></p><p id="final-contact" class="details"></p>'+
     (normal?'':'<div class="tint details"><p>Vai receber por email o telefone e o email profissional do parceiro que escolheu.</p><strong>Quando vai receber o contacto?</strong><p>'+contactDeadline()+'</p>'+
     '<p class="details">Se esse prazo passar sem receber contacto, <a href="'+supportWhatsApp+'">avise o Guia pelo WhatsApp</a>.</p></div>')+

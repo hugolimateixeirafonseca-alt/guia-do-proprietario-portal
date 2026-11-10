@@ -2,7 +2,9 @@ export async function onRequestGet({request,env}){
   const headers={'Cache-Control':'no-store'};
   try {
     const endpoint=new URL('/api/premium',env.CLEANING_DASHBOARD_API_URL||'https://guia-do-proprietario-parceiros.pages.dev');
-    endpoint.searchParams.set('zone',new URL(request.url).searchParams.get('zone')||'');
+    const params=new URL(request.url).searchParams;
+    endpoint.searchParams.set('zone',params.get('zone')||'');
+    if(params.get('plans')==='1')endpoint.searchParams.set('plans','1');
     const response=await fetch(endpoint,{
       headers:{Authorization:'Bearer '+env.CLEANING_DASHBOARD_API_TOKEN},
       redirect:'manual',

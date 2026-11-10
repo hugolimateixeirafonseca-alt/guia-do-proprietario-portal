@@ -24,6 +24,7 @@ interface Env {
 
 interface SubscribeBody {
   premiumPartner?: unknown;
+  premiumPlan?: unknown;
   premiumName?: unknown;
   premiumVersion?: unknown;
   premiumProducts?: unknown;
@@ -194,7 +195,7 @@ async function sendCleaningLead(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        ...(directed ? {premium_partner:body.premiumPartner,premium_version:body.premiumVersion,premium_name:body.premiumName,premium_products:body.premiumProducts} : {}),
+        ...(directed ? {premium_partner:body.premiumPartner,premium_plan:body.premiumPlan,premium_version:body.premiumVersion,premium_name:body.premiumName,premium_products:body.premiumProducts} : {}),
         event_id: cleanText(body.eventId, 128),
         client_ip_key: ipKey,
         request_confirmed: body.requestConfirmed === true,
