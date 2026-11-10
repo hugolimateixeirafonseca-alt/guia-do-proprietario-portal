@@ -53,10 +53,9 @@ function cardPrice(p){
 }
 function planChoices(p){
   const plans=compatiblePlans(p);
-  return '<fieldset class="quote-plans"><legend>'+(plans.length===1?'Plano de limpeza':'Escolha o seu plano')+'</legend>'+plans.map(plan=>{
-    const terms=plan.details.map(term=>'<small>'+html(term)+'</small>').join('');
-    return '<label><input type="radio" name="quote-plan" value="'+html(plan.id)+'" '+(plan.id===request.planId?'checked':'')+'><span><b>'+html(plan.title)+'</b><strong>'+html(plan.price)+'</strong>'+terms+'</span></label>';
-  }).join('')+'</fieldset>';
+  return '<fieldset class="quote-plans"><legend>'+(plans.length===1?'Plano de limpeza':'Escolha o seu plano')+'</legend>'+plans.map(plan=>premiumPlanCard(plan,{
+    team:p.type==='Equipa de Limpeza',frequency:request.frequency,selectable:true,checked:plan.id===request.planId
+  })).join('')+'</fieldset>';
 }
 function field(id,label,values){return '<label>'+label+'<select id="'+id+'" name="'+id+'">'+options(values)+'</select></label>'}
 function setValues(ids){for(const id of ids){document.getElementById(id).value=request[id]}}

@@ -43,7 +43,3 @@
 
 .quote-plans{padding:0;border:0;margin:1rem 0;min-width:0}
 .quote-plans legend{font-weight:700;margin-bottom:.5rem}
-.quote-plans label{display:flex;align-items:flex-start;gap:.7rem;border:1px solid var(--line);border-radius:.6rem;padding:.85rem;margin:.4rem 0;cursor:pointer}
-.quote-plans label:has(:checked){background:var(--pale);border-color:var(--blue)}
-.quote-plans input{width:auto;margin:.3rem 0 0;accent-color:var(--blue)}
-.quote-plans span{display:grid;gap:.2rem}.quote-plans strong{font-size:1.2rem}.quote-plans small{color:var(--muted)}
