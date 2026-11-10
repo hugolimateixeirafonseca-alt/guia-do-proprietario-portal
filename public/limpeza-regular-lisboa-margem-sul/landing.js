@@ -35,9 +35,7 @@ function compatiblePlans(p){
     const price=money(p.rate)+'/h'+(p.rateUnit?' '+p.rateUnit:'');
     return [{id:'base',amount:p.rate,billing:'hora',rateUnit:p.rateUnit,price,title:'À hora',summary:price,details:[]}];
   }
-  return p.plans.filter(plan=>(!plan.frequency||plan.frequency===request.frequency)&&
-    (!plan.spaces.length||plan.spaces.includes(request.space))&&
-    (!homeTypes.includes(request.space)||!plan.sizes.length||plan.sizes.includes(request.size)))
+  return p.plans.filter(plan=>!plan.frequency||plan.frequency===request.frequency)
     .map(plan=>plan.frequency?plan:{...plan,title:plan.title.replace(/^Limpeza regular/,request.frequency),summary:plan.summary.replace(/^Limpeza regular/,request.frequency)});
 }
 function selectedPlan(p){return compatiblePlans(p).find(plan=>plan.id===request.planId);}
@@ -45,11 +43,15 @@ function cardPrice(p){
   const plans=compatiblePlans(p);
   if(plans.length===1)return plans[0].price;
   const minimums=new Map();
+  let hasUnpriced=false;
   for(const plan of plans){
+    if(!(Number(plan.amount)>0)){hasUnpriced=true;continue;}
     const unit=plan.billing==='mensal'?'mensal':(p.people>1||p.type==='Equipa de Limpeza'?plan.rateUnit:'hora');
     if(!minimums.has(unit)||plan.amount<minimums.get(unit).amount)minimums.set(unit,plan);
   }
-  return [...minimums.values()].map(plan=>'Desde '+plan.price).join(' · ')+' · '+plans.length+' opções';
+  const prices=[...minimums.values()].map(plan=>'Desde '+plan.price);
+  if(hasUnpriced)prices.push('Preço a combinar');
+  return [...prices,plans.length+' opções'].join(' · ');
 }
 function planChoices(p){
   const plans=compatiblePlans(p);
