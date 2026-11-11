@@ -1,10 +1,8 @@
 /* Shared by the partner preview and the cleaning quote page. */
-function premiumPlanCard(plan, {team=false, frequency='', selectable=false, checked=false}={}) {
+function premiumPlanCard(plan,{team,partnerName,preview,group}) {
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const number=value=>Number(value).toLocaleString('pt-PT',{maximumFractionDigits:2});
   const monthly=plan.billing==='mensal';
-  const cadence=plan.frequency||frequency;
-  const title=cadence?'Plano '+cadence.toLocaleLowerCase('pt-PT'):(monthly?'Plano mensal':plan.billing==='hora'?'Plano à hora':'Limpeza regular');
   const amount=Number(plan.amount),hours=plan.duration==='flexible'?0:Number(plan.hours),visits=Number(plan.visits);
   const metrics=[],rows=[];
   if(monthly&&visits>0)metrics.push(['Limpezas/mês',number(visits)]);
@@ -19,11 +17,32 @@ function premiumPlanCard(plan, {team=false, frequency='', selectable=false, chec
   const vat={included:'IVA incluído',exempt:'Isento de IVA'}[plan.vat];
   const unitNote=!monthly&&team?plan.rateUnit:'';
   const notes=[unitNote,vat].filter(Boolean).join(' · ');
-  const tag=selectable?'label':'article';
-  const radio=selectable?'<input type="radio" name="quote-plan" value="'+esc(plan.id)+'"'+(checked?' checked':'')+'>':'';
+  const title=hours>0?(plan.billing==='hora'?'Mínimo de ':'')+number(hours)+(hours===1?' hora':' horas')+' por visita':
+    plan.duration==='flexible'?'Até concluir a limpeza':monthly?'Mensalidade fixa':plan.billing==='hora'?'Limpeza à hora':'Limpeza regular';
   const price=amount>0?esc(number(amount))+' €<span class="pc-unit">'+(monthly?'/mês':plan.billing==='hora'?'/h':'')+'</span>':'Preço a combinar';
-  return '<'+tag+' class="plan-card"><span class="pc-head"><span class="pc-name">'+radio+esc(title)+'</span>'+
-    '<span class="pc-pricing"><span class="pc-price">'+price+'</span>'+(notes?'<span class="pc-note">'+esc(notes)+'</span>':'')+'</span></span>'+
+  return '<details class="plan-card" name="'+group+'" data-option="'+esc(plan.id)+'"><summary class="pc-head"><span class="pc-name">'+esc(title)+'</span>'+
+    '<span class="pc-price">'+price+'</span><span class="pc-link"><span>Ver detalhes</span><span>Ocultar detalhes</span></span></summary>'+
+    (notes?'<span class="pc-note pc-meta">'+esc(notes)+'</span>':'')+
     (metrics.length?'<span class="pc-metrics">'+metrics.map(([key,value])=>'<span class="pc-metric"><span class="pc-key">'+esc(key)+'</span><span class="pc-value">'+esc(value)+'</span></span>').join('')+'</span>':'')+
-    (rows.length?'<span class="pc-terms">'+rows.map(([key,value])=>'<span class="pc-row"><span class="pc-key">'+esc(key)+'</span><span>'+esc(value)+'</span></span>').join('')+'</span>':'')+'</'+tag+'>';
+    (rows.length?'<span class="pc-terms">'+rows.map(([key,value])=>'<span class="pc-row"><span class="pc-key">'+esc(key)+'</span><span>'+esc(value)+'</span></span>').join('')+'</span>':'')+'<div class="pc-action"><button type="button" class="pc-interest" data-interest="'+esc(plan.id)+'"'+(preview?' disabled':'')+'>Gostava de saber mais</button>'+
+    '<p>Peça mais informações '+(partnerName?'a '+esc(partnerName):'ao parceiro')+' sobre esta opção, sem compromisso.</p></div></details>';
+}
+
+function premiumPlanOptions(plans,{team=false,frequency='',partnerName='',preview=false}={}){
+  const group=preview?'preview-options':'cleaning-options';
+  const cards=plans.map(plan=>premiumPlanCard(plan,{team,partnerName,preview,group}));
+  const title='Opções de limpeza'+(frequency==='Semanal'?' semanal':frequency==='Quinzenal'?' quinzenal':'');
+  const common=[];
+  if(plans.length>1){
+    const first=plans[0];
+    if(first.billing==='mensal'&&Number(first.visits)>0&&plans.every(plan=>plan.billing==='mensal'&&Number(plan.visits)===Number(first.visits))){
+      common.push(Number(first.visits)+(Number(first.visits)===1?' limpeza por mês':' limpezas por mês'));
+    }
+    const vat={included:'IVA incluído',exempt:'Isento de IVA'}[first.vat];
+    if(vat&&plans.every(plan=>plan.vat===first.vat))common.push(vat);
+  }
+  const commonInfo=common.length?'<p class="pc-common">'+common.join(' · ')+'</p>':'';
+  const extra=cards.length>3?'<details class="pc-more"><summary>Ver mais '+(cards.length-3)+(cards.length===4?' opção':' opções')+'</summary>'+cards.slice(3).join('')+'</details>':'';
+  return '<section class="quote-plans"><h3>'+title+'</h3>'+commonInfo+cards.slice(0,3).join('')+extra+
+    (cards.length?'':'<p>Sem opções para esta frequência.</p>')+'</section>';
 }

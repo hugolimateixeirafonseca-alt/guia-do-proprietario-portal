@@ -21,7 +21,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
     const subject='Os contactos de '+professional;
     return renderEmailLayout({subject,title:subject,preview:'Guarde o telefone e o email do parceiro que escolheu.',name:clean(payload.partner_name),audience:'client',signature:false,paragraphs:[
       'O seu pedido de contacto foi enviado a '+professional+'. O parceiro entrará em contacto consigo no prazo de 24 horas, contando apenas os dias úteis.',
-      ...(clean(data.plan_summary,800)?['Plano escolhido: '+clean(data.plan_summary,800)]:[]),
+      ...(clean(data.plan_summary,800)?['Opção sobre a qual pediu contacto: '+clean(data.plan_summary,800)]:[]),
       'Telefone: '+phone+'\nEmail: '+email,
       'Pode usar estes contactos para combinar a data da limpeza diretamente com o parceiro.'
     ]});

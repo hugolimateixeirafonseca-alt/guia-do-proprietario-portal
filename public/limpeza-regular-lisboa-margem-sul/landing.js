@@ -54,10 +54,7 @@ function cardPrice(p){
   return [...prices,plans.length+' opções'].join(' · ');
 }
 function planChoices(p){
-  const plans=compatiblePlans(p);
-  return '<fieldset class="quote-plans"><legend>'+(plans.length===1?'Plano de limpeza':'Escolha o seu plano')+'</legend>'+plans.map(plan=>premiumPlanCard(plan,{
-    team:p.type==='Equipa de Limpeza',frequency:request.frequency,selectable:true,checked:plan.id===request.planId
-  })).join('')+'</fieldset>';
+  return premiumPlanOptions(compatiblePlans(p),{team:p.type==='Equipa de Limpeza',frequency:request.frequency,partnerName:p.name});
 }
 function field(id,label,values){return '<label>'+label+'<select id="'+id+'" name="'+id+'">'+options(values)+'</select></label>'}
 function setValues(ids){for(const id of ids){document.getElementById(id).value=request[id]}}
@@ -157,9 +154,7 @@ function profile(p){
   return '<img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'">'+
     '<h2 id="profile-title" tabindex="-1">'+html(p.name)+'</h2><p>'+html(identity)+'</p><p>'+html(p.bio)+'</p>'+
     planChoices(p)+
-    '<dl class="quote-details">'+rows+'</dl><p>Contacto em 24 horas, contando apenas os dias úteis.</p>'+
-    '<button class="primary full" id="choose">Pedir contacto sobre este plano</button>'+
-    '<p class="note">Escolha o canal e a altura em que prefere receber o contacto.</p>';
+    '<dl class="quote-details">'+rows+'</dl><p>Contacto em 24 horas, contando apenas os dias úteis.</p>';
 }
 async function results(){
   let lookupFailed=false;
@@ -195,13 +190,12 @@ async function results(){
       const p=found.find(i=>i.id===request.selected);
       const offers=document.querySelector('.offers'), detail=document.getElementById('perfil');
       offers.innerHTML=found.map(card).join('');
-      const plans=compatiblePlans(p);
-      if(!selectedPlan(p))request.planId=plans.length===1?plans[0].id:'';
       detail.innerHTML=profile(p);
-      const choose=detail.querySelector('#choose');
-      choose.disabled=!request.planId;
-      detail.querySelector('.quote-plans').onchange=e=>{
-        request.planId=e.target.value;choose.disabled=!selectedPlan(p);
+      detail.querySelector('.quote-plans').onclick=e=>{
+        const interest=e.target.closest('button[data-interest]');
+        if(!interest)return;
+        request.planId=interest.dataset.interest;
+        normal=false;confirmed=false;go('contacto');
       };
       const frame=(img,partner)=>{
         const position=value=>Number.isInteger(value)?Math.min(100,Math.max(0,value)):50;
@@ -211,7 +205,6 @@ async function results(){
       };
       offers.querySelectorAll('.offer img').forEach((img,index)=>frame(img,found[index]));
       frame(detail.querySelector('img'),p);
-      document.getElementById('choose').onclick=()=>{normal=false;confirmed=false;go('contacto')};
       if(move){
         document.getElementById('profile-title').focus({preventScroll:true});
         if(matchMedia('(max-width:780px)').matches)detail.scrollIntoView({block:'start'});
@@ -239,7 +232,7 @@ function contact(){
   const p=matches().find(profile=>profile.id===request.selected);
   if(!normal&&(!p||!selectedPlan(p))){go('propostas');return}
   const recipient=normal?'Pedido a parceiros de '+request.zone:proposalLabel(p);
-  const title=normal?'Pedir contacto a outros parceiros':'Pedir contacto sobre este plano';
+  const title=normal?'Pedir contacto a outros parceiros':'Como prefere que '+html(p.name)+' entre em contacto consigo?';
   const authorisedPartner=normal?'até 3 parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade':'o prestador que escolhi ('+html(p.name)+')';
   const permission='Autorizo o Guia do Proprietário a partilhar os dados deste pedido com '+authorisedPartner+(normal?', para que me possam contactar':', para que me possa contactar')+' com informações, disponibilidade e propostas relacionadas com este pedido.';
   request.consents=null;
@@ -254,7 +247,7 @@ function contact(){
 
     '<div class="optins"><label class="permission"><input type="checkbox" name="allowContact" required><span><strong>'+permission+'</strong><small>Consulte os parceiros que podem receber pedidos na nossa <a href="https://guiadoproprietario.pt/parceiros/">Lista de Parceiros</a> e saiba mais na <a href="https://guiadoproprietario.pt/privacidade/">Política de Privacidade</a>.</small></span></label>'+
     '<label class="permission"><input type="checkbox" name="marketing"><span><strong>Quero receber por email conteúdos, novidades e comunicações comerciais do Guia do Proprietário, incluindo ofertas e conteúdos patrocinados de parceiros selecionados.</strong><small>As comunicações são enviadas pelo Guia do Proprietário e o meu email não é cedido aos anunciantes. Posso cancelar a subscrição a qualquer momento.</small></span></label></div>'+
-    '<div class="actions"><button type="submit" class="primary">'+(normal?'Confirmar pedido a outros parceiros':'Confirmar pedido de contacto')+'</button></div></form></section>';
+    '<div class="actions"><button type="submit" class="primary">'+(normal?'Confirmar pedido a outros parceiros':'Rever número de telefone')+'</button></div></form></section>';
   document.getElementById('contact-summary').textContent=summary();
   setValues(normal?['contactName','email','phone']:['contactName','email','phone','contactTime']);
   const form=document.getElementById('finish');
@@ -288,7 +281,7 @@ function confirmPhone(){
   main.innerHTML='<section class="wrap page narrow">'+head('É este o número para onde prefere ser contactado?')+
     '<div class="contact-box"><p>Confirme o indicativo e os últimos algarismos antes de concluir o pedido.</p>'+
     '<p role="status" id="send-status"></p><a id="review-proposals" href="#propostas" hidden>Voltar aos orçamentos</a><p id="phone-review" class="total details" dir="ltr"></p><p id="phone-channels" class="note details"></p>'+
-    '<div class="actions"><button type="button" id="confirm-number" class="primary">Sim, confirmar este número</button>'+
+    '<div class="actions"><button type="button" id="confirm-number" class="primary">'+(normal?'Sim, confirmar este número':'Pedir contacto')+'</button>'+
     '<button type="button" id="edit-number" class="secondary">Corrigir número</button></div>'+
     '<form id="correct-number" method="dialog" hidden><div class="field-grid"><label>Número de telefone<input name="correctedPhone" required type="tel" autocomplete="tel" inputmode="tel" maxlength="28"></label></div>'+
     '<button class="primary">Rever número corrigido</button></form></div></section>';
