@@ -133,3 +133,16 @@ test('contact confirmation includes every selected cleaning modality',()=>{
  assert.match(message.text,/Limpeza regular \+ Limpeza profunda/);
  assert.throws(()=>renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data:{...data,cleaning_types:['regular','unsupported']}}));
 });
+
+test('Premium availability messages distinguish a request, a contact and the two recovery paths',()=>{
+ const key='cb8a2cd1-48ac-4001-a296-c67eac025999';
+ for(const [status,alternatives] of [['pending',false],['accepted',false],['declined',true],['expired',false]]){
+  const data={kind:'premium_availability',audience:'client',status,professional_name:'Equipa',deadline:'2026-11-12T15:00:00Z',plan_summary:'Plano semanal',professional_email:'equipa@example.pt',professional_phone:'912345678',recovery_key:key,has_alternatives:alternatives};
+  const msg=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',event_id:'engagement:client_premium:'+status+':'+key,data});
+  assert.match(msg.text,/sem compromisso/);
+  assert.equal(msg.text.includes('equipa@example.pt'),status==='accepted');
+  assert.equal(msg.html.includes('#retomar='+key),['declined','expired'].includes(status));
+  if(status==='declined')assert.match(msg.html,/Ver outras propostas/);
+  if(status==='expired')assert.match(msg.html,/Pedir contacto a outros parceiros/);
+ }
+});

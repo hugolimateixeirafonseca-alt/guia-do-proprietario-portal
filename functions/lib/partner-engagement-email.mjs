@@ -14,6 +14,30 @@ function preferences(value,fallback) {
 
 export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
+  if(data.kind==='premium_availability'){
+    const match=/^engagement:client_premium:(pending|accepted|declined|expired):[a-f0-9-]{36}$/.exec(payload.event_id);
+    const partner=clean(data.professional_name);
+    if(!match||match[1]!==data.status||!partner||payload.event_type!=='contact_accepted'||data.audience!=='client')throw Error('invalid_event_data');
+    const deadline=new Intl.DateTimeFormat('pt-PT',{timeZone:'Europe/Lisbon',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(data.deadline));
+    let subject,body,button;
+    if(data.status==='pending'){
+      subject='Pedido de disponibilidade enviado a '+partner;
+      body=['Recebemos o seu pedido de contacto. '+partner+' vai verificar a disponibilidade até '+deadline+' (hora de Lisboa). Enviamos a resposta por email.'];
+    }else if(data.status==='accepted'){
+      subject=partner+' confirmou disponibilidade para falar consigo';
+      const phone=clean(data.professional_phone,25),email=clean(data.professional_email,254);
+      if(!phone||!email)throw Error('invalid_professional_contact');
+      body=['A empresa vai falar consigo pelo canal que indicou. O prazo para o primeiro contacto termina a '+deadline+' (hora de Lisboa).','Também pode contactar a empresa diretamente.','Telefone: '+phone+'\nEmail: '+email];
+    }else{
+      if(!/^[a-f0-9-]{36}$/.test(data.recovery_key))throw Error('invalid_recovery_key');
+      subject=data.status==='declined'?partner+' indicou que não tem disponibilidade':partner+' não respondeu dentro do prazo';
+      body=[subject+'.',data.has_alternatives?'Pode consultar outras propostas compatíveis. Os dados do pedido já estão preenchidos.':'Pode pedir contacto a outros parceiros da sua zona. Os dados só são partilhados se confirmar o novo pedido.'];
+      button={label:data.has_alternatives?'Ver outras propostas':'Pedir contacto a outros parceiros da minha zona',url:'https://guiadoproprietario.pt/limpeza-regular-lisboa-margem-sul/#retomar='+data.recovery_key};
+    }
+    if(clean(data.plan_summary,800))body.push('Opção consultada: '+clean(data.plan_summary,800));
+    body.push('Este pedido de contacto é sem compromisso. Só há marcação se combinar o serviço diretamente com o profissional.');
+    return renderEmailLayout({subject,title:subject,preview:body[0],name:clean(payload.partner_name),audience:'client',paragraphs:body,button,signature:false});
+  }
   if(data.kind==='premium_contact'){
     if(payload.event_type!=='contact_accepted'||!/^engagement:client_premium:[a-z0-9-]+$/i.test(payload.event_id)||data.audience!=='client')throw Error('invalid_event_data');
     const professional=clean(data.professional_name),phone=clean(data.professional_phone,25),email=clean(data.professional_email,254);

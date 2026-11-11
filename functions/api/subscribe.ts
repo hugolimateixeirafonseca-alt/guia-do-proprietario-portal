@@ -28,6 +28,7 @@ interface SubscribeBody {
   premiumName?: unknown;
   premiumVersion?: unknown;
   premiumProducts?: unknown;
+  premiumPreferences?: unknown;
   measurementPixelState?: unknown;
   requestConfirmed?: unknown;
   email?: unknown;
@@ -195,7 +196,7 @@ async function sendCleaningLead(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        ...(directed ? {premium_partner:body.premiumPartner,premium_plan:body.premiumPlan,premium_version:body.premiumVersion,premium_name:body.premiumName,premium_products:body.premiumProducts} : {}),
+        ...(directed ? {premium_partner:body.premiumPartner,premium_plan:body.premiumPlan,premium_version:body.premiumVersion,premium_name:body.premiumName,premium_products:body.premiumProducts,premium_preferences:body.premiumPreferences} : {}),
         event_id: cleanText(body.eventId, 128),
         client_ip_key: ipKey,
         request_confirmed: body.requestConfirmed === true,

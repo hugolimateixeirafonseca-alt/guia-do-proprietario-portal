@@ -107,7 +107,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
   if (adminApplication && partnerEmail !== 'hugo.lima.teixeira.fonseca@gmail.com') return json({error:'invalid_admin_recipient'},400);
   let message;
   if(/^premium:[a-f0-9-]{36}$/.test(eventId)){
-    message=renderEmailLayout({subject:'Um cliente pediu contacto sobre uma opção de limpeza',preview:'Consulte os dados na área de parceiro.',title:'Recebeu um pedido Premium',name:partnerName,paragraphs:['Um cliente está interessado no seu serviço em '+municipality+'. Contacte-o nas próximas 24 horas, contando apenas os dias úteis.',...(summary?['Opção de interesse: '+summary]:[])],button:{label:'Abrir Pedidos Premium',url:dashboardUrl}});
+    message=renderEmailLayout({subject:'Um cliente pediu contacto sobre uma opção de limpeza',preview:'Consulte os dados na área de parceiro.',title:'Recebeu um pedido Premium',name:partnerName,paragraphs:['Um cliente está interessado no seu serviço em '+municipality+'. Consulte o pedido e indique se tem disponibilidade. Se confirmar, recebe os contactos do cliente para falar com ele dentro do prazo original de 24 horas, contando apenas os dias úteis. O pedido é sem compromisso.',...(summary?['Opção de interesse: '+summary]:[])],button:{label:'Abrir Pedidos Premium',url:dashboardUrl}});
   }else if(welcome){
     // Current policy owns model and entitlements; never trust an old queued offer.
     if(!commercialData)return json({error:'commercial_policy_unavailable'},503);

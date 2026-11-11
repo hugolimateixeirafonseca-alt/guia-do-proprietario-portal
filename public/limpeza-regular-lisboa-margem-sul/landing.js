@@ -9,6 +9,8 @@ const homeTypes=['Apartamento','Moradia','Alojamento local'];
 const weekdays=['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado','Domingo'];
 const spaceAreas=['Até 50 m²','51 a 100 m²','101 a 150 m²','Mais de 150 m²'];
 let profiles=[];
+let excludedPartners=new Set();
+let resuming=false;
 const offerRanks=new Map();
 let lastSubmission=null;
 let sending=false;
@@ -23,7 +25,7 @@ const options=arr=>arr.map(s=>'<option>'+s+'</option>').join('');
 const money=n=>new Intl.NumberFormat('pt-PT',{maximumFractionDigits:2}).format(n)+' €';
 const sizes=['T0 / T1','T2','T3','T4 ou superior'];
 function availableDays(p){return p.days.filter(day=>!request.days.length||request.days.includes(day)).join(' ou ')}
-function matches(){return profiles.filter(p=>p.spaces.includes(request.space)&&p.zones.includes(request.zone)&&p.frequencies.includes(request.frequency)&&
+function matches(){return profiles.filter(p=>!excludedPartners.has(p.id)&&p.spaces.includes(request.space)&&p.zones.includes(request.zone)&&p.frequencies.includes(request.frequency)&&
   (!homeTypes.includes(request.space)||p.sizes.includes(request.size))&&
   (request.products!=='A equipa leva os produtos'||p.products!=='client')&&
   (!request.periods.length||request.periods.some(t=>p.periods.includes(t)))&&availableDays(p)&&compatiblePlans(p).length);}
@@ -62,7 +64,7 @@ function collect(ids){for(const id of ids){request[id]=document.getElementById(i
 function go(route){if(location.hash==='#'+route)render();else location.hash=route}
 function progress(n){return '<p class="step">Passo '+n+' de 3</p>'}
 function head(title,extra='',n=0){return '<div class="page-head">'+(n?progress(n):'')+'<h1 id="main-title" tabindex="-1">'+title+'</h1>'+extra+'</div>'}
-function reset(){lastSubmission=null;delivered=false;request={...initial};normal=false;confirmed=false;go('inicio')}
+function reset(){excludedPartners.clear();lastSubmission=null;delivered=false;request={...initial};normal=false;confirmed=false;go('inicio')}
 function start(){
   main.innerHTML=startMarkup;
   const zone=document.getElementById('zone');
@@ -154,7 +156,7 @@ function profile(p){
   return '<img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'">'+
     '<h2 id="profile-title" tabindex="-1">'+html(p.name)+'</h2><p>'+html(identity)+'</p><p>'+html(p.bio)+'</p>'+
     planChoices(p)+
-    '<dl class="quote-details">'+rows+'</dl><p>Contacto em 24 horas, contando apenas os dias úteis.</p>';
+    '<dl class="quote-details">'+rows+'</dl><p>O parceiro verifica a disponibilidade em 24 horas, contando apenas os dias úteis. Pedido sem compromisso.</p>';
 }
 async function results(){
   let lookupFailed=false;
@@ -173,6 +175,10 @@ async function results(){
     lookupFailed=true;
   }
   const found=matches();
+  if(resuming){
+    resuming=false;
+    if(!lookupFailed&&!found.length){normal=true;go('contacto');return;}
+  }
   for(const partner of found){
     if(!offerRanks.has(partner.id))offerRanks.set(partner.id,Math.random());
   }
@@ -224,7 +230,7 @@ function proposalLabel(p){
   return html(p.name)+' · '+p.type;
 }
 function contactDeadline(){
-  return 'O profissional que escolheu irá contactá-lo nas 24 horas seguintes à receção do pedido. Para este prazo, contam apenas os dias úteis.';
+  return 'O parceiro vai verificar a disponibilidade. Enviamos a resposta por email no prazo de 24 horas, contando apenas os dias úteis. Se tiver disponibilidade, fala consigo pelo canal que indicou dentro desse mesmo prazo.';
 }
 const lateContactMessage='Olá! Fiz um pedido de limpeza através do Guia do Proprietário. Já passou o prazo de contacto e ainda não fui contactado. Podem ajudar-me?';
 const supportWhatsApp='https://wa.me/351913857414?text='+encodeURIComponent(lateContactMessage);
@@ -238,7 +244,7 @@ function contact(){
   request.consents=null;
   main.innerHTML='<section class="wrap page narrow"><div class="bar"><a href="#propostas" class="back">← Voltar às propostas</a></div>'+head(title)+
     '<form class="contact-box" id="finish" method="dialog"><div class="tint"><strong>'+recipient+'</strong>'+(normal?'':'<p>'+html(selectedPlan(p).summary)+' · '+availableDays(p)+'</p>')+
-    '<p id="contact-summary" class="summary-line"></p>'+(normal?'':'<p class="details">'+contactDeadline()+'</p>')+'</div>'+normalFields()+'<fieldset class="contact-fields"><legend>Os seus dados de contacto</legend><div class="field-grid">'+
+    '<p id="contact-summary" class="summary-line"></p>'+(normal?'':'<p class="details">Pedido sem compromisso. '+contactDeadline()+'</p>')+'</div>'+normalFields()+'<fieldset class="contact-fields"><legend>Os seus dados de contacto</legend><div class="field-grid">'+
     '<label>Nome<input id="contactName" name="contactName" autocomplete="name" type="text" maxlength="80" required></label>'+
     '<label>Email<input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required></label>'+
     '<label>Número de telefone<input id="phone" name="phone" autocomplete="tel" type="tel" inputmode="tel" maxlength="28" aria-describedby="phone-help" required><small id="phone-help">'+'Indique um telemóvel português com nove algarismos.'+'</small></label>'+
@@ -309,7 +315,7 @@ async function sendRequest(){
   const body={...normalRequestData(),additionalNotes:note.slice(0,500),requestConfirmed:true,
     source:normal?'guia_limpeza_regular_lisboa':'guia_limpeza_premium',consentVersion:normal?'limpeza-2026-09-c':'limpeza-premium-2026-11',
     pageUrl:location.origin+location.pathname+location.search};
-  if(profile)Object.assign(body,{premiumPartner:profile.id,premiumPlan:selectedPlan(profile).id,premiumName:profile.name,premiumVersion:profile.version,premiumProducts:request.products==='A equipa leva os produtos'?'partner':'any'});
+  if(profile)Object.assign(body,{premiumPreferences:Object.fromEntries(['area','other','products','contactTime','notes'].map(key=>[key,request[key]])),premiumPartner:profile.id,premiumPlan:selectedPlan(profile).id,premiumName:profile.name,premiumVersion:profile.version,premiumProducts:request.products==='A equipa leva os produtos'?'partner':'any'});
   const signature=JSON.stringify(body);
   if(lastSubmission?.signature!==signature)lastSubmission={signature,id:crypto.randomUUID()};
   body.eventId=lastSubmission.id;body.measurementPixelState=typeof window.fbq==='function'?'callable':'missing';
@@ -333,7 +339,7 @@ function done(){
     '<div class="box"><h2>'+(normal?'Contacto com outros parceiros':proposalLabel(p))+'</h2>'+
     (normal?'':'<p class="total details">'+html(selectedPlan(p).summary)+'</p><p>'+availableDays(p)+'</p>')+
     '<p id="final-summary" class="summary-line details"></p><p id="final-contact" class="details"></p>'+
-    (normal?'':'<div class="tint details"><p>Vai receber por email o telefone e o email profissional do parceiro que escolheu.</p><strong>Quando vai receber o contacto?</strong><p>'+contactDeadline()+'</p>'+
+    (normal?'':'<div class="tint details"><p>O seu pedido é sem compromisso. A limpeza só fica marcada se combinar o serviço diretamente com o parceiro.</p><strong>O que acontece agora?</strong><p>'+contactDeadline()+'</p>'+
     '<p class="details">Se esse prazo passar sem receber contacto, <a href="'+supportWhatsApp+'">avise o Guia pelo WhatsApp</a>.</p></div>')+
     '<p class="note details">O pedido foi registado. A data da limpeza é combinada diretamente com o prestador.</p>'+
     '<div class="actions"><button class="primary" id="restart">Fazer outro pedido</button></div></div></section>';
@@ -360,4 +366,19 @@ function render(){
   if(route==='concluido'&&!confirmed){route='propostas';history.replaceState(null,'','#propostas')}
   const views={inicio:start,pedido:qualify,propostas:results,contacto:contact,telefone:confirmPhone,concluido:done};(views[route]||start)();document.getElementById('main-title')?.focus({preventScroll:true});window.scrollTo(0,0);
 }
-window.addEventListener('hashchange',render);render();
+async function resumeRequest(key){
+  main.innerHTML='<section class="wrap page narrow"><p role="status">A recuperar o seu pedido…</p></section>';
+  try{
+    const response=await fetch('/api/perfis-limpeza-premium',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key}),cache:'no-store'});
+    if(!response.ok)throw Error();
+    const data=await response.json();
+    if(!data.ok||!municipalities.includes(data.preferences.zone))throw Error();
+    Object.assign(request,data.preferences,{selected:'',planId:'',consents:null});
+    excludedPartners=new Set(data.excluded);resuming=true;
+    history.replaceState(null,'','#propostas');render();
+  }catch{
+    main.innerHTML='<section class="wrap page narrow">'+head('Não foi possível recuperar o pedido')+'<p>Volte a abrir a ligação do email ou comece um novo pedido.</p><a class="primary" href="#inicio">Começar novo pedido</a></section>';
+  }
+}
+window.addEventListener('hashchange',render);
+if(window.premiumResumeKey){const key=window.premiumResumeKey;delete window.premiumResumeKey;resumeRequest(key);}else render();
