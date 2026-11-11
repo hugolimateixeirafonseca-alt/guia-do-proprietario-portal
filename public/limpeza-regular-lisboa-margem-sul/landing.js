@@ -45,7 +45,12 @@ function compatiblePlans(p){
   return p.plans.filter(plan=>!plan.frequency||plan.frequency===request.frequency)
     .map(plan=>plan.frequency?plan:{...plan,title:plan.title.replace(/^Limpeza regular/,request.frequency),summary:plan.summary.replace(/^Limpeza regular/,request.frequency)});
 }
-function selectedPlan(p){return compatiblePlans(p).find(plan=>plan.id===request.planId);}
+const anyPlan={id:'_any',title:'Qualquer uma das opções',summary:'Qualquer uma das opções'};
+function selectedPlan(p){
+  const plans=compatiblePlans(p);
+  if(request.planId===anyPlan.id&&plans.length>1)return anyPlan;
+  return plans.find(plan=>plan.id===request.planId);
+}
 function cardPrice(p){
   const plans=compatiblePlans(p);
   if(plans.length===1)return plans[0].price;
@@ -248,7 +253,7 @@ function contactPlan(p){
   const plan=selectedPlan(p);
   if(plan)return '<p>'+html(plan.summary)+' · '+html(availableDays(p))+'</p>';
   const options=compatiblePlans(p).map(item=>'<option value="'+html(item.id)+'">'+html(item.summary)+'</option>').join('');
-  return '<label>Sobre que opção gostaria de saber mais?<select name="planOfInterest" required><option value="">Selecione uma opção</option>'+options+'</select></label>';
+  return '<label>Sobre que opção gostaria de saber mais?<select name="planOfInterest" required><option value="">Selecione uma opção</option><option value="'+anyPlan.id+'">'+anyPlan.title+'</option>'+options+'</select></label>';
 }
 function contact(){
   const p=matches().find(profile=>profile.id===request.selected);
@@ -363,7 +368,7 @@ function premiumConfirmation(p,plan){
     '<section class="receipt-next"><h2>Quando recebo uma resposta?</h2>'+
     '<p>Enviamos a resposta para <strong>'+html(request.email)+'</strong> no prazo de 24 horas, contando apenas os dias úteis.</p>'+
     '<p>Se o parceiro tiver disponibilidade, fala consigo por '+html(channel)+' dentro desse prazo. Se recusar ou não responder ao pedido, enviamos-lhe outras opções por email.</p></section>'+
-    '<section class="receipt-summary" id="final-summary"><header><div><h2>A sua proposta</h2><p>'+html(p.name)+' · '+html(p.type)+'</p></div><strong class="receipt-price">'+html(plan.price)+'</strong></header>'+
+    '<section class="receipt-summary" id="final-summary"><header><div><h2>A sua proposta</h2><p>'+html(p.name)+' · '+html(p.type)+'</p></div>'+(plan.price?'<strong class="receipt-price">'+html(plan.price)+'</strong>':'')+'</header>'+
     '<dl>'+rows+'</dl>'+(terms?'<details><summary>Condições do plano</summary><ul>'+terms+'</ul></details>':'')+
     '<p class="receipt-note">O pedido é sem compromisso. A limpeza só fica marcada quando combinar o serviço com o parceiro.</p></section>'+
     '<div class="receipt-footer"><p>O parceiro confirmou disponibilidade mas ainda não falou consigo? <a href="'+supportWhatsApp+'">Fale com o Guia pelo WhatsApp</a>.</p>'+
