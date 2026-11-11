@@ -46,7 +46,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
     }else{
       if(!/^[a-f0-9-]{36}$/.test(data.recovery_key))throw Error('invalid_recovery_key');
       subject=data.status==='declined'?partner+' indicou que não tem disponibilidade':partner+' não respondeu dentro do prazo';
-      const url='https://guiadoproprietario.pt/limpeza-regular-lisboa-margem-sul/#retomar='+data.recovery_key;
+      const url='https://guiadoproprietario.pt/pedir-limpeza/#retomar='+data.recovery_key;
       const network={label:'Pedir propostas a outros parceiros',url:url+'&rede=1'};
       body=[subject+'.'];
       if(data.has_alternatives){

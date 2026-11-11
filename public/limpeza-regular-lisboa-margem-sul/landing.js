@@ -81,6 +81,13 @@ function head(title,extra='',n=0){return '<div class="page-head">'+(n?progress(n
 function reset(){recoveryKey='';resuming=false;presentedPartners.clear();excludedPartners.clear();lastSubmission=null;delivered=false;request={...initial};normal=false;confirmed=false;go('inicio')}
 function start(){
   main.innerHTML=startMarkup;
+  document.getElementById('regularEntry').onclick=()=>document.getElementById('zone').focus();
+  const normalUrl=new URL('/servicos-limpeza/',location.origin);
+  for(const [key,value] of new URLSearchParams(location.search)){
+    if(key.startsWith('utm_')||['fbclid','gclid'].includes(key))normalUrl.searchParams.set(key,value);
+  }
+  normalUrl.hash='pedido';
+  document.getElementById('otherEntry').href=normalUrl.href;
   const zone=document.getElementById('zone');
   for(const [name,places] of Object.entries(areas)){const g=document.createElement('optgroup');g.label=name;g.innerHTML=options(places);zone.append(g)}
   setValues(['zone','frequency']);
