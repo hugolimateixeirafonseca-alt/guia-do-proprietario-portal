@@ -166,7 +166,6 @@ function profile(p){
     ['Espaços',list.format(p.spaces)],
     ['Tipologias',p.spaces.some(space=>homeTypes.includes(space))?list.format(p.sizes):''],
     ['Frequência',list.format(p.frequencies)],
-    ['Produtos',provider[p.products]],
     ['Equipamento',provider[p.equipment]]
   ];
   const rows=details.filter(([,value])=>value).map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+html(value)+'</dd></div>').join('');
