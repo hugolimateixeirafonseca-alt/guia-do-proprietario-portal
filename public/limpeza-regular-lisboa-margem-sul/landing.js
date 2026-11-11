@@ -24,7 +24,12 @@ let confirmed=false,normal=false,pendingPhone='';
 const options=arr=>arr.map(s=>'<option>'+s+'</option>').join('');
 const money=n=>new Intl.NumberFormat('pt-PT',{maximumFractionDigits:2}).format(n)+' €';
 const sizes=['T0 / T1','T2','T3','T4 ou superior'];
-function availableDays(p){return p.days.filter(day=>!request.days.length||request.days.includes(day)).join(' ou ')}
+function scheduleLabel(days){
+  if(days.length===7)return 'Todos os dias da semana';
+  if(days.length===5&&days.every(day=>weekdays.slice(0,5).includes(day)))return 'De segunda a sexta-feira';
+  return new Intl.ListFormat('pt-PT',{type:'disjunction'}).format(days);
+}
+function availableDays(p){return scheduleLabel(p.days.filter(day=>!request.days.length||request.days.includes(day)))}
 function matches(){return profiles.filter(p=>!excludedPartners.has(p.id)&&p.spaces.includes(request.space)&&p.zones.includes(request.zone)&&p.frequencies.includes(request.frequency)&&
   (!homeTypes.includes(request.space)||p.sizes.includes(request.size))&&
   (request.products!=='A equipa leva os produtos'||p.products!=='client')&&
@@ -135,10 +140,7 @@ function card(p){const active=p.id===request.selected;
 }
 function profile(p){
   const list=new Intl.ListFormat('pt-PT',{style:'long',type:'conjunction'});
-  const days=p.days;
-  let schedule=list.format(days);
-  if(days.length===7)schedule='Todos os dias da semana';
-  else if(days.length===5&&!days.includes('Sábado')&&!days.includes('Domingo'))schedule='De segunda a sexta-feira';
+  const schedule=scheduleLabel(p.days);
   const team=p.type==='Equipa de Limpeza';
   const identity=team?p.type+' · '+p.people+(p.people===1?' profissional':' profissionais')+' por serviço':p.type;
   const provider={flexible:'A combinar',partner:'O prestador leva',client:'O cliente fornece'};
@@ -347,26 +349,42 @@ async function sendRequest(){
     delivered=true;confirmed=true;pendingPhone='';go('concluido');
   }catch(error){status.textContent=error.message;submit.disabled=false;edit.disabled=false;}finally{sending=false;}
 }
+function premiumConfirmation(p,plan){
+  const channel=new Intl.ListFormat('pt-PT',{type:'disjunction'}).format(request.channels.map(c=>c==='Chamada'?'chamada':c));
+  const space=[request.zone,request.space==='Outro'?request.other:request.space,homeTypes.includes(request.space)?request.size:request.area].filter(Boolean).join(' · ');
+  const facts=[
+    ['Espaço',space],['Plano',plan.title],['Dias possíveis',availableDays(p)],
+    ['Contacto',request.contactName+' · '+channel+' · número terminado em '+request.phone.slice(-3)]
+  ];
+  const rows=facts.map(([label,value])=>'<div><dt>'+label+'</dt><dd>'+html(value)+'</dd></div>').join('');
+  const terms=(plan.details||[]).map(term=>'<li>'+html(term)+'</li>').join('');
+  return '<section class="wrap page receipt">'+head('Pedido enviado')+
+    '<p class="receipt-intro"><strong>'+html(p.name)+'</strong> vai verificar se tem disponibilidade para a sua limpeza.</p>'+
+    '<section class="receipt-next"><h2>Quando recebo uma resposta?</h2>'+
+    '<p>Enviamos a resposta para <strong>'+html(request.email)+'</strong> no prazo de 24 horas, contando apenas os dias úteis.</p>'+
+    '<p>Se o parceiro tiver disponibilidade, fala consigo por '+html(channel)+' dentro desse prazo. Se recusar ou não responder ao pedido, enviamos-lhe outras opções por email.</p></section>'+
+    '<section class="receipt-summary" id="final-summary"><header><div><h2>A sua proposta</h2><p>'+html(p.name)+' · '+html(p.type)+'</p></div><strong class="receipt-price">'+html(plan.price)+'</strong></header>'+
+    '<dl>'+rows+'</dl>'+(terms?'<details><summary>Condições do plano</summary><ul>'+terms+'</ul></details>':'')+
+    '<p class="receipt-note">O pedido é sem compromisso. A limpeza só fica marcada quando combinar o serviço com o parceiro.</p></section>'+
+    '<div class="receipt-footer"><p>O parceiro confirmou disponibilidade mas ainda não falou consigo? <a href="'+supportWhatsApp+'">Fale com o Guia pelo WhatsApp</a>.</p>'+
+    '<button type="button" id="restart" class="secondary">Fazer outro pedido</button></div></section>';
+}
 function done(){
-  const p=normal?null:matches().find(profile=>profile.id===request.selected);
-  if(!normal&&(!p||!selectedPlan(p))){go('propostas');return}
-  main.innerHTML='<section class="wrap page narrow">'+head('Pedido enviado')+
-    '<div class="box"><h2>'+(normal?'Contacto com outros parceiros':proposalLabel(p))+'</h2>'+
-    (normal?'':'<p class="total details">'+html(selectedPlan(p).summary)+'</p><p>'+availableDays(p)+'</p>')+
-    '<p id="final-summary" class="summary-line details"></p><p id="final-contact" class="details"></p>'+
-    (normal?'':'<div class="tint details"><p>O seu pedido é sem compromisso. A limpeza só fica marcada se combinar o serviço diretamente com o parceiro.</p><strong>O que acontece agora?</strong><p>'+contactDeadline()+'</p>'+
-    '<p class="details">Se esse prazo passar sem receber contacto, <a href="'+supportWhatsApp+'">avise o Guia pelo WhatsApp</a>.</p></div>')+
-    '<p class="note details">O pedido foi registado. A data da limpeza é combinada diretamente com o prestador.</p>'+
-    '<div class="actions"><button class="primary" id="restart">Fazer outro pedido</button></div></div></section>';
-  let finalSummary=summary();
-  if(normal){
+  if(!normal){
+    const p=matches().find(profile=>profile.id===request.selected);
+    const plan=p&&selectedPlan(p);
+    if(!plan){go('propostas');return;}
+    main.innerHTML=premiumConfirmation(p,plan);
+  }else{
     const data=normalRequestData();
-    finalSummary += (homeTypes.includes(request.space)?'':' · '+normalSizes[data.spaceSize])+' · '+data.postalCode+' · '+
-      (data.preferredDate ? data.preferredDate.split('-').reverse().join('/') : normalTiming[data.oneTimeTiming])+
-      ' · '+(request.periods.join(' ou ')||'Qualquer período');
+    main.innerHTML='<section class="wrap page narrow">'+head('Pedido enviado')+
+      '<div class="box"><h2>Contacto com outros parceiros</h2><p id="final-summary" class="summary-line details"></p><p id="final-contact" class="details"></p>'+
+      '<p class="note details">O pedido foi registado. A data da limpeza é combinada diretamente com o prestador.</p>'+
+      '<div class="actions"><button class="primary" id="restart">Fazer outro pedido</button></div></div></section>';
+    document.getElementById('final-summary').textContent=summary()+(homeTypes.includes(request.space)?'':' · '+normalSizes[data.spaceSize])+' · '+data.postalCode+' · '+
+      (data.preferredDate?data.preferredDate.split('-').reverse().join('/'):normalTiming[data.oneTimeTiming])+' · '+(request.periods.join(' ou ')||'Qualquer período');
+    document.getElementById('final-contact').textContent=request.contactName+' · '+request.channels.join(' e ')+' · telefone terminado em '+request.phone.slice(-3)+'.';
   }
-  document.getElementById('final-summary').textContent=finalSummary;
-  document.getElementById('final-contact').textContent=request.contactName+' · '+request.channels.join(' e ')+' · telefone terminado em '+request.phone.slice(-3)+'.';
   document.getElementById('restart').onclick=reset;
 }
 function render(){

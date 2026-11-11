@@ -43,3 +43,29 @@
 
 .quote-plans{padding:0;border:0;margin:1rem 0;min-width:0}
 .quote-plans legend{font-weight:700;margin-bottom:.5rem}
+
+.receipt{max-width:46rem;overflow-wrap:anywhere}
+.receipt .page-head{margin:0 0 .45rem}
+.receipt .page-head h1{font-size:clamp(2.3rem,5vw,3.6rem);line-height:1.08}
+.receipt .receipt-intro{margin:0 0 1.55rem;color:var(--muted);font-size:1.08rem}
+.receipt h2{font:600 1.15rem/1.3 var(--sans);letter-spacing:normal;margin:0}
+.receipt-next,.receipt-summary{padding:clamp(1.1rem,3vw,1.6rem);border-radius:14px}
+.receipt-next{background:var(--pale)}
+.receipt-next p{margin:.55rem 0 0;line-height:1.55}
+.receipt-summary{margin-top:1rem;border:1px solid var(--line);background:var(--white)}
+.receipt-summary header{display:flex;align-items:start;justify-content:space-between;gap:1rem}
+.receipt-summary header p{margin:.25rem 0 0;color:var(--muted)}
+.receipt-price{font:650 1.25rem/1.3 var(--sans);color:var(--blue);text-align:right}
+.receipt-summary dl{margin:1rem 0 .5rem}
+.receipt-summary dl>div{display:grid;grid-template-columns:7.3rem minmax(0,1fr);gap:.75rem;padding:.55rem 0;border-top:1px solid var(--line)}
+.receipt-summary dt{color:var(--muted)}
+.receipt-summary dd{margin:0}
+.receipt-summary summary{color:var(--blue);font-weight:600;cursor:pointer}
+.receipt-summary ul{margin:.5rem 0;padding-left:1.35rem}
+.receipt .receipt-note{margin:1rem 0 0;color:var(--muted);font-size:.92rem}
+.receipt-footer{margin-top:1.2rem}
+.receipt-footer p{margin:0 0 1rem;line-height:1.5}
+@media(max-width:480px){
+  .receipt-summary header{flex-wrap:wrap}
+  .receipt-summary dl>div{grid-template-columns:5.4rem minmax(0,1fr);gap:.5rem}
+}
