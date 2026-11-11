@@ -156,7 +156,8 @@ function profile(p){
   return '<img src="'+html(p.image)+'" alt="Fotografia de '+html(p.name)+'">'+
     '<h2 id="profile-title" tabindex="-1">'+html(p.name)+'</h2><p>'+html(identity)+'</p><p>'+html(p.bio)+'</p>'+
     planChoices(p)+
-    '<dl class="quote-details">'+rows+'</dl><p>O parceiro verifica a disponibilidade em 24 horas, contando apenas os dias úteis. Pedido sem compromisso.</p>';
+    '<dl class="quote-details">'+rows+'</dl><p>O parceiro verifica a disponibilidade em 24 horas, contando apenas os dias úteis. Pedido sem compromisso.</p>'+
+    '<div class="pc-action"><button type="button" class="pc-interest" data-profile-contact>Pedir contacto a este parceiro</button></div>';
 }
 async function results(){
   let lookupFailed=false;
@@ -197,11 +198,18 @@ async function results(){
       const offers=document.querySelector('.offers'), detail=document.getElementById('perfil');
       offers.innerHTML=found.map(card).join('');
       detail.innerHTML=profile(p);
+      const openContact=planId=>{
+        request.planId=planId;
+        normal=false;confirmed=false;go('contacto');
+      };
+      detail.querySelector('[data-profile-contact]').onclick=()=>{
+        const plans=compatiblePlans(p);
+        openContact(plans.length===1?plans[0].id:'');
+      };
       detail.querySelector('.quote-plans').onclick=e=>{
         const interest=e.target.closest('button[data-interest]');
         if(!interest)return;
-        request.planId=interest.dataset.interest;
-        normal=false;confirmed=false;go('contacto');
+        openContact(interest.dataset.interest);
       };
       const frame=(img,partner)=>{
         const position=value=>Number.isInteger(value)?Math.min(100,Math.max(0,value)):50;
@@ -234,16 +242,22 @@ function contactDeadline(){
 }
 const lateContactMessage='Olá! Fiz um pedido de limpeza através do Guia do Proprietário. Já passou o prazo de contacto e ainda não fui contactado. Podem ajudar-me?';
 const supportWhatsApp='https://wa.me/351913857414?text='+encodeURIComponent(lateContactMessage);
+function contactPlan(p){
+  const plan=selectedPlan(p);
+  if(plan)return '<p>'+html(plan.summary)+' · '+html(availableDays(p))+'</p>';
+  const options=compatiblePlans(p).map(item=>'<option value="'+html(item.id)+'">'+html(item.summary)+'</option>').join('');
+  return '<label>Sobre que opção gostaria de saber mais?<select name="planOfInterest" required><option value="">Selecione uma opção</option>'+options+'</select></label>';
+}
 function contact(){
   const p=matches().find(profile=>profile.id===request.selected);
-  if(!normal&&(!p||!selectedPlan(p))){go('propostas');return}
+  if(!normal&&!p){go('propostas');return}
   const recipient=normal?'Pedido a parceiros de '+request.zone:proposalLabel(p);
   const title=normal?'Pedir contacto a outros parceiros':'Como prefere que '+html(p.name)+' entre em contacto consigo?';
   const authorisedPartner=normal?'até 3 parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade':'o prestador que escolhi ('+html(p.name)+')';
   const permission='Autorizo o Guia do Proprietário a partilhar os dados deste pedido com '+authorisedPartner+(normal?', para que me possam contactar':', para que me possa contactar')+' com informações, disponibilidade e propostas relacionadas com este pedido.';
   request.consents=null;
   main.innerHTML='<section class="wrap page narrow"><div class="bar"><a href="#propostas" class="back">← Voltar às propostas</a></div>'+head(title)+
-    '<form class="contact-box" id="finish" method="dialog"><div class="tint"><strong>'+recipient+'</strong>'+(normal?'':'<p>'+html(selectedPlan(p).summary)+' · '+availableDays(p)+'</p>')+
+    '<form class="contact-box" id="finish" method="dialog"><div class="tint"><strong>'+recipient+'</strong>'+(normal?'':contactPlan(p))+
     '<p id="contact-summary" class="summary-line"></p>'+(normal?'':'<p class="details">Pedido sem compromisso. '+contactDeadline()+'</p>')+'</div>'+normalFields()+'<fieldset class="contact-fields"><legend>Os seus dados de contacto</legend><div class="field-grid">'+
     '<label>Nome<input id="contactName" name="contactName" autocomplete="name" type="text" maxlength="80" required></label>'+
     '<label>Email<input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required></label>'+
@@ -277,6 +291,7 @@ function contact(){
     form.elements.email.setCustomValidity(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.elements.email.value.trim())?'':'Indique um endereço de email válido.');
     phoneInput.setCustomValidity(phoneNumber(phoneInput.value)?'':'Indique um telemóvel português válido.');
     if(!form.reportValidity())return;
+    if(form.elements.planOfInterest)request.planId=form.elements.planOfInterest.value;
     request.contactName=name;request.email=form.elements.email.value.trim();request.phone=phoneNumber(phoneInput.value);
     request.consents={partnerSharing:form.elements.allowContact.checked,marketing:form.elements.marketing.checked,recipient:normal?'parceiros-da-zona':p.id};
     pendingPhone=request.phone;confirmed=false;go('telefone');
