@@ -156,7 +156,7 @@ test('weekly agenda reminder uses a profile link and asks for review on the dash
   assert.match(msg.html,/perfilPremium=1/);
   assert.doesNotMatch(msg.html,/confirmAgenda/);
   if(data.review)assert.match(msg.text,/três pedidos/);
-  else assert.match(msg.text,/7 dias/);
+  else {assert.match(msg.text,/todas as semanas/);assert.doesNotMatch(msg.text,/oculta|voltar a aparecer|termina amanhã/);}
  }
  assert.throws(()=>renderPartnerEngagementEmail({...payload,dashboard_url:'https://example.org/?t=private',data:{kind:'premium_agenda'}}));
 });
