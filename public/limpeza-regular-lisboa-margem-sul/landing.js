@@ -22,7 +22,7 @@ let delivered=false;
 const html=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const main=document.querySelector('#main');
 const startMarkup=main.innerHTML;
-const initial={zone:'',frequency:'Semanal',size:'T2',space:'',other:'',area:'51 a 100 m²',days:[],periods:[],products:'Sem preferência',selected:'',planId:'',contactName:'',email:'',phone:'',channels:['Chamada','WhatsApp'],contactTime:'Sem preferência',consents:null};
+const initial={zone:'',frequency:'Semanal',size:'T2',space:'',other:'',area:'51 a 100 m²',days:[],periods:[],selected:'',planId:'',contactName:'',email:'',phone:'',channels:['Chamada','WhatsApp'],contactTime:'Sem preferência',consents:null};
 let request={...initial};
 let confirmed=false,normal=false,pendingPhone='';
 const options=arr=>arr.map(s=>'<option>'+s+'</option>').join('');
@@ -36,7 +36,6 @@ function scheduleLabel(days){
 function availableDays(p){return scheduleLabel(p.days.filter(day=>!request.days.length||request.days.includes(day)))}
 function matches(){return profiles.filter(p=>!excludedPartners.has(p.id)&&p.spaces.includes(request.space)&&p.zones.includes(request.zone)&&p.frequencies.includes(request.frequency)&&
   (!homeTypes.includes(request.space)||p.sizes.includes(request.size))&&
-  (request.products!=='A equipa leva os produtos'||p.products!=='client')&&
   (!request.periods.length||request.periods.some(t=>p.periods.includes(t)))&&availableDays(p)&&compatiblePlans(p).length);}
 function summary(){
   return [request.zone,request.space==='Outro'?request.other:request.space,homeTypes.includes(request.space)?request.size:request.area,'Limpeza '+request.frequency.toLowerCase(),request.days.join(', ')||'Qualquer dia'].join(' · ');
@@ -113,9 +112,9 @@ function qualify(){
   const other='<label id="otherLabel" hidden>Qual é o tipo de espaço?<input id="other" type="text" maxlength="100" placeholder="Por exemplo, um estúdio de dança"></label>';
   const days=choices('days','Em que dias pode receber a limpeza?',['Qualquer dia',...weekdays],'checkbox',request.days.length?request.days:['Qualquer dia'],'Escolha todos os dias que lhe dão jeito.');
   const periods=choices('periods','Em que períodos?',['Qualquer período','Manhã','Tarde'],'checkbox',request.periods.length?request.periods:['Qualquer período']);
-  main.innerHTML='<section class="wrap page narrow"><div class="bar"><a class="back" href="#inicio">← Alterar zona e frequência</a></div>'+head('Como é a limpeza que procura?',location,2)+'<form class="box" id="qualify"><h2>O seu espaço e a sua disponibilidade</h2>'+space+other+'<div class="field-grid">'+field('size','Tipologia do imóvel',sizes)+field('area','Área aproximada',spaceAreas)+field('products','Quem fornece os produtos?',['Sem preferência','A equipa leva os produtos'])+'</div>'+days+periods+'<p class="tint">Os orçamentos referem-se à limpeza regular. Forno, interior de armários e limpezas pós-obra são combinados diretamente com o prestador.</p><div class="actions"><button class="primary">Comparar orçamentos <span aria-hidden="true">→</span></button></div></form></section>';
+  main.innerHTML='<section class="wrap page narrow"><div class="bar"><a class="back" href="#inicio">← Alterar zona e frequência</a></div>'+head('Como é a limpeza que procura?',location,2)+'<form class="box" id="qualify"><h2>O seu espaço e a sua disponibilidade</h2>'+space+other+'<div class="field-grid">'+field('size','Tipologia do imóvel',sizes)+field('area','Área aproximada',spaceAreas)+'</div>'+days+periods+'<p class="tint">Os orçamentos referem-se à limpeza regular. Forno, interior de armários e limpezas pós-obra são combinados diretamente com o prestador.</p><div class="actions"><button class="primary">Comparar orçamentos <span aria-hidden="true">→</span></button></div></form></section>';
   const form=document.getElementById('qualify'),otherInput=form.elements.other;
-  setValues(['size','area','products']);otherInput.value=request.other;
+  setValues(['size','area']);otherInput.value=request.other;
   function updateSpace(){
     const type=form.elements.space.value;
     const isOther=type==='Outro';
@@ -134,7 +133,7 @@ function qualify(){
       otherInput.setCustomValidity('Indique o tipo de espaço.');otherInput.reportValidity();return;
     }
     if(request.space!==form.elements.space.value || request.area!==form.elements.area.value)request.spaceSize='';
-    collect(['size','area','products']);request.space=form.elements.space.value;
+    collect(['size','area']);request.space=form.elements.space.value;
     request.other=request.space==='Outro'?otherInput.value.trim():'';
     request.days=selectedValues(form,'days').filter(d=>d!=='Qualquer dia');
     request.periods=selectedValues(form,'periods').filter(t=>t!=='Qualquer período');
@@ -356,11 +355,11 @@ async function sendRequest(){
   const profile=normal?null:matches().find(p=>p.id===request.selected);
   if(!normal&&(!profile||!selectedPlan(profile))){go('propostas');return;}
   const note=[request.notes,request.other&&'Espaço: '+request.other,!homeTypes.includes(request.space)&&'Área: '+request.area,
-    'Produtos: '+request.products,!normal&&'Preferência de contacto: '+request.contactTime].filter(Boolean).join(' · ');
+    !normal&&'Preferência de contacto: '+request.contactTime].filter(Boolean).join(' · ');
   const body={...normalRequestData(),premiumRecoveryKey:recoveryKey||undefined,presentedPartners:normal?undefined:[...presentedPartners],additionalNotes:note.slice(0,500),requestConfirmed:true,
     source:normal?'guia_limpeza_regular_lisboa':'guia_limpeza_premium',consentVersion:normal?'limpeza-2026-09-c':'limpeza-premium-2026-11',
     pageUrl:location.origin+location.pathname+location.search};
-  if(profile)Object.assign(body,{premiumPreferences:Object.fromEntries(['area','other','products','contactTime','notes'].map(key=>[key,request[key]])),premiumPartner:profile.id,premiumPlan:selectedPlan(profile).id,premiumName:profile.name,premiumVersion:profile.version,premiumProducts:request.products==='A equipa leva os produtos'?'partner':'any'});
+  if(profile)Object.assign(body,{premiumPreferences:Object.fromEntries(['area','other','contactTime','notes'].map(key=>[key,request[key]])),premiumPartner:profile.id,premiumPlan:selectedPlan(profile).id,premiumName:profile.name,premiumVersion:profile.version});
   const signature=JSON.stringify(body);
   if(lastSubmission?.signature!==signature)lastSubmission={signature,id:crypto.randomUUID()};
   body.eventId=lastSubmission.id;body.measurementPixelState=typeof window.fbq==='function'?'callable':'missing';
