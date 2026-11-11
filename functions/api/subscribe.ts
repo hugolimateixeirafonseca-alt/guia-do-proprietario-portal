@@ -23,6 +23,8 @@ interface Env {
 }
 
 interface SubscribeBody {
+  premiumRecoveryKey?: unknown;
+  presentedPartners?: unknown;
   premiumPartner?: unknown;
   premiumPlan?: unknown;
   premiumName?: unknown;
@@ -196,7 +198,8 @@ async function sendCleaningLead(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        ...(directed ? {premium_partner:body.premiumPartner,premium_plan:body.premiumPlan,premium_version:body.premiumVersion,premium_name:body.premiumName,premium_products:body.premiumProducts,premium_preferences:body.premiumPreferences} : {}),
+        ...((directed || body.source === "guia_limpeza_regular_lisboa") ? {recovery_key:body.premiumRecoveryKey} : {}),
+        ...(directed ? {presented:body.presentedPartners,premium_partner:body.premiumPartner,premium_plan:body.premiumPlan,premium_version:body.premiumVersion,premium_name:body.premiumName,premium_products:body.premiumProducts,premium_preferences:body.premiumPreferences} : {}),
         event_id: cleanText(body.eventId, 128),
         client_ip_key: ipKey,
         request_confirmed: body.requestConfirmed === true,

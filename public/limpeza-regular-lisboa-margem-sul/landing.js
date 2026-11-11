@@ -10,7 +10,11 @@ const weekdays=['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Se
 const spaceAreas=['Até 50 m²','51 a 100 m²','101 a 150 m²','Mais de 150 m²'];
 let profiles=[];
 let excludedPartners=new Set();
-let resuming=false;
+let resuming=false,recoveryKey='';
+const presentedPartners=new Set();
+function networkAlreadySent(){
+  main.innerHTML='<section class="wrap page narrow">'+head('Já pediu propostas a outros parceiros')+'<p>Os parceiros da sua zona que aceitarem o pedido poderão contactá-lo pelo canal que indicou.</p></section>';
+}
 const offerRanks=new Map();
 let lastSubmission=null;
 let sending=false;
@@ -74,7 +78,7 @@ function collect(ids){for(const id of ids){request[id]=document.getElementById(i
 function go(route){if(location.hash==='#'+route)render();else location.hash=route}
 function progress(n){return '<p class="step">Passo '+n+' de 3</p>'}
 function head(title,extra='',n=0){return '<div class="page-head">'+(n?progress(n):'')+'<h1 id="main-title" tabindex="-1">'+title+'</h1>'+extra+'</div>'}
-function reset(){excludedPartners.clear();lastSubmission=null;delivered=false;request={...initial};normal=false;confirmed=false;go('inicio')}
+function reset(){recoveryKey='';resuming=false;presentedPartners.clear();excludedPartners.clear();lastSubmission=null;delivered=false;request={...initial};normal=false;confirmed=false;go('inicio')}
 function start(){
   main.innerHTML=startMarkup;
   const zone=document.getElementById('zone');
@@ -177,6 +181,14 @@ async function results(){
     if(location.hash!=='#propostas'||request.zone!==zone)return;
     if(!data.ok||!Array.isArray(data.profiles))throw Error();
     profiles=data.profiles;
+    if(recoveryKey){
+      const saved=await fetch('/api/perfis-limpeza-premium',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({key:recoveryKey,presented:matches().map(p=>p.id)}),cache:'no-store'});
+      if(!saved.ok)throw Error();
+      const state=await saved.json();
+      if(location.hash!=='#propostas'||request.zone!==zone)return;
+      if(state.networkSent){networkAlreadySent();return;}
+    }
   }catch{
     if(location.hash!=='#propostas'||request.zone!==zone)return;
     profiles=[];
@@ -188,6 +200,7 @@ async function results(){
     if(!lookupFailed&&!found.length){normal=true;go('contacto');return;}
   }
   for(const partner of found){
+    presentedPartners.add(partner.id);
     if(!offerRanks.has(partner.id))offerRanks.set(partner.id,Math.random());
   }
   found.sort((a,b)=>offerRanks.get(a.id)-offerRanks.get(b.id));
@@ -195,7 +208,8 @@ async function results(){
   let title='Pode pedir contacto a outros parceiros da sua zona';
   if(found.length===1)title='Veja a proposta para a sua limpeza';
   if(found.length>1)title='Compare as propostas para a sua limpeza';
-  const description='<p id="request-summary"></p>';
+  const networkOffer=recoveryKey&&found.length?'<aside class="box network-invitation"><h2>Prefere receber outras propostas?</h2><p>Peça contacto a outros parceiros da sua zona. Quem aceitar o pedido poderá contactá-lo para apresentar uma proposta, sem compromisso. As empresas cujas propostas já viu ficam excluídas.</p><button type="button" class="secondary" id="fallback">Pedir propostas a outros parceiros</button></aside>':'';
+  const description='<p id="request-summary"></p>'+networkOffer;
   main.innerHTML='<section class="wrap page"><div class="bar"><a class="back" href="#pedido">← Alterar pedido</a></div>'+head(title,description,3)+(found.length?'<div class="results"><div class="offers" aria-label="Propostas de limpeza"></div><article id="perfil" class="profile" aria-labelledby="profile-title"></article></div>':'<div class="box"><p>Os parceiros Premium apresentam aqui o seu perfil, planos de limpeza e dias disponíveis. '+(lookupFailed?'De momento, não conseguimos consultar esses perfis.':'De momento, nenhum tem uma proposta compatível com as suas preferências.')+'</p><p>Quer receber outras propostas? Aproveitamos os dados que já preencheu. Complete os dados em falta e escolha como quer ser contactado por até três parceiros da sua zona.</p><div class="actions"><button type="button" class="primary" id="fallback">Pedir contacto a outros parceiros</button><a href="#pedido" class="secondary">Ajustar preferências</a>'+(lookupFailed?'<button type="button" class="secondary" id="retry-profiles">Voltar a consultar parceiros Premium</button>':'')+'</div></div>')+'</section>';
   if(lookupFailed)document.getElementById('retry-profiles').onclick=results;
   document.getElementById('request-summary').textContent=summary();
@@ -232,7 +246,9 @@ async function results(){
       }
     };
     document.querySelector('.offers').onclick=e=>{const button=e.target.closest('button[data-id]');if(button){if(request.selected!==button.dataset.id)request.planId='';request.selected=button.dataset.id;display(true)}};display(false);
-  }else document.getElementById('fallback').onclick=()=>{normal=true;confirmed=false;go('contacto')};
+  }
+  const fallback=document.getElementById('fallback');
+  if(fallback)fallback.onclick=()=>{normal=true;confirmed=false;go('contacto')};
 }
 function phoneNumber(value){
   {
@@ -259,13 +275,13 @@ function contact(){
   const p=matches().find(profile=>profile.id===request.selected);
   if(!normal&&!p){go('propostas');return}
   const recipient=normal?'Pedido a parceiros de '+request.zone:proposalLabel(p);
-  const title=normal?'Pedir contacto a outros parceiros':'Como prefere que '+html(p.name)+' entre em contacto consigo?';
+  const title=normal?'Pedir propostas a outros parceiros':'Como prefere que '+html(p.name)+' entre em contacto consigo?';
   const authorisedPartner=normal?'até 3 parceiros de limpeza e manutenção do lar selecionados de acordo com a localização, o tipo de serviço e a disponibilidade':'o prestador que escolhi ('+html(p.name)+')';
   const permission='Autorizo o Guia do Proprietário a partilhar os dados deste pedido com '+authorisedPartner+(normal?', para que me possam contactar':', para que me possa contactar')+' com informações, disponibilidade e propostas relacionadas com este pedido.';
   request.consents=null;
   main.innerHTML='<section class="wrap page narrow"><div class="bar"><a href="#propostas" class="back">← Voltar às propostas</a></div>'+head(title)+
     '<form class="contact-box" id="finish" method="dialog"><div class="tint"><strong>'+recipient+'</strong>'+(normal?'':contactPlan(p))+
-    '<p id="contact-summary" class="summary-line"></p>'+(normal?'':'<p class="details">Pedido sem compromisso. '+contactDeadline()+'</p>')+'</div>'+normalFields()+'<fieldset class="contact-fields"><legend>Os seus dados de contacto</legend><div class="field-grid">'+
+    '<p id="contact-summary" class="summary-line"></p>'+(normal?(recoveryKey?'<p class="details">Ao confirmar, o seu pedido fica disponível para outros parceiros da sua zona. Quem o aceitar poderá contactá-lo para apresentar uma proposta. As empresas cujas propostas já viu ficam excluídas.</p>':''):'<p class="details">Pedido sem compromisso. '+contactDeadline()+'</p>')+'</div>'+normalFields()+'<fieldset class="contact-fields"><legend>Os seus dados de contacto</legend><div class="field-grid">'+
     '<label>Nome<input id="contactName" name="contactName" autocomplete="name" type="text" maxlength="80" required></label>'+
     '<label>Email<input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required></label>'+
     '<label>Número de telefone<input id="phone" name="phone" autocomplete="tel" type="tel" inputmode="tel" maxlength="28" aria-describedby="phone-help" required><small id="phone-help">'+'Indique um telemóvel português com nove algarismos.'+'</small></label>'+
@@ -334,7 +350,7 @@ async function sendRequest(){
   if(!normal&&(!profile||!selectedPlan(profile))){go('propostas');return;}
   const note=[request.notes,request.other&&'Espaço: '+request.other,!homeTypes.includes(request.space)&&'Área: '+request.area,
     'Produtos: '+request.products,!normal&&'Preferência de contacto: '+request.contactTime].filter(Boolean).join(' · ');
-  const body={...normalRequestData(),additionalNotes:note.slice(0,500),requestConfirmed:true,
+  const body={...normalRequestData(),premiumRecoveryKey:recoveryKey||undefined,presentedPartners:normal?undefined:[...presentedPartners],additionalNotes:note.slice(0,500),requestConfirmed:true,
     source:normal?'guia_limpeza_regular_lisboa':'guia_limpeza_premium',consentVersion:normal?'limpeza-2026-09-c':'limpeza-premium-2026-11',
     pageUrl:location.origin+location.pathname+location.search};
   if(profile)Object.assign(body,{premiumPreferences:Object.fromEntries(['area','other','products','contactTime','notes'].map(key=>[key,request[key]])),premiumPartner:profile.id,premiumPlan:selectedPlan(profile).id,premiumName:profile.name,premiumVersion:profile.version,premiumProducts:request.products==='A equipa leva os produtos'?'partner':'any'});
@@ -410,10 +426,11 @@ async function resumeRequest(key){
     const response=await fetch('/api/perfis-limpeza-premium',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key}),cache:'no-store'});
     if(!response.ok)throw Error();
     const data=await response.json();
+    if(data.networkSent){networkAlreadySent();return;}
     if(!data.ok||!municipalities.includes(data.preferences.zone))throw Error();
     Object.assign(request,data.preferences,{selected:'',planId:'',consents:null});
-    excludedPartners=new Set(data.excluded);resuming=true;
-    history.replaceState(null,'','#propostas');render();
+    excludedPartners=new Set(data.excluded);recoveryKey=key;normal=window.premiumNetwork===true;resuming=!normal;
+    history.replaceState(null,'',normal?'#contacto':'#propostas');render();
   }catch{
     main.innerHTML='<section class="wrap page narrow">'+head('Não foi possível recuperar o pedido')+'<p>Volte a abrir a ligação do email ou comece um novo pedido.</p><a class="primary" href="#inicio">Começar novo pedido</a></section>';
   }

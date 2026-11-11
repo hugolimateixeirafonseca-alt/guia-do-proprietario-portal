@@ -143,6 +143,7 @@ test('Premium availability messages distinguish a request, a contact and the two
   assert.equal(msg.text.includes('equipa@example.pt'),status==='accepted');
   assert.equal(msg.html.includes('#retomar='+key),['declined','expired'].includes(status));
   if(status==='declined')assert.match(msg.html,/Ver outras propostas/);
-  if(status==='expired')assert.match(msg.html,/Pedir contacto a outros parceiros/);
+  assert.equal(msg.text.includes('#retomar='+key+'&rede=1'),['declined','expired'].includes(status));
+  if(status==='expired')assert.match(msg.html,/Pedir propostas a outros parceiros/);
  }
 });

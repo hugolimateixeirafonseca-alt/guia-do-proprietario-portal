@@ -20,6 +20,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
     if(!match||match[1]!==data.status||!partner||payload.event_type!=='contact_accepted'||data.audience!=='client')throw Error('invalid_event_data');
     const deadline=new Intl.DateTimeFormat('pt-PT',{timeZone:'Europe/Lisbon',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(data.deadline));
     let subject,body,button;
+    const secondary=[];
     if(data.status==='pending'){
       subject='Pedido de disponibilidade enviado a '+partner;
       body=['Recebemos o seu pedido de contacto. '+partner+' vai verificar a disponibilidade até '+deadline+' (hora de Lisboa). Enviamos a resposta por email.'];
@@ -31,12 +32,22 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
     }else{
       if(!/^[a-f0-9-]{36}$/.test(data.recovery_key))throw Error('invalid_recovery_key');
       subject=data.status==='declined'?partner+' indicou que não tem disponibilidade':partner+' não respondeu dentro do prazo';
-      body=[subject+'.',data.has_alternatives?'Pode consultar outras propostas compatíveis. Os dados do pedido já estão preenchidos.':'Pode pedir contacto a outros parceiros da sua zona. Os dados só são partilhados se confirmar o novo pedido.'];
-      button={label:data.has_alternatives?'Ver outras propostas':'Pedir contacto a outros parceiros da minha zona',url:'https://guiadoproprietario.pt/limpeza-regular-lisboa-margem-sul/#retomar='+data.recovery_key};
+      const url='https://guiadoproprietario.pt/limpeza-regular-lisboa-margem-sul/#retomar='+data.recovery_key;
+      const network={label:'Pedir propostas a outros parceiros',url:url+'&rede=1'};
+      body=[subject+'.'];
+      if(data.has_alternatives){
+        body.push('Pode ver as restantes propostas para a sua limpeza. Se nenhuma lhe interessar, pode pedir novas propostas a outros parceiros da sua zona.');
+        button={label:'Ver outras propostas',url};
+        secondary.push(network);
+      }else{
+        body.push('Pode pedir novas propostas a outros parceiros da sua zona.');
+        button=network;
+      }
+      body.push('Confirme o pedido com os dados que já preencheu. Só os parceiros que o aceitarem poderão contactá-lo para apresentar uma proposta. As empresas cujas propostas já viu ficam excluídas deste pedido.');
     }
     if(clean(data.plan_summary,800))body.push('Opção consultada: '+clean(data.plan_summary,800));
     body.push('Este pedido de contacto é sem compromisso. Só há marcação se combinar o serviço diretamente com o profissional.');
-    return renderEmailLayout({subject,title:subject,preview:body[0],name:clean(payload.partner_name),audience:'client',paragraphs:body,button,signature:false});
+    return renderEmailLayout({subject,title:subject,preview:body[0],name:clean(payload.partner_name),audience:'client',paragraphs:body,button,secondary,signature:false});
   }
   if(data.kind==='premium_contact'){
     if(payload.event_type!=='contact_accepted'||!/^engagement:client_premium:[a-z0-9-]+$/i.test(payload.event_id)||data.audience!=='client')throw Error('invalid_event_data');

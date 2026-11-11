@@ -23,12 +23,12 @@ export async function onRequestGet({request,env}){
 export async function onRequestPost({request,env}){
   const headers={'Cache-Control':'no-store','Referrer-Policy':'no-referrer'};
   try{
-    const {key}=await request.json();
+    const {key,presented}=await request.json();
     if(typeof key!=='string'||!/^[a-f0-9-]{36}$/.test(key))return Response.json({ok:false},{status:400,headers});
     const endpoint=new URL('/api/premium',env.CLEANING_DASHBOARD_API_URL||'https://guia-do-proprietario-parceiros.pages.dev');
     const result=await fetch(endpoint,{method:'POST',redirect:'manual',signal:AbortSignal.timeout(10000),
       headers:{Authorization:'Bearer '+env.CLEANING_DASHBOARD_API_TOKEN,'Content-Type':'application/json'},
-      body:JSON.stringify({action:'resume',key})});
+      body:JSON.stringify(presented===undefined?{action:'resume',key}:{action:'presented',recovery_key:key,presented})});
     if(!result.ok)return Response.json({ok:false},{status:result.status===404?404:503,headers});
     return Response.json(await result.json(),{headers});
   }catch{return Response.json({ok:false},{status:503,headers});}
