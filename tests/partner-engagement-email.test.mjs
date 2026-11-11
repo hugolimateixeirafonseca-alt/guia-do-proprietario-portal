@@ -147,3 +147,16 @@ test('Premium availability messages distinguish a request, a contact and the two
   if(status==='expired')assert.match(msg.html,/Pedir propostas a outros parceiros/);
  }
 });
+
+test('weekly agenda reminder uses a profile link and asks for review on the dashboard',()=>{
+ const payload={...base,event_id:'engagement:premium_agenda:partner:2',event_type:'contact_accepted',dashboard_url:'https://parceiros.guiadoproprietario.pt/?t=private&vista=premium&perfilPremium=1'};
+ for(const data of [{kind:'premium_agenda',expired:false,review:false},{kind:'premium_agenda',expired:true,review:false},{kind:'premium_agenda',expired:false,review:true}]){
+  const msg=renderPartnerEngagementEmail({...payload,data});
+  assert.match(msg.text,/Rever disponibilidade/);
+  assert.match(msg.html,/perfilPremium=1/);
+  assert.doesNotMatch(msg.html,/confirmAgenda/);
+  if(data.review)assert.match(msg.text,/três pedidos/);
+  else assert.match(msg.text,/7 dias/);
+ }
+ assert.throws(()=>renderPartnerEngagementEmail({...payload,dashboard_url:'https://example.org/?t=private',data:{kind:'premium_agenda'}}));
+});

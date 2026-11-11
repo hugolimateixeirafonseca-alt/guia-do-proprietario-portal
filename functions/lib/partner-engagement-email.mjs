@@ -14,6 +14,20 @@ function preferences(value,fallback) {
 
 export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
+  if(data.kind==='premium_agenda'){
+    if(payload.event_type!=='contact_accepted'||!/^engagement:premium_agenda:[a-z0-9_-]+:[0-9]+$/i.test(payload.event_id))throw Error('invalid_agenda_event');
+    const url=new URL(payload.dashboard_url);
+    if(url.protocol!=='https:'||url.hostname!==(options.preview?'engagement-test.guia-do-proprietario-parceiros.pages.dev':'parceiros.guiadoproprietario.pt')||url.port||url.username||url.password||!url.searchParams.get('t')||url.searchParams.get('perfilPremium')!=='1')throw Error('invalid_dashboard_url');
+    const title=data.review?'Reveja a disponibilidade do seu perfil Premium':data.expired?'Confirme a agenda para voltar a aparecer aos clientes':'Continua disponível para novos serviços?';
+    const paragraphs=data.review?[
+      'Os seus últimos três pedidos terminaram sem confirmação de disponibilidade. Reveja os dias, períodos, zonas e o número de pedidos que consegue receber.',
+      'A sua proposta está temporariamente oculta. Atualize as preferências que deixaram de corresponder à sua disponibilidade para voltar a aparecer aos clientes.'
+    ]:[
+      data.expired?'A confirmação da sua agenda terminou. A sua proposta está temporariamente oculta.':'A confirmação da sua agenda termina amanhã. Reveja o resumo no seu perfil para continuar a receber pedidos.',
+      'Confirme os dias, períodos e o número de pedidos que consegue receber por dia. A confirmação é válida durante 7 dias. Se estiver sem disponibilidade, pode suspender o perfil.'
+    ];
+    return renderEmailLayout({subject:title,title,preview:paragraphs[0],name:clean(payload.partner_name),paragraphs,button:{label:'Rever disponibilidade',url:url.href}});
+  }
   if(data.kind==='premium_availability'){
     const match=/^engagement:client_premium:(pending|accepted|declined|expired):[a-f0-9-]{36}$/.exec(payload.event_id);
     const partner=clean(data.professional_name);
