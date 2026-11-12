@@ -85,6 +85,7 @@ function start(){
   for(const [key,value] of new URLSearchParams(location.search)){
     if(key.startsWith('utm_')||['fbclid','gclid'].includes(key))normalUrl.searchParams.set(key,value);
   }
+  normalUrl.searchParams.set('origem_pedido','premium');
   normalUrl.hash='pedido';
   document.getElementById('otherEntry').href=normalUrl.href;
   const zone=document.getElementById('zone');

@@ -186,7 +186,7 @@ import {cleaningPixelState, trackCleaningLead} from '../../lib/cleaning-measurem
 
     let submissionId = eventId();
     const payload = {
-      source: "guia_limpeza_preco_disponibilidade",
+      source: new URLSearchParams(window.location.search).get("origem_pedido") === "premium" ? "guia_limpeza_regular_lisboa" : "guia_limpeza_preco_disponibilidade",
       measurementPixelState: cleaningPixelState(window),
       consentVersion: form.dataset.consentVersion,
       consent1: form.elements.consent_partner_sharing.checked,
