@@ -41,8 +41,8 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
     }else if(data.status==='accepted'){
       subject=partner+' confirmou disponibilidade para falar consigo';
       const phone=clean(data.professional_phone,25),email=clean(data.professional_email,254);
-      if(!phone||!email)throw Error('invalid_professional_contact');
-      body=['A empresa vai falar consigo pelo canal que indicou. O prazo para o primeiro contacto termina a '+deadline+' (hora de Lisboa).','Também pode contactar a empresa diretamente.','Telefone: '+phone+'\nEmail: '+email];
+      if(!phone)throw Error('invalid_professional_contact');
+      body=['A empresa vai falar consigo pelo canal que indicou. O prazo para o primeiro contacto termina a '+deadline+' (hora de Lisboa).','Também pode contactar a empresa diretamente.','Telefone: '+phone+(email?'\nEmail: '+email:'')];
     }else{
       if(!/^[a-f0-9-]{36}$/.test(data.recovery_key))throw Error('invalid_recovery_key');
       subject=data.status==='declined'?partner+' indicou que não tem disponibilidade':partner+' não respondeu dentro do prazo';
@@ -66,12 +66,12 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
   if(data.kind==='premium_contact'){
     if(payload.event_type!=='contact_accepted'||!/^engagement:client_premium:[a-z0-9-]+$/i.test(payload.event_id)||data.audience!=='client')throw Error('invalid_event_data');
     const professional=clean(data.professional_name),phone=clean(data.professional_phone,25),email=clean(data.professional_email,254);
-    if(!professional||!/^\+?\d{9,15}$/.test(phone)||!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email))throw Error('invalid_public_contact');
+    if(!professional||!/^\+?\d{9,15}$/.test(phone)||(email&&!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)))throw Error('invalid_public_contact');
     const subject='Os contactos de '+professional;
-    return renderEmailLayout({subject,title:subject,preview:'Guarde o telefone e o email do parceiro que escolheu.',name:clean(payload.partner_name),audience:'client',signature:false,paragraphs:[
+    return renderEmailLayout({subject,title:subject,preview:'Guarde o contacto do parceiro que escolheu.',name:clean(payload.partner_name),audience:'client',signature:false,paragraphs:[
       'O seu pedido de contacto foi enviado a '+professional+'. O parceiro entrará em contacto consigo no prazo de 24 horas, contando apenas os dias úteis.',
       ...(clean(data.plan_summary,800)?['Opção sobre a qual pediu contacto: '+clean(data.plan_summary,800)]:[]),
-      'Telefone: '+phone+'\nEmail: '+email,
+      'Telefone: '+phone+(email?'\nEmail: '+email:''),
       'Pode usar estes contactos para combinar a data da limpeza diretamente com o parceiro.'
     ]});
   }

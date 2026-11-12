@@ -29,3 +29,9 @@ test('Premium confirmation includes the selected professional contacts',()=>{
  assert.match(message.text,/211234567/);
  assert.doesNotMatch(message.text,/\?t=|pedido-contactos/);
 });
+
+test('Premium confirmation can share just the professional phone',()=>{
+ const message=renderPartnerEngagementEmail({...payload,event_id:'engagement:client_premium:request-01',data:{audience:'client',kind:'premium_contact',professional_name:'Equipa',professional_phone:'+351211234567'}});
+ assert.match(message.text,/Telefone: \+351211234567/);
+ assert.doesNotMatch(message.text,/Email:/);
+});
