@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
-import {measurementChoice,trackCleaningLead} from '../src/lib/cleaning-measurement.mjs';
+import {measurementChoice,trackCleaningLead,trackSelectedCleaningQuote} from '../src/lib/cleaning-measurement.mjs';
 import {recordCleaningMeasurement} from '../functions/lib/cleaning-measurement-diagnostics.mjs';
 const cookie = (measurement, extra={}) => 'gp_cookie_preferences='+encodeURIComponent(JSON.stringify({version:'2026-09-01-1',savedAt:new Date().toISOString(),measurement,...extra}));
 test('measurement choices distinguish refusal, missing, invalid and expired cookies',()=>{
@@ -16,6 +16,13 @@ test('only consenting submissions invoke the same Lead ID; pixel errors never es
  b.document.cookie=cookie(false);assert.equal(trackCleaningLead(b,'id-2'),'skipped_consent');assert.equal(calls.length,1);
  b.document.cookie=cookie(true);b.fbq=undefined;assert.equal(trackCleaningLead(b,'id-3'),'unavailable');
  b.fbq=()=>{throw Error('blocked')};assert.equal(trackCleaningLead(b,'id-4'),'exception');
+});
+test('confirmed quote uses a separate Meta event only with measurement consent',()=>{
+ const calls=[],browser={document:{cookie:cookie(false)},fbq:(...args)=>calls.push(args)};
+ assert.equal(trackSelectedCleaningQuote(browser,'request-id'),'skipped_consent');
+ browser.document.cookie=cookie(true);
+ assert.equal(trackSelectedCleaningQuote(browser,'request-id'),'invoked');
+ assert.deepEqual(calls,[['trackCustom','OrcamentoSelecionado',{content_name:'servicos-limpeza'},{eventID:'request-id'}]]);
 });
 test('diagnostics record only successful caller evidence, once per event, without contact data',async()=>{
  const db=new DatabaseSync(':memory:');db.exec(readFileSync(new URL('../migrations/consent-archive/0002_cleaning_measurement_diagnostics.sql',import.meta.url),'utf8'));

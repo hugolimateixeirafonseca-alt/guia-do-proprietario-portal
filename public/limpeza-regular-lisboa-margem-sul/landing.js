@@ -372,6 +372,7 @@ async function sendRequest(){
       throw Error('Não foi possível confirmar o envio. Tente novamente.');
     }
     window.dispatchEvent(new CustomEvent('gp:premium-request-sent',{detail:body.eventId}));
+    if(profile)window.dispatchEvent(new CustomEvent('gp:quote-request-confirmed',{detail:body.eventId}));
     delivered=true;confirmed=true;pendingPhone='';go('concluido');
   }catch(error){status.textContent=error.message;submit.disabled=false;edit.disabled=false;}finally{sending=false;}
 }

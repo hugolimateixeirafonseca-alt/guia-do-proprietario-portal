@@ -11,8 +11,14 @@ export function measurementChoice(cookie = '', now = Date.now()) {
 export function cleaningPixelState(browser) { return typeof browser.fbq === 'function' ? 'callable' : 'missing'; }
 // An invocation can queue an event. It is never evidence of delivery to Meta.
 export function trackCleaningLead(browser, eventId) {
+  return trackCleaningEvent(browser, eventId, 'track', 'Lead');
+}
+export function trackSelectedCleaningQuote(browser, eventId) {
+  return trackCleaningEvent(browser, eventId, 'trackCustom', 'OrcamentoSelecionado');
+}
+function trackCleaningEvent(browser, eventId, method, name) {
   if (measurementChoice(browser.document.cookie) !== 'accepted') return 'skipped_consent';
   if (cleaningPixelState(browser) !== 'callable') return 'unavailable';
-  try { browser.fbq('track', 'Lead', {content_name:'servicos-limpeza'}, {eventID:eventId}); return 'invoked'; }
+  try { browser.fbq(method, name, {content_name:'servicos-limpeza'}, {eventID:eventId}); return 'invoked'; }
   catch { return 'exception'; }
 }
