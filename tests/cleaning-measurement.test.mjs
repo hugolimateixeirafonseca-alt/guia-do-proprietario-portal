@@ -17,6 +17,16 @@ test('only consenting submissions invoke the same Lead ID; pixel errors never es
  b.document.cookie=cookie(true);b.fbq=undefined;assert.equal(trackCleaningLead(b,'id-3'),'unavailable');
  b.fbq=()=>{throw Error('blocked')};assert.equal(trackCleaningLead(b,'id-4'),'exception');
 });
+test('Premium Lead has a distinct content_name and retains the submission ID',()=>{
+ const calls=[],browser={document:{cookie:cookie(true)},fbq:(...args)=>calls.push(args)};
+ trackCleaningLead(browser,'premium-id',true);
+ trackCleaningLead(browser,'normal-id',false);
+ assert.deepEqual(calls[0],['track','Lead',{content_name:'servicos-limpeza-premium'},{eventID:'premium-id'}]);
+ assert.deepEqual(calls[1],['track','Lead',{content_name:'servicos-limpeza'},{eventID:'normal-id'}]);
+ browser.document.cookie=cookie(false);
+ trackCleaningLead(browser,'refused-id',true);
+ assert.equal(calls.length,2);
+});
 test('confirmed quote uses a separate Meta event only with measurement consent',()=>{
  const calls=[],browser={document:{cookie:cookie(false)},fbq:(...args)=>calls.push(args)};
  assert.equal(trackSelectedCleaningQuote(browser,'request-id'),'skipped_consent');

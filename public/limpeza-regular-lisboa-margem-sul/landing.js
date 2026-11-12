@@ -371,7 +371,7 @@ async function sendRequest(){
       if(response.status===409){document.getElementById('review-proposals').hidden=false;throw Error('A proposta mudou. Consulte os orçamentos disponíveis antes de confirmar.');}
       throw Error('Não foi possível confirmar o envio. Tente novamente.');
     }
-    window.dispatchEvent(new CustomEvent('gp:premium-request-sent',{detail:body.eventId}));
+    window.dispatchEvent(new CustomEvent('gp:premium-request-sent',{detail:{eventId:body.eventId,premium:!!profile}}));
     if(profile)window.dispatchEvent(new CustomEvent('gp:quote-request-confirmed',{detail:body.eventId}));
     delivered=true;confirmed=true;pendingPhone='';go('concluido');
   }catch(error){status.textContent=error.message;submit.disabled=false;edit.disabled=false;}finally{sending=false;}
