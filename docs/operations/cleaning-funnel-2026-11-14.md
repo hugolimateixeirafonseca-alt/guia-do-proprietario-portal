@@ -1,6 +1,6 @@
 # Funil de captação em /pedir-limpeza/
 
-Estado: implementado e validado localmente. Migração e publicação por autorizar. Sem dados de produção consultados ou enviados nesta tarefa.
+Estado em 14/11/2026: ativação autorizada pelo utilizador. Migração aditiva aplicada com sucesso à base de medição existente (cinco instruções, sem alteração das tabelas de emails). PR 90 integrado no portal e enviado para publicação pelo fluxo existente. Painel operacional em integração. Sem confirmação de deployment ou online, conforme as regras do projeto. Sem submissões ou avisos de teste reais.
 
 ## Percurso medido
 
@@ -27,14 +27,14 @@ Até 80 eventos por sessão, lotes de até 20, envio a cada 5 segundos apenas se
 
 O painel só consulta ao abrir a análise ou clicar Atualizar. A API autenticada do dashboard devolve apenas agregados; nunca IDs de sessão. Janela máxima de consulta de 90 dias.
 
-## Ativação, após autorização
+## Ordem de ativação autorizada
 
 1. Aplicar apenas o SQL novo à base guia-proprietario-partner-email-delivery. Não executar todas as migrations antigas por rotina.
 2. Integrar o portal e publicar pelo fluxo existente.
 3. Integrar o dashboard operacional com CLEANING_FUNNEL_DB ligado à mesma base e publicar pelo fluxo existente.
 4. Confirmação visual/online pelo utilizador, conforme as regras do projeto.
 
-A revisão automática rejeitou ligar a escrita D1 remota ao workflow sem autorização específica. A migração ficou separada e não foi executada. Não ativar a recolha em produção antes de preparar as tabelas.
+A revisão automática exigiu autorização específica para criar as duas tabelas em produção. O utilizador confirmou a ativação e publicação, e a migração separada foi aplicada com sucesso antes da integração do portal. Não foi acrescentada uma migração remota automática ao workflow.
 
 ## Validação
 
