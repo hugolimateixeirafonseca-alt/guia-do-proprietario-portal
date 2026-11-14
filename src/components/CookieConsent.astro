@@ -100,6 +100,7 @@ const metaPixelId = /^\d{10,30}$/.test(configuredMetaPixelId)
       }));
       const secure = location.protocol === "https:" ? "; Secure" : "";
       document.cookie = `${COOKIE_NAME}=${value}; Path=/; Max-Age=15552000; SameSite=Lax${secure}`;
+      window.dispatchEvent(new CustomEvent("gp:measurement-choice"));
       closeConsent();
       if (measurementAllowed) loadPixel();
       if (!measurementAllowed) {
