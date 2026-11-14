@@ -1,6 +1,6 @@
 const normalTiming = {
   asap: 'O mais rápido possível', this_week: 'Esta semana', next_week: 'Próxima semana',
-  specific_date: 'Tenho uma data', flexible: 'A combinar com o profissional de limpeza'
+  specific_date: 'Tenho uma data'
 };
 const normalSizes = {
   t0_t1: 'T0 / T1', t2: 'T2', t3: 'T3', t4_mais: 'T4 ou superior',
