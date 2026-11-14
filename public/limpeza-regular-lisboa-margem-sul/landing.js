@@ -1,4 +1,5 @@
 'use strict';
+const funnel=(name,detail='')=>{try{window.gpCleaningFunnel?.track(name,detail);}catch{}};
 const areas={
   'Grande Lisboa':['Amadora','Cascais','Lisboa','Loures','Mafra','Odivelas','Oeiras','Sintra','Vila Franca de Xira'],
   'Margem Sul':['Alcochete','Almada','Barreiro','Moita','Montijo','Palmela','Seixal','Sesimbra','Setúbal']
@@ -80,7 +81,7 @@ function head(title,extra='',n=0){return '<div class="page-head">'+(n?progress(n
 function reset(){recoveryKey='';resuming=false;presentedPartners.clear();excludedPartners.clear();lastSubmission=null;delivered=false;request={...initial};normal=false;confirmed=false;go('inicio')}
 function start(){
   main.innerHTML=startMarkup;
-  document.getElementById('regularEntry').onclick=()=>document.getElementById('zone').focus();
+  document.getElementById('regularEntry').onclick=()=>{funnel('start');document.getElementById('zone').focus();};
   const normalUrl=new URL('/servicos-limpeza/',location.origin);
   for(const [key,value] of new URLSearchParams(location.search)){
     if(key.startsWith('utm_')||['fbclid','gclid'].includes(key))normalUrl.searchParams.set(key,value);
@@ -201,6 +202,7 @@ async function results(){
     lookupFailed=true;
   }
   const found=matches();
+  funnel('results',lookupFailed?'unavailable':found.length?'available':'none');
   if(resuming){
     resuming=false;
     if(!lookupFailed&&!found.length){normal=true;go('contacto');return;}
@@ -226,6 +228,7 @@ async function results(){
       offers.innerHTML=found.map(card).join('');
       detail.innerHTML=profile(p);
       const openContact=planId=>{
+        funnel('select','premium');
         request.planId=planId;
         normal=false;confirmed=false;go('contacto');
       };
@@ -251,10 +254,10 @@ async function results(){
         if(matchMedia('(max-width:780px)').matches)detail.scrollIntoView({block:'start'});
       }
     };
-    document.querySelector('.offers').onclick=e=>{const button=e.target.closest('button[data-id]');if(button){if(request.selected!==button.dataset.id)request.planId='';request.selected=button.dataset.id;display(true)}};display(false);
+    document.querySelector('.offers').onclick=e=>{const button=e.target.closest('button[data-id]');if(button){funnel('profile');if(request.selected!==button.dataset.id)request.planId='';request.selected=button.dataset.id;display(true)}};display(false);
   }
   const fallback=document.getElementById('fallback');
-  if(fallback)fallback.onclick=()=>{normal=true;confirmed=false;go('contacto')};
+  if(fallback)fallback.onclick=()=>{funnel('network','network');normal=true;confirmed=false;go('contacto')};
 }
 function phoneNumber(value){
   {
@@ -364,18 +367,23 @@ async function sendRequest(){
   if(lastSubmission?.signature!==signature)lastSubmission={signature,id:crypto.randomUUID()};
   body.eventId=lastSubmission.id;body.measurementPixelState=typeof window.fbq==='function'?'callable':'missing';
   const submit=document.getElementById('confirm-number'),edit=document.getElementById('edit-number'),status=document.getElementById('send-status');
+  funnel('submit',normal?'network':'premium');
+  let failureKind='network_error';
   sending=true;submit.disabled=true;edit.disabled=true;status.textContent='A enviar o pedido…';
   try{
     const response=await fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    failureKind=response.status===409?'conflict':response.ok?'network_error':'server';
     const result=await response.json();
+    failureKind=response.status===409?'conflict':'server';
     if(!response.ok||!result.dashboardStored){
       if(response.status===409){document.getElementById('review-proposals').hidden=false;throw Error('A proposta mudou. Consulte os orçamentos disponíveis antes de confirmar.');}
       throw Error('Não foi possível confirmar o envio. Tente novamente.');
     }
     window.dispatchEvent(new CustomEvent('gp:premium-request-sent',{detail:{eventId:body.eventId,premium:!!profile}}));
     if(profile)window.dispatchEvent(new CustomEvent('gp:quote-request-confirmed',{detail:body.eventId}));
+    funnel('success',normal?'network':'premium');
     delivered=true;confirmed=true;pendingPhone='';go('concluido');
-  }catch(error){status.textContent=error.message;submit.disabled=false;edit.disabled=false;}finally{sending=false;}
+  }catch(error){funnel('failure',failureKind);status.textContent=error.message;submit.disabled=false;edit.disabled=false;}finally{sending=false;}
 }
 function premiumConfirmation(p,plan){
   const channel=new Intl.ListFormat('pt-PT',{type:'disjunction'}).format(request.channels.map(c=>c==='Chamada'?'chamada':c));
@@ -425,6 +433,7 @@ function render(){
   if(route!=='telefone')pendingPhone='';
   if(route!=='concluido')confirmed=false;
   if(route==='concluido'&&!confirmed){route='propostas';history.replaceState(null,'','#propostas')}
+  try{window.gpCleaningFunnel?.step(({inicio:1,pedido:2,propostas:3,contacto:4,telefone:5,concluido:6})[route]||1,request.zone);}catch{}
   const views={inicio:start,pedido:qualify,propostas:results,contacto:contact,telefone:confirmPhone,concluido:done};(views[route]||start)();document.getElementById('main-title')?.focus({preventScroll:true});window.scrollTo(0,0);
 }
 async function resumeRequest(key){

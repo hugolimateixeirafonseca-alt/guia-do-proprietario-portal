@@ -203,6 +203,9 @@ jobs:
       - name: Validate consent archive integration
         run: node --test tests/consent-archive.test.mjs tests/subscribe.test.mjs
 
+      - name: Validate cleaning funnel
+        run: node --test tests/cleaning-funnel.test.mjs
+
       - name: Restore tracked image timestamps
         run: node scripts/restore-image-times.mjs
 
