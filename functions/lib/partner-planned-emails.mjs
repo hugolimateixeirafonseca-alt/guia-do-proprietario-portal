@@ -21,8 +21,8 @@ export function renderPlannedPartnerEmail(id,data){
    return renderEmailLayout({subject,preview:'A sua área de parceiro está pronta.',title,name:data.name,paragraphs:['A sua conta foi aprovada e o primeiro carregamento já está registado. Consulte o saldo e os contactos disponíveis na sua área.'],button:{label:'Ver pedidos disponíveis',url:access(data.url,'pedidos')}});
   }
   if(data.model==='novo'){
-   preview='Carregue 15 € e receba 2 contactos grátis para começar.';paragraphs.push('Para obter contactos, falta só um passo: carregar saldo.');offer=true;
-   add('🎁 Carregue 15 €. Receba 2 contactos grátis.','Os contactos grátis são partilhados.\nOs 15 € ficam no seu saldo para os contactos seguintes.\nE se eu quiser sair? Devolvemos o dinheiro que não gastou. Se sair nos primeiros 60 dias, descontamos os contactos grátis que usou.',{offer:true});button={label:'Carregar 15 € e receber 2 contactos grátis',url:access(data.url,'saldo')};
+   preview='Carregue 15 € e receba 1 contacto grátis para começar.';paragraphs.push('Para obter contactos, falta só um passo: carregar saldo.');offer=true;
+   add('🎁 Carregue 15 €. Receba 1 contacto grátis.','Os contactos grátis são partilhados.\nOs 15 € ficam no seu saldo para os contactos seguintes.\nE se eu quiser sair? Devolvemos o dinheiro que não gastou. Se sair nos primeiros 60 dias, descontamos os contactos grátis que usou.',{offer:true});button={label:'Carregar 15 € e receber 1 contacto grátis',url:access(data.url,'saldo')};
   }else{
    preview='A sua área de parceiro está pronta.';
    if(!Number.isSafeInteger(data.freeContacts)||data.freeContacts<0)throw Error('invalid_free_count');

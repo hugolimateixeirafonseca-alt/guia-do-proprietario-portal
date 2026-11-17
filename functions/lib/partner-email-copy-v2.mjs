@@ -69,8 +69,8 @@ function renderEmailCopyV2Core(id,data){
   const guarantee='Tente 3 vezes, em 2 dias úteis diferentes, pelos botões da plataforma. Depois, carregue em “Pedir outro contacto”.\nO cliente já tinha contratado outra pessoa antes de comprar o seu contacto? Também lhe damos outro contacto.\nNós confirmamos com o cliente. Só para contactos pagos.';
   add(emailCard('3. O cliente não atende? Damos-lhe outro contacto.',guarantee.split('\n').map(v=>p(esc(v))).join('')+p(emailLink('Ver as regras',u.toString())),{rules:true}),'3. O cliente não atende? Damos-lhe outro contacto.\n'+guarantee+'\nVer as regras: '+u);
   if(requests.length){add('<h2 style="font-size:24px;color:#1E4634">Pedidos na sua zona agora</h2>','Pedidos na sua zona agora');grid();}main('Ver os pedidos da minha zona');
-  const offer='Num carregamento de 15 € ou mais, recebe 2 contactos partilhados grátis, uma única vez.\nOs 15 € ficam no seu saldo para os contactos seguintes.\nA oferta é opcional.';
-  add(emailCard('4. Oferta para si: carregue 15 € e receba 2 contactos grátis',offer.split('\n').map(v=>p(esc(v))).join('')+p(emailLink('Ver a oferta',path(data.url,'saldo'))),{offer:true}),'4. Oferta para si: carregue 15 € e receba 2 contactos grátis\n'+offer+'\nVer a oferta: '+path(data.url,'saldo'));
+  const offer='Num carregamento de 15 € ou mais, recebe 1 contacto partilhado grátis, uma única vez.\nOs 15 € ficam no seu saldo para os contactos seguintes.\nA oferta é opcional.';
+  add(emailCard('4. Oferta para si: carregue 15 € e receba 1 contacto grátis',offer.split('\n').map(v=>p(esc(v))).join('')+p(emailLink('Ver a oferta',path(data.url,'saldo'))),{offer:true}),'4. Oferta para si: carregue 15 € e receba 1 contacto grátis\n'+offer+'\nVer a oferta: '+path(data.url,'saldo'));
   block('O que já tem continua a ser seu','O seu saldo e os contactos grátis que ainda tem mantêm-se.\nSe quiser sair, devolvemos o dinheiro que não gastou. Nos primeiros 60 dias depois de receber esta oferta, descontamos os contactos da oferta que usou. Os contactos grátis anteriores ficam fora deste desconto.');break;
  }
  case 'P4':{
