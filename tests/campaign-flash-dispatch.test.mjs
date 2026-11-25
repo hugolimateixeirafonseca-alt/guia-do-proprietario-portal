@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {onRequestPost as dispatch} from '../functions/api/campaign-flash-dispatch.js';
+import {deliveryFixture as fixture} from './partner-email-fixture.mjs';
+const req=(send=false,key='key')=>new Request('https://test/api',{method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({partner_id:'partner-1',send})});
+test('one-off campaign dispatch rejects unauthenticated callers before any lookup',async()=>{let calls=0;const old=globalThis.fetch;globalThis.fetch=async()=>{calls++;throw Error('unexpected');};try{assert.equal((await dispatch({request:req(false,'wrong'),env:{CAMPAIGN_FLASH_DISPATCH_KEY:'key'}})).status,404);assert.equal(calls,0);}finally{globalThis.fetch=old;}});
+test('dry run respects provider opt-out and never sends, subscribes or prepares a personal link',async()=>{const f=fixture(),old=globalThis.fetch;try{
+ const calls=[];globalThis.fetch=async(url,opts)=>{calls.push({url:String(url),opts});return new Response(JSON.stringify(String(url).includes('black-friday-invitation')?{ok:true,allowed:true,email:'example@example.invalid',count:8,event_id:'engagement:campaign_flash:20261125:partner-1'}:{data:[{email:'example@example.invalid',status:{email:'unsubscribed'}}],meta:{last_page:1}}),{headers:{'Content-Type':'application/json'}});};
+ const r=await dispatch({request:req(),env:{CAMPAIGN_FLASH_DISPATCH_KEY:'key',SENDER_API_TOKEN:'sender',CLEANING_DASHBOARD_API_TOKEN:'service',EMAIL_DELIVERY_DB:f.binding}});assert.equal((await r.json()).reason,'provider_opt_out');assert.equal(calls.length,2);assert.equal(JSON.parse(calls[0].opts.body).prepare,false);assert.equal(f.db.prepare('SELECT COUNT(*) n FROM email_delivery').get().n,0);
+ }finally{globalThis.fetch=old;f.db.close();}});

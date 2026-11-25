@@ -9,8 +9,6 @@ const path=(value,hash)=>{const u=personal(value);u.hash=hash;return u.toString(
 function badges(r,{registrationConfirmationReady=false,whatsappReady=false}={}){
  const badges=[];
  if(registrationConfirmationReady&&r.registrationConfirmed===true)badges.push({label:'✓ Pedido confirmado pelo cliente no registo',style:'background:#EEF5F0;color:#1E4634;border:1px solid #EEF5F0'});
- if(whatsappReady&&r.whatsappVerified===true)badges.push({label:'◉ WhatsApp verificado',style:'background:#FFFFFF;color:#1E4634;border:1px solid #1E4634'});
- if(whatsappReady&&r.interestConfirmed===true)badges.push({label:'✓ Interesse confirmado pelo cliente por WhatsApp',style:'background:#1E4634;color:#FFFFFF!important;border:1px solid #1E4634'});
  return badges;
 }
 export function renderEmailRequestCard(r,data,{candidate=false}={}){
@@ -36,7 +34,7 @@ export function renderEmailRequestCard(r,data,{candidate=false}={}){
 }
 function cards(requests,data,candidate=false){
  const list=requests.map(r=>renderEmailRequestCard(r,data,{candidate}));
- const notice='Todos os pedidos foram confirmados pelo cliente no registo e são igualmente válidos, com ou sem as etiquetas de WhatsApp.';
+ const notice='Os clientes indicam no formulário o serviço de que precisam e aceitam ser contactados por profissionais.';
  return {html:(list.length?emailCard('',p(esc(notice)),{rules:true}):'')+'<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'+list.map(v=>'<tr><td class="request-column" style="padding:0 0 32px">'+v.html+'</td></tr>').join('')+'</table>',text:[list.length?notice:'',...list.map(v=>v.text)].filter(Boolean).join('\n\n')};
 }
 
@@ -59,8 +57,8 @@ function renderEmailCopyV2Core(id,data){
   add(p('Obrigado por fazer parte do Guia do Proprietário. <strong>Temos novidades que fazem cada contacto valer mais.</strong>'),'Obrigado por fazer parte do Guia do Proprietário. Temos novidades que fazem cada contacto valer mais.');
   let labelHtml=p('Os pedidos passam a mostrar como foram confirmados:'),labelText='Os pedidos passam a mostrar como foram confirmados:';
   const samples=badges({registrationConfirmed:true,whatsappVerified:true,interestConfirmed:true},data);
-  for(const v of samples){const explanation=v.label.includes('no registo')?'Todos os pedidos confirmados no registo têm esta etiqueta.':v.label.includes('Interesse')?'Falámos com o cliente e ele confirmou que quer o serviço.':'O número do cliente tem WhatsApp.';labelHtml+=p('<strong style="display:inline-block;padding:10px;border-radius:6px;'+v.style+'">'+esc(v.label)+'</strong>')+p(esc(explanation));labelText+='\n'+v.label+'\n'+explanation;}
-  const explanation=data.registrationConfirmationReady?'Os clientes submetem pedidos para encontrar um profissional de limpeza. A verificação por WhatsApp é um passo extra. Sem essa etiqueta, o interesse foi indicado pelo cliente no registo. Veja a confirmação disponível em cada pedido.':'As etiquetas de WhatsApp são passos extra quando conseguimos falar com o cliente. Um pedido sem estas etiquetas é tão válido como os outros.';
+  for(const v of samples){const explanation=v.label.includes('no registo')?'Todos os pedidos confirmados no registo têm esta etiqueta.':'O cliente indicou o interesse no formulário.';labelHtml+=p('<strong style="display:inline-block;padding:10px;border-radius:6px;'+v.style+'">'+esc(v.label)+'</strong>')+p(esc(explanation));labelText+='\n'+v.label+'\n'+explanation;}
+  const explanation='Os clientes indicam no formulário o serviço de que precisam e aceitam ser contactados por profissionais. Veja os detalhes de cada pedido antes de obter o contacto.';
   labelHtml+=p('<strong>'+esc(explanation)+'</strong>');labelText+='\n'+explanation;add(emailCard('1. Saiba mais sobre cada pedido',labelHtml),'1. Saiba mais sobre cada pedido\n'+labelText);
   const priceText='Partilhado: '+euro(data.prices?.partilhada)+'. Até 3 profissionais podem receber o mesmo contacto.\nExclusivo: '+euro(data.prices?.exclusiva)+'. Só você recebe este contacto através do Guia do Proprietário. Disponível enquanto ninguém tiver obtido o contacto.';
   const priceCell=(label,amount,description)=>'<td class="request-column" width="50%" valign="top" style="padding:16px;background:#EEF5F0;border-radius:8px"><p style="margin:0 0 12px;font-size:16px;font-weight:bold;color:#1E4634">'+label+'</p><p style="margin:0 0 14px;font-size:40px;font-weight:bold;line-height:1.2;color:#1E4634">'+euro(amount)+'</p>'+p(description)+'</td>';
@@ -86,7 +84,7 @@ function renderEmailCopyV2Core(id,data){
   if(!Number.isSafeInteger(data.total)||data.total<requests.length||!requests.length)throw Error('invalid_request_count');
   subject=data.total===1?'1 novo pedido de limpeza nas suas zonas':data.total+' novos pedidos de limpeza nas suas zonas';title=data.total===1?'1 novo pedido na sua zona':data.total+' novos pedidos nas suas zonas';preview=[...new Set(requests.map(r=>r.place))].slice(0,2).join(', ')+(data.total>requests.length?' e mais.':'.')+' Veja antes que outros profissionais.';
   add(p('Entraram novos pedidos de limpeza nas suas zonas:'),'Entraram novos pedidos de limpeza nas suas zonas:');grid();if(data.total>requests.length)add(p(emailLink('Ver mais '+(data.total-requests.length)+' pedidos',path(data.url,'pedidos'))),'Ver mais '+(data.total-requests.length)+' pedidos: '+path(data.url,'pedidos'));main('Ver todos os pedidos');
-  const words='Os pedidos são submetidos por clientes que procuram um profissional. Veja no cartão como o interesse foi confirmado. As etiquetas de WhatsApp identificam uma verificação adicional.';add(p(esc(words)),words);const preferences='Pode escolher um ou dois resumos por dia, ou desligar estes avisos, em “O meu perfil”.';add(p(esc(preferences)),preferences);break;
+  const words='Os pedidos são submetidos por clientes que procuram um profissional. Consulte a zona, o serviço e as preferências antes de obter o contacto.';add(p(esc(words)),words);const preferences='Pode escolher um ou dois resumos por dia, ou desligar estes avisos, em “O meu perfil”.';add(p(esc(preferences)),preferences);break;
  }
  case 'Candidatura':{
   subject=requests.length?'Recebemos a sua candidatura: já há pedidos na sua zona':'Recebemos a sua candidatura';preview=requests.length?'Veja os pedidos que estão à espera de um profissional.':'Enquanto a analisamos, preparamos o seu acesso.';title='Obrigado pela sua candidatura!';
@@ -196,7 +194,7 @@ export function renderEmailCopyV2Remaining(id,data){
    block('🎁 '+label,(modes?modes+'\n':'')+'Os contactos grátis são usados antes do saldo quando escolhe o tipo de contacto correspondente.',{offer:true});
   }
   if(data.guaranteeReady===true){block('Lembre-se','O cliente de um contacto pago não atende? Damos-lhe outro contacto. Verificamos cada caso.',{rules:true});const u=personal(data.url);u.pathname='/regras-garantia.html';u.hash='';content+=p(emailLink('Ver as regras',u.toString()));textContent+='\nVer as regras: '+u;}
-  block('Dica','Os clientes submetem pedidos para encontrar um profissional de limpeza.'+(data.whatsappReady===true?' Os pedidos com “✓ Interesse confirmado pelo cliente por WhatsApp” são clientes com quem já falámos.':''));action('Ver pedidos disponíveis');break;
+  block('Dica','Os clientes submetem pedidos para encontrar um profissional de limpeza.');action('Ver pedidos disponíveis');break;
  case 'P6':
   if(data.contactAcquired!==true||!['partilhada','exclusiva'].includes(data.modality))throw Error('contact_not_acquired');
   subject='O contacto do pedido '+short+' ('+r.place+')';preview='Contacte na próxima hora: quem fala primeiro tem mais hipóteses.';title='Tem um novo cliente para contactar.';
