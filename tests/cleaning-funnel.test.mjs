@@ -49,17 +49,9 @@ test('field contents, URL parameters and contact data never enter the browser pa
  assert.doesNotThrow(()=>validateFunnel(payload,request(payload),Date.now()));
 });
 
-async function submission(reply,trackerFails=false){
- const source=readFileSync(new URL('../public/limpeza-regular-lisboa-margem-sul/landing.js',import.meta.url),'utf8');
- const events=[],routes=[],nodes=new Map();
- const c={normal:true,sending:false,delivered:false,pendingPhone:'+351900000000',request:{consents:{partnerSharing:true},notes:'',other:'',space:'Apartamento'},homeTypes:['Apartamento'],recoveryKey:'',presentedPartners:new Set(),lastSubmission:null,normalRequestData:()=>({}),location:{origin:'https://guiadoproprietario.pt',pathname:'/pedir-limpeza/',search:''},crypto,CustomEvent,document:{getElementById:id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id);}},window:{gpCleaningFunnel:{track:(...args)=>{if(trackerFails)throw Error('analytics unavailable');events.push(args);}},dispatchEvent(){}},fetch:async()=>reply,go:r=>routes.push(r)};
- vm.createContext(c);vm.runInContext(source.split('\n')[1]+'\n'+source.slice(source.indexOf('async function sendRequest(){'),source.indexOf('function premiumConfirmation(')),c);
- await vm.runInContext('sendRequest()',c);return {c,events,routes};
-}
-test('a tracking failure cannot block a confirmed cleaning request',async()=>{
- const f=await submission({ok:true,status:200,json:async()=>({dashboardStored:true})},true);assert.equal(f.c.delivered,true);assert.deepEqual(f.routes,['concluido']);
-});
-test('a rejected request records a failure, never a conversion',async()=>{
- const f=await submission({ok:false,status:409,json:async()=>({})});assert.equal(f.c.delivered,false);assert(f.events.some(e=>e[0]==='failure'&&e[1]==='conflict'));assert(!f.events.some(e=>e[0]==='success'));
- const success=await submission({ok:true,status:200,json:async()=>({dashboardStored:true})});assert(success.events.some(e=>e[0]==='success'&&e[1]==='network'));
+test('retired entry routes redirect to the ordinary form, preserving campaign attribution',()=>{
+ const source=readFileSync(new URL('../public/limpeza-regular-lisboa-margem-sul/landing.js',import.meta.url),'utf8');let target;
+ vm.runInNewContext(source,{URL,location:{origin:'https://guiadoproprietario.pt',search:'?utm_source=facebook&fbclid=EXAMPLE',replace:value=>target=value}});
+ const url=new URL(target);assert.equal(url.pathname,'/servicos-limpeza/');assert.equal(url.searchParams.get('utm_source'),'facebook');assert.equal(url.searchParams.get('fbclid'),'EXAMPLE');assert.equal(url.hash,'#pedido');
+ for(const route of ['pedir-limpeza','limpeza-regular-lisboa-margem-sul']){const page=readFileSync(new URL('../src/pages/'+route+'/index.astro',import.meta.url),'utf8');assert.match(page,/servicos-limpeza/);assert.doesNotMatch(page,/zoneForm|premium-plan-card|window.premium/);}
 });

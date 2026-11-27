@@ -14,6 +14,7 @@ function preferences(value,fallback) {
 
 export function renderPartnerEngagementEmail(payload, options = {}) {
   const data = payload.data || {};
+  if(['premium_agenda','premium_contact','premium_availability'].includes(data.kind))throw Error('retired_feature');
   if(data.kind==='premium_agenda'){
     if(payload.event_type!=='contact_accepted'||!/^engagement:premium_agenda:[a-z0-9_-]+:[0-9]+$/i.test(payload.event_id))throw Error('invalid_agenda_event');
     const url=new URL(payload.dashboard_url);

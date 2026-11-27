@@ -850,3 +850,6 @@ test('successful cleaning lead records measurement choice separately from newsle
  const invalid=await onRequestPost({request:requestFor({...cleaningBody,eventId:'invalid-attempt',requestConfirmed:false}),env});assert.equal(invalid.status,400);
  assert.equal(archiveSql.prepare('SELECT count(*) n FROM cleaning_measurement_diagnostics').get().n,1);
 });
+test('retired premium submissions return the normal-form destination without integrations',async()=>{
+ const result=await onRequestPost({request:new Request('https://test/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'guia_limpeza_premium',email:'test@example.invalid'})}),env,waitUntil:()=>{throw Error('No job expected');}});assert.equal(result.status,410);assert.equal((await result.json()).redirect,'/servicos-limpeza/#pedido');assert.equal(calls.length,0);
+});

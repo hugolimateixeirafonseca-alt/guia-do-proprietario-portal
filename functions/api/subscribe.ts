@@ -366,6 +366,8 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     return json({ error: "invalid" }, 400);
   }
 
+  if(body.source==='guia_limpeza_premium')return json({error:'opcao_descontinuada',redirect:'/servicos-limpeza/#pedido',message:'Continue no formulário normal de limpeza.'},410);
+
   const email = cleanText(body.email, 254).toLowerCase();
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
   const consentVersion = cleanText(body.consentVersion, 64);

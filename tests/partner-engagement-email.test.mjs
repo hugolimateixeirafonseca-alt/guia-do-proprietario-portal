@@ -134,29 +134,13 @@ test('contact confirmation includes every selected cleaning modality',()=>{
  assert.throws(()=>renderPartnerEngagementEmail({...base,event_type:'contact_accepted',data:{...data,cleaning_types:['regular','unsupported']}}));
 });
 
-test('Premium availability messages distinguish a request, a contact and the two recovery paths',()=>{
- const key='cb8a2cd1-48ac-4001-a296-c67eac025999';
- for(const [status,alternatives] of [['pending',false],['accepted',false],['declined',true],['expired',false]]){
-  const data={kind:'premium_availability',audience:'client',status,professional_name:'Equipa',deadline:'2026-11-12T15:00:00Z',plan_summary:'Plano semanal',professional_email:'equipa@example.pt',professional_phone:'912345678',recovery_key:key,has_alternatives:alternatives};
-  const msg=renderPartnerEngagementEmail({...base,event_type:'contact_accepted',event_id:'engagement:client_premium:'+status+':'+key,data});
-  assert.match(msg.text,/sem compromisso/);
-  assert.equal(msg.text.includes('equipa@example.pt'),status==='accepted');
-  assert.equal(msg.html.includes('#retomar='+key),['declined','expired'].includes(status));
-  if(status==='declined')assert.match(msg.html,/Ver outras propostas/);
-  assert.equal(msg.text.includes('#retomar='+key+'&rede=1'),['declined','expired'].includes(status));
-  if(status==='expired')assert.match(msg.html,/Pedir propostas a outros parceiros/);
- }
+test('retired premium templates cannot generate emails or contact disclosures',()=>{
+ for(const kind of ['premium_agenda','premium_contact','premium_availability'])assert.throws(()=>renderPartnerEngagementEmail({...base,data:{kind}}),/retired_feature/);
 });
-
-test('weekly agenda reminder uses a profile link and asks for review on the dashboard',()=>{
- const payload={...base,event_id:'engagement:premium_agenda:partner:2',event_type:'contact_accepted',dashboard_url:'https://parceiros.guiadoproprietario.pt/?t=private&vista=premium&perfilPremium=1'};
- for(const data of [{kind:'premium_agenda',expired:false,review:false},{kind:'premium_agenda',expired:true,review:false},{kind:'premium_agenda',expired:false,review:true}]){
-  const msg=renderPartnerEngagementEmail({...payload,data});
-  assert.match(msg.text,/Rever disponibilidade/);
-  assert.match(msg.html,/perfilPremium=1/);
-  assert.doesNotMatch(msg.html,/confirmAgenda/);
-  if(data.review)assert.match(msg.text,/três pedidos/);
-  else {assert.match(msg.text,/todas as semanas/);assert.doesNotMatch(msg.text,/oculta|voltar a aparecer|termina amanhã/);}
+test('stale premium deliveries are suppressed before policy, archive or Sender',async()=>{
+ const original=globalThis.fetch;globalThis.fetch=()=>{throw Error('No network allowed');};try{
+ for(const [event_id,kind] of [['engagement:premium_agenda:partner:2','premium_agenda'],['engagement:client_premium:accepted:00000000-0000-4000-8000-000000000001','premium_availability']]){
+ const response=await onRequestPost({request:request({...base,event_id,data:{kind}}),env:env()});assert.equal(response.status,200);assert.equal((await response.json()).suppressed,true);
  }
- assert.throws(()=>renderPartnerEngagementEmail({...payload,dashboard_url:'https://example.org/?t=private',data:{kind:'premium_agenda'}}));
+ }finally{globalThis.fetch=original;}
 });

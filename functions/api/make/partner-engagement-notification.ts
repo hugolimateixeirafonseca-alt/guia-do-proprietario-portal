@@ -21,6 +21,7 @@ export async function onRequestPost({request, env}: {request: Request, env: Reco
   let payload;
   try { payload = await request.json(); } catch { return json({error:'invalid_json'}, 400); }
   if (!payload || typeof payload !== 'object' || typeof payload.event_id !== 'string' || !/^engagement:[a-z0-9:_-]{8,180}$/i.test(payload.event_id)) return json({error:'invalid_event_id'}, 400);
+  if(/^engagement:(?:client_premium:|premium_agenda:)/.test(payload.event_id)||['premium_agenda','premium_contact','premium_availability'].includes(payload.data?.kind))return json({ok:true,suppressed:true,event_id:payload.event_id});
   const email = typeof payload.partner_email === 'string' ? payload.partner_email.trim().toLowerCase() : '';
   const preview = env.APP_ENV === 'preview';
   if (preview && (env.PARTNER_ENGAGEMENT_TEST_MODE !== 'true' || !env.PARTNER_ENGAGEMENT_TEST_EMAIL || email !== env.PARTNER_ENGAGEMENT_TEST_EMAIL.trim().toLowerCase() || env.CLEANING_DASHBOARD_API_URL !== 'https://engagement-test.guia-do-proprietario-parceiros.pages.dev')) return json({error:'test_recipient_blocked'},403);
