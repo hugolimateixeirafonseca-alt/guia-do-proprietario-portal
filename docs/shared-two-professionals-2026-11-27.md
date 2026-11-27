@@ -22,4 +22,6 @@ Testes direcionados da compra atómica e bloqueio sem desconto; gratuito e pago 
 
 ## Publicação
 
-Implementado no repositório. Publicação e referências finais a registar após envio. Sem confirmação online posterior, de acordo com as regras do espaço de trabalho.
+Fonte de parceiros b52a17a5. Migração 0112 aplicada e registada em produção. Publicação de produção concluída pelo Wrangler: edc72229. Portal dd2d342d0 enviado para main e publicação automática, incluindo landings, consentimentos, termos, privacidade e modelos de email. 30 testes direcionados da plataforma e 66 do portal passaram. Sintaxe dos ficheiros alterados e catálogos JSON válidos. Sem confirmação online posterior, de acordo com as regras do espaço de trabalho.
+
+Os testes históricos gerais contêm expectativas anteriores sobre quatro gratuitos iniciais, a interface Premium retirada e uma frase já inexistente de apresentação ao cliente. Essas expectativas não foram usadas para alterar o comportamento atual; as verificações relevantes à alteração passaram, incluindo os novos testes de preservação de compras anteriores e entrega simulada de emails.
