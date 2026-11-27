@@ -17,6 +17,7 @@ export function renderPlannedPartnerEmail(id,data){
  case 'P4':{
   if(!['novo','anterior'].includes(data.model))throw Error('invalid_partner_model');subject='A sua conta foi aprovada';title='Bem-vindo(a).\nA sua conta está aprovada.';
   paragraphs.push('Já pode ver os pedidos de limpeza da sua zona.');
+  if(data.campaignFreeSuspended===true)return renderEmailLayout({subject,preview:'Consulte a Campanha Flash na sua área.',title,name:data.name,paragraphs:['A sua conta está aprovada. Consulte os pedidos e a Campanha Flash na sua área. Durante a campanha, os contactos gratuitos ficam suspensos e este carregamento não inclui o bónus habitual.'],button:{label:'Ver pedidos e campanha',url:dashboard}});
   if(data.model==='novo'&&data.firstTopupDone===true){
    return renderEmailLayout({subject,preview:'A sua área de parceiro está pronta.',title,name:data.name,paragraphs:['A sua conta foi aprovada e o primeiro carregamento já está registado. Consulte o saldo e os contactos disponíveis na sua área.'],button:{label:'Ver pedidos disponíveis',url:access(data.url,'pedidos')}});
   }

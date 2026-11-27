@@ -1,3 +1,4 @@
+import {renderCampaignEmail} from './campaign-email.mjs';
 import {renderPlannedPartnerEmail} from './partner-planned-emails.mjs';
 import {renderEmailLayout,emailCard,emailParagraph as p,emailButton,emailLink,escapeEmailHtml as esc} from './partner-email-layout.mjs';
 export const V2_REVIEW_IDS=['P1','P4','Resumo','Candidatura'];
@@ -40,6 +41,7 @@ function cards(requests,data,candidate=false){
 
 /** Pure content renderer. Delivery readiness is enforced by the event queue. */
 function renderEmailCopyV2Core(id,data){
+ if(id.startsWith('BF-'))return renderCampaignEmail(id,data);
  if(V2_REMAINING_IDS.includes(id))return renderEmailCopyV2Remaining(id,data);
  if(V2_ADDITION_IDS.includes(id))return renderEmailCopyV2Addition(id,data);
  if(!V2_REVIEW_IDS.includes(id))throw Error('email_awaits_four_draft_review');
@@ -78,7 +80,7 @@ function renderEmailCopyV2Core(id,data){
   if(requests.length){add('<h2 style="font-size:24px;color:#1E4634">Alguns pedidos na sua zona</h2>','Alguns pedidos na sua zona');grid();}main('Ver os pedidos da minha zona');
   block('Como funciona','1. Vê o pedido completo: tipo de limpeza, casa, frequência e dias.\n2. Escolhe os pedidos que lhe interessam e obtém o contacto.\n3. Fala diretamente com o cliente e apresenta o seu orçamento.');
   const words='Todos os pedidos são de pessoas reais, que pediram preço no nosso site.';add(p(esc(words))+p(emailLink('O que significam as etiquetas?',labelsUrl())),words+'\nO que significam as etiquetas?: '+labelsUrl());
-  const welcome=data.model==='anterior'?'Tem '+data.freeContacts+' contactos grátis para começar.':'Na sua área tem também uma oferta de boas-vindas à sua espera.';add(p('<strong>'+esc(welcome)+'</strong>'),welcome);break;
+  const welcome=data.campaignFreeSuspended===true?'Consulte a Campanha Flash na sua área. Durante a campanha, os contactos gratuitos ficam suspensos e este carregamento não inclui o bónus habitual.':data.model==='anterior'?'Tem '+data.freeContacts+' contactos grátis para começar.':'Na sua área tem também uma oferta de boas-vindas à sua espera.';add(p('<strong>'+esc(welcome)+'</strong>'),welcome);break;
  }
  case 'Resumo':{
   if(!Number.isSafeInteger(data.total)||data.total<requests.length||!requests.length)throw Error('invalid_request_count');
