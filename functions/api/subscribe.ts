@@ -5,6 +5,8 @@ import { cleaningAttribution } from "../lib/cleaning-attribution.mjs";
 import { recordConsent } from "../lib/consent-archive.mjs";
 import {
   CONSENT_TEXT,
+  LIMPEZA_CONSENT_VERSION,
+  ALOJAMENTO_LOCAL_CONSENT_VERSION,
   NEWSLETTER_CONSENT_VERSION,
   VERIFICACAO_DIRECT_CONSENT_VERSION,
   type ConsentVersion
@@ -387,7 +389,7 @@ export const onRequestPost = async ({ request, env, waitUntil }: RequestContext)
     : isDirectValueLead
       ? "valor-liquido-2026-08-a"
       : isCleaningLead
-        ? source === "guia_limpeza_premium" ? "limpeza-premium-2026-11" : isCleaningAlLead ? "alojamento-local-2026-09-b" : "limpeza-2026-09-c"
+        ? source === "guia_limpeza_premium" ? "limpeza-premium-2026-11" : isCleaningAlLead ? ALOJAMENTO_LOCAL_CONSENT_VERSION : LIMPEZA_CONSENT_VERSION
       : "2026-08-k";
   const phone = cleanText(body.phone, 32);
   const phoneDigits = phone.replace(/\D/g, "");

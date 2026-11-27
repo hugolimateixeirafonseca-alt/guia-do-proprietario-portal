@@ -208,7 +208,7 @@ export function renderPartnerEngagementEmail(payload, options = {}) {
       subject='Já usou os contactos grátis iniciais. Veja os próximos passos.';
       preview='Consulte o saldo, os contactos grátis por usar e os preços atuais.';
       paragraphs=['Já usou os contactos grátis iniciais da sua conta. Os outros contactos grátis por usar e o seu saldo mantêm-se.',
-        'Partilhado: '+euro(data.prices.partilhada)+'. Até 3 profissionais podem receber o mesmo contacto.',
+        'Partilhado: '+euro(data.prices.partilhada)+'. Até 2 profissionais podem receber o mesmo contacto.',
         'Exclusivo: '+euro(data.prices.exclusiva)+'. Só você recebe este contacto através do Guia do Proprietário. Disponível enquanto ninguém tiver obtido o contacto.',
         data.payments_ready?'Para continuar, pode usar o saldo que já tem ou carregar a sua conta. Consulte as opções disponíveis na sua área.':'Pode continuar a usar o saldo e os contactos grátis que ainda tem. Os carregamentos estão temporariamente indisponíveis.',
         'Sem mensalidade. O saldo é descontado quando obtém um contacto pago.'];
@@ -248,7 +248,7 @@ export function renderClientContactEmail(data,options={}){
  const stop=new URL(data.stop_url),host=options.preview?'engagement-test.guia-do-proprietario-parceiros.pages.dev':'parceiros.guiadoproprietario.pt';
  if(stop.protocol!=='https:'||stop.hostname!==host||stop.pathname!=='/pedido-contactos.html'||stop.username||stop.password||stop.port||!stop.hash)throw new Error('invalid_client_link');
  const subject=`${professional} vai contactá-lo(a) sobre a sua limpeza`,preview='Guarde este contacto para reconhecer a chamada.';
- const paragraphs=[`Olá ${name},`,`Boas notícias: o seu pedido de limpeza em ${place} foi aceite por um profissional da sua zona.`,`${professional}\n📞 ${phone}`,'Pedimos ao profissional que o(a) contacte até ao próximo dia útil. Se preferir, pode também ligar diretamente.',data.modality==='partilhada'?'O seu pedido pode ser aceite por até 3 profissionais.':'Este profissional é o único a receber o seu contacto através do Guia do Proprietário.','Antes de marcar o serviço:\nPeça o orçamento por escrito.\nConfirme o que está incluído e o preço final.','O serviço é combinado diretamente entre si e o profissional. O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.','Já resolveu a limpeza ou prefere não ser contactado(a)? Pode confirmar na ligação abaixo.'];
+ const paragraphs=[`Olá ${name},`,`Boas notícias: o seu pedido de limpeza em ${place} foi aceite por um profissional da sua zona.`,`${professional}\n📞 ${phone}`,'Pedimos ao profissional que o(a) contacte até ao próximo dia útil. Se preferir, pode também ligar diretamente.',data.modality==='partilhada'?'O seu pedido pode ser aceite por até 2 profissionais.':'Este profissional é o único a receber o seu contacto através do Guia do Proprietário.','Antes de marcar o serviço:\nPeça o orçamento por escrito.\nConfirme o que está incluído e o preço final.','O serviço é combinado diretamente entre si e o profissional. O Guia do Proprietário encaminha o pedido, mas não presta o serviço de limpeza.','Já resolveu a limpeza ou prefere não ser contactado(a)? Pode confirmar na ligação abaixo.'];
  const button='Não quero receber mais contactos';
  return renderEmailLayout({subject,preview,title:'Um profissional vai contactá-lo(a).',name,audience:'client',paragraphs:paragraphs.slice(1),secondary:[{label:button,url:stop.toString()}],signature:false});
 }

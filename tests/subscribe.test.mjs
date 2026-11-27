@@ -57,7 +57,7 @@ const cleaningBody = {
   additionalNotes: "Há um cão em casa.",
   consent1: true,
   consent2: false,
-  consentVersion: "limpeza-2026-09-c",
+  consentVersion: "limpeza-2026-11-d",
   source: "guia_limpeza_preco_disponibilidade",
   pageUrl: "https://guiadoproprietario.pt/servicos-limpeza/?utm_source=meta",
   eventId: "limpeza-123"
@@ -78,7 +78,7 @@ const alojamentoLocalBody = {
   alServices: ["rotation", "laundry"],
   alTurnaround: "3_5h",
   alAccess: "lockbox",
-  consentVersion: "alojamento-local-2026-09-b",
+  consentVersion: "alojamento-local-2026-11-c",
   source: "guia_limpeza_alojamento_local",
   pageUrl: "https://guiadoproprietario.pt/servicos-limpeza/alojamento-local/",
   eventId: "alojamento-local-123"
