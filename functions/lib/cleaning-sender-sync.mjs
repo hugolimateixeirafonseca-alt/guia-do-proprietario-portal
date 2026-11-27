@@ -86,6 +86,82 @@ async function syncContact(env,lead,required,membershipOnly=false){
  if(!current||!required.every(g=>memberIds(current).has(g)))throw new SyncError('groups_unconfirmed');
  return {state:'synced',code:created?'created':added?'groups_added':'already_present',created,added};
 }
+export const PARTNER_NEWSLETTER_GROUP_TITLE='GP | Parceiros | Newsletter e patrocinados';
+async function newsletterGroup(env,create){
+ let found=null;
+ for(let page=1;page<=10;page++){
+  const r=await sender(env,'/groups?limit=100&page='+page);if(!r.ok)throw new SyncError('newsletter_groups_'+r.status,r.status);
+  const j=await r.json();if(!Array.isArray(j.data))throw new SyncError('newsletter_groups_invalid');
+  for(const g of j.data.filter(g=>g.title===PARTNER_NEWSLETTER_GROUP_TITLE)){
+   if(!g.id||found&&String(found)!==String(g.id))throw new SyncError('newsletter_group_ambiguous');found=String(g.id);
+  }
+  const last=Number(j.meta?.last_page||0),next=j.links?.next;
+  if(last?page>=last:!next){
+   if(found||!create)return found;
+   const created=await sender(env,'/groups','POST',{title:PARTNER_NEWSLETTER_GROUP_TITLE});
+   if(!created.ok)throw new SyncError('newsletter_group_create_'+created.status,created.status);
+   const body=await created.json();if(!body.data?.id||body.data.title!==PARTNER_NEWSLETTER_GROUP_TITLE)throw new SyncError('newsletter_group_unconfirmed');
+   return String(body.data.id);
+  }
+ }
+ throw new SyncError('newsletter_group_scan_limit');
+}
+async function currentNewsletter(env,email){
+ const result=await queue(env,{action:'newsletter_policy',email},true);
+ if(result.ok!==true||result.newsletter?.email!==email||typeof result.newsletter.consent!=='boolean')throw new SyncError('newsletter_policy_invalid');
+ return result.newsletter;
+}
+async function removeNewsletterGroup(env,email,group,current){
+ if(!group||!current||!memberIds(current).has(group))return;
+ const r=await sender(env,'/subscribers/groups/'+encodeURIComponent(group),'DELETE',{subscribers:[email],trigger_automation:false});
+ if(!r.ok)throw new SyncError('newsletter_remove_'+r.status,r.status);
+ const verified=await profile(env,email);if(verified&&memberIds(verified).has(group))throw new SyncError('newsletter_remove_unconfirmed');
+}
+/** Newsletter-only work never changes transactional channels or other group memberships. */
+export async function syncPartnerNewsletter(env,newsletter){
+ const email=String(newsletter?.email||'').trim().toLowerCase();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254)throw new SyncError('newsletter_email_invalid');
+ let policy=await currentNewsletter(env,email);
+ const group=await newsletterGroup(env,policy.consent);
+ if(!group)return {state:'synced',code:'newsletter_not_requested'};
+ let current=await profile(env,email);
+ if(!policy.consent){await removeNewsletterGroup(env,email,group,current);return {state:'synced',code:'newsletter_removed'};}
+ const optedOut=p=>{const bad=['unsubscribed','bounced','spam_reported','reported_spam'];return bad.includes(p?.status?.email)||!p?.status?.email&&bad.includes(p?.status?.temail||p?.status?.transactional_email);};
+ if(optedOut(current)){await removeNewsletterGroup(env,email,group,current);return {state:'suppressed',code:'newsletter_existing_optout'};}
+ // Recheck consent after provider reads and before any subscription write.
+ policy=await currentNewsletter(env,email);
+ if(!policy.consent){await removeNewsletterGroup(env,email,group,current);return {state:'synced',code:'newsletter_removed'};}
+ if(!current){
+  const r=await sender(env,'/subscribers','POST',{email,firstname:policy.nome||'',groups:[group],trigger_automation:false});
+  if(!r.ok&&r.status!==409)throw new SyncError('newsletter_create_'+r.status,r.status);
+  current=await profile(env,email);if(!current)throw new SyncError('newsletter_create_unconfirmed');
+ }
+ if(optedOut(current)){await removeNewsletterGroup(env,email,group,current);return {state:'suppressed',code:'newsletter_existing_optout'};}
+ const status=current.status?.email??null;
+ if(status===null||['non_subscribed','non-subscribed','not_subscribed'].includes(status)){
+  if(!current.status||typeof current.status!=='object'||Array.isArray(current.status)&&current.status.length)throw new SyncError('newsletter_status_unknown');
+  if(!(await currentNewsletter(env,email)).consent){await removeNewsletterGroup(env,email,group,current);return {state:'synced',code:'newsletter_removed'};}
+  const r=await sender(env,'/subscribers/'+encodeURIComponent(email),'PATCH',{subscriber_status:'ACTIVE',trigger_automation:false});
+  if(!r.ok)throw new SyncError('newsletter_subscribe_'+r.status,r.status);
+  current=await profile(env,email);
+ }
+ if(current?.status?.email!=='active')throw new SyncError('newsletter_status_unconfirmed');
+ if(!memberIds(current).has(group)){
+  if(!(await currentNewsletter(env,email)).consent)return {state:'pending',code:'newsletter_consent_changed',retry_ms:60000};
+  const r=await sender(env,'/subscribers/groups/'+encodeURIComponent(group),'POST',{subscribers:[email],trigger_automation:false});
+  if(!r.ok){
+   if(r.status!==400)throw new SyncError('newsletter_add_'+r.status,r.status);
+   current=await profile(env,email);if(!current||optedOut(current))return {state:'suppressed',code:'newsletter_existing_optout'};
+   if(!(await currentNewsletter(env,email)).consent)return {state:'pending',code:'newsletter_consent_changed',retry_ms:60000};
+   const fallback=await sender(env,'/subscribers/'+encodeURIComponent(email),'PATCH',{groups:[...new Set([...memberIds(current),group])],trigger_automation:false});
+   if(!fallback.ok)throw new SyncError('newsletter_add_'+fallback.status,fallback.status);
+  }
+ }
+ current=await profile(env,email);
+ if(!memberIds(current).has(group)||current?.status?.email!=='active')throw new SyncError('newsletter_membership_unconfirmed');
+ if(!(await currentNewsletter(env,email)).consent){await removeNewsletterGroup(env,email,group,current);return {state:'synced',code:'newsletter_removed'};}
+ return {state:'synced',code:'newsletter_subscribed'};
+}
 async function queue(env,body,partner=false){
  const base=env.CLEANING_DASHBOARD_API_URL||'https://guia-do-proprietario-parceiros.pages.dev/api/leads';
  const url=new URL(partner?'/api/partner-sender-sync':'/api/sender-sync',base);
@@ -95,19 +171,19 @@ async function queue(env,body,partner=false){
 }
 export async function processSenderSync(env,partner=false){
  if(!env.SENDER_API_TOKEN||!env.CLEANING_DASHBOARD_API_TOKEN)throw new Error('sync_not_configured');
- const {job}=await queue(env,{action:'claim'},partner);
+ const {job}=await queue(env,{action:'claim',...(partner?{newsletter_version:1}:{})},partner);
  if(!job)return partner?{state:'idle'}:processSenderSync(env,true);
  let result;
- try{result=partner?await syncPartner(env,job.partner):await syncLead(env,job.lead);}catch(error){
+ try{result=job.kind==='newsletter'?await syncPartnerNewsletter(env,job.newsletter):partner?await syncPartner(env,job.partner):await syncLead(env,job.lead);}catch(error){
   const status=Number(error.status)||0;
   const blocked=status>=400&&status<500&&![408,409,429].includes(status);
   result={state:blocked?'blocked':'pending',code:error.diagnostics?['sender_429',error.diagnostics.operation,'l'+error.diagnostics.limit,'r'+error.diagnostics.remaining,'edge'+Number(error.diagnostics.edgeBlock)].join('_'):error instanceof SyncError||error instanceof SenderPause?error.message:'unexpected',retry_ms:Math.max(error.retryMs||0,Math.min(21600000,60000*2**Math.min(job.attempts,9))),cooldown:status===429,...(error.diagnostics?{diagnostics:error.diagnostics}:{})};
  }
- await queue(env,{action:'finish',...(partner?{partner_id:job.partner_id}:{lead_id:job.lead_id}),lease:job.lease,...result},partner);
+ await queue(env,{action:'finish',...(job.kind==='newsletter'?{kind:'newsletter',email:job.email}:partner?{partner_id:job.partner_id}:{lead_id:job.lead_id}),lease:job.lease,...result},partner);
  return result;
 }
 export async function senderSyncStats(env){
  const [leads,partners]=await Promise.all([queue(env,{action:'stats'}),queue(env,{action:'stats'},true)]);
- const totals=new Map();for(const row of [...leads.states,...partners.states])totals.set(row.state,(totals.get(row.state)||0)+row.count);
- return {ok:true,states:[...totals].map(([state,count])=>({state,count})),partners:partners.states};
+ const totals=new Map();for(const row of [...leads.states,...partners.states,...(partners.newsletter_states||[])])totals.set(row.state,(totals.get(row.state)||0)+row.count);
+ return {ok:true,states:[...totals].map(([state,count])=>({state,count})),partners:partners.states,newsletters:partners.newsletter_states||[]};
 }

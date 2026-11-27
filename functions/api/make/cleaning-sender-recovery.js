@@ -16,7 +16,7 @@ export async function onRequestPost({request,env}){
     if(['idle','pending','blocked'].includes(result.state))break;
    }
    const stats=await senderSyncStats(env);
-   return json({ok:!results.some(r=>r.state==='blocked'),results,partners:stats.partners});
+   return json({ok:!results.some(r=>r.state==='blocked'),results,partners:stats.partners,newsletters:stats.newsletters});
   }
   if(body.backfillPdfSince){
    const since=Date.parse(body.backfillPdfSince);
