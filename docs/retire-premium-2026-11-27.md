@@ -12,4 +12,4 @@ Portal: /pedir-limpeza/ e /limpeza-regular-lisboa-margem-sul/ passam para /servi
 
 Validação: 21 testes direcionados na plataforma e 60 no portal aprovados. Incluem regras de tempo, canais, campanha, quatro opções, autenticação, APIs retiradas, bloqueio de filas, diretório/estatísticas, redirecionamento com UTMs, rejeição da submissão antiga e proteção dos envios. Sintaxe e diff verificados. Sem build integral local de rotina e sem verificações online posteriores.
 
-Estado: implementação local validada; publicação da plataforma e envio do portal em preparação.
+Estado: plataforma publicada em 7eb099ec, fonte 6ab679b0, migração 0108 aplicada e registada. Portal enviado para publicação em 553960799 pelo fluxo normal. Sem verificação posterior de deployments ou confirmação online; validação visual e funcional pelo proprietário.
