@@ -190,6 +190,14 @@ export function renderEmailCopyV2Remaining(id,data){
   if(!Number.isSafeInteger(data.freeContacts)||data.freeContacts<0)throw Error('invalid_free_count');
   subject='Recebemos o seu carregamento de '+euro(data.amount);preview='O seu carregamento foi confirmado.';title='Carregamento confirmado.';
   paragraph('Recebemos o seu carregamento de '+euro(data.amount)+'. A sua conta está ativa.');
+  if(data.recurringTopupBonus===true){
+   title='Recebeu 1 contacto de bónus';
+   preview='O contacto de bónus já está disponível na sua conta.';
+   paragraph('Juntámos um contacto partilhado de bónus ao seu carregamento. Pode usá-lo num pedido disponível na sua zona.');
+   paragraph('Durante a oferta, pode ganhar outro bónus ao voltar a carregar pelo menos 20 €, depois de usar este contacto e gastar o saldo deste ciclo. O pequeno saldo que sobrar fica na sua conta.');
+   action('Ver pedidos disponíveis');
+   break;
+  }
   if(data.freeContacts>0){
    const label='Tem '+data.freeContacts+(data.freeContacts===1?' contacto grátis disponível.':' contactos grátis disponíveis.');
    const modes=[['freeSharedContacts','partilhado'],['freeExclusiveContacts','exclusivo']].filter(([key])=>data[key]>0).map(([key,mode])=>data[key]+' '+(data[key]===1?'contacto '+mode:'contactos '+mode+'s')+' grátis.').join('\n');
